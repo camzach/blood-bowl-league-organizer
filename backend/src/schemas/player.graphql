@@ -1,0 +1,42 @@
+type Player {
+  id: String!
+  name: String
+  number: Int!
+  team: Team!
+  position: String!
+  MA: Int!
+  ST: Int!
+  PA: Int
+  AG: Int!
+  AV: Int!
+  skills: [String]!
+  progression: [String]!
+  starPlayerPoints: StarPlayerPoints!
+  teamValue: TeamValue!
+  casualties: Casualties!
+}
+
+type StarPlayerPoints {
+  MVPs: Int!
+  casualties: Int!
+  completions: Int!
+  deflections: Int!
+  interceptions: Int!
+  prayersToNuffle: Int!
+  touchdowns: Int!
+}
+
+type TeamValue {
+  base: Int!
+  current: Int!
+}
+
+type Casualties {
+  missNextGame: Boolean!
+  niggles: Int!
+}
+
+extend type Query {
+  player(name: String!): Player
+  # players(query: PlayerQueryInput, limit: Int = 100, sortBy: PlayerSortByInput): [Player]!
+}

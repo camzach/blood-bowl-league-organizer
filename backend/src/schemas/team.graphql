@@ -1,0 +1,18 @@
+type Team {
+  id: String!
+  race: String!
+  coach: String!
+  name: String!
+  apothecary: Boolean!
+  coaches: Int!
+  cheerleaders: Int!
+  fans: Int!
+  treasury: Int!
+  rerolls: Int!
+  players: [Player!]!
+}
+
+extend type Query {
+  team(name: String!): Team
+  teams: [Team!]!
+}

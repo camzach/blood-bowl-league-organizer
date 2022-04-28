@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "@camzach/eslint-config"
+  ],
+  "parserOptions": {
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": [
+    "build",
+    "*.gen.ts"
+  ]
+}
