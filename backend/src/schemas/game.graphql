@@ -1,0 +1,16 @@
+type Game {
+  homeTeam: Team!
+  awayTeam: Team!
+  ffHome: Int!
+  ffAway: Int!
+  tdHome: Int!
+  tdAway: Int!
+  casHome: Int!
+  casAway: Int!
+  winningsHome: Int!
+  winningsAway: Int!
+}
+
+extend type Query {
+  games: [Game!]!
+}
