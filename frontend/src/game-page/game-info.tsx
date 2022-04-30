@@ -1,7 +1,8 @@
 import type React from 'react';
 import { styled } from '@linaria/react';
 import { TeamTable } from '../team-table';
-import { useGameQueryQuery } from './game.query.gen';
+import { useGameQuery } from './game.query.gen';
+import { useLocation } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -27,7 +28,12 @@ const Score = styled.div`
 `;
 
 export function GameInfo(): React.ReactElement {
-  const { data, isLoading, isError } = useGameQueryQuery({ home: '100 gecs', away: 'Ridge Ave Reanimators' });
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const { isLoading, isError, data } = useGameQuery({
+    home: searchParams.get('home'),
+    away: searchParams.get('away'),
+  });
 
   if (isLoading) return <>Loading...</>;
   if (isError || !data?.game) return <>Failed to load team info</>;

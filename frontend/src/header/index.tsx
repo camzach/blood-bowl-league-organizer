@@ -38,7 +38,7 @@ export function Header(): React.ReactElement {
       <NavList>
         <NavLink className={navItem} to="/teams">Teams</NavLink>
         <NavLink className={navItem} to="/league">League Table</NavLink>
-        <NavLink className={navItem} to="/game">Games</NavLink>
+        <NavLink className={navItem} to="/schedule">Games</NavLink>
       </NavList>
     </Container>
   );

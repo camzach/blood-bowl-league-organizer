@@ -1,5 +1,8 @@
-query GameQuery {
-  game(home: "Ridge Ave Reanimators" away: "100 gecs") {
+query Game(
+  $home: String!
+  $away: String!
+) {
+  game(home: $home away: $away) {
     homeTeam {
       ...TeamTable
     }
