@@ -2,7 +2,7 @@ import type React from 'react';
 import { styled } from '@linaria/react';
 import { TeamTable } from '../team-table';
 import { useGameQuery } from './game.query.gen';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -28,8 +28,7 @@ const Score = styled.div`
 `;
 
 export function GameInfo(): React.ReactElement {
-  const { search } = useLocation();
-  const searchParams = new URLSearchParams(search);
+  const [searchParams] = useSearchParams();
   const { isLoading, isError, data } = useGameQuery({
     home: searchParams.get('home'),
     away: searchParams.get('away'),
