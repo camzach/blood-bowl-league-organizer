@@ -3,9 +3,13 @@ import teams from '../teams.json';
 import games from '../games.json';
 
 export const GameQueries: QueryResolvers = {
-  games: () => {
-    console.log('resolving games');
-    return games;
+  games: () => games,
+  game: (parent, query) => {
+    const homeId = teams.find(t => t.name === query.home)?.id;
+    const awayId = teams.find(t => t.name === query.away)?.id;
+    const game = games.find(g => g.homeId === homeId && g.awayId === awayId);
+    if (!game) throw new Error('Could not find game');
+    return game;
   },
 };
 

@@ -2,35 +2,6 @@ query Team(
   $name: String!
 ) {
   team(name: $name) {
-    coach
-    name
-    players {
-      name
-      number
-      position
-      teamValue {
-        base
-        current
-      }
-      casualties {
-        missNextGame
-        niggles
-      }
-      starPlayerPoints {
-        MVPs
-        casualties
-        completions
-        deflections
-        interceptions
-        touchdowns
-        prayersToNuffle
-      }
-      MA
-      ST
-      PA
-      AG
-      AV
-      skills
-    }
+    ...TeamTable
   }
 }

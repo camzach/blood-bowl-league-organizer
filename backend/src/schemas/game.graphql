@@ -13,4 +13,5 @@ type Game {
 
 extend type Query {
   games: [Game!]!
+  game(home: String! away: String!): Game
 }

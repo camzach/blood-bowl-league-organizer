@@ -24,3 +24,5 @@ generates:
         Team: backend/src/models#TeamModel
         Player: backend/src/models#PlayerModel
         Game: backend/src/models#GameModel
+        ScheduledGame: backend/src/models#ScheduledGameModel
+        ScheduleSlot: backend/src/models#ScheduleSlotModel

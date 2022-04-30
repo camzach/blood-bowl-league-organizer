@@ -7,15 +7,13 @@ export function Content(): React.ReactElement {
   const { team: teamParam } = useParams();
   const { isLoading, isError, data } = useTeamQuery({ name: teamParam ?? '' });
 
-  if (isLoading || !data?.team) return <>Loading...</>;
-  if (isError) return <>Failed to load team info</>;
-
-  const teamInfo = data.team;
+  if (isLoading) return <>Loading...</>;
+  if (isError || !data?.team) return <>Failed to load team info</>;
 
   return (
     <section>
-      <h2>{teamInfo.name}</h2>
-      <TeamTable team={teamInfo} />
+      <h2>{data.team.name}</h2>
+      <TeamTable team={data.team} />
     </section>
   );
 }
