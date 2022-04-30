@@ -26,3 +26,4 @@ generates:
         Game: backend/src/models#GameModel
         ScheduledGame: backend/src/models#ScheduledGameModel
         ScheduleSlot: backend/src/models#ScheduleSlotModel
+        Inducement: backend/src/models#InducementModel

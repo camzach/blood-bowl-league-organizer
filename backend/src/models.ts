@@ -74,3 +74,11 @@ export type ScheduleSlotModel =
     homeId: string;
     awayId: string;
   };
+
+export type InducementModel = {
+  max: number;
+  name: string;
+  price?: number;
+  specialPrices?: Array<[string, number]>;
+  options?: [];
+};

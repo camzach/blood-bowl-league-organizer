@@ -1,11 +1,11 @@
 {
   "Amazon": {
     "specialRules": [
-      "Lustrian Superleague"
+      "Lustrian Superleague",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Tribal Linewoman",
@@ -96,11 +96,11 @@
   "Black Orc": {
     "specialRules": [
       "Badlands Brawl",
-      "Bribery and Corruption"
+      "Bribery and Corruption",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Goblin Bruiser Lineman",
@@ -178,11 +178,11 @@
   },
   "Chaos Chosen": {
     "specialRules": [
-      "Favoured of"
+      "Favoured of",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Beastman Runner Lineman",
@@ -308,11 +308,11 @@
     "specialRules": [
       "Badlands Brawl",
       "Favoured of",
-      "Worlds Edge Superleague"
+      "Worlds Edge Superleague",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Hobgoblin Lineman",
@@ -407,11 +407,11 @@
   },
   "Chaos Renegade": {
     "specialRules": [
-      "Favoured of"
+      "Favoured of",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Renegade Human Lineman",
@@ -651,11 +651,11 @@
   },
   "Dark Elf": {
     "specialRules": [
-      "Elven Kingdoms League"
+      "Elven Kingdoms League",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Dark Elf Lineman",
@@ -767,11 +767,11 @@
   "Dwarf": {
     "specialRules": [
       "Old World Classic",
-      "Worlds Edge"
+      "Worlds Edge",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Dwarf Blocker Lineman",
@@ -893,11 +893,11 @@
   },
   "Elven Union": {
     "specialRules": [
-      "Elven Kingdoms League"
+      "Elven Kingdoms League",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Elven Lineman",
@@ -987,11 +987,11 @@
     "specialRules": [
       "Badlands Brawl",
       "Bribery and Corruption",
-      "Underworld Challenge"
+      "Underworld Challenge",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 3,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Goblin Lineman",
@@ -1186,11 +1186,11 @@
   "Halfling": {
     "specialRules": [
       "Halfling Thimble Cup",
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 3,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Halfling Hopeful Lineman",
@@ -1292,11 +1292,11 @@
   },
   "High Elf": {
     "specialRules": [
-      "Elven Kingdoms League"
+      "Elven Kingdoms League",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "High Elf Lineman",
@@ -1385,11 +1385,11 @@
   },
   "Human": {
     "specialRules": [
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Human Lineman",
@@ -1524,11 +1524,11 @@
   },
   "Imperial Nobility": {
     "specialRules": [
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Imperial Retainer Lineman",
@@ -1643,11 +1643,11 @@
   },
   "Khorne": {
     "specialRules": [
-      "Favoured of Khorne"
+      "Favoured of Khorne",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Bloodborn Marauder Lineman",
@@ -1743,11 +1743,11 @@
   },
   "Lizardman": {
     "specialRules": [
-      "Lustrian Superleague"
+      "Lustrian Superleague",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Skink Runner Lineman",
@@ -1962,11 +1962,11 @@
   "Norse": {
     "specialRules": [
       "Lustrian Superleague",
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Norse Lineman",
@@ -2210,11 +2210,11 @@
     "specialRules": [
       "Badlands Brawl",
       "Low Cost Linemen",
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 3,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Gnoblar Lineman",
@@ -2291,11 +2291,11 @@
   },
   "Old World Alliance": {
     "specialRules": [
-      "Old World Classic"
+      "Old World Classic",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Old World Human Lineman",
@@ -2555,11 +2555,11 @@
   },
   "Orc": {
     "specialRules": [
-      "Badlands Brawl"
+      "Badlands Brawl",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Orc Lineman",
@@ -2813,11 +2813,11 @@
   },
   "Skaven": {
     "specialRules": [
-      "Underworld Challenge"
+      "Underworld Challenge",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Skaven Clanrat Lineman",
@@ -2934,11 +2934,11 @@
   },
   "Slann": {
     "specialRules": [
-      "Lustrian Superleague"
+      "Lustrian Superleague",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Slann Lineman",
@@ -3038,11 +3038,11 @@
     "specialRules": [
       "Low Cost Linemen",
       "Bribery and Corruption",
-      "Underworld Challenge"
+      "Underworld Challenge",
+      "Apothecary Allowed"
     ],
     "rerollCost": 60000,
     "tier": 3,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Snotling Lineman",
@@ -3294,11 +3294,11 @@
   "Underworld Denizens": {
     "specialRules": [
       "Bribery and Corruption",
-      "Underworld Challenge"
+      "Underworld Challenge",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Underworld Goblin Lineman",
@@ -3494,11 +3494,11 @@
   },
   "Vampire": {
     "specialRules": [
-      "Sylvanian Spotlight"
+      "Sylvanian Spotlight",
+      "Apothecary Allowed"
     ],
     "rerollCost": 70000,
     "tier": 2,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Thrall Lineman",
@@ -3546,11 +3546,11 @@
   },
   "Wood Elf": {
     "specialRules": [
-      "Elven Kingdoms League"
+      "Elven Kingdoms League",
+      "Apothecary Allowed"
     ],
     "rerollCost": 50000,
     "tier": 1,
-    "apothecaryAllowed": true,
     "players": [
       {
         "position": "Wood Elf Lineman",
