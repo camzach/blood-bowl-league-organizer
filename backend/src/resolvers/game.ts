@@ -2,7 +2,7 @@ import type { GameResolvers, QueryResolvers } from '../graphql.gen';
 import teams from '../teams.json';
 import games from '../games.json';
 
-export const GameQueries: QueryResolvers = {
+const Query: QueryResolvers = {
   games: () => games,
   game: (parent, query) => {
     const homeId = teams.find(t => t.name === query.home)?.id;
@@ -13,7 +13,7 @@ export const GameQueries: QueryResolvers = {
   },
 };
 
-export const Game: GameResolvers = {
+const Game: GameResolvers = {
   homeTeam: parent => {
     const home = teams.find(team => team.id === parent.homeId);
     if (!home) throw new Error('Unable to locate home team');
@@ -25,3 +25,5 @@ export const Game: GameResolvers = {
     return away;
   },
 };
+
+export { Game, Query };

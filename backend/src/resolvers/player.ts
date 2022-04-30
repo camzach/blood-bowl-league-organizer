@@ -5,7 +5,7 @@ import rosters from '../rosters.json';
 import type { PlayerModel } from '../models';
 import { getBasePlayer, getPlayerValue } from './utils';
 
-export const Player: PlayerResolvers = {
+const Player: PlayerResolvers = {
   team: parent => {
     const team = teams.find(t => t.id === parent.teamId);
     if (!team) return null as never;
@@ -34,10 +34,12 @@ export const Player: PlayerResolvers = {
   casualties: parent => ({ missNextGame: parent.injuries.missNextGame, niggles: parent.injuries.niggles }),
 };
 
-export const PlayerQueries: QueryResolvers = {
+const Query: QueryResolvers = {
   player: (parent, query) => {
     const player = players.find(p => p.name === query.name);
     if (!player) return null;
     return player;
   },
 };
+
+export { Player, Query };

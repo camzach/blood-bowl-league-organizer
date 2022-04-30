@@ -3,7 +3,7 @@ import teams from '../teams.json';
 import games from '../games.json';
 import schedule from '../schedule.json';
 
-export const ScheduleQueries: QueryResolvers = {
+const Query: QueryResolvers = {
   schedule: () => ({
     rounds: schedule.map(round => ({
       games: round.map(g => {
@@ -14,7 +14,7 @@ export const ScheduleQueries: QueryResolvers = {
   }),
 };
 
-export const ScheduledGame: ScheduledGameResolvers = {
+const ScheduledGame: ScheduledGameResolvers = {
   homeTeam: parent => {
     const team = teams.find(t => parent.homeId === t.id);
     if (!team) throw new Error('Couldn\'t find home team');
@@ -26,3 +26,5 @@ export const ScheduledGame: ScheduledGameResolvers = {
     return team;
   },
 };
+
+export { Query, ScheduledGame };
