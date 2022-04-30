@@ -15,10 +15,12 @@ export function TeamsPage(): React.ReactElement {
   return (
     <Grid>
       <Sidebar />
-      <Routes>
-        <Route element={noTeam} path="/" />
-        <Route element={<Content />} path="/:team" />
-      </Routes>
+      <main>
+        <Routes>
+          <Route element={noTeam} path="/" />
+          <Route element={<Content />} path="/:team" />
+        </Routes>
+      </main>
     </Grid>
   );
 }

@@ -21,7 +21,7 @@ export function App(): React.ReactElement {
       <Header />
       <Routes>
         <Route element={<TeamsPage />} path="/teams/*" />
-        <Route element={<GamePage />} path="/game/*" />
+        <Route element={<GamePage />} path="/schedule/*" />
       </Routes>
     </Container>
   );
