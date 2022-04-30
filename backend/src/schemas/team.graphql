@@ -10,6 +10,12 @@ type Team {
   treasury: Int!
   rerolls: Int!
   players: [Player!]!
+  teamValue: TeamValue!
+}
+
+type TeamValue {
+  base: Int!
+  current: Int!
 }
 
 extend type Query {
