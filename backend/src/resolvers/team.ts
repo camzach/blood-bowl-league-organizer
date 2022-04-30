@@ -4,7 +4,7 @@ import players from '../players.json';
 import rosters from '../rosters.json';
 import { getPlayerValue } from './utils';
 
-export const TeamQueries: QueryResolvers = {
+const Query: QueryResolvers = {
   team: (parent, query) => {
     const team = teams.find(t => t.name === query.name);
     if (!team) return null;
@@ -13,7 +13,7 @@ export const TeamQueries: QueryResolvers = {
   teams: () => teams,
 };
 
-export const Team: TeamResolvers = {
+const Team: TeamResolvers = {
   players: parent => {
     const teamPlayers = players.filter(p => parent.playerIds.includes(p.id));
     return teamPlayers;
@@ -33,3 +33,5 @@ export const Team: TeamResolvers = {
     return { base: playerValues.base + staffValue, current: playerValues.current + staffValue };
   },
 };
+
+export { Team, Query };
