@@ -1,0 +1,18 @@
+type Schedule {
+  rounds: [Round!]!
+}
+
+type Round {
+  games: [ScheduleSlot!]!
+}
+
+union ScheduleSlot = Game | ScheduledGame
+
+type ScheduledGame {
+  homeTeam: Team!
+  awayTeam: Team!
+}
+
+extend type Query {
+  schedule: Schedule!
+}

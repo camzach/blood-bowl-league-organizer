@@ -1,8 +1,7 @@
 import type React from 'react';
 import { styled } from '@linaria/react';
-import type { Team } from 'globals';
 import { TeamTable } from '../team-table';
-import { useFetch } from '../fetch';
+import { useGameQueryQuery } from './game.query.gen';
 
 const Container = styled.div`
   display: flex;
@@ -28,33 +27,33 @@ const Score = styled.div`
 `;
 
 export function GameInfo(): React.ReactElement {
-  const [gameLoading, gameError, game] = useFetch<Record<string, unknown>>('http://localhost:3000/games/1/Antivaxxers');
-  const [homeLoading, homeError, home] = useFetch<Team>(`http://localhost:3000/teams/${game?.home}`);
-  const [awayLoading, awayError, away] = useFetch<Team>(`http://localhost:3000/teams/${game?.away}`);
-  console.log(game, home, away);
+  const { data, isLoading, isError } = useGameQueryQuery({ home: '100 gecs', away: 'Ridge Ave Reanimators' });
 
-  if (gameLoading || homeLoading || awayLoading || !game || !home || !away) return <>Loading...</>;
-  if (gameError || homeError || awayError) return <>Failed to load team info</>;
+  if (isLoading) return <>Loading...</>;
+  if (isError || !data?.game) return <>Failed to load team info</>;
+
+  const { game } = data;
+  const { homeTeam, awayTeam } = game;
 
   return (
     <Container>
       <TeamContainer>
         <TableContainer>
-          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={home} />
+          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={homeTeam} />
         </TableContainer>
       </TeamContainer>
       <Score>
         Touchdowns
         <br />
-        {game.tdHome as string} - {game.tdAway as string}
+        {game.tdHome} - {game.tdAway}
         <br />
         Casualties
         <br />
-        {game.casHome as string} - {game.casAway as string}
+        {game.casHome} - {game.casAway}
       </Score>
       <TeamContainer>
         <TableContainer>
-          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={away} />
+          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={awayTeam} />
         </TableContainer>
       </TeamContainer>
     </Container>

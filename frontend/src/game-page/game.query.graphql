@@ -1,0 +1,14 @@
+query GameQuery {
+  game(home: "Ridge Ave Reanimators" away: "100 gecs") {
+    homeTeam {
+      ...TeamTable
+    }
+    awayTeam {
+      ...TeamTable
+    }
+    tdHome
+    tdAway
+    casHome
+    casAway
+  }
+}

@@ -1,3 +1,5 @@
+import type { Game } from './graphql.gen';
+
 export type PlayerModel = {
   id: string;
   injuries: {
@@ -48,6 +50,7 @@ export type TeamModel = {
 };
 
 export type GameModel = {
+  id: string;
   homeId: string;
   awayId: string;
   ffHome: number;
@@ -59,3 +62,15 @@ export type GameModel = {
   winningsHome: number;
   winningsAway: number;
 };
+
+export type ScheduledGameModel = {
+  homeId: string;
+  awayId: string;
+};
+
+export type ScheduleSlotModel =
+  | Game
+  | {
+    homeId: string;
+    awayId: string;
+  };

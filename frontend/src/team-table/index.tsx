@@ -1,6 +1,6 @@
 import type React from 'react';
 import { styled } from '@linaria/react';
-import type { TeamQuery } from '../graphql.gen';
+import type { TeamTableFragment } from './team.fragment.gen';
 import { Player } from './player';
 import { cols } from './cols';
 
@@ -33,7 +33,7 @@ const Table = styled.table`
 `;
 
 type Props = {
-  team: NonNullable<TeamQuery['team']>;
+  team: TeamTableFragment;
   cols?: ReadonlyArray<(typeof cols)[number]>;
 };
 
