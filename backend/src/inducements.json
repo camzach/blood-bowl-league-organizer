@@ -1,0 +1,18 @@
+[
+  {"max": 4, "name": "Temp Agency Cheerleader", "price": 20000},
+  {"max": 3, "name": "Part-time Assistant Coach", "price": 20000},
+  {"max": 1, "name": "Weather Mage", "price": 30000},
+  {"max": 2, "name": "Bloodweiser Keg", "price": 50000},
+  {"max": 5, "name": "Special Play", "price": 100000},
+  {"max": 8, "name": "Extra Team Training", "price": 100000},
+  {"max": 3, "name": "Bribe", "price": 100000, "specialPrices": [["Bribery and Corruption", 50000]]},
+  {"max": 2, "name": "Wandering Apothecary", "specialPrices": [["Apothecary Allowed", 100000]]},
+  {"max": 1, "name": "Mortuary Assistant", "specialPrices": [["Sylvanian Spotlight", 100000]]},
+  {"max": 1, "name": "Plague Doctor", "specialPrices": [["Favoured of Nurgle", 100000]]},
+  {"max": 1, "name": "Riotous Rookies", "specialPrices": [["Low Cost Linemen", 100000]]},
+  {"max": 1, "name": "Halfling Master Chef", "price": 300000, "specialPrices": [["Halfling Thimble Cup", 100000]]},
+  {"max": 2, "name": "Star Player"},
+  {"max": 2, "name": "(in)Famous Coaching Staff"},
+  {"max": 1, "name": "Wizard"},
+  {"max": 1, "name": "Biased ref"}
+]
