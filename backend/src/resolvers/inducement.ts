@@ -42,11 +42,12 @@ const Query: QueryResolvers = {
       }
     })(),
   })).filter(inducement => {
+    const { specialRules } = query;
     // Return all when no specialRules are passed
-    if (!query.specialRules) return true;
+    if (!specialRules) return true;
     return (
       inducement.price !== undefined ||
-      inducement.specialPrices?.some(([specialRule]) => query.specialRules?.includes(specialRule)) ||
+      (inducement.specialPrices?.some(([specialRule]) => specialRules.includes(specialRule)) ?? false) ||
       inducement.choices
     );
   }),

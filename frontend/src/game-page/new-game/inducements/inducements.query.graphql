@@ -1,0 +1,39 @@
+query Inducements(
+  $homeSpecialRules: [String!]!
+  $awaySpecialRules: [String!]!
+) {
+  homeInducements: inducements(specialRules: $homeSpecialRules) {
+    ...Inducement
+  }
+  awayInducements: inducements(specialRules: $awaySpecialRules) {
+    ...Inducement
+  }
+}
+
+fragment Inducement on Inducement {
+  name
+  max
+  choices {
+    __typename
+    ...on StarPlayerOptions {
+      starPlayers {
+        name
+      }
+    }
+    ...on WizardOptions {
+      wizards {
+        name
+      }
+    }
+    ...on BiasedRefOptions {
+      biasedRefs {
+        name
+      }
+    }
+    ...on InfamousCoachingStaffOptions {
+      infamousCoachingStaff {
+        name
+      }
+    }
+  }
+}

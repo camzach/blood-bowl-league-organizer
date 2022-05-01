@@ -32,6 +32,7 @@ const Team: TeamResolvers = {
       (parent.rerolls * roster.rerollCost);
     return { base: playerValues.base + staffValue, current: playerValues.current + staffValue };
   },
+  specialRules: parent => rosters[parent.race as keyof typeof rosters].specialRules,
 };
 
 export { Team, Query };
