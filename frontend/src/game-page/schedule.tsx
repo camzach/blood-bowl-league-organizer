@@ -81,8 +81,15 @@ export function Schedule(): React.ReactElement {
                   <li key={`${homeTeam.name}-${awayTeam.name}`}>
                     {/* eslint-disable-next-line no-underscore-dangle */}
                     {game.__typename === 'Game'
-                      ? <GameLink to={`game/?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</GameLink>
-                      : <span>{contents}</span>}
+                      ? <GameLink to={`game?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</GameLink>
+                      : (
+                        <>
+                          <span>{contents}</span>
+                          <Link to={`newgame?home=${homeTeam.name}&away=${awayTeam.name}`}>
+                            Play it now
+                          </Link>
+                        </>
+                      )}
                   </li>
                 );
               })}

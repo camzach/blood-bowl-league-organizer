@@ -1,0 +1,20 @@
+query PregameInfo(
+  $home: String!
+  $away: String!
+) {
+  home: team(name: $home) {
+    ...Pregame
+  }
+  away: team(name: $away) {
+    ...Pregame
+  }
+}
+
+fragment Pregame on Team {
+  name
+  teamValue {
+    current
+  }
+  treasury
+  specialRules
+}
