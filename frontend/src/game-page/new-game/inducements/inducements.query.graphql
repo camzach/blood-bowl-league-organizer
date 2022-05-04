@@ -10,30 +10,26 @@ query Inducements(
   }
 }
 
-fragment Inducement on Inducement {
-  name
-  max
-  choices {
-    __typename
-    ...on StarPlayerOptions {
-      starPlayers {
-        name
-      }
+fragment Inducement on Inducements {
+  basic {
+    name
+    max
+    price
+    specialPrices {
+      rule
+      price
     }
-    ...on WizardOptions {
-      wizards {
-        name
-      }
-    }
-    ...on BiasedRefOptions {
-      biasedRefs {
-        name
-      }
-    }
-    ...on InfamousCoachingStaffOptions {
-      infamousCoachingStaff {
-        name
-      }
+  }
+  starPlayers {
+    name
+    price
+  }
+  wizards {
+    name
+    price
+    specialPrices {
+      rule
+      price
     }
   }
 }

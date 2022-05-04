@@ -11,15 +11,13 @@ const dieFaces = [
 ];
 
 const Scene = styled.div<{ size: number; unit: string }>`
-
-  --sceneSize: ${({ size, unit }): string => `${size}${unit}`};
-
-  width: var(--sceneSize);
-  height: var(--sceneSize);
+  width: ${({ size, unit }): string => `${size}${unit}`};
+  aspect-ratio: 1;
   perspective: 100rem;
   display: grid;
   place-items: center;
   border: 1px solid red;
+
 `;
 const Cube = styled.button`
   @keyframes roll {

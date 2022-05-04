@@ -8,11 +8,12 @@ generates:
     preset: near-operation-file
     presetConfig:
       extension: .gen.ts
-      baseTypesPath: types.ts
+      baseTypesPath: types.gen.ts
     plugins:
       - typescript-operations
       - typescript-react-query
     config:
+      skipTypename: true
       fetcher:
         endpoint: http://localhost:3000/graphql
   backend/src/graphql.gen.ts:
@@ -21,9 +22,9 @@ generates:
       - typescript-resolvers
     config:
       mappers:
-        Team: backend/src/models#TeamModel
-        Player: backend/src/models#PlayerModel
-        Game: backend/src/models#GameModel
-        ScheduledGame: backend/src/models#ScheduledGameModel
-        ScheduleSlot: backend/src/models#ScheduleSlotModel
-        Inducement: backend/src/models#InducementModel
+        Team: backend/src/models/team#TeamModel
+        Player: backend/src/models/player#PlayerModel
+        Game: backend/src/models/game#GameModel
+        ScheduledGame: backend/src/models/schedule#ScheduledGameModel
+        ScheduleSlot: backend/src/models/schedule#ScheduleSlotModel
+        Inducements: backend/src/models/inducement#InducementsModel
