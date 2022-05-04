@@ -1,20 +1,16 @@
-type Inducement {
+type Inducements {
+  basic: [BasicInducement!]!
+  starPlayers: [StarPlayer!]!
+  wizards: [Wizard!]!
+  infamousCoachingStaff: [InfamousCoachingStaff!]!
+  biasedRefs: [BiasedRef!]!
+}
+
+type BasicInducement {
   name: String!
   max: Int!
   price: Int
   specialPrices: [SpecialPrice!]
-  choices(specialRules: [String!]): InducementOptions
-}
-
-type SpecialPrice {
-  rule: String!
-  price: String!
-}
-
-union InducementOptions = StarPlayerOptions | WizardOptions | InfamousCoachingStaffOptions | BiasedRefOptions
-
-type StarPlayerOptions {
-  starPlayers: [StarPlayer!]!
 }
 
 type StarPlayer {
@@ -27,34 +23,34 @@ type StarPlayer {
   skills: [String!]!
   specialRules: String!
   price: Int!
+  specialPrices: [SpecialPrice!]
   playsFor: [String!]
   doesntPlayFor: [String!]
 }
 
-type WizardOptions {
-  wizards: [Wizard!]!
-}
-
 type Wizard {
   name: String!
-}
-
-type InfamousCoachingStaffOptions {
-  infamousCoachingStaff: [InfamousCoachingStaff!]!
+  price: Int!
+  specialPrices: [SpecialPrice!]
 }
 
 type InfamousCoachingStaff {
   name: String!
-}
-
-type BiasedRefOptions {
-  biasedRefs: [BiasedRef!]!
+  price: Int!
+  specialPrices: [SpecialPrice!]
 }
 
 type BiasedRef {
   name: String!
+  price: Int!
+  specialPrices: [SpecialPrice!]
+}
+
+type SpecialPrice {
+  rule: String!
+  price: Int!
 }
 
 extend type Query {
-  inducements(specialRules: [String!]): [Inducement!]!
+  inducements(specialRules: [String!]): Inducements!
 }

@@ -1,6 +1,7 @@
 [
   {
     "name": "Akhorne The Squirrel",
+    "id": "c17f4f54a89893ffb3ae9f78",
     "MA": 7,
     "ST": 1,
     "AG": 2,
@@ -23,6 +24,7 @@
   },
   {
     "name": "Barik Farblast",
+    "id": "2c2f40bb91ea5af4291dce87",
     "MA": 6,
     "ST": 3,
     "AG": 3,
@@ -47,6 +49,7 @@
   },
   {
     "name": "The Black Gobbo",
+    "id": "1c5f4efbad3654cc0f2fa6f1",
     "MA": 6,
     "ST": 2,
     "AG": 3,
@@ -71,6 +74,7 @@
   },
   {
     "name": "Bomber Dribblesnot",
+    "id": "5da54af4a87891e21e93d495",
     "MA": 6,
     "ST": 2,
     "AG": 3,
@@ -94,6 +98,7 @@
   },
   {
     "name": "Bryce ‘The Slice’ Cambuel",
+    "id": "41a74050bc9d2eb98aa2aa49",
     "MA": 5,
     "ST": 3,
     "AG": 4,
@@ -115,6 +120,7 @@
   },
   {
     "name": "Deeproot Strongbranch",
+    "id": "550747519ed2fe079bb9fa97",
     "MA": 2,
     "ST": 7,
     "AG": 5,
@@ -139,6 +145,7 @@
   },
   {
     "name": "Eldril Sidewinder",
+    "id": "c50349768e7ef8a6262c60a6",
     "MA": 8,
     "ST": 3,
     "AG": 2,
@@ -160,6 +167,7 @@
   },
   {
     "name": "Fungus the Loon",
+    "id": "14e849f2bb1f4868f52e3157",
     "MA": 4,
     "ST": 7,
     "AG": 3,
@@ -182,6 +190,7 @@
   },
   {
     "name": "Glart Smashrip",
+    "id": "eaa94f5b80200180f584ed0d",
     "MA": 5,
     "ST": 4,
     "AG": 4,
@@ -204,6 +213,7 @@
   },
   {
     "name": "Gloriel Summerbloom",
+    "id": "97624954b54ef93819eae59a",
     "MA": 7,
     "ST": 2,
     "AG": 2,
@@ -225,6 +235,7 @@
   },
   {
     "name": "Grak",
+    "id": "405643769c0c0b33ea3eee87",
     "MA": 5,
     "ST": 5,
     "AG": 4,
@@ -242,6 +253,7 @@
   },
   {
     "name": "Crumbleberry",
+    "id": "f3e245be94c1e56e5921ebe7",
     "MA": 5,
     "ST": 2,
     "AG": 3,
@@ -259,6 +271,7 @@
   },
   {
     "name": "Grashnak Blackhoof",
+    "id": "b2ac428f8fc610972b8980c4",
     "MA": 6,
     "ST": 6,
     "AG": 4,
@@ -280,6 +293,7 @@
   },
   {
     "name": "Gretchen Wachter “The Blood Bowl Widow”",
+    "id": "887541e3a2ac17ae1ee4316d",
     "MA": 7,
     "ST": 3,
     "AG": 2,
@@ -304,6 +318,7 @@
   },
   {
     "name": "Griff Oberwald",
+    "id": "5281497086d64062184575b1",
     "MA": 7,
     "ST": 4,
     "AG": 2,
@@ -325,6 +340,7 @@
   },
   {
     "name": "Grim Ironjaw",
+    "id": "0bf142bf997ce1707bc97cb1",
     "MA": 5,
     "ST": 4,
     "AG": 3,
@@ -348,6 +364,7 @@
   },
   {
     "name": "Frank ‘n’ Stein",
+    "id": "c27b48e190467d74825b046d",
     "MA": 4,
     "ST": 5,
     "AG": 4,
@@ -370,6 +387,7 @@
   },
   {
     "name": "Hakflem Skuttlespike",
+    "id": "75ce47b692296b3c80a65e57",
     "MA": 9,
     "ST": 3,
     "AG": 2,
@@ -391,6 +409,7 @@
   },
   {
     "name": "Helmut Wolf",
+    "id": "dedf443b86ccc1beab4bca29",
     "MA": 6,
     "ST": 3,
     "AG": 3,
@@ -408,6 +427,7 @@
   },
   {
     "name": "Karla Von Kill",
+    "id": "5f7841e3b8cb19714a12a199",
     "MA": 6,
     "ST": 4,
     "AG": 3,
@@ -430,6 +450,7 @@
   },
   {
     "name": "Kreek Rustgouger",
+    "id": "30c14b69b13701aec1bdd5b0",
     "MA": 5,
     "ST": 7,
     "AG": 4,
@@ -452,6 +473,7 @@
   },
   {
     "name": "Lord Borak The Despoiler",
+    "id": "1d44444790855e4c495713cd",
     "MA": 5,
     "ST": 5,
     "AG": 3,
@@ -472,6 +494,7 @@
   },
   {
     "name": "Max Spleenripper",
+    "id": "800b40c7baeccc85e865f525",
     "MA": 5,
     "ST": 4,
     "AG": 4,
@@ -490,6 +513,7 @@
   },
   {
     "name": "Mighty Zug",
+    "id": "9613479499ac6648a06ef780",
     "MA": 4,
     "ST": 5,
     "AG": 4,
@@ -510,6 +534,7 @@
   },
   {
     "name": "Morg ‘n’ Thorg",
+    "id": "93864f1d88a16990d4fa141c",
     "MA": 6,
     "ST": 6,
     "AG": 3,
@@ -528,6 +553,7 @@
   },
   {
     "name": "Roxanna Darknail",
+    "id": "31bf42f8b6d3ee2308dc9798",
     "MA": 8,
     "ST": 3,
     "AG": 1,
@@ -549,6 +575,7 @@
   },
   {
     "name": "Rumbelow Sheepskin",
+    "id": "47564297a9b26b2efe00b9cc",
     "MA": 6,
     "ST": 3,
     "AG": 3,
@@ -574,6 +601,7 @@
   },
   {
     "name": "Scyla Anfingrimm",
+    "id": "b9ca4f57ae3de52c310f20c6",
     "MA": 5,
     "ST": 5,
     "AG": 4,
@@ -596,6 +624,7 @@
   },
   {
     "name": "Skrull Halfheight",
+    "id": "31244399a0eb0485dd8977e2",
     "MA": 6,
     "ST": 3,
     "AG": 4,
@@ -619,6 +648,7 @@
   },
   {
     "name": "Lucian Swift",
+    "id": "c85f4b51b410c00f32d1094c",
     "MA": 7,
     "ST": 3,
     "AG": 2,
@@ -638,6 +668,7 @@
   },
   {
     "name": "Valen Swift",
+    "id": "083643949f72ec32801569ca",
     "MA": 7,
     "ST": 3,
     "AG": 2,
@@ -659,6 +690,7 @@
   },
   {
     "name": "Varag Ghoul-Chewer",
+    "id": "57274fc187ed52f0b2347122",
     "MA": 6,
     "ST": 5,
     "AG": 3,
@@ -680,6 +712,7 @@
   },
   {
     "name": "Grombrindal, the White Dwarf",
+    "id": "4ecc4e6daa77d479a1fc4999",
     "MA": 5,
     "ST": 3,
     "AG": 3,
@@ -704,6 +737,7 @@
   },
   {
     "name": "Wilhelm Chaney",
+    "id": "aa014822a7967c67f5c3e0b4",
     "MA": 8,
     "ST": 4,
     "AG": 3,
@@ -725,6 +759,7 @@
   },
   {
     "name": "Willow Rosebark",
+    "id": "7fba4f22bed7f87c463756c3",
     "MA": 5,
     "ST": 4,
     "AG": 3,
@@ -744,6 +779,7 @@
   },
   {
     "name": "Zolcath the Zoat",
+    "id": "1e1b4646b95bb940e60b20e3",
     "MA": 5,
     "ST": 5,
     "AG": 4,

@@ -2,7 +2,7 @@ import type { PlayerResolvers, QueryResolvers } from '../graphql.gen';
 import teams from '../teams.json';
 import players from '../players.json';
 import rosters from '../rosters.json';
-import type { PlayerModel } from '../models';
+import type { PlayerModel } from '../models/player';
 import { getBasePlayer, getPlayerValue } from './utils';
 
 const Player: PlayerResolvers = {

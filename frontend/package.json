@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build",
     "lint": "npm-run-all lint:src lint:css",
-    "lint:css": "stylelint ./src",
+    "lint:css": "stylelint ./src/**/*.tsx",
     "lint:src": "eslint ./src --ext=.ts,.tsx",
     "preview": "vite preview",
     "start": "vite"
