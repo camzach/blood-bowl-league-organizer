@@ -11,14 +11,22 @@ const dieFaces = [
 ];
 
 const Scene = styled.div<{ size: number; unit: string }>`
-  width: ${({ size, unit }): string => `${size}${unit}`};
-  aspect-ratio: 1;
+  width: var(--sceneSize);
+  height: var(--sceneSize);
   perspective: 100rem;
   display: grid;
   place-items: center;
-  border: 1px solid red;
 
+  --sceneSize: ${({ size, unit }): string => `${size}${unit}`};
 `;
+const rotations = [
+  'rotateX(0)',
+  'rotateY(-90deg)',
+  'rotateX(180deg)',
+  'rotateY(90deg)',
+  'rotateX(-90deg)',
+  'rotateX(90deg)',
+];
 const Cube = styled.button`
   @keyframes roll {
     from {
@@ -29,6 +37,21 @@ const Cube = styled.button`
       transform: rotate3d(var(--x), var(--y), var(--z), 360deg);
     }
   }
+  ${Array.from(Array(6), (_, k) => `
+    @keyframes roll${k + 1} {
+      50% {
+        transform: rotate3d(var(--x), var(--y), var(--z), 360deg);
+      }
+
+      100% {
+        transform: ${rotations[k]};
+      }
+    }
+    &[data-result="${k + 1}"] {
+      animation: roll${k + 1} 1s cubic-bezier(.68,-0.55,.27,1.55);
+      animation-fill-mode: forwards;
+    }
+  `).join('')}
 
   --x: -2;
   --y: 4;
@@ -45,38 +68,10 @@ const Cube = styled.button`
   position: relative;
   transform-style: preserve-3d;
 
-  &[data-result="1"] {
-    transform: rotateX(0deg);
-    animation: none;
-  }
-
-  &[data-result="2"] {
-    transform: rotateX(90deg);
-    animation: none;
-  }
-
-  &[data-result="3"] {
-    transform: rotateX(-90deg);
-    animation: none;
-  }
-
-  &[data-result="4"] {
-    transform: rotateX(180deg);
-    animation: none;
-  }
-
-  &[data-result="5"] {
-    transform: rotateY(90deg);
-    animation: none;
-  }
-
-  &[data-result="6"] {
-    transform: rotateY(-90deg);
-    animation: none;
-  }
-
-  &:active {
-    animation: roll 0.5s infinite linear;
+  &:not([disabled]):is(
+  :not([data-result]),
+  &:active) {
+    animation: roll 1s infinite linear;
   }
 `;
 const Face = styled.div`
@@ -123,21 +118,26 @@ type Props = {
   size: `${number}${
     '%' | 'ch' | 'cm' | 'em' | 'ex' | 'in' | 'mm' | 'pc' | 'pt' | 'px' | 'rem' | 'vh' | 'vmax' | 'vmin' | 'vw'
   }`;
+  isDisabled?: boolean;
+  onRoll: (value: number) => void;
 };
 
-export function Die({ size: sizeprop }: Props): React.ReactElement {
+export function Die({ size: sizeprop, isDisabled, onRoll }: Props): React.ReactElement {
   const [result, setResult] = React.useState<number | null>(null);
 
-  const handleClick = React.useCallback((): void => {
-    setResult(Math.ceil(Math.random() * 6));
-  }, []);
+  const handleClick = React.useCallback(() => {
+    const newval = Math.ceil(Math.random() * 6);
+    setResult(newval);
+    onRoll(newval);
+  }, [onRoll]);
 
   const { size, unit } = regex.exec(sizeprop)?.groups ?? { size: '200', unit: 'px' };
-
   return (
-    <Scene size={parseInt(size, 10)} unit={unit}>
+    <Scene role="presentation" size={parseInt(size, 10)} unit={unit}>
       <Cube
+        aria-label={(isDisabled ?? false) ? `Die showing a ${result}` : 'Roll the die!'}
         data-result={result}
+        disabled={isDisabled}
         tabIndex={0}
         onClick={handleClick}
       >

@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { styled } from '@linaria/react';
-import type { TeamQuery } from '../graphql.gen';
 import type { cols } from './cols';
+import type { TeamQuery } from '../team-page/content/team.query.gen';
 
 const Skill = styled.span`
   &:nth-child(2n) {
