@@ -12,7 +12,7 @@ export function Content(): React.ReactElement {
 
   return (
     <section>
-      <h2>{data.team.name}</h2>
+      <h1>{data.team.name}</h1>
       <TeamTable team={data.team} />
     </section>
   );

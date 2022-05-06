@@ -15,6 +15,7 @@ fragment Pregame on Team {
   teamValue {
     current
   }
+  fans
   treasury
   specialRules
 }

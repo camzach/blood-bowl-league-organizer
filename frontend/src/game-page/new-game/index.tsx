@@ -1,16 +1,38 @@
-import type React from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Inducements } from './inducements';
-import { usePregameInfoQuery } from './team-values.query.gen';
+import { Fans } from './fans';
+import { usePregameInfoQuery } from './queries/team-values.query.gen';
+import { Weather } from './weather';
+import type { InducementFragment } from './queries/inducements.query.gen';
+
+export type SelectedInducementsType =
+  Record<keyof Omit<InducementFragment, 'basic'>, string[]>
+  & { basic: Record<string, number> };
+
+type GameInfo = {
+  fans?: { home: number; away: number };
+  weather?: string;
+  inducements?: { home: SelectedInducementsType; away: SelectedInducementsType };
+};
 
 export function NewGame(): React.ReactElement {
   const [searchParams] = useSearchParams();
-  const home = searchParams.get('home');
-  const away = searchParams.get('away');
+  const home = searchParams.get('home') ?? '';
+  const away = searchParams.get('away') ?? '';
 
   const { isLoading, isError, data } = usePregameInfoQuery({ home, away });
 
-  if (home === null || away === null) {
+  const [gameInfo, setGameInfo] = React.useState<GameInfo>({});
+
+  const resultHandler = React.useCallback(
+    (key: keyof GameInfo) => (result: GameInfo[typeof key]) => {
+      setGameInfo(o => ({ ...o, [key]: result }));
+    }
+    , []
+  );
+
+  if (!home || !away) {
     return (
       <>
         <p>Home and Away teams not specified.</p>
@@ -26,7 +48,29 @@ export function NewGame(): React.ReactElement {
     !data.away
   ) return <>Error</>;
 
+  if (gameInfo.fans === undefined) {
+    return (
+      <Fans
+        away={data.away}
+        home={data.home}
+        onResult={resultHandler('fans')}
+      />
+    );
+  }
+
+  if (gameInfo.weather === undefined) return <Weather onResult={resultHandler('weather')} />;
+
+  if (!gameInfo.inducements) {
+    return (
+      <Inducements
+        away={data.away}
+        home={data.home}
+        onResult={resultHandler('inducements')}
+      />
+    );
+  }
+
   return (
-    <Inducements away={data.away} home={data.home} />
+    <pre>{JSON.stringify(gameInfo, null, 4)}</pre>
   );
 }
