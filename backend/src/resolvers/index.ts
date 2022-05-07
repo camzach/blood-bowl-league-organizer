@@ -5,6 +5,7 @@ import * as Team from './team';
 import * as Game from './game';
 import * as Schedule from './schedule';
 import * as Inducement from './inducement';
+import * as Roster from './roster';
 
 export const resolvers = merge(
   {},
@@ -13,4 +14,5 @@ export const resolvers = merge(
   Game,
   Schedule,
   Inducement,
+  Roster,
 ) as Resolvers;

@@ -1,0 +1,26 @@
+type RosterPlayer {
+  position: String!
+  max: Int!
+  cost: Int!
+  MA: Int!
+  ST: Int!
+  AG: Int!
+  PA: Int
+  AV: Int!
+  secondary: [String!]!
+  primary: [String!]!
+  skills: [String!]!
+}
+
+type Roster {
+  name: String!
+  rerollCost: Int!
+  tier: Int!
+  players: [RosterPlayer!]!
+  specialRules: [String!]!
+}
+
+extend type Query {
+  rosters: [Roster!]!
+  roster(name: String!): Roster
+}
