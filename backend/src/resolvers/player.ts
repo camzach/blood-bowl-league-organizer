@@ -19,7 +19,7 @@ const Player: PlayerResolvers = {
     stat,
     (parent: PlayerModel): number | null => {
       const baseStat = getBasePlayer(parent)[stat];
-      if (baseStat === null) return null;
+      if (typeof baseStat !== 'number') return null;
       return baseStat + parent.injuries[stat] - parent.improvements[stat];
     },
   ])),

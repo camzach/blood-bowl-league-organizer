@@ -25,14 +25,19 @@ const Team: TeamResolvers = {
         const { base, current } = getPlayerValue(player);
         return { base: base + prev.base, current: current + prev.current };
       }, { base: 0, current: 0 });
-    const roster = rosters[parent.race as keyof typeof rosters];
+    const roster = rosters.find(r => r.name === parent.race);
+    if (!roster) throw new Error('Unable to locate team roster');
     const staffValue =
       (parent.apothecary ? 50000 : 0) +
       ((parent.cheerleaders + parent.coaches) * 10000) +
       (parent.rerolls * roster.rerollCost);
     return { base: playerValues.base + staffValue, current: playerValues.current + staffValue };
   },
-  specialRules: parent => rosters[parent.race as keyof typeof rosters].specialRules,
+  specialRules: parent => {
+    const roster = rosters.find(r => r.name === parent.race)?.specialRules;
+    if (!roster) throw new Error('Unable to locate team roster');
+    return roster;
+  },
 };
 
 export { Team, Query };

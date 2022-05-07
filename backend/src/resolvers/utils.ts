@@ -1,9 +1,9 @@
-import type { Player } from '../graphql.gen';
+import type { Player, RosterPlayer } from '../graphql.gen';
 import rosters from '../rosters.json';
 import type { PlayerModel } from '../models/player';
 
-export function getBasePlayer(player: PlayerModel): (typeof rosters)[keyof (typeof rosters)]['players'][number] {
-  const basePlayer = Object.values(rosters)
+export function getBasePlayer(player: PlayerModel): RosterPlayer {
+  const basePlayer = rosters
     .flatMap(roster => roster.players)
     .find(p => p.position === player.position);
   if (!basePlayer) throw new Error('Player position not recognized');

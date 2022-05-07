@@ -1,5 +1,6 @@
-{
-  "Amazon": {
+[
+  {
+    "name": "Amazon",
     "specialRules": [
       "Lustrian Superleague",
       "Apothecary Allowed"
@@ -93,7 +94,8 @@
       }
     ]
   },
-  "Black Orc": {
+  {
+    "name": "Black Orc",
     "specialRules": [
       "Badlands Brawl",
       "Bribery and Corruption",
@@ -176,7 +178,8 @@
       }
     ]
   },
-  "Chaos Chosen": {
+  {
+    "name": "Chaos Chosen",
     "specialRules": [
       "Favoured of",
       "Apothecary Allowed"
@@ -304,7 +307,8 @@
       }
     ]
   },
-  "Chaos Dwarf": {
+  {
+    "name": "Chaos Dwarf",
     "specialRules": [
       "Badlands Brawl",
       "Favoured of",
@@ -405,7 +409,8 @@
       }
     ]
   },
-  "Chaos Renegade": {
+  {
+    "name": "Chaos Renegade",
     "specialRules": [
       "Favoured of",
       "Apothecary Allowed"
@@ -649,7 +654,8 @@
       }
     ]
   },
-  "Dark Elf": {
+  {
+    "name": "Dark Elf",
     "specialRules": [
       "Elven Kingdoms League",
       "Apothecary Allowed"
@@ -764,7 +770,8 @@
       }
     ]
   },
-  "Dwarf": {
+  {
+    "name": "Dwarf",
     "specialRules": [
       "Old World Classic",
       "Worlds Edge",
@@ -891,7 +898,8 @@
       }
     ]
   },
-  "Elven Union": {
+  {
+    "name": "Elven Union",
     "specialRules": [
       "Elven Kingdoms League",
       "Apothecary Allowed"
@@ -983,7 +991,8 @@
       }
     ]
   },
-  "Goblin": {
+  {
+    "name": "Goblin",
     "specialRules": [
       "Badlands Brawl",
       "Bribery and Corruption",
@@ -1183,7 +1192,8 @@
       }
     ]
   },
-  "Halfling": {
+  {
+    "name": "Halfling",
     "specialRules": [
       "Halfling Thimble Cup",
       "Old World Classic",
@@ -1290,7 +1300,8 @@
       }
     ]
   },
-  "High Elf": {
+  {
+    "name": "High Elf",
     "specialRules": [
       "Elven Kingdoms League",
       "Apothecary Allowed"
@@ -1383,7 +1394,8 @@
       }
     ]
   },
-  "Human": {
+  {
+    "name": "Human",
     "specialRules": [
       "Old World Classic",
       "Apothecary Allowed"
@@ -1522,7 +1534,8 @@
       }
     ]
   },
-  "Imperial Nobility": {
+  {
+    "name": "Imperial Nobility",
     "specialRules": [
       "Old World Classic",
       "Apothecary Allowed"
@@ -1641,7 +1654,8 @@
       }
     ]
   },
-  "Khorne": {
+  {
+    "name": "Khorne",
     "specialRules": [
       "Favoured of Khorne",
       "Apothecary Allowed"
@@ -1741,7 +1755,8 @@
       }
     ]
   },
-  "Lizardman": {
+  {
+    "name": "Lizardman",
     "specialRules": [
       "Lustrian Superleague",
       "Apothecary Allowed"
@@ -1838,7 +1853,8 @@
       }
     ]
   },
-  "Necromantic Horror": {
+  {
+    "name": "Necromantic Horror",
     "specialRules": [
       "Masters of Undeath",
       "Sylvanian Spotlight"
@@ -1959,7 +1975,8 @@
       }
     ]
   },
-  "Norse": {
+  {
+    "name": "Norse",
     "specialRules": [
       "Lustrian Superleague",
       "Old World Classic",
@@ -2098,7 +2115,8 @@
       }
     ]
   },
-  "Nurgle": {
+  {
+    "name": "Nurgle",
     "specialRules": [
       "Favoured of"
     ],
@@ -2206,7 +2224,8 @@
       }
     ]
   },
-  "Ogre": {
+  {
+    "name": "Ogre",
     "specialRules": [
       "Badlands Brawl",
       "Low Cost Linemen",
@@ -2289,7 +2308,8 @@
       }
     ]
   },
-  "Old World Alliance": {
+  {
+    "name": "Old World Alliance",
     "specialRules": [
       "Old World Classic",
       "Apothecary Allowed"
@@ -2553,7 +2573,8 @@
       }
     ]
   },
-  "Orc": {
+  {
+    "name": "Orc",
     "specialRules": [
       "Badlands Brawl",
       "Apothecary Allowed"
@@ -2696,7 +2717,8 @@
       }
     ]
   },
-  "Shambling Undead": {
+  {
+    "name": "Shambling Undead",
     "specialRules": [
       "Masters of Undeath",
       "Sylvanian Spotlight"
@@ -2811,7 +2833,8 @@
       }
     ]
   },
-  "Skaven": {
+  {
+    "name": "Skaven",
     "specialRules": [
       "Underworld Challenge",
       "Apothecary Allowed"
@@ -2932,7 +2955,8 @@
       }
     ]
   },
-  "Slann": {
+  {
+    "name": "Slann",
     "specialRules": [
       "Lustrian Superleague",
       "Apothecary Allowed"
@@ -3034,7 +3058,8 @@
       }
     ]
   },
-  "Snotling": {
+  {
+    "name": "Snotling",
     "specialRules": [
       "Low Cost Linemen",
       "Bribery and Corruption",
@@ -3193,7 +3218,8 @@
       }
     ]
   },
-  "Tomb Kings": {
+  {
+    "name": "Tomb Kings",
     "specialRules": [
       "Sylvanian Spotlight"
     ],
@@ -3291,7 +3317,8 @@
       }
     ]
   },
-  "Underworld Denizens": {
+  {
+    "name": "Underworld Denizens",
     "specialRules": [
       "Bribery and Corruption",
       "Underworld Challenge",
@@ -3492,7 +3519,8 @@
       }
     ]
   },
-  "Vampire": {
+  {
+    "name": "Vampire",
     "specialRules": [
       "Sylvanian Spotlight",
       "Apothecary Allowed"
@@ -3544,7 +3572,8 @@
       }
     ]
   },
-  "Wood Elf": {
+  {
+    "name": "Wood Elf",
     "specialRules": [
       "Elven Kingdoms League",
       "Apothecary Allowed"
@@ -3638,4 +3667,4 @@
       }
     ]
   }
-}
+]
