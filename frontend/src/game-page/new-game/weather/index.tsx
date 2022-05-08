@@ -61,7 +61,7 @@ export function Weather({ onResult }: Props): React.ReactElement {
         fields={fields}
         onResult={setWeather}
       />
-      <button disabled={!weather} type="button" onClick={handleSubmit} />
+      <button disabled={!weather} type="button" onClick={handleSubmit}>Done with weather</button>
     </>
   );
 }

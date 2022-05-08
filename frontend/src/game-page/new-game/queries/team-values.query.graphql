@@ -12,8 +12,15 @@ query PregameInfo(
 
 fragment Pregame on Team {
   name
+  race
   teamValue {
     current
+  }
+  players(missNextGame: false) {
+    name
+    casualties {
+      missNextGame
+    }
   }
   fans
   treasury
