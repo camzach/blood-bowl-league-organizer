@@ -1,0 +1,25 @@
+query Rosters (
+  $home: String!
+  $away: String!
+){
+  home: roster(name: $home) {
+    ...RosterPlayers
+  }
+  away: roster(name: $away) {
+    ...RosterPlayers
+  }
+}
+
+fragment RosterPlayers on Roster {
+  players {
+    max
+    position
+    cost
+    MA
+    ST
+    PA
+    AG
+    AV
+    skills
+  }
+}

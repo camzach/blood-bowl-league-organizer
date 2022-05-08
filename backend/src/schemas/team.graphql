@@ -9,7 +9,7 @@ type Team {
   fans: Int!
   treasury: Int!
   rerolls: Int!
-  players: [Player!]!
+  players(missNextGame: Boolean): [Player!]!
   teamValue: TeamValue!
   specialRules: [String!]!
 }

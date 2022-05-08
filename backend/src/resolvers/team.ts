@@ -14,13 +14,18 @@ const Query: QueryResolvers = {
 };
 
 const Team: TeamResolvers = {
-  players: parent => {
-    const teamPlayers = players.filter(p => parent.playerIds.includes(p.id));
+  players: (parent, query) => {
+    const teamPlayers = players
+      .filter(p => parent.playerIds.includes(p.id))
+      .filter(p => (query.missNextGame !== undefined
+        ? p.injuries.missNextGame === query.missNextGame
+        : true));
     return teamPlayers;
   },
   teamValue: parent => {
-    const playerValues = players
-      .filter(player => parent.playerIds.includes(player.id))
+    const teamPlayers = players
+      .filter(player => parent.playerIds.includes(player.id));
+    const playerValues = teamPlayers
       .reduce((prev, player) => {
         const { base, current } = getPlayerValue(player);
         return { base: base + prev.base, current: current + prev.current };
@@ -31,6 +36,13 @@ const Team: TeamResolvers = {
       (parent.apothecary ? 50000 : 0) +
       ((parent.cheerleaders + parent.coaches) * 10000) +
       (parent.rerolls * roster.rerollCost);
+    const uninjuredPlayerCount = teamPlayers.filter(p => !p.injuries.missNextGame).length;
+    if (uninjuredPlayerCount < 11) {
+      // The team takes on journeymen
+      const journeymanCost = roster.players.find(p => p.max >= 12)?.cost;
+      if (journeymanCost === undefined) throw new Error('Unable to find journeymen for the team');
+      playerValues.current += journeymanCost * (11 - uninjuredPlayerCount);
+    }
     return { base: playerValues.base + staffValue, current: playerValues.current + staffValue };
   },
   specialRules: parent => {

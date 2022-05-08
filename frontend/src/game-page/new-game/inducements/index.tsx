@@ -9,6 +9,18 @@ function sum(numbers: number[]): number {
   return numbers.reduce((total, current) => total + current, 0);
 }
 
+function inducementPrice(
+  inducement: InducementFragment[keyof InducementFragment][number],
+  specialRules: string[]
+): number {
+  let { price } = inducement;
+  if ('specialPrices' in inducement) {
+    const specialPrice = inducement.specialPrices?.find(({ rule }) => specialRules.includes(rule))?.price;
+    if (specialPrice !== undefined) price = specialPrice;
+  }
+  return price ?? 0;
+}
+
 type PregameListProps = {
   teamInfo: PregameFragment;
   opponentInfo: PregameFragment;
@@ -30,32 +42,35 @@ function PregameList(props: PregameListProps): React.ReactElement {
   const makeSelector = React.useCallback((key: keyof Omit<InducementFragment, 'basic'>) =>
     (option: string, sel: boolean) => {
       const newValue = sel ? [...selected[key], option] : selected[key].filter(n => n !== option);
+      const inducement = inducements[key].find(i => i.name === option);
+      const price = inducement ? inducementPrice(inducement, teamInfo.specialRules) : 0;
       onSelection({
         ...selected,
         [key]: newValue,
+        totalCost: selected.totalCost + (price * (sel ? 1 : -1)),
       });
-    }, [onSelection, selected]);
+    }, [selected, inducements, teamInfo.specialRules, onSelection]);
 
   const makeValueUpdater = React.useCallback((value: string) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inducement = inducements.basic.find(i => i.name === value);
+      const price = inducement ? inducementPrice(inducement, teamInfo.specialRules) : 0;
       onSelection({
         ...selected,
         basic: {
           ...selected.basic,
           [value]: e.target.valueAsNumber,
         },
+        totalCost: selected.totalCost - ((selected.basic[value] ?? 0) * price) + (e.target.valueAsNumber * price),
       });
-    }, [onSelection, selected]);
+    }, [inducements.basic, onSelection, selected, teamInfo.specialRules]);
 
   const pettyCash = Math.max(0, opponentInfo.teamValue.current - teamInfo.teamValue.current);
-  const prayersToNuffle = Math.floor(Math.max(
-    0,
-    (opponentInfo.teamValue.current - teamInfo.teamValue.current) / 50000
-  ));
 
   const basicCost = sum(Object.entries(selected.basic).map(([key, num]) => {
-    const price = inducements.basic.find(ind => ind.name === key)?.price ?? 0;
-    return price * num;
+    const { price, specialPrices } = inducements.basic.find(ind => ind.name === key) ?? {};
+    const actualPrice = specialPrices?.find(({ rule }) => teamInfo.specialRules.includes(rule))?.price ?? price ?? 0;
+    return actualPrice * (num ?? 0);
   }));
   const starPlayerCost = sum(selected.starPlayers.map(player =>
     inducements.starPlayers.find(p => p.name === player)?.price ?? 0));
@@ -70,7 +85,6 @@ function PregameList(props: PregameListProps): React.ReactElement {
       <p>Treasury - {(teamInfo.treasury - treasuryCost).toLocaleString()} (-{treasuryCost})</p>
       <p>Total Available - {(pettyCash + teamInfo.treasury - inducementsCost).toLocaleString()} (-{inducementsCost})</p>
       <p>Inducements Cost - {inducementsCost.toLocaleString()}</p>
-      <p>Prayers to Nuffle - {prayersToNuffle}</p>
       <ul>
         {inducements.basic.map(inducement => (
           <li key={inducement.name}>
@@ -104,7 +118,7 @@ function PregameList(props: PregameListProps): React.ReactElement {
 }
 
 type ResultType = { home: SelectedInducementsType; away: SelectedInducementsType };
-const noInducements = { basic: {}, wizards: [], starPlayers: [] };
+const noInducements = { basic: {}, wizards: [], starPlayers: [], totalCost: 0 };
 type Props = {
   home: PregameFragment;
   away: PregameFragment;

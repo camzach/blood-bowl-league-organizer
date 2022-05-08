@@ -5,14 +5,17 @@ import { Fans } from './fans';
 import { usePregameInfoQuery } from './queries/team-values.query.gen';
 import { Weather } from './weather';
 import type { InducementFragment } from './queries/inducements.query.gen';
+import { Journeymen } from './journeymen';
+import type { RosterPlayersFragment } from './queries/roster.query.gen';
 
 export type SelectedInducementsType =
   Record<keyof Omit<InducementFragment, 'basic'>, string[]>
-  & { basic: Record<string, number> };
+  & { basic: Partial<Record<string, number>>; totalCost: number };
 
 type GameInfo = {
   fans?: { home: number; away: number };
   weather?: string;
+  journeymen?: { home: RosterPlayersFragment['players']; away: RosterPlayersFragment['players'] };
   inducements?: { home: SelectedInducementsType; away: SelectedInducementsType };
 };
 
@@ -59,6 +62,16 @@ export function NewGame(): React.ReactElement {
   }
 
   if (gameInfo.weather === undefined) return <Weather onResult={resultHandler('weather')} />;
+
+  if (gameInfo.journeymen === undefined) {
+    return (
+      <Journeymen
+        away={data.away}
+        home={data.home}
+        onResult={resultHandler('journeymen')}
+      />
+    );
+  }
 
   if (!gameInfo.inducements) {
     return (

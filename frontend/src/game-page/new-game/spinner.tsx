@@ -23,21 +23,6 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
   // eslint-disable-next-line react/hook-use-state
   const [angle, setAngle] = React.useState<number | null>(null);
 
-  const handleClick = React.useCallback(() => {
-    let spin = Math.random();
-    const a = spin;
-    let res = fields[0].text;
-    fields.forEach(field => {
-      if (spin >= 0) res = field.text;
-      spin -= field.prob;
-    });
-    setAngle(a + 3);
-    setTimeout(() => {
-      onResult(res);
-    }, 4000);
-  }, [fields, onResult]);
-
-
   const offsets = React.useMemo(
     () => fields.reduce<{ ang: number; prev: number; it: number[] }>((acc, item) => ({
       ang: acc.ang + (item.prob / 2) + (acc.prev / 2),
@@ -47,13 +32,23 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
     , [fields]
   );
 
+  const handleClick = React.useCallback(() => {
+    const spin = Math.random();
+    setAngle(-(spin + 3));
+    const resIdx = offsets.findIndex((val, idx) =>
+      (fields[idx].prob / 2) + val >= spin && spin >= (fields[idx].prob / 2) - val);
+    setTimeout(() => {
+      onResult(fields[resIdx].text);
+    }, 0);
+  }, [fields, offsets, onResult]);
+
   return (
     <button
       disabled={(isDisabled ?? false) || ((isSingleSpin ?? false) && angle !== null)}
       type="button"
       onClick={handleClick}
     >
-      <Svg>
+      <Svg aria-hidden>
         <SpinningBit angle={angle ?? 0}>
           {fields.map(({ prob, color, text }, idx) => (
             // eslint-disable-next-line react/no-array-index-key
