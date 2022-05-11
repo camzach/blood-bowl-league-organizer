@@ -17,10 +17,7 @@ fragment Pregame on Team {
     current
   }
   players(missNextGame: false) {
-    name
-    casualties {
-      missNextGame
-    }
+    ...TeamTablePlayer
   }
   fans
   treasury

@@ -30,8 +30,8 @@ const Score = styled.div`
 export function GameInfo(): React.ReactElement {
   const [searchParams] = useSearchParams();
   const { isLoading, isError, data } = useGameQuery({
-    home: searchParams.get('home'),
-    away: searchParams.get('away'),
+    home: searchParams.get('home') ?? '',
+    away: searchParams.get('away') ?? '',
   });
 
   if (isLoading) return <>Loading...</>;
@@ -44,7 +44,10 @@ export function GameInfo(): React.ReactElement {
     <Container>
       <TeamContainer>
         <TableContainer>
-          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={homeTeam} />
+          <TeamTable
+            cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']}
+            players={homeTeam.players}
+          />
         </TableContainer>
       </TeamContainer>
       <Score>
@@ -58,7 +61,10 @@ export function GameInfo(): React.ReactElement {
       </Score>
       <TeamContainer>
         <TableContainer>
-          <TeamTable cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']} team={awayTeam} />
+          <TeamTable
+            cols={['#', 'Name', 'Position', 'Skills', 'MA', 'ST', 'PA', 'AG', 'AV']}
+            players={awayTeam.players}
+          />
         </TableContainer>
       </TeamContainer>
     </Container>

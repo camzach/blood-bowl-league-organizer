@@ -1,5 +1,6 @@
 import { styled } from '@linaria/react';
 import React from 'react';
+import { gameContext } from '..';
 import { Die } from '../../die';
 
 const Container = styled.div`
@@ -15,18 +16,16 @@ const DieRow = styled.span`
   align-items: center;
 `;
 
-type Props = {
-  away: { name: string; fans: number };
-  home: { name: string; fans: number };
-  onResult: (fans: { home: number; away: number }) => void;
-};
-export function Fans({ home, away, onResult }: Props): React.ReactElement {
+export function Fans(): React.ReactElement {
+  const { gameInfo, dispatch } = React.useContext(gameContext);
+  const { home, away } = gameInfo;
   const [ffHome, setFfHome] = React.useState<number | null>(null);
   const [ffAway, setFfAway] = React.useState<number | null>(null);
 
   const handleSubmit = React.useCallback(() => {
-    onResult({ home: ffHome ?? 0, away: ffAway ?? 0 });
-  }, [ffAway, ffHome, onResult]);
+    if (ffHome === null || ffAway === null) return;
+    dispatch({ type: 'fans', home: ffHome, away: ffAway });
+  }, [dispatch, ffAway, ffHome]);
 
   return (
     <Container>

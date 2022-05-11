@@ -4,10 +4,14 @@ query Game(
 ) {
   game(home: $home away: $away) {
     homeTeam {
-      ...TeamTable
+      players {
+        ...TeamTablePlayer
+      }
     }
     awayTeam {
-      ...TeamTable
+      players {
+        ...TeamTablePlayer
+      }
     }
     tdHome
     tdAway

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { styled } from '@linaria/react';
-import type { TeamTableFragment } from './team.fragment.gen';
+import type { TeamTablePlayerFragment } from './team.fragment.gen';
 import { Player } from './player';
 import { cols } from './cols';
 
@@ -33,11 +33,11 @@ const Table = styled.table`
 `;
 
 type Props = {
-  team: TeamTableFragment;
+  players: TeamTablePlayerFragment[];
   cols?: ReadonlyArray<(typeof cols)[number]>;
 };
 
-export function TeamTable({ team, cols: displayCols = cols }: Props): React.ReactElement {
+export function TeamTable({ players, cols: displayCols = cols }: Props): React.ReactElement {
   return (
     <Table>
       <thead>
@@ -46,7 +46,7 @@ export function TeamTable({ team, cols: displayCols = cols }: Props): React.Reac
         </tr>
       </thead>
       <tbody>
-        {team.players.sort((a, b) => a.number - b.number).map((player, idx) => (
+        {players.sort((a, b) => a.number - b.number).map((player, idx) => (
           <Player
             // eslint-disable-next-line react/no-array-index-key
             key={idx}
