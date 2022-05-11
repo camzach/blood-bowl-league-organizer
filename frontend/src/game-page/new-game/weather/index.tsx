@@ -1,4 +1,5 @@
 import React from 'react';
+import { gameContext } from '..';
 import { Spinner } from '../spinner';
 
 const fields = [
@@ -44,14 +45,12 @@ const fields = [
   },
 ];
 
-type Props = {
-  onResult: (weather: string) => void;
-};
-export function Weather({ onResult }: Props): React.ReactElement {
+export function Weather(): React.ReactElement {
+  const { dispatch } = React.useContext(gameContext);
   const [weather, setWeather] = React.useState('');
   const handleSubmit = React.useCallback(() => {
-    onResult(weather);
-  }, [onResult, weather]);
+    dispatch({ type: 'weather', weather });
+  }, [dispatch, weather]);
 
   return (
     <>

@@ -1,32 +1,28 @@
-fragment TeamTable on Team {
-  coach
+fragment TeamTablePlayer on Player {
   name
-  players {
-    name
-    number
-    position
-    teamValue {
-      base
-      current
-    }
-    casualties {
-      missNextGame
-      niggles
-    }
-    starPlayerPoints {
-      MVPs
-      casualties
-      completions
-      deflections
-      interceptions
-      touchdowns
-      prayersToNuffle
-    }
-    MA
-    ST
-    PA
-    AG
-    AV
-    skills
+  number
+  position
+  teamValue {
+    base
+    current
   }
+  casualties {
+    missNextGame
+    niggles
+  }
+  starPlayerPoints {
+    MVPs
+    casualties
+    completions
+    deflections
+    interceptions
+    touchdowns
+    prayersToNuffle
+  }
+  MA
+  ST
+  PA
+  AG
+  AV
+  skills
 }
