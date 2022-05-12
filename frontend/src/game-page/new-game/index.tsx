@@ -9,6 +9,7 @@ import { Inducements } from './inducements';
 import { Fans } from './fans';
 import { Weather } from './weather';
 import { Journeymen } from './journeymen';
+import { PrayersToNuffle } from './prayers-to-nuffle';
 
 type Team = {
   name: string;
@@ -29,14 +30,16 @@ type GameInfo = {
   home: Team;
   away: Team;
   weather: string;
-  stage: 'attendance' | 'weather' | 'journeymen' | 'inducements' | 'prayersToNuffle';
+  stage: 'attendance' | 'weather' | 'journeymen' | 'inducements' | 'prayersToNuffle' | 'play';
 };
+type InducementActionContents = InducementFragment & { basic: Array<{ count: number }>; totalCost: number };
 type Action =
   | { type: 'initialize'; home: Team; away: Team }
   | { type: 'fans'; home: number; away: number }
   | { type: 'weather'; weather: string }
   | { type: 'journeymen' } & Record<'home' | 'away', Team['players']['journeymen']>
-  | { type: 'inducements'; home: InducementFragment & { basic: Array<{ count: number }> }; away: InducementFragment };
+  | { type: 'inducements'; home: InducementActionContents; away: InducementActionContents }
+  | { type: 'prayersToNuffle' };
 const emptyTeam: GameInfo['home' | 'away'] = {
   name: '',
   race: '',
@@ -96,10 +99,14 @@ export function NewGame(): React.ReactElement {
       case 'inducements':
         newState.home.players.stars = action.home.starPlayers;
         newState.home.inducements = action.home;
+        newState.home.currentTeamValue += action.home.totalCost;
         newState.away.players.stars = action.away.starPlayers;
         newState.away.inducements = action.away;
+        newState.away.currentTeamValue += action.away.totalCost;
         newState.stage = 'prayersToNuffle';
         break;
+      case 'prayersToNuffle':
+        newState.stage = 'play';
     }
     return newState;
   }, emptyGame);
@@ -143,7 +150,6 @@ export function NewGame(): React.ReactElement {
 
   const renderContent = (): React.ReactElement => {
     switch (gameInfo.stage) {
-      default:
       case 'attendance':
         return <Fans />;
       case 'weather':
@@ -153,8 +159,11 @@ export function NewGame(): React.ReactElement {
       case 'inducements':
         return <Inducements />;
       case 'prayersToNuffle':
-        return <>PTN</>;
+        return <PrayersToNuffle />;
+      case 'play':
+        return <>Play Game</>;
     }
+    return <>Something went wrong!</>;
   };
 
   return (

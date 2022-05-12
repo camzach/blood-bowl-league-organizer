@@ -146,12 +146,13 @@ export function Inducements(): React.ReactElement {
     const lookup = (
       selection: SelectedInducementsType,
       inventory: InducementFragment
-    ): InducementFragment & { basic: Array<{ count: number }> } => ({
+    ): InducementFragment & { basic: Array<{ count: number }>; totalCost: number } => ({
       basic: inventory.basic
         .filter(basic => (selection.basic[basic.name] ?? 0) > 0)
         .map(i => ({ ...i, count: selection.basic[i.name] ?? 0 })),
       starPlayers: inventory.starPlayers.filter(star => selection.starPlayers.includes(star.name)),
       wizards: inventory.starPlayers.filter(wiz => selection.wizards.includes(wiz.name)),
+      totalCost: selection.totalCost,
     });
     dispatch({
       type: 'inducements',
