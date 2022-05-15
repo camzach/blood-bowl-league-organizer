@@ -23,6 +23,12 @@ fragment Inducement on Inducements {
   starPlayers {
     name
     price
+    MA
+    ST
+    AG
+    PA
+    AV
+    skills
   }
   wizards {
     name

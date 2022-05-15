@@ -10,13 +10,14 @@ import { Fans } from './fans';
 import { Weather } from './weather';
 import { Journeymen } from './journeymen';
 import { PrayersToNuffle } from './prayers-to-nuffle';
+import { Play } from './play';
 
 type Team = {
   name: string;
   race: string;
   players: {
     roster: TeamTablePlayerFragment[];
-    stars: InducementFragment['starPlayers'];
+    starPlayers: InducementFragment['starPlayers'];
     journeymen: RosterPlayersFragment['players'];
   };
   inducements: InducementFragment;
@@ -45,7 +46,7 @@ const emptyTeam: GameInfo['home' | 'away'] = {
   race: '',
   players: {
     roster: [],
-    stars: [],
+    starPlayers: [],
     journeymen: [],
   },
   inducements: { basic: [], wizards: [], starPlayers: [] },
@@ -79,6 +80,7 @@ export function NewGame(): React.ReactElement {
       case 'initialize':
         newState.home = action.home;
         newState.away = action.away;
+        newState.stage = 'play';
         break;
       case 'fans':
         newState.home.fanFactor = action.home;
@@ -97,10 +99,10 @@ export function NewGame(): React.ReactElement {
         newState.stage = 'inducements';
         break;
       case 'inducements':
-        newState.home.players.stars = action.home.starPlayers;
+        newState.home.players.starPlayers = action.home.starPlayers;
         newState.home.inducements = action.home;
         newState.home.currentTeamValue += action.home.totalCost;
-        newState.away.players.stars = action.away.starPlayers;
+        newState.away.players.starPlayers = action.away.starPlayers;
         newState.away.inducements = action.away;
         newState.away.currentTeamValue += action.away.totalCost;
         newState.stage = 'prayersToNuffle';
@@ -122,7 +124,7 @@ export function NewGame(): React.ReactElement {
       treasury: team.treasury,
       inducements: { basic: [], wizards: [], starPlayers: [] },
       currentTeamValue: team.teamValue.current,
-      players: { roster: team.players, stars: [], journeymen: [] },
+      players: { roster: team.players, starPlayers: [], journeymen: [] },
       specialRules: team.specialRules,
     });
     dispatch({
@@ -161,7 +163,7 @@ export function NewGame(): React.ReactElement {
       case 'prayersToNuffle':
         return <PrayersToNuffle />;
       case 'play':
-        return <>Play Game</>;
+        return <Play />;
     }
     return <>Something went wrong!</>;
   };
@@ -169,10 +171,6 @@ export function NewGame(): React.ReactElement {
   return (
     <gameContext.Provider value={contextValue}>
       {renderContent()}
-      <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-        <pre>{JSON.stringify(gameInfo.home, null, 2)}</pre>
-        <pre>{JSON.stringify(gameInfo.away, null, 2)}</pre>
-      </div>
     </gameContext.Provider>
   );
 }
