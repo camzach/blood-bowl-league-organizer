@@ -16,19 +16,6 @@ const Table = styled.table`
   td {
     padding: 0.25em;
     text-align: center;
-    width: min-content;
-  }
-
-  td:nth-child(-n+4) {
-    text-align: left;
-  }
-
-  td:nth-child(-n+3) {
-    width: 10%;
-  }
-
-  td:nth-child(4) {
-    width: 50%;
   }
 `;
 
@@ -42,7 +29,7 @@ export function TeamTable({ players, cols: displayCols = cols }: Props): React.R
     <Table>
       <thead>
         <tr>
-          {displayCols.map(col => <th key={`th-${col}`}>{col}</th>)}
+          {displayCols.map(col => <th key={`th-${col}`} col-name={col}>{col}</th>)}
         </tr>
       </thead>
       <tbody>

@@ -14,8 +14,7 @@ const Container = styled.header`
 `;
 const Logo = styled.img`
   height: 100%;
-  float: inline-start;
-  margin-right: 2em;
+  float: left;
   position: relative;
 `;
 const NavList = styled.nav`
