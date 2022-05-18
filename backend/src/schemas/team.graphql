@@ -1,22 +1,24 @@
-type Team {
-  id: String!
-  race: String!
-  coach: String!
-  name: String!
-  apothecary: Boolean!
-  coaches: Int!
-  cheerleaders: Int!
-  fans: Int!
-  treasury: Int!
-  rerolls: Int!
-  players(missNextGame: Boolean): [Player!]!
-  teamValue: TeamValue!
-  specialRules: [String!]!
+type Team @entity(
+  additionalFields: [
+    { path: "_id", type: "ObjectId" }
+  ]
+) {
+  race: Roster! @link
+  coach: String! @column
+  name: String! @column
+  apothecary: Boolean! @column
+  coaches: Int! @column
+  cheerleaders: Int! @column
+  fans: Int! @column
+  treasury: Int! @column
+  rerolls: Int! @column
+  players(missNextGame: Boolean): [Player!]! @link
+  teamValue: TeamValue! @column
 }
 
 type TeamValue {
-  base: Int!
-  current: Int!
+  base: Int! @column
+  current: Int! @column
 }
 
 extend type Query {

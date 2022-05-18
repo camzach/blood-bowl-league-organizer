@@ -1,16 +1,15 @@
-type Schedule {
-  rounds: [Round!]!
+type Schedule @entity {
+  rounds: [Round!]! @column
 }
 
 type Round {
-  games: [ScheduleSlot!]!
+  games: [ScheduleSlot!]! @column
 }
 
-union ScheduleSlot = Game | ScheduledGame
-
-type ScheduledGame {
-  homeTeam: Team!
-  awayTeam: Team!
+type ScheduleSlot {
+  homeTeam: Team! @link
+  awayTeam: Team! @link
+  game: Game @link
 }
 
 extend type Query {

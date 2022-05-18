@@ -1,14 +1,18 @@
-type Game {
-  homeTeam: Team!
-  awayTeam: Team!
-  ffHome: Int!
-  ffAway: Int!
-  tdHome: Int!
-  tdAway: Int!
-  casHome: Int!
-  casAway: Int!
-  winningsHome: Int!
-  winningsAway: Int!
+type Game @entity(
+  additionalFields: [
+    { path: "_id", type: "ObjectId" }
+  ]
+) {
+  homeTeam: Team! @column
+  awayTeam: Team! @column
+  ffHome: Int! @column
+  ffAway: Int! @column
+  tdHome: Int! @column
+  tdAway: Int! @column
+  casHome: Int! @column
+  casAway: Int! @column
+  winningsHome: Int! @column
+  winningsAway: Int! @column
 }
 
 extend type Query {

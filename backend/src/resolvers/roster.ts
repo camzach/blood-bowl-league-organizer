@@ -1,9 +1,9 @@
-import type { QueryResolvers, RosterResolvers } from '../graphql.gen';
-import rosters from '../rosters.json';
+import type { QueryResolvers, RosterDbObject, RosterResolvers } from '../graphql.gen';
 
 export const Roster: RosterResolvers = {};
 
 export const Query: QueryResolvers = {
-  rosters: () => rosters,
-  roster: (parent, query) => rosters.find(roster => roster.name === query.name) ?? null,
+  rosters: async(parent, query, context) => context.db.collection('rosters').find<RosterDbObject>({}).toArray(),
+  roster: async(parent, query, context) =>
+    context.db.collection('rosters').findOne<RosterDbObject>({ name: query.name }),
 };

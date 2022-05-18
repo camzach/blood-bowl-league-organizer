@@ -1,19 +1,47 @@
-type Player {
-  id: String!
-  name: String
-  number: Int!
-  team: Team!
-  position: String!
+type Player @entity(
+  additionalFields: [
+    { path: "injuries", type: {
+      missNextGame: "boolean",
+      niggles: "number",
+      MA: "number",
+      AG: "number",
+      PA: "number",
+      ST: "number",
+      AV: "number",
+    } }
+    { path: "improvements", type: {
+      MA: "number",
+      AG: "number",
+      PA: "number",
+      ST: "number",
+      AV: "number",
+    } }
+    { path: "MA", type: "number" }
+    { path: "ST", type: "number" }
+    { path: "PA", type: "number | null" }
+    { path: "AG", type: "number" }
+    { path: "AV", type: "number" }
+    { path: "_id", type: "ObjectId" }
+  ]
+) {
+  name: String @column
+  number: Int! @column
+  team: Team! @link
+  position: String! @column
+  stats: PlayerStats!
+  skills: [String!]! @column
+  progression: [String!]! @column
+  starPlayerPoints: StarPlayerPoints! @column
+  teamValue: TeamValue! @column
+  casualties: Casualties!
+}
+
+type PlayerStats {
   MA: Int!
   ST: Int!
   PA: Int
   AG: Int!
   AV: Int!
-  skills: [String]!
-  progression: [String]!
-  starPlayerPoints: StarPlayerPoints!
-  teamValue: TeamValue!
-  casualties: Casualties!
 }
 
 type StarPlayerPoints {

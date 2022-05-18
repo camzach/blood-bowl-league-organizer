@@ -1,49 +1,48 @@
 type Inducements {
-  basic: [BasicInducement!]!
-  starPlayers: [StarPlayer!]!
-  wizards: [Wizard!]!
-  infamousCoachingStaff: [InfamousCoachingStaff!]!
-  biasedRefs: [BiasedRef!]!
+  basic: [BasicInducement!]! @link
+  starPlayers: [StarPlayer!]! @link
+  wizards: [Wizard!]! @link
+  infamousCoachingStaff: [InfamousCoachingStaff!]! @link
+  biasedRefs: [BiasedRef!]! @link
 }
 
-type BasicInducement {
-  name: String!
-  max: Int!
-  price: Int
-  specialPrices: [SpecialPrice!]
+type BasicInducement @entity {
+  name: String! @column
+  max: Int! @column
+  price: Int @column
+  specialPrices: [SpecialPrice!] @column
 }
 
-type StarPlayer {
-  name: String!
-  MA: Int!
-  ST: Int!
-  PA: Int
-  AG: Int!
-  AV: Int!
-  skills: [String!]!
-  specialRules: String!
-  price: Int!
-  specialPrices: [SpecialPrice!]
-  playsFor: [String!]
-  doesntPlayFor: [String!]
+type StarPlayer @entity {
+  name: String! @column
+  MA: Int! @column
+  ST: Int! @column
+  PA: Int @column
+  AG: Int! @column
+  AV: Int! @column
+  skills: [String!]! @column
+  specialRules: String! @column
+  price: Int! @column
+  playsFor: [String!] @column
+  doesntPlayFor: [String!] @column
 }
 
-type Wizard {
-  name: String!
-  price: Int!
-  specialPrices: [SpecialPrice!]
+type Wizard @entity {
+  name: String! @column
+  price: Int! @column
+  specialPrices: [SpecialPrice!] @column
 }
 
-type InfamousCoachingStaff {
-  name: String!
-  price: Int!
-  specialPrices: [SpecialPrice!]
+type InfamousCoachingStaff @entity {
+  name: String! @column
+  price: Int! @column
+  specialPrices: [SpecialPrice!] @column
 }
 
-type BiasedRef {
-  name: String!
-  price: Int!
-  specialPrices: [SpecialPrice!]
+type BiasedRef @entity {
+  name: String! @column
+  price: Int! @column
+  specialPrices: [SpecialPrice!] @column
 }
 
 type SpecialPrice {

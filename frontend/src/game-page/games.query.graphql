@@ -2,17 +2,9 @@ query Schedule {
 	schedule {
     rounds {
       games {
-        __typename
-				... on ScheduledGame {
-          homeTeam {name}
-          awayTeam {name}
-        }
-        ...on Game {
-          homeTeam {name}
-          awayTeam {name}
-          tdHome
-          tdAway
-        }
+        homeTeam {name}
+        awayTeam {name}
+        game { tdHome tdAway }
       }
     }
   }

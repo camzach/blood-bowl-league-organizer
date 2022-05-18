@@ -19,10 +19,12 @@ fragment TeamTablePlayer on Player {
     touchdowns
     prayersToNuffle
   }
-  MA
-  ST
-  PA
-  AG
-  AV
+  stats {
+    MA
+    ST
+    PA
+    AG
+    AV
+  }
   skills
 }

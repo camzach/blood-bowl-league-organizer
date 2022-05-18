@@ -1,37 +1,45 @@
-import type { QueryResolvers, TeamResolvers } from '../graphql.gen';
-import teams from '../teams.json';
-import players from '../players.json';
-import rosters from '../rosters.json';
+/* eslint-disable no-underscore-dangle */
+import type { Filter } from 'mongodb';
+import type {
+  PlayerDbObject,
+  QueryResolvers,
+  RosterDbObject,
+  TeamDbObject,
+  TeamResolvers,
+} from '../graphql.gen';
+
 import { getPlayerValue } from './utils';
 
 const Query: QueryResolvers = {
-  team: (parent, query) => {
-    const team = teams.find(t => t.name === query.name);
+  team: async(parent, query, context) => {
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ name: query.name });
     if (!team) return null;
     return team;
   },
-  teams: () => teams,
+  teams: async(parent, query, context) => context.db.collection('teams').find<TeamDbObject>({}).toArray(),
 };
 
 const Team: TeamResolvers = {
-  players: (parent, query) => {
-    const teamPlayers = players
-      .filter(p => parent.playerIds.includes(p.id))
-      .filter(p => (query.missNextGame !== undefined
-        ? p.injuries.missNextGame === query.missNextGame
-        : true));
+  players: async(parent, query, context) => {
+    const mongoQuery: Filter<PlayerDbObject> = { team: parent._id };
+    // @ts-expect-error: injuries.missNextGame is a sub-document query, the types don't know about this
+    if (typeof query.missNextGame === 'boolean') mongoQuery['injuries.missNextGame'] = query.missNextGame;
+    const teamPlayers = await context.db.collection('players')
+      .find<PlayerDbObject>(mongoQuery)
+      .toArray();
     return teamPlayers;
   },
-  teamValue: parent => {
-    const teamPlayers = players
-      .filter(player => parent.playerIds.includes(player.id));
+  teamValue: async(parent, query, context) => {
+    const teamPlayers = await context.db.collection('players')
+      .find<PlayerDbObject>({ team: parent._id })
+      .toArray();
+    const roster = await context.db.collection('rosters').findOne<RosterDbObject>({ _id: parent.race });
+    if (!roster) throw new Error('Unable to locate team roster');
     const playerValues = teamPlayers
       .reduce((prev, player) => {
-        const { base, current } = getPlayerValue(player);
+        const { base, current } = getPlayerValue(player, roster);
         return { base: base + prev.base, current: current + prev.current };
       }, { base: 0, current: 0 });
-    const roster = rosters.find(r => r.name === parent.race);
-    if (!roster) throw new Error('Unable to locate team roster');
     const staffValue =
       (parent.apothecary ? 50000 : 0) +
       ((parent.cheerleaders + parent.coaches) * 10000) +
@@ -45,9 +53,9 @@ const Team: TeamResolvers = {
     }
     return { base: playerValues.base + staffValue, current: playerValues.current + staffValue };
   },
-  specialRules: parent => {
-    const roster = rosters.find(r => r.name === parent.race)?.specialRules;
-    if (!roster) throw new Error('Unable to locate team roster');
+  race: async(parent, query, context) => {
+    const roster = await context.db.collection('rosters').findOne<RosterDbObject>({ _id: parent.race });
+    if (!roster) throw new Error('Unknown roster');
     return roster;
   },
 };

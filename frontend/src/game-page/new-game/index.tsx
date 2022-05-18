@@ -118,14 +118,14 @@ export function NewGame(): React.ReactElement {
     if (!data?.home || !data.away) return;
     const teamToContextTeam = (team: NonNullable<PregameInfoQuery['home' | 'away']>): Team => ({
       name: team.name,
-      race: team.race,
+      race: team.race.name,
       fans: team.fans,
       fanFactor: 0,
       treasury: team.treasury,
       inducements: { basic: [], wizards: [], starPlayers: [] },
       currentTeamValue: team.teamValue.current,
       players: { roster: team.players, starPlayers: [], journeymen: [] },
-      specialRules: team.specialRules,
+      specialRules: team.race.specialRules,
     });
     dispatch({
       type: 'initialize',
