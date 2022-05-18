@@ -1,30 +1,39 @@
-import type { QueryResolvers, ScheduledGameResolvers } from '../graphql.gen';
-import teams from '../teams.json';
-import games from '../games.json';
-import schedule from '../schedule.json';
+/* eslint-disable no-underscore-dangle */
+import type {
+  GameDbObject,
+  QueryResolvers,
+  ScheduleDbObject,
+  ScheduleSlotResolvers,
+  TeamDbObject,
+} from '../graphql.gen';
 
 const Query: QueryResolvers = {
-  schedule: () => ({
-    rounds: schedule.map(round => ({
-      games: round.map(g => {
-        const game = games.find(someGame => someGame.homeId === g.homeId && someGame.awayId === g.awayId);
-        return game ? { __typename: 'Game', ...game } : { __typename: 'ScheduledGame', ...g };
-      }),
-    })),
-  }),
+  schedule: async(parent, query, context) => {
+    const schedule = await context.db.collection('schedule').findOne<ScheduleDbObject>({});
+    if (!schedule) throw new Error('Unable to find schedule');
+    return {
+      rounds: await Promise.all(schedule.rounds.map(async round => ({
+        games: await Promise.all(round.games.map(async g => {
+          const game = await context.db.collection('games')
+            .findOne<GameDbObject>({ homeTeam: g.homeTeam, awayTeam: g.awayTeam });
+          return { homeTeam: g.homeTeam, awayTeam: g.awayTeam, game };
+        })),
+      }))),
+    };
+  },
 };
 
-const ScheduledGame: ScheduledGameResolvers = {
-  homeTeam: parent => {
-    const team = teams.find(t => parent.homeId === t.id);
+const ScheduleSlot: ScheduleSlotResolvers = {
+  homeTeam: async(parent, query, context) => {
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent.homeTeam });
     if (!team) throw new Error('Couldn\'t find home team');
     return team;
   },
-  awayTeam: parent => {
-    const team = teams.find(t => parent.awayId === t.id);
-    if (!team) throw new Error('Couldn\'t find away team');
+  awayTeam: async(parent, query, context) => {
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent.awayTeam });
+    if (!team) throw new Error('Couldn\'t find home team');
     return team;
   },
 };
 
-export { Query, ScheduledGame };
+export { Query, ScheduleSlot };

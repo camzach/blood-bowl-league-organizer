@@ -8,8 +8,16 @@ function sum(numbers: number[]): number {
   return numbers.reduce((total, current) => total + current, 0);
 }
 
+type InducementPrices = {
+  specialPrices?: Array<{
+    rule: string;
+    price: number;
+  }> | null | undefined;
+  price?: number | null | undefined;
+};
+
 function inducementPrice(
-  inducement: InducementFragment[keyof InducementFragment][number],
+  inducement: InducementPrices,
   specialRules: string[]
 ): number {
   let { price } = inducement;
@@ -51,7 +59,7 @@ function PregameList({
   const makeSelector = React.useCallback((key: keyof Omit<InducementFragment, 'basic'>) =>
     (option: string, sel: boolean) => {
       const newValue = sel ? [...selected[key], option] : selected[key].filter(n => n !== option);
-      const inducement = inducements[key].find(i => i.name === option);
+      const inducement = (inducements[key] as Array<InducementPrices & { name: string }>).find(i => i.name === option);
       const price = inducement ? inducementPrice(inducement, specialRules) : 0;
       onSelection({
         ...selected,

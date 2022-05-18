@@ -12,12 +12,16 @@ type RosterPlayer {
   skills: [String!]!
 }
 
-type Roster {
-  name: String!
-  rerollCost: Int!
-  tier: Int!
-  players: [RosterPlayer!]!
-  specialRules: [String!]!
+type Roster @entity(
+  additionalFields: [
+    { path: "_id", type: "ObjectId" }
+  ]
+) {
+  name: String! @column
+  rerollCost: Int! @column
+  tier: Int! @column
+  players: [RosterPlayer!]! @column
+  specialRules: [String!]! @column
 }
 
 extend type Query {

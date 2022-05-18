@@ -1,26 +1,26 @@
-import type { GameResolvers, QueryResolvers } from '../graphql.gen';
-import teams from '../teams.json';
-import games from '../games.json';
+/* eslint-disable no-underscore-dangle */
+import type { GameDbObject, GameResolvers, QueryResolvers, TeamDbObject } from '../graphql.gen';
 
 const Query: QueryResolvers = {
-  games: () => games,
-  game: (parent, query) => {
-    const homeId = teams.find(t => t.name === query.home)?.id;
-    const awayId = teams.find(t => t.name === query.away)?.id;
-    const game = games.find(g => g.homeId === homeId && g.awayId === awayId);
+  games: async(parent, query, context) => context.db.collection('games').find<GameDbObject>({}).toArray(),
+  game: async(parent, query, context) => {
+    const home = await context.db.collection('teams').findOne<TeamDbObject>({ name: query.home });
+    const away = await context.db.collection('teams').findOne<TeamDbObject>({ name: query.away });
+    const game = await context.db.collection('games')
+      .findOne<GameDbObject>({ homeTeam: home?._id, awayTeam: away?._id });
     if (!game) throw new Error('Could not find game');
     return game;
   },
 };
 
 const Game: GameResolvers = {
-  homeTeam: parent => {
-    const home = teams.find(team => team.id === parent.homeId);
+  homeTeam: async(parent, query, context) => {
+    const home = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent.homeTeam });
     if (!home) throw new Error('Unable to locate home team');
     return home;
   },
-  awayTeam: parent => {
-    const away = teams.find(team => team.id === parent.awayId);
+  awayTeam: async(parent, query, context) => {
+    const away = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent.awayTeam });
     if (!away) throw new Error('Unable to locate away team');
     return away;
   },

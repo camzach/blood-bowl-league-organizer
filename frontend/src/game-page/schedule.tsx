@@ -63,9 +63,9 @@ export function Schedule(): React.ReactElement {
               {round.games.map(game => {
                 const { homeTeam, awayTeam } = game;
                 // eslint-disable-next-line no-underscore-dangle
-                const tdHome = game.__typename === 'Game' && game.tdHome;
+                const tdHome = game.game?.tdHome;
                 // eslint-disable-next-line no-underscore-dangle
-                const tdAway = game.__typename === 'Game' && game.tdAway;
+                const tdAway = game.game?.tdAway;
                 const contents = (
                   <>
                     <Home>
@@ -80,7 +80,7 @@ export function Schedule(): React.ReactElement {
                 return (
                   <li key={`${homeTeam.name}-${awayTeam.name}`}>
                     {/* eslint-disable-next-line no-underscore-dangle */}
-                    {game.__typename === 'Game'
+                    {game.game
                       ? <GameLink to={`game?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</GameLink>
                       : (
                         <>

@@ -20,11 +20,12 @@ generates:
     plugins:
       - typescript
       - typescript-resolvers
+      - typescript-mongodb
     config:
+      contextType: backend/src/index#Context
       mappers:
-        Team: backend/src/models/team#TeamModel
-        Player: backend/src/models/player#PlayerModel
-        Game: backend/src/models/game#GameModel
-        ScheduledGame: backend/src/models/schedule#ScheduledGameModel
-        ScheduleSlot: backend/src/models/schedule#ScheduleSlotModel
-        Inducements: backend/src/models/inducement#InducementsModel
+        Team: TeamDbObject
+        Player: PlayerDbObject
+        Game: GameDbObject
+        Schedule: ScheduleDbObject
+        Roster: RosterDbObject

@@ -39,7 +39,7 @@ export function Player({ player, cols }: Props): React.ReactElement {
     const statCols = Object.fromEntries((['MA', 'ST', 'PA', 'AG', 'AV'] as const).map(stat => [
       stat,
       <td key={stat}>
-        {player[stat] ?? '-'}{player[stat] !== null && ['PA', 'AG', 'AV'].includes(stat) && '+'}
+        {player.stats[stat] ?? '-'}{player.stats[stat] !== null && ['PA', 'AG', 'AV'].includes(stat) && '+'}
       </td>,
     ])) as Record<'AG' | 'AV' | 'MA' | 'PA' | 'ST', ReactElement>;
 

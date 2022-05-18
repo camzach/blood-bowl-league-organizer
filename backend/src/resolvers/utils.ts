@@ -1,17 +1,8 @@
-import type { Player, RosterPlayer } from '../graphql.gen';
-import rosters from '../rosters.json';
-import type { PlayerModel } from '../models/player';
+import type { PlayerDbObject, RosterDbObject, TeamValue } from '../graphql.gen';
 
-export function getBasePlayer(player: PlayerModel): RosterPlayer {
-  const basePlayer = rosters
-    .flatMap(roster => roster.players)
-    .find(p => p.position === player.position);
+export function getPlayerValue(parent: PlayerDbObject, roster: RosterDbObject): TeamValue {
+  const basePlayer = roster.players.find(p => p.position === parent.position);
   if (!basePlayer) throw new Error('Player position not recognized');
-  return basePlayer;
-}
-
-export function getPlayerValue(parent: PlayerModel): Player['teamValue'] {
-  const basePlayer = getBasePlayer(parent);
   let base = basePlayer.cost;
   for (const progression of parent.progression) {
     switch (progression) {
@@ -35,11 +26,8 @@ export function getPlayerValue(parent: PlayerModel): Player['teamValue'] {
     }
     base += 0 as never;
   }
-  const baseTeam = Object.values(rosters).find(roster =>
-    roster.players.some(player => player.position === parent.position));
-  if (!baseTeam) throw new Error('Player position not recognized');
   const noCurrentCost =
-    (baseTeam.specialRules.includes('Low Cost Linemen') && basePlayer.max >= 12) ||
+    (roster.specialRules.includes('Low Cost Linemen') && basePlayer.max >= 12) ||
     parent.injuries.missNextGame;
   return { base, current: noCurrentCost ? 0 : base };
 }
