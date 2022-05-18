@@ -1,5 +1,11 @@
-import type { PlayerDbObject, PlayerResolvers, QueryResolvers, RosterDbObject, TeamDbObject } from '../graphql.gen';
-import { getPlayerValue } from './utils';
+import type {
+  PlayerDbObject,
+  PlayerResolvers,
+  QueryResolvers,
+  RosterDbObject,
+  TeamDbObject,
+} from '../graphql.gen';
+import { getModifiedSkills, getPlayerValue } from './utils';
 
 const Player: PlayerResolvers = {
   team: async(parent, query, context) => {
@@ -35,7 +41,7 @@ const Player: PlayerResolvers = {
     const roster = await context.db.collection('rosters').findOne<RosterDbObject>(rosterQuery);
     const basePlayer = roster?.players.find(p => p.position === parent.position);
     if (!basePlayer || !roster) throw new Error('Unable to find base player');
-    return [...basePlayer.skills, ...parent.skills];
+    return getModifiedSkills([...basePlayer.skills, ...parent.skills], context.db.collection('skills'));
   },
   teamValue: async(parent, query, context) => {
     const rosterQuery = { players: { $elemMatch: { position: parent.position } } };

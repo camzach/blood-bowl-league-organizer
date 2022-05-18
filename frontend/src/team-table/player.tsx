@@ -4,7 +4,7 @@ import { styled } from '@linaria/react';
 import type { cols } from './cols';
 import type { TeamQuery } from '../team-page/content/team.query.gen';
 
-const Skill = styled.span`
+const Skill = styled.dfn`
   &:nth-child(2n) {
     color: #9e0000;
   }
@@ -54,8 +54,8 @@ export function Player({ player, cols }: Props): React.ReactElement {
       'Skills': (
         <td key="Skills">
           {player.skills.map((skill, idx) => (
-            <React.Fragment key={skill}>
-              <Skill>{skill}</Skill>
+            <React.Fragment key={skill.name}>
+              <Skill title={skill.rules}>{skill.name}</Skill>
               {idx < player.skills.length - 1 ? ', ' : ''}
             </React.Fragment>
           ))}

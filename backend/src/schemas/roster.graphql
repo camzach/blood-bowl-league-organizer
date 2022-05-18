@@ -1,15 +1,22 @@
-type RosterPlayer {
-  position: String!
-  max: Int!
-  cost: Int!
-  MA: Int!
-  ST: Int!
-  AG: Int!
-  PA: Int
-  AV: Int!
-  secondary: [String!]!
-  primary: [String!]!
-  skills: [String!]!
+type RosterPlayer @entity(embedded: true) {
+  position: String! @column
+  max: Int! @column
+  cost: Int! @column
+  MA: Int! @column
+  ST: Int! @column
+  AG: Int! @column
+  PA: Int @column
+  AV: Int! @column
+  secondary: [String!]! @column
+  primary: [String!]! @column
+  skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
+}
+
+type Skill @entity(additionalFields: [
+  { path: "_id", type: "ObjectId" }
+]) {
+  name: String! @column
+  rules: String! @column
 }
 
 type Roster @entity(
@@ -20,7 +27,7 @@ type Roster @entity(
   name: String! @column
   rerollCost: Int! @column
   tier: Int! @column
-  players: [RosterPlayer!]! @column
+  players: [RosterPlayer!]! @embedded
   specialRules: [String!]! @column
 }
 

@@ -20,6 +20,8 @@ fragment RosterPlayers on Roster {
     PA
     AG
     AV
-    skills
+    skills {
+      name
+    }
   }
 }

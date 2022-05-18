@@ -29,7 +29,7 @@ type Player @entity(
   team: Team! @link
   position: String! @column
   stats: PlayerStats!
-  skills: [String!]! @column
+  skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
   progression: [String!]! @column
   starPlayerPoints: StarPlayerPoints! @column
   teamValue: TeamValue! @column

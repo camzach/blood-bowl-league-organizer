@@ -29,3 +29,4 @@ generates:
         Game: GameDbObject
         Schedule: ScheduleDbObject
         Roster: RosterDbObject
+        RosterPlayer: RosterPlayerDbObject
