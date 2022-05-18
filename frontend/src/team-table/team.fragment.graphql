@@ -26,5 +26,8 @@ fragment TeamTablePlayer on Player {
     AG
     AV
   }
-  skills
+  skills {
+    name
+    rules
+  }
 }
