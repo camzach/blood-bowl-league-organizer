@@ -10,8 +10,8 @@ import { getModifiedSkills, getPlayerValue } from './utils';
 const Player: PlayerResolvers = {
   team: async(parent, query, context) => {
     // eslint-disable-next-line no-underscore-dangle
-    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent._id });
-    if (!team) return null as never;
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: parent.team });
+    if (!team) throw new Error('Unable to find team for player');
     return team;
   },
   stats: async(parent, query, context) => {
