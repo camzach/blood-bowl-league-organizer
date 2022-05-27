@@ -1,12 +1,13 @@
 type Schedule @entity {
-  rounds: [Round!]! @column
+  id: String! @id
+  rounds: [Round!]! @embedded
 }
 
-type Round {
-  games: [ScheduleSlot!]! @column
+type Round @entity(embedded: true) {
+  games: [ScheduleSlot!]! @embedded
 }
 
-type ScheduleSlot {
+type ScheduleSlot @entity(embedded: true) {
   homeTeam: Team! @link
   awayTeam: Team! @link
   game: Game @link
@@ -14,4 +15,15 @@ type ScheduleSlot {
 
 extend type Query {
   schedule: Schedule!
+}
+
+type MutationResult {
+  success: Boolean!
+}
+extend type Mutation {
+  playGame(
+    round: Int!
+    homeTeam: String!
+    awayTeam: String!
+  ): MutationResult!
 }

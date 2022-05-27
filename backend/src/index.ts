@@ -8,7 +8,7 @@ import { DIRECTIVES } from '@graphql-codegen/typescript-mongodb';
 import type { Db } from 'mongodb';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-export type Context = { db: Db };
+export type Context = { db: Db; client: MongoClient };
 
 const typedefs = loadTypedefsSync(
   join(__dirname, 'schemas', '**/*.graphql'),
@@ -23,7 +23,7 @@ void new MongoClient(uri, { serverApi: ServerApiVersion.v1 }).connect()
     schema,
     port: 3000,
     cors: { origin: ['*'] },
-    context: { db: c.db('bblm') },
+    context: { db: c.db('bblm'), client: c },
   }))
   .then(async server => server.start())
   .catch(e => {

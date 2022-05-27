@@ -19,6 +19,6 @@ type TeamValue {
 }
 
 extend type Query {
-  team(name: String!): Team
+  team(id: String!): Team
   teams: [Team!]!
 }

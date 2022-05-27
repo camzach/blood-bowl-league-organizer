@@ -1,9 +1,10 @@
 query Team(
-  $name: String!
+  $id: String!
 ) {
-  team(name: $name) {
+  team(id: $id) {
     coach
     name
+    id
     players {
       ...TeamTablePlayer
     }

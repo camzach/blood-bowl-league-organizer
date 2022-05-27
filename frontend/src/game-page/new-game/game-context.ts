@@ -45,7 +45,7 @@ export type GameInfo = {
   home: ContextTeam;
   away: ContextTeam;
   weather: string;
-  stage: 'attendance' | 'weather' | 'journeymen' | 'inducements' | 'prayersToNuffle' | 'play';
+  stage: 'attendance' | 'weather' | 'journeymen' | 'inducements' | 'prayersToNuffle' | 'play' | 'complete';
   results: {
     touchdowns: { home: number; away: number };
     casualties: { home: number; away: number };
@@ -126,6 +126,7 @@ export const reducer = (state: GameInfo, action: Action): GameInfo => {
       break;
     case 'results':
       newState.results = action.results;
+      newState.stage = 'complete';
   }
   return newState;
 };

@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import type { Filter } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import type {
   PlayerDbObject,
   QueryResolvers,
@@ -12,7 +13,7 @@ import { getPlayerValue } from './utils';
 
 const Query: QueryResolvers = {
   team: async(parent, query, context) => {
-    const team = await context.db.collection('teams').findOne<TeamDbObject>({ name: query.name });
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: new ObjectId(query.id) });
     if (!team) return null;
     return team;
   },
