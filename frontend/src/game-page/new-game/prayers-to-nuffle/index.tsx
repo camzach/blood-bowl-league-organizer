@@ -1,5 +1,5 @@
 import React from 'react';
-import { gameContext } from '..';
+import { gameContext } from '../game-context';
 
 export function PrayersToNuffle(): React.ReactElement {
   const { gameInfo: { home, away }, dispatch } = React.useContext(gameContext);

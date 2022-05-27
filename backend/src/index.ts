@@ -8,6 +8,8 @@ import { DIRECTIVES } from '@graphql-codegen/typescript-mongodb';
 import type { Db } from 'mongodb';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
+export type Context = { db: Db };
+
 const typedefs = loadTypedefsSync(
   join(__dirname, 'schemas', '**/*.graphql'),
   { loaders: [new GraphQLFileLoader()] },
@@ -15,19 +17,15 @@ const typedefs = loadTypedefsSync(
 const schema = makeExecutableSchema({ typeDefs: [DIRECTIVES, typedefs], resolvers });
 
 const uri = 'mongodb+srv://admin:abc@bblm.pkmbu.mongodb.net/BBLM?retryWrites=true&w=majority';
-const client = new MongoClient(uri, { serverApi: ServerApiVersion.v1 }).connect();
 
-export type Context = {
-  db: Db;
-};
-
-const server = createServer({
-  schema,
-  port: 3000,
-  cors: { origin: ['*'] },
-  context: async(): Promise<Context> => ({ db: (await client).db('bblm') }),
-});
-server.start().catch(e => {
-  console.log('Failed to start', e);
-});
-
+void new MongoClient(uri, { serverApi: ServerApiVersion.v1 }).connect()
+  .then(c => createServer({
+    schema,
+    port: 3000,
+    cors: { origin: ['*'] },
+    context: { db: c.db('bblm') },
+  }))
+  .then(async server => server.start())
+  .catch(e => {
+    console.log('Failed to start', e);
+  });

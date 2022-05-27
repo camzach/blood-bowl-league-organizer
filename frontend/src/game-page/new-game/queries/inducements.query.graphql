@@ -28,7 +28,11 @@ fragment Inducement on Inducements {
     AG
     PA
     AV
-    skills
+    skills {
+      name
+      rules
+    }
+    specialRules
   }
   wizards {
     name

@@ -1,9 +1,9 @@
 type Inducements {
-  basic: [BasicInducement!]! @link
-  starPlayers: [StarPlayer!]! @link
-  wizards: [Wizard!]! @link
-  infamousCoachingStaff: [InfamousCoachingStaff!]! @link
-  biasedRefs: [BiasedRef!]! @link
+  basic: [BasicInducement!]!
+  starPlayers: [StarPlayer!]!
+  wizards: [Wizard!]!
+  infamousCoachingStaff: [InfamousCoachingStaff!]!
+  biasedRefs: [BiasedRef!]!
 }
 
 type BasicInducement @entity {
@@ -20,7 +20,7 @@ type StarPlayer @entity {
   PA: Int @column
   AG: Int! @column
   AV: Int! @column
-  skills: [String!]! @column
+  skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
   specialRules: String! @column
   price: Int! @column
   playsFor: [String!] @column

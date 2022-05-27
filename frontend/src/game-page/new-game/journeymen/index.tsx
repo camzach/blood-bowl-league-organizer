@@ -1,5 +1,5 @@
 import React from 'react';
-import { gameContext } from '..';
+import { gameContext } from '../game-context';
 import type { RosterPlayersFragment } from '../queries/roster.query.gen';
 import { useRostersQuery } from '../queries/roster.query.gen';
 
@@ -51,8 +51,14 @@ export function Journeymen(): React.ReactElement {
   const extractedData = React.useMemo(() => {
     if (!data?.away || !data.home) return null;
     return {
-      linemenAway: data.away.players.filter(p => p.max >= 12).map(p => ({ ...p, skills: [...p.skills, 'Loner (4+)'] })),
-      linemenHome: data.home.players.filter(p => p.max >= 12).map(p => ({ ...p, skills: [...p.skills, 'Loner (4+)'] })),
+      linemenAway: data.away.players.filter(p => p.max >= 12).map(p => ({
+        ...p,
+        skills: [...p.skills, { name: 'Loner (4+)', rules: '' }],
+      })),
+      linemenHome: data.home.players.filter(p => p.max >= 12).map(p => ({
+        ...p,
+        skills: [...p.skills, { name: 'Loner (4+)', rules: '' }],
+      })),
       jmAway: Math.max(0, 11 - away.players.roster.length),
       jmHome: Math.max(0, 11 - home.players.roster.length),
     };

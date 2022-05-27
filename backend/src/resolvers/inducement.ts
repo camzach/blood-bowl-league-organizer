@@ -5,43 +5,10 @@ import type {
   InfamousCoachingStaffDbObject,
   QueryResolvers,
   StarPlayerDbObject,
+  StarPlayerResolvers,
   WizardDbObject,
 } from '../graphql.gen';
-
-// Function getStarPlayers(specialRules?: string[] | null): StarPlayer[] {
-//   return starPlayers.filter(player => {
-//     if (!specialRules) return true;
-//     let result = true;
-//     if (player.playsFor) result &&= player.playsFor.some(rule => specialRules.includes(rule));
-//     if (player.doesntPlayFor) result &&= !player.doesntPlayFor.some(rule => specialRules.includes(rule));
-//     return result;
-//   });
-// }
-
-// function getWizards(specialRules?: string[] | null): Wizard[] {
-//   return wizards.filter(wizard => {
-//     if (!specialRules) return true;
-//     let result = false;
-//     if (wizard.price) result = true;
-//     return result;
-//   });
-// }
-
-// type PriceProps = { price: number | null; specialPrices: Array<[string, number]> };
-// function getInducements<T extends PriceProps>(list: T[], specialRules?: string[] | null): T[] {
-//   return list
-//     .filter(inducement => {
-//       if (!specialRules) return true;
-//       let result = false;
-//       if (inducement.price !== null) result = true;
-//       if (inducement.specialPrices.some(([rule]) => specialRules.includes(rule))) result = true;
-//       return result;
-//     })
-//     .map(inducement => ({
-//       ...inducement,
-//       specialPrices: inducement.specialPrices.map(([rule, price]) => ({ rule, price })),
-//     }));
-// }
+import { getModifiedSkills } from './utils';
 
 type OtherFilter = Filter<WizardDbObject | BasicInducementDbObject | InfamousCoachingStaffDbObject | BiasedRefDbObject>;
 const Query: QueryResolvers = {
@@ -86,4 +53,9 @@ const Query: QueryResolvers = {
   },
 };
 
-export { Query };
+const StarPlayer: StarPlayerResolvers = {
+  //
+  skills: async(parent, query, context) => getModifiedSkills(parent.skills, context.db.collection('skills')),
+};
+
+export { Query, StarPlayer };

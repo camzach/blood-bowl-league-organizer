@@ -18,7 +18,7 @@
     "@graphql-tools/graphql-file-loader": "^7.3.11",
     "@graphql-tools/load": "^7.5.10",
     "@graphql-tools/schema": "^8.3.10",
-    "@graphql-yoga/node": "^2.3.0",
+    "@graphql-yoga/node": "^2.6.0",
     "graphql": "^16.4.0",
     "lodash": "^4.17.21",
     "mongodb": "^4.6.0"

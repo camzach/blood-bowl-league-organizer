@@ -80,7 +80,6 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
           d="M 100 45 L 100 55 L 90 50 L 100 45"
           fill="black"
           stroke="white"
-          transform="rotate(45deg)"
         />
       </Svg>
     </button>
