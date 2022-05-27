@@ -3,6 +3,7 @@ import React from 'react';
 import { gameContext, injuryOptions, sppOptions } from '../game-context';
 import { TeamTable } from '../../../team-table';
 import { combinePlayers } from './utils';
+import { NumberInput } from '../../../number-input';
 
 const Container = styled.div`
   display: flex;
@@ -12,6 +13,10 @@ const TableContainer = styled.div`
   flex-basis: 40%;
   max-height: 75vh;
   overflow: scroll;
+`;
+const ControlWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 const Popup = styled.dialog`
 `;
@@ -93,13 +98,13 @@ export function Play(): React.ReactElement {
   ], [results.playerUpdates, showPopup]);
 
   const updateResults = React.useCallback((type: 'touchdowns' | 'casualties', team: 'home' | 'away') =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (Number.isNaN(e.target.valueAsNumber)) return;
+    (val: number) => {
+      if (Number.isNaN(val)) return;
       setResults(old => ({
         ...old,
         [type]: {
           ...old[type],
-          [team]: e.target.valueAsNumber,
+          [team]: val,
         },
       }));
     }, []);
@@ -161,17 +166,37 @@ export function Play(): React.ReactElement {
       <TableContainer>
         <TeamTable players={homePlayers} cols={teamCols} />
       </TableContainer>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <span>
-          <input value={results.touchdowns.home} type="number" onChange={updateResults('touchdowns', 'home')} />
+      <div>
+        <ControlWrapper>
+          <NumberInput
+            min={0}
+            value={results.touchdowns.home}
+            onChange={updateResults('touchdowns', 'home')}
+            label="Home Touchdowns"
+          />
           Touchdowns
-          <input value={results.touchdowns.away} type="number" onChange={updateResults('touchdowns', 'away')} />
-        </span>
-        <span>
-          <input value={results.casualties.home} type="number" onChange={updateResults('casualties', 'home')} />
+          <NumberInput
+            min={0}
+            value={results.touchdowns.away}
+            label="Away Touchdowns"
+            onChange={updateResults('touchdowns', 'away')}
+          />
+        </ControlWrapper>
+        <ControlWrapper>
+          <NumberInput
+            min={0}
+            value={results.casualties.home}
+            label="Home Casualties"
+            onChange={updateResults('casualties', 'home')}
+          />
           Casualties
-          <input value={results.casualties.away} type="number" onChange={updateResults('casualties', 'away')} />
-        </span>
+          <NumberInput
+            min={0}
+            value={results.casualties.away}
+            label="Away Casualties"
+            onChange={updateResults('casualties', 'away')}
+          />
+        </ControlWrapper>
       </div>
       <TableContainer>
         <TeamTable players={awayPlayers} cols={teamCols} />

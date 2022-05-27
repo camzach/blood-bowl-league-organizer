@@ -1,4 +1,5 @@
 import React from 'react';
+import { NumberInput } from '../../../number-input';
 import { gameContext } from '../game-context';
 import type { InducementFragment } from '../queries/inducements.query.gen';
 import { useInducementsQuery } from '../queries/inducements.query.gen';
@@ -49,7 +50,6 @@ function PregameList({
   onSelection,
 }: PregameListProps): React.ReactElement {
   const [expandedList, setExpandedList] = React.useState('');
-  const id = React.useId();
 
   const makeListExpander = React.useCallback((listname: string) =>
     () => {
@@ -69,18 +69,18 @@ function PregameList({
     }, [selected, inducements, specialRules, onSelection]);
 
   const makeValueUpdater = React.useCallback((value: string) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (number: number) => {
       const inducement = inducements.basic.find(i => i.name === value);
       const price = inducement ? inducementPrice(inducement, specialRules) : 0;
       onSelection({
         ...selected,
         basic: {
           ...selected.basic,
-          [value]: e.target.valueAsNumber,
+          [value]: number,
         },
-        totalCost: selected.totalCost - ((selected.basic[value] ?? 0) * price) + (e.target.valueAsNumber * price),
+        totalCost: selected.totalCost - ((selected.basic[value] ?? 0) * price) + (number * price),
       });
-    }, [inducements.basic, onSelection, selected, specialRules]);
+    }, [inducements.basic, selected, specialRules, onSelection]);
 
   const basicCost = sum(Object.entries(selected.basic).map(([key, num]) => {
     const { price, specialPrices } = inducements.basic.find(ind => ind.name === key) ?? {};
@@ -102,18 +102,14 @@ function PregameList({
       <ul>
         {inducements.basic.map(inducement => (
           <li key={inducement.name}>
-            <label htmlFor={id}>
-              <input
-                defaultValue={0}
-                id={id}
-                max={inducement.max}
-                min={0}
-                type="number"
-                value={selected.basic.size}
-                onChange={makeValueUpdater(inducement.name)}
-              />
-              {inducement.name}
-            </label>
+            <NumberInput
+              max={inducement.max}
+              min={0}
+              value={selected.basic[inducement.name] ?? 0}
+              label={inducement.name}
+              showLabel
+              onChange={makeValueUpdater(inducement.name)}
+            />
           </li>
         ))}
         <li>
