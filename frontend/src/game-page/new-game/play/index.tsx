@@ -121,6 +121,25 @@ export function Play(): React.ReactElement {
       },
     }));
   }, []);
+  const removeUpdate = React.useCallback((type: 'spp' | 'cas', playerId: string, idx: number) => () => {
+    setResults(old => {
+      const list = old.playerUpdates[playerId]?.[type] ?? [];
+      list.splice(idx, 1);
+      return {
+        ...old,
+        playerUpdates: {
+          ...old.playerUpdates,
+          [playerId]: {
+            ...old.playerUpdates[playerId] ?? { cas: [], spp: [] },
+            [type]: list,
+          },
+        },
+      };
+    });
+  }, []);
+  const handleGameEnd = React.useCallback(() => {
+    dispatch({ type: 'results', results });
+  }, [dispatch, results]);
 
   const [homePlayers, awayPlayers] = React.useMemo(() => {
     const home = combinePlayers(gameInfo.home.players);
@@ -140,24 +159,36 @@ export function Play(): React.ReactElement {
             case 'spp':
               return (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                  {results.playerUpdates[playerId]?.spp.map(upd => (
-                    <React.Fragment key={upd}>
+                  {results.playerUpdates[playerId]?.spp.map((upd, idx) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <React.Fragment key={idx}>
                       <p>{upd}</p>
-                      <button type="button">Remove</button>
+                      <button type="button" onClick={removeUpdate('spp', playerId, idx)}>Remove</button>
                     </React.Fragment>
                   ))}
                   <Picker opts={sppOptions} onSelect={updatePlayer('spp', playerId)} />
                 </div>
               );
             case 'cas':
-              return <Picker opts={injuryOptions} onSelect={updatePlayer('cas', playerId)} />;
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                  {results.playerUpdates[playerId]?.cas.map((upd, idx) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <React.Fragment key={idx}>
+                      <p>{upd}</p>
+                      <button type="button" onClick={removeUpdate('cas', playerId, idx)}>Remove</button>
+                    </React.Fragment>
+                  ))}
+                  <Picker opts={injuryOptions} onSelect={updatePlayer('cas', playerId)} />
+                </div>
+              );
             default: return null as never;
           }
         })()}
       </React.Fragment>
       <button type="reset" onClick={hidePopup}>Done</button>
     </Popup>
-  ), [popup, hidePopup, results.playerUpdates, updatePlayer]);
+  ), [popup, hidePopup, results.playerUpdates, updatePlayer, removeUpdate]);
 
   return (
     <Container>
