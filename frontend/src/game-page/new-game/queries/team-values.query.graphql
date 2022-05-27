@@ -2,16 +2,17 @@ query PregameInfo(
   $home: String!
   $away: String!
 ) {
-  home: team(name: $home) {
+  home: team(id: $home) {
     ...Pregame
   }
-  away: team(name: $away) {
+  away: team(id: $away) {
     ...Pregame
   }
 }
 
 fragment Pregame on Team {
   name
+  id
   race {
     name
     specialRules

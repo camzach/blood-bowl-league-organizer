@@ -9,7 +9,7 @@ export function GamePage(): React.ReactElement {
     <main>
       <Routes>
         <Route element={<Schedule />} path="/" />
-        <Route element={<GameInfo />} path="/game" />
+        <Route element={<GameInfo />} path="/game/:gameId" />
         <Route element={<NewGame />} path="/newgame" />
       </Routes>
     </main>

@@ -10,6 +10,7 @@ import { Weather } from './weather';
 import { Journeymen } from './journeymen';
 import { PrayersToNuffle } from './prayers-to-nuffle';
 import { Play } from './play';
+import { Submit } from './submit';
 
 export function NewGame(): React.ReactElement {
   const [searchParams] = useSearchParams();
@@ -73,6 +74,8 @@ export function NewGame(): React.ReactElement {
         return <PrayersToNuffle />;
       case 'play':
         return <Play />;
+      case 'complete':
+        return <Submit />;
     }
     return <>Something went wrong!</>;
   };

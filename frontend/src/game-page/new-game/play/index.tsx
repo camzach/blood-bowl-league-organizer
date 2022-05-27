@@ -228,6 +228,7 @@ export function Play(): React.ReactElement {
             onChange={updateResults('casualties', 'away')}
           />
         </ControlWrapper>
+        <button type="button" onClick={handleGameEnd}>Done!</button>
       </div>
       <TableContainer>
         <TeamTable players={awayPlayers} cols={teamCols} />

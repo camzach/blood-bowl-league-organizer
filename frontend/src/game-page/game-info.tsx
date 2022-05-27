@@ -2,7 +2,7 @@ import type React from 'react';
 import { styled } from '@linaria/react';
 import { TeamTable } from '../team-table';
 import { useGameQuery } from './game.query.gen';
-import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -28,14 +28,11 @@ const Score = styled.div`
 `;
 
 export function GameInfo(): React.ReactElement {
-  const [searchParams] = useSearchParams();
-  const { isLoading, isError, data } = useGameQuery({
-    home: searchParams.get('home') ?? '',
-    away: searchParams.get('away') ?? '',
-  });
+  const { gameId } = useParams();
+  const { isLoading, isError, data } = useGameQuery({ id: gameId ?? '' });
 
   if (isLoading) return <>Loading...</>;
-  if (isError || !data?.game) return <>Failed to load team info</>;
+  if (isError || !data?.game) return <>Failed to load game info</>;
 
   const { game } = data;
   const { homeTeam, awayTeam } = game;

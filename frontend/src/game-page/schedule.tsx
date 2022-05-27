@@ -76,11 +76,11 @@ export function Schedule(): React.ReactElement {
                   <li key={`${homeTeam.name}-${awayTeam.name}`}>
                     {/* eslint-disable-next-line no-underscore-dangle */}
                     {game.game
-                      ? <Link to={`game?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</Link>
+                      ? <Link to={`game/${game.game.id}`}>{contents}</Link>
                       : (
                         <>
                           <span>{contents}</span>
-                          <Link to={`newgame?home=${homeTeam.name}&away=${awayTeam.name}`}>
+                          <Link to={`newgame?home=${homeTeam.id}&away=${awayTeam.id}`}>
                             Play it now
                           </Link>
                         </>

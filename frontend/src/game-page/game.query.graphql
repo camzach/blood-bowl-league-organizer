@@ -1,8 +1,7 @@
 query Game(
-  $home: String!
-  $away: String!
+  $id: String!
 ) {
-  game(home: $home away: $away) {
+  game(id: $id) {
     homeTeam {
       players {
         ...TeamTablePlayer

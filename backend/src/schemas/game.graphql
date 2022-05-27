@@ -1,10 +1,7 @@
-type Game @entity(
-  additionalFields: [
-    { path: "_id", type: "ObjectId" }
-  ]
-) {
-  homeTeam: Team! @column
-  awayTeam: Team! @column
+type Game @entity {
+  id: String! @id
+  homeTeam: Team! @link
+  awayTeam: Team! @link
   ffHome: Int! @column
   ffAway: Int! @column
   tdHome: Int! @column
@@ -17,5 +14,5 @@ type Game @entity(
 
 extend type Query {
   games: [Game!]!
-  game(home: String! away: String!): Game
+  game(id: String!): Game
 }

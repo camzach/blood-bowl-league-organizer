@@ -28,6 +28,8 @@ generates:
         Player: PlayerDbObject
         Game: GameDbObject
         Schedule: ScheduleDbObject
+        Round: RoundDbObject
+        ScheduleSlot: ScheduleSlotDbObject
         Roster: RosterDbObject
         RosterPlayer: RosterPlayerDbObject
         StarPlayer: StarPlayerDbObject
