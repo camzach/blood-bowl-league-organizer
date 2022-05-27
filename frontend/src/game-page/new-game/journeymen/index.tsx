@@ -1,4 +1,5 @@
 import React from 'react';
+import { NumberInput } from '../../../number-input';
 import { gameContext } from '../game-context';
 import type { RosterPlayersFragment } from '../queries/roster.query.gen';
 import { useRostersQuery } from '../queries/roster.query.gen';
@@ -10,32 +11,29 @@ type SelectorProps = {
   setSelections: (selections: RosterPlayersFragment['players']) => void;
 };
 function JourneymanSelector({ linemen, count, selections, setSelections }: SelectorProps): React.ReactElement {
-  const baseId = React.useId();
-
-  const selectionHandler = React.useCallback((pos: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const selectionHandler = React.useCallback((pos: string) => (val: number) => {
     const newLinemen = selections.filter(p => p.position !== pos);
     const player = linemen.find(p => p.position === pos);
-    if (!player) return;
-    newLinemen.push(...Array.from(new Array(e.target.valueAsNumber), () => ({ ...player })));
+    if (!player || Number.isNaN(val)) return;
+    newLinemen.push(...Array.from(new Array(val), () => ({ ...player })));
     if (newLinemen.length > count) return;
     setSelections(newLinemen);
   }, [linemen, selections, count, setSelections]);
 
   return (
-    <section>
-      <h2>Team Name?</h2>
+    <>
       {linemen.map(lm => (
-        <label key={lm.position} htmlFor={`${baseId}-${lm.position}`}>
-          {lm.position}
-          <input
-            id={`${baseId}-${lm.position}`}
-            type="number"
-            value={selections.filter(p => p.position === lm.position).length}
-            onChange={selectionHandler(lm.position)}
-          />
-        </label>
+        <NumberInput
+          key={lm.position}
+          value={selections.filter(p => p.position === lm.position).length}
+          min={0}
+          max={count}
+          label={lm.position}
+          showLabel
+          onChange={selectionHandler(lm.position)}
+        />
       ))}
-    </section>
+    </>
   );
 }
 
@@ -96,19 +94,25 @@ export function Journeymen(): React.ReactElement {
       <h1>Take on Journeymen</h1>
       <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
         {jmHome > 0 &&
-          <JourneymanSelector
-            count={jmHome}
-            linemen={linemenHome}
-            selections={selections.home}
-            setSelections={handleSelection('home')}
-          />}
+          <section>
+            <h2>{home.name}</h2>
+            <JourneymanSelector
+              count={jmHome}
+              linemen={linemenHome}
+              selections={selections.home}
+              setSelections={handleSelection('home')}
+            />
+          </section>}
         {jmAway > 0 &&
-          <JourneymanSelector
-            count={jmAway}
-            linemen={linemenAway}
-            selections={selections.away}
-            setSelections={handleSelection('home')}
-          />}
+          <section>
+            <h2>{away.name}</h2>
+            <JourneymanSelector
+              count={jmAway}
+              linemen={linemenAway}
+              selections={selections.away}
+              setSelections={handleSelection('away')}
+            />
+          </section>}
       </div>
       <button
         disabled={selections.away.length !== jmAway || selections.home.length !== jmHome}
