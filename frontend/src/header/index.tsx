@@ -2,9 +2,10 @@ import type React from 'react';
 import { styled } from '@linaria/react';
 import { css } from '@linaria/core';
 import { NavLink } from 'react-router-dom';
-import imageUrl from './BBLogoIcon2018_web.png';
+import imageUrl from './BBLogoIcon2018_web_200_200.png';
 
 const Container = styled.header`
+  position: relative;
   width: 100%;
   max-height: 50px;
   flex-basis: 50px;
@@ -14,8 +15,7 @@ const Container = styled.header`
 `;
 const Logo = styled.img`
   height: 100%;
-  float: left;
-  position: relative;
+  position: absolute;
 `;
 const NavList = styled.nav`
   display: flex;

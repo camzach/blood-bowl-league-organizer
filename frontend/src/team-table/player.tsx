@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { styled } from '@linaria/react';
-import type { cols } from './cols';
+import type { cols as presetCols } from './cols';
 import type { TeamQuery } from '../team-page/content/team.query.gen';
+import type { TeamTablePlayerFragment } from './team.fragment.gen';
 
 const Skill = styled.dfn`
   &:nth-child(2n) {
@@ -14,11 +15,14 @@ const Skill = styled.dfn`
 
 type Props = {
   player: NonNullable<TeamQuery['team']>['players'][number];
-  cols: ReadonlyArray<(typeof cols)[number]>;
+  cols: ReadonlyArray<
+  (typeof presetCols)[number] |
+  { name: string; render: (player: TeamTablePlayerFragment) => React.ReactElement }
+  >;
 };
 
 export function Player({ player, cols }: Props): React.ReactElement {
-  const renderCols: Record<Props['cols'][number], React.ReactElement> = React.useMemo(() => {
+  const renderCols: Record<(typeof presetCols)[number], React.ReactElement> = React.useMemo(() => {
     const {
       MVPs,
       casualties,
@@ -68,7 +72,7 @@ export function Player({ player, cols }: Props): React.ReactElement {
 
   return (
     <tr>
-      {cols.map(col => renderCols[col])}
+      {cols.map(col => (typeof col === 'string' ? renderCols[col] : col.render(player)))}
     </tr>
   );
 }

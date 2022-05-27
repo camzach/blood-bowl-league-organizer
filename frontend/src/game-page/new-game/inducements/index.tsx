@@ -1,5 +1,5 @@
 import React from 'react';
-import { gameContext } from '..';
+import { gameContext } from '../game-context';
 import type { InducementFragment } from '../queries/inducements.query.gen';
 import { useInducementsQuery } from '../queries/inducements.query.gen';
 import { OptionsList } from './options-list';
@@ -94,8 +94,7 @@ function PregameList({
   const treasuryCost = inducementsCost > pettyCashCost ? inducementsCost - pettyCash : 0;
 
   return (
-    <section>
-      <h1>Team Name Here</h1>
+    <>
       <p>Petty cash - {(pettyCash - pettyCashCost).toLocaleString()} (-{pettyCashCost})</p>
       <p>Treasury - {(treasury - treasuryCost).toLocaleString()} (-{treasuryCost})</p>
       <p>Total Available - {(pettyCash + treasury - inducementsCost).toLocaleString()} (-{inducementsCost})</p>
@@ -128,7 +127,7 @@ function PregameList({
           />
         </li>
       </ul>
-    </section>
+    </>
   );
 }
 
@@ -178,22 +177,28 @@ export function Inducements(): React.ReactElement {
   return (
     <>
       <div style={{ display: 'flex', width: '100%', justifyContent: 'space-evenly' }}>
-        <PregameList
-          inducements={data.homeInducements}
-          specialRules={home.specialRules}
-          pettyCash={pettyCashHome}
-          treasury={home.treasury}
-          selected={selected.home}
-          onSelection={handleSelection('home')}
-        />
-        <PregameList
-          inducements={data.awayInducements}
-          specialRules={away.specialRules}
-          pettyCash={pettyCashAway}
-          treasury={away.treasury}
-          selected={selected.away}
-          onSelection={handleSelection('away')}
-        />
+        <section>
+          <h1>{home.name}</h1>
+          <PregameList
+            inducements={data.homeInducements}
+            specialRules={home.specialRules}
+            pettyCash={pettyCashHome}
+            treasury={home.treasury}
+            selected={selected.home}
+            onSelection={handleSelection('home')}
+          />
+        </section>
+        <section>
+          <h1>{away.name}</h1>
+          <PregameList
+            inducements={data.awayInducements}
+            specialRules={away.specialRules}
+            pettyCash={pettyCashAway}
+            treasury={away.treasury}
+            selected={selected.away}
+            onSelection={handleSelection('away')}
+          />
+        </section>
       </div>
       <button type="button" onClick={handleConfirm}>Done with inducements</button>
     </>

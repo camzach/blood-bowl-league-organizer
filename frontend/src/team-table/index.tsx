@@ -6,6 +6,8 @@ import { cols } from './cols';
 
 const Table = styled.table`
   thead {
+    position: sticky;
+    top: 0.25em;
     background-color: hsl(0, 0%, 60%);
   }
 
@@ -21,7 +23,10 @@ const Table = styled.table`
 
 type Props = {
   players: TeamTablePlayerFragment[];
-  cols?: ReadonlyArray<(typeof cols)[number]>;
+  cols?: ReadonlyArray<
+  (typeof cols)[number] |
+  { name: string; render: (player: TeamTablePlayerFragment) => React.ReactElement }
+  >;
 };
 
 export function TeamTable({ players, cols: displayCols = cols }: Props): React.ReactElement {
@@ -29,14 +34,17 @@ export function TeamTable({ players, cols: displayCols = cols }: Props): React.R
     <Table>
       <thead>
         <tr>
-          {displayCols.map(col => <th key={`th-${col}`} col-name={col}>{col}</th>)}
+          {displayCols.map(col => {
+            const colname = typeof col === 'string' ? col : col.name;
+            return <th key={`th-${colname}`} col-name={col}>{colname}</th>;
+          })}
         </tr>
       </thead>
       <tbody>
-        {players.sort((a, b) => a.number - b.number).map((player, idx) => (
+        {players.sort((a, b) => a.number - b.number).map(player => (
           <Player
-            // eslint-disable-next-line react/no-array-index-key
-            key={idx}
+          // eslint-disable-next-line react/no-array-index-key
+            key={player.number}
             cols={displayCols}
             player={player}
           />

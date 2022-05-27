@@ -1,5 +1,5 @@
 import React from 'react';
-import { gameContext } from '..';
+import { gameContext } from '../game-context';
 import { Spinner } from '../spinner';
 
 const fields = [

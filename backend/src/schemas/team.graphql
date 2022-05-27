@@ -1,8 +1,5 @@
-type Team @entity(
-  additionalFields: [
-    { path: "_id", type: "ObjectId" }
-  ]
-) {
+type Team @entity {
+  id: String! @id
   race: Roster! @link
   coach: String! @column
   name: String! @column

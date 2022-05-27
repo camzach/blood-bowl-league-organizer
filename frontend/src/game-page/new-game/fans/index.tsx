@@ -1,6 +1,6 @@
 import { styled } from '@linaria/react';
 import React from 'react';
-import { gameContext } from '..';
+import { gameContext } from '../game-context';
 import { Die } from '../../die';
 
 const Container = styled.div`

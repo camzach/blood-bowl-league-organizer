@@ -41,11 +41,6 @@ const Vs = styled.span`
   flex-basis: 1ch;
   margin-inline: 1ch;
 `;
-const GameLink = styled(Link)`
-  &:focus {
-    outline: 2px dashed red;
-  }
-`;
 
 export function Schedule(): React.ReactElement {
   const { isLoading, isError, data } = useScheduleQuery();
@@ -81,7 +76,7 @@ export function Schedule(): React.ReactElement {
                   <li key={`${homeTeam.name}-${awayTeam.name}`}>
                     {/* eslint-disable-next-line no-underscore-dangle */}
                     {game.game
-                      ? <GameLink to={`game?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</GameLink>
+                      ? <Link to={`game?home=${homeTeam.name}&away=${awayTeam.name}`}>{contents}</Link>
                       : (
                         <>
                           <span>{contents}</span>

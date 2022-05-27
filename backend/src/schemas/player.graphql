@@ -21,9 +21,9 @@ type Player @entity(
     { path: "PA", type: "number | null" }
     { path: "AG", type: "number" }
     { path: "AV", type: "number" }
-    { path: "_id", type: "ObjectId" }
   ]
 ) {
+  id: String! @id
   name: String @column
   number: Int! @column
   team: Team! @link

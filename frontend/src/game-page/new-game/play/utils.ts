@@ -7,14 +7,17 @@ function journeymanToTeamPlayer(
   number: number
 ): TeamTablePlayerFragment {
   return {
+    id: `jm${number}`,
     name: `Journeyman ${player.position}`,
     number,
     position: player.position,
-    MA: player.MA,
-    ST: player.ST,
-    AG: player.AG,
-    PA: player.PA,
-    AV: player.AV,
+    stats: {
+      MA: player.MA,
+      ST: player.ST,
+      AG: player.AG,
+      PA: player.PA,
+      AV: player.AV,
+    },
     skills: player.skills,
     starPlayerPoints: {
       MVPs: 0,
@@ -32,14 +35,17 @@ function journeymanToTeamPlayer(
 
 function starPlayerToTeamPlayer(player: InducementFragment['starPlayers'][number]): TeamTablePlayerFragment {
   return {
+    id: player.name,
     name: player.name,
     number: 0,
     position: 'Star Player',
-    MA: player.MA,
-    ST: player.ST,
-    AG: player.AG,
-    PA: player.PA,
-    AV: player.AV,
+    stats: {
+      MA: player.MA,
+      ST: player.ST,
+      AG: player.AG,
+      PA: player.PA,
+      AV: player.AV,
+    },
     skills: player.skills,
     starPlayerPoints: {
       MVPs: 0,

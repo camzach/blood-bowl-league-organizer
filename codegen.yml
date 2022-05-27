@@ -30,3 +30,4 @@ generates:
         Schedule: ScheduleDbObject
         Roster: RosterDbObject
         RosterPlayer: RosterPlayerDbObject
+        StarPlayer: StarPlayerDbObject

@@ -20,6 +20,7 @@ const Query: QueryResolvers = {
 };
 
 const Team: TeamResolvers = {
+  id: parent => parent._id.toHexString(),
   players: async(parent, query, context) => {
     const mongoQuery: Filter<PlayerDbObject> = { team: parent._id };
     // @ts-expect-error: injuries.missNextGame is a sub-document query, the types don't know about this

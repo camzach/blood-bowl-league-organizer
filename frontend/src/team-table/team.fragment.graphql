@@ -1,4 +1,5 @@
 fragment TeamTablePlayer on Player {
+  id
   name
   number
   position
