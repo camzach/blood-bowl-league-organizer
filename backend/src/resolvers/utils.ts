@@ -5,7 +5,7 @@ export function getPlayerValue(parent: PlayerDbObject, roster: RosterDbObject): 
   const basePlayer = roster.players.find(p => p.position === parent.position);
   if (!basePlayer) throw new Error('Player position not recognized');
   const noHiringFee = (roster.specialRules.includes('Low Cost Linemen') && basePlayer.max >= 12);
-  let cost = noHiringFee ? basePlayer.cost : 0;
+  let cost = noHiringFee ? 0 : basePlayer.cost;
   for (const progression of parent.progression) {
     switch (progression) {
       case 'AV':
