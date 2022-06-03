@@ -28,7 +28,7 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
       ang: acc.ang + (item.prob / 2) + (acc.prev / 2),
       prev: item.prob,
       it: [...acc.it, acc.ang + (item.prob / 2) + (acc.prev / 2)],
-    }), { ang: -fields[0].prob / 2, prev: 0, it: [] }).it
+    }), { ang: 0, prev: 0, it: [] }).it
     , [fields]
   );
 
@@ -37,9 +37,10 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
     setAngle(-(spin + 3));
     const resIdx = offsets.findIndex((val, idx) =>
       (fields[idx].prob / 2) + val >= spin && spin >= (fields[idx].prob / 2) - val);
-    setTimeout(() => {
-      onResult(fields[resIdx].text);
-    }, 0);
+    // Should this happen?
+    // setTimeout(() => {
+    onResult(fields[resIdx].text);
+    // }, 3000);
   }, [fields, offsets, onResult]);
 
   return (

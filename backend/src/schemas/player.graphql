@@ -31,7 +31,7 @@ type Player @entity(
   stats: PlayerStats!
   skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
   progression: [String!]! @column
-  starPlayerPoints: StarPlayerPoints! @column
+  starPlayerPoints: StarPlayerPoints! @embedded
   teamValue: TeamValue! @column
   casualties: Casualties!
 }
@@ -44,14 +44,16 @@ type PlayerStats {
   AV: Int!
 }
 
-type StarPlayerPoints {
-  MVPs: Int!
-  casualties: Int!
-  completions: Int!
-  deflections: Int!
-  interceptions: Int!
-  prayersToNuffle: Int!
-  touchdowns: Int!
+type StarPlayerPoints @entity(embedded: true) {
+  MVPs: Int! @column
+  casualties: Int! @column
+  completions: Int! @column
+  deflections: Int! @column
+  interceptions: Int! @column
+  prayersToNuffle: Int! @column
+  touchdowns: Int! @column
+  total: Int!
+  current: Int!
 }
 
 type TeamValue {

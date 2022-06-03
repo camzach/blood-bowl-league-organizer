@@ -21,15 +21,18 @@ const Table = styled.table`
   }
 `;
 
-type Props = {
-  players: TeamTablePlayerFragment[];
-  cols?: ReadonlyArray<
+export type TeamTableProps<ExtendsPlayer extends TeamTablePlayerFragment> = {
+  players: ExtendsPlayer[];
+  cols?: Array<
   (typeof cols)[number] |
-  { name: string; render: (player: TeamTablePlayerFragment) => React.ReactElement }
+  { name: string; render: (player: ExtendsPlayer) => React.ReactElement }
   >;
 };
 
-export function TeamTable({ players, cols: displayCols = cols }: Props): React.ReactElement {
+export function TeamTable<T extends TeamTablePlayerFragment>({
+  players,
+  cols: displayCols = [...cols],
+}: TeamTableProps<T>): React.ReactElement {
   return (
     <Table>
       <thead>
@@ -43,7 +46,6 @@ export function TeamTable({ players, cols: displayCols = cols }: Props): React.R
       <tbody>
         {players.sort((a, b) => a.number - b.number).map(player => (
           <Player
-          // eslint-disable-next-line react/no-array-index-key
             key={player.number}
             cols={displayCols}
             player={player}

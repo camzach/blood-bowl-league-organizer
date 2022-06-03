@@ -12,13 +12,8 @@ fragment TeamTablePlayer on Player {
     niggles
   }
   starPlayerPoints {
-    MVPs
-    casualties
-    completions
-    deflections
-    interceptions
-    touchdowns
-    prayersToNuffle
+    current
+    total
   }
   stats {
     MA

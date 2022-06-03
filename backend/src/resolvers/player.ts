@@ -51,6 +51,30 @@ const Player: PlayerResolvers = {
     return getPlayerValue(parent, roster);
   },
   casualties: parent => ({ missNextGame: parent.injuries.missNextGame, niggles: parent.injuries.niggles }),
+  starPlayerPoints: ({ starPlayerPoints, progression }) => {
+    const advancements = {
+      'Random Primary': [3, 4, 6, 8, 10, 15],
+      'Chosen Primary': [6, 8, 12, 16, 20, 30],
+      'Random Secondary': [6, 8, 12, 16, 20, 30],
+      'Chosen Secondary': [12, 14, 18, 22, 26, 40],
+      'Characteristic Improvement': [18, 20, 24, 28, 32, 50],
+    };
+    const total =
+      (starPlayerPoints.MVPs * 4) +
+      (starPlayerPoints.touchdowns * 3) +
+      (starPlayerPoints.casualties * 2) +
+      (starPlayerPoints.deflections) +
+      (starPlayerPoints.completions) +
+      (starPlayerPoints.interceptions) +
+      (starPlayerPoints.prayersToNuffle);
+    const current = total - progression.reduce((cost, prog, idx) =>
+      cost + advancements[prog as keyof typeof advancements][idx], 0);
+    return {
+      ...starPlayerPoints,
+      total,
+      current,
+    };
+  },
 };
 
 const Query: QueryResolvers = {
