@@ -2,7 +2,6 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { styled } from '@linaria/react';
 import type { cols as presetCols } from './cols';
-import type { TeamQuery } from '../team-page/content/team.query.gen';
 import type { TeamTablePlayerFragment } from './team.fragment.gen';
 
 const Skill = styled.dfn`
@@ -13,33 +12,16 @@ const Skill = styled.dfn`
   white-space: nowrap;
 `;
 
-type Props = {
-  player: NonNullable<TeamQuery['team']>['players'][number];
-  cols: ReadonlyArray<
+type Props<ExtendsPlayer extends TeamTablePlayerFragment> = {
+  player: ExtendsPlayer;
+  cols: Array<
   (typeof presetCols)[number] |
-  { name: string; render: (player: TeamTablePlayerFragment) => React.ReactElement }
+  { name: string; render: (player: ExtendsPlayer) => React.ReactElement }
   >;
 };
 
-export function Player({ player, cols }: Props): React.ReactElement {
+export function Player<T extends TeamTablePlayerFragment>({ player, cols }: Props<T>): React.ReactElement {
   const renderCols: Record<(typeof presetCols)[number], React.ReactElement> = React.useMemo(() => {
-    const {
-      MVPs,
-      casualties,
-      completions,
-      deflections,
-      interceptions,
-      touchdowns,
-      prayersToNuffle,
-    } = player.starPlayerPoints;
-    const calculatedSPP =
-      (MVPs * 4) +
-      (casualties * 2) +
-      (completions) +
-      (deflections) +
-      (interceptions * 2) +
-      (touchdowns * 3) +
-      (prayersToNuffle);
     const statCols = Object.fromEntries((['MA', 'ST', 'PA', 'AG', 'AV'] as const).map(stat => [
       stat,
       <td key={stat}>
@@ -54,7 +36,7 @@ export function Player({ player, cols }: Props): React.ReactElement {
       'NI': <td key="NI">{player.casualties.niggles}</td>,
       'Name': <td key="Name">{player.name}</td>,
       'Position': <td key="Position">{player.position}</td>,
-      'SPP': <td key="SPP">{calculatedSPP}</td>,
+      'SPP': <td key="SPP">{player.starPlayerPoints.current}</td>,
       'Skills': (
         <td key="Skills">
           {player.skills.map((skill, idx) => (

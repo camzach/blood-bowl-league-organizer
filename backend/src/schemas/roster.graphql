@@ -7,16 +7,9 @@ type RosterPlayer @entity(embedded: true) {
   AG: Int! @column
   PA: Int @column
   AV: Int! @column
-  secondary: [String!]! @column
-  primary: [String!]! @column
+  secondary: [SkillCategory!]! @column
+  primary: [SkillCategory!]! @column
   skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
-}
-
-type Skill @entity(additionalFields: [
-  { path: "_id", type: "ObjectId" }
-]) {
-  name: String! @column
-  rules: String! @column
 }
 
 type Roster @entity(

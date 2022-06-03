@@ -5,8 +5,24 @@ query Team(
     coach
     name
     id
+    race {
+      rerollCost
+      players {
+        position
+        primary
+        secondary
+      }
+    }
+    rerolls
+    coaches
+    cheerleaders
+    apothecary
     players {
       ...TeamTablePlayer
+      progression
+      starPlayerPoints {
+        total
+      }
     }
   }
 }

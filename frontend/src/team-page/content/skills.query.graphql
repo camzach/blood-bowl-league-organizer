@@ -1,0 +1,7 @@
+query Skills {
+  skills {
+    name
+    rules
+    category
+  }
+}

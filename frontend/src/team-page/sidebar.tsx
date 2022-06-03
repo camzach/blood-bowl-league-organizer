@@ -25,11 +25,12 @@ const navLinkStyle = css`
 
 export function Sidebar(): React.ReactElement {
   const { data } = useTeamNamesQuery();
-  const teamnames = data?.teams.map(t => t.name);
+  if (!data) return <>Couldn't load teams</>;
+
   return (
     <NavList>
-      {teamnames?.map(teamname => (
-        <NavLink key={teamname} className={navLinkStyle} to={encodeURI(`/teams/${teamname}`)}>{teamname}</NavLink>
+      {data.teams.map(team => (
+        <NavLink key={team.id} className={navLinkStyle} to={encodeURI(`/teams/${team.id}`)}>{team.name}</NavLink>
       ))}
     </NavList>
   );

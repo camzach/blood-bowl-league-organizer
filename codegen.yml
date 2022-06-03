@@ -33,3 +33,4 @@ generates:
         Roster: RosterDbObject
         RosterPlayer: RosterPlayerDbObject
         StarPlayer: StarPlayerDbObject
+        Skill: SkillDbObject
