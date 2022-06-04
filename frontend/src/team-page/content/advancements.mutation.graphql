@@ -1,0 +1,46 @@
+mutation RandomSkill(
+  $playerId: String!
+  $category: SkillCategory!
+) {
+  purchaseRandomSkill(playerId: $playerId category: $category) {
+    success
+    skill {
+      name
+    }
+    player {
+      ...TeamPagePlayer
+    }
+  }
+}
+
+mutation ChosenSkill(
+  $playerId: String!
+  $skillId: String!
+) {
+  purchaseChosenSkill(playerId: $playerId skillId: $skillId) {
+    success
+    skill {
+      name
+    }
+    player {
+      ...TeamPagePlayer
+    }
+  }
+}
+
+mutation CharacteristicImprovement(
+  $playerId: String!
+  $secondarySkillChoice: String!
+  $preferences: [CharacteristicImprovementPreference!]!
+) {
+  purchaseCharacteristicImprovement(
+    playerId: $playerId,
+    preferences: $preferences,
+    secondarySkillChoice: $secondarySkillChoice
+  ) {
+    success
+    player {
+      ...TeamPagePlayer
+    }
+  }
+}

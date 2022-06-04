@@ -29,11 +29,24 @@ type Player @entity(
   team: Team! @link
   position: String! @column
   stats: PlayerStats!
-  skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
-  progression: [String!]! @column
+  skills: [Skill!]! @link
+  progression: [ProgressionOption!]! @column
   starPlayerPoints: StarPlayerPoints! @embedded
   teamValue: TeamValue! @column
   casualties: Casualties!
+}
+
+enum ProgressionOption {
+  RandomPrimary
+  ChosenPrimary
+  RandomSecondary
+  ChosenSecondary
+  CharacteristicSecondary
+  MA
+  ST
+  PA
+  AG
+  AV
 }
 
 type PlayerStats {
@@ -69,4 +82,34 @@ type Casualties {
 extend type Query {
   player(name: String!): Player
   # players(query: PlayerQueryInput, limit: Int = 100, sortBy: PlayerSortByInput): [Player]!
+}
+
+type SkillPurchaseResult {
+  success: Boolean!
+  skill: Skill!
+  player: Player!
+}
+
+enum CharacteristicImprovementPreference {
+  ST
+  MA
+  AG
+  PA
+  AV
+  Secondary
+}
+type CharacteristicImprovementResult {
+  success: Boolean!
+  player: Player!
+  characteristic: CharacteristicImprovementPreference!
+}
+
+extend type Mutation {
+  purchaseRandomSkill(playerId: String!, category: SkillCategory!): SkillPurchaseResult!
+  purchaseChosenSkill(playerId: String!, skillId: String!): SkillPurchaseResult!
+  purchaseCharacteristicImprovement(
+    playerId: String!
+    preferences: [CharacteristicImprovementPreference!]!
+    secondarySkillChoice: String!
+  ): CharacteristicImprovementResult!
 }

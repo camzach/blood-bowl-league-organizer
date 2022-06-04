@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom';
 import type { TeamTableProps } from '../../team-table';
 import { TeamTable } from '../../team-table';
 import { AdvancementPicker, advancementCosts } from './advancement-picker';
+import type { TeamPagePlayerFragment } from './team.query.gen';
 import { useTeamQuery } from './team.query.gen';
-import type { TeamQuery } from './team.query.gen';
 
 const baseCols = [
   '#',
@@ -27,49 +27,42 @@ export function Content(): React.ReactElement {
   const { team: teamParam } = useParams();
   const { isLoading, isError, data } = useTeamQuery({ id: teamParam ?? '' });
   const [mode, setMode] = React.useState<'view' | 'skills' | 'hire'>('skills');
-  const [updates, setUpdates] = React.useState({ advancements: {}, hires: {}, fires: {} });
 
   const [popup, setPopup] = React.useState('');
-  const popupRef: React.MutableRefObject<HTMLDialogElement | null> = React.useRef(null);
-  const setPopupRef = React.useCallback((ref: HTMLDialogElement | null) => {
-    popupRef.current = ref;
-    ref?.addEventListener('cancel', e => {
-      e.preventDefault();
-    });
-    ref?.addEventListener('close', () => {
-      setPopup('');
-    });
-  }, []);
+  const popupRef: React.RefObject<HTMLDialogElement> = React.useRef<HTMLDialogElement>(null);
   const showPopup = React.useCallback((id: string) => () => {
     setPopup(id);
     popupRef.current?.showModal();
   }, []);
   const hidePopup = React.useCallback(() => {
+    setPopup('');
     popupRef.current?.close();
   }, []);
   const cols = React.useMemo(() => {
-      type PlayerType = NonNullable<TeamQuery['team']>['players'][number];
-      const result: NonNullable<TeamTableProps<PlayerType>['cols']> = [...baseCols];
-      if (mode === 'skills') {
-        result.splice(11, 0, {
-          name: 'Spend SPP',
-          render: (player: PlayerType) => (
-            <td key="Spend SPP">
-              {Object.values(advancementCosts).some(costs =>
-                costs[player.progression.length] <= player.starPlayerPoints.current) &&
-                  <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
-            </td>
-          ),
-        });
-      }
+    const result: NonNullable<TeamTableProps<TeamPagePlayerFragment>['cols']> = [...baseCols];
+    if (mode === 'skills') {
+      result.splice(11, 0, {
+        name: 'Spend SPP',
+        render: (player: TeamPagePlayerFragment) => (
+          <td key="Spend SPP">
+            {Object.values(advancementCosts).some(costs =>
+              costs[player.progression.length] <= player.starPlayerPoints.current) &&
+                <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
+          </td>
+        ),
+      });
+    }
 
-      return result;
+    return result;
   }, [mode, showPopup]);
 
-  const handlePlayerImprovement = React.useCallback((id: string, improvement: string) => {
-    console.log(id, improvement);
-    popupRef.current?.close();
-  }, []);
+  const handlePlayerImprovement = React.useCallback((player: TeamPagePlayerFragment) => {
+    if (!data?.team) return;
+    const updateIndex = data.team.players.findIndex(p => p.id === player.id);
+    if (updateIndex === -1) return;
+    data.team.players[updateIndex] = player;
+    hidePopup();
+  }, [data?.team, hidePopup]);
 
   const renderPopup = React.useCallback((): React.ReactElement | null => {
     const thisPlayer = data?.team?.players.find(p => p.id === popup);
@@ -80,17 +73,16 @@ export function Content(): React.ReactElement {
         player={thisPlayer}
         rosterPlayer={rosterPlayer}
         onAdvancementChosen={handlePlayerImprovement}
-        onCancel={hidePopup}
       />
     );
-  }, [data?.team?.players, data?.team?.race.players, handlePlayerImprovement, hidePopup, popup]);
+  }, [data?.team?.players, data?.team?.race.players, handlePlayerImprovement, popup]);
 
   if (isLoading) return <>Loading...</>;
   if (isError || !data?.team) return <>Failed to load team info</>;
   const { team } = data;
   return (
     <section>
-      <dialog ref={setPopupRef}>{renderPopup()}</dialog>
+      <dialog ref={popupRef}>{renderPopup()}</dialog>
       <h1>{team.name}</h1>
       <TeamTable players={team.players} cols={cols} />
       <table>

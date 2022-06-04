@@ -37,11 +37,12 @@ const Team: TeamResolvers = {
       .toArray();
     const roster = await context.db.collection('rosters').findOne<RosterDbObject>({ _id: parent.race });
     if (!roster) throw new Error('Unable to locate team roster');
-    const playerValues = teamPlayers
-      .reduce((prev, player) => {
-        const { base, current } = getPlayerValue(player, roster);
-        return { base: base + prev.base, current: current + prev.current };
-      }, { base: 0, current: 0 });
+    const playerValues = await teamPlayers
+      .reduce(async(prev, player) => {
+        const p = await prev;
+        const { base, current } = await getPlayerValue(player, context.db);
+        return { base: base + p.base, current: current + p.current };
+      }, Promise.resolve({ base: 0, current: 0 }));
     const staffValue =
       (parent.apothecary ? 50000 : 0) +
       ((parent.cheerleaders + parent.coaches) * 10000) +

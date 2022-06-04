@@ -14,7 +14,7 @@ const SpinningBit = styled.g<{ angle: number }>`
 `;
 
 type Props = {
-  fields: Array<{ prob: number; color: string; text: string }>;
+  fields: Array<{ prob: number; color: string; text: string; value?: string }>;
   isDisabled?: boolean;
   isSingleSpin?: boolean;
   onResult: (result: string) => void;
@@ -39,7 +39,7 @@ export function Spinner({ fields, isDisabled, isSingleSpin, onResult }: Props): 
       (fields[idx].prob / 2) + val >= spin && spin >= (fields[idx].prob / 2) - val);
     // Should this happen?
     // setTimeout(() => {
-    onResult(fields[resIdx].text);
+    onResult(fields[resIdx].value ?? fields[resIdx].text);
     // }, 3000);
   }, [fields, offsets, onResult]);
 

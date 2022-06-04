@@ -4,16 +4,19 @@ import type {
   RosterDbObject,
   RosterPlayerResolvers,
   RosterResolvers,
+  SkillDbObject,
 } from '../graphql.gen';
-import { getModifiedSkills } from './utils';
 
 export const Roster: RosterResolvers = {};
 
 export const RosterPlayer: RosterPlayerResolvers = {
-  skills: async(parent, query, context) =>
-    // Newline for spacing
-    getModifiedSkills(parent.skills, context.db.collection('skills'))
-  ,
+  skills: async(parent, query, context) => context.db.collection('skills')
+    .aggregate<SkillDbObject>([
+    { $match: { _id: { $in: parent.skills } } },
+    { $addFields: { __order: { $indexOfArray: [parent.skills, '$_id'] } } },
+    { $sort: { __order: 1 } },
+  ])
+    .toArray(),
 };
 
 export const Query: QueryResolvers = {
