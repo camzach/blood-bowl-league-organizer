@@ -23,6 +23,7 @@ generates:
       - typescript-mongodb
     config:
       contextType: backend/src/index#Context
+      enumsAsString: false
       mappers:
         Team: TeamDbObject
         Player: PlayerDbObject

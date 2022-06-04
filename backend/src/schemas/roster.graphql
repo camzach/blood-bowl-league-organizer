@@ -9,7 +9,7 @@ type RosterPlayer @entity(embedded: true) {
   AV: Int! @column
   secondary: [SkillCategory!]! @column
   primary: [SkillCategory!]! @column
-  skills: [Skill!]! @column(overrideType: "Array<{ id: ObjectId; modifier?: string }>")
+  skills: [Skill!]! @link
 }
 
 type Roster @entity(

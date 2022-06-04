@@ -1,28 +1,43 @@
-import type { Collection, ObjectId } from 'mongodb';
-import type { PlayerDbObject, RosterDbObject, SkillDbObject, TeamValue } from '../graphql.gen';
+import type { Db, ObjectId } from 'mongodb';
+import type { PlayerDbObject, RosterDbObject, RosterPlayerDbObject, TeamValue } from '../graphql.gen';
+import { ProgressionOption } from '../graphql.gen';
 
-export function getPlayerValue(parent: PlayerDbObject, roster: RosterDbObject): TeamValue {
-  const basePlayer = roster.players.find(p => p.position === parent.position);
-  if (!basePlayer) throw new Error('Player position not recognized');
+type PlayerInfoType = { player: PlayerDbObject; basePlayer: RosterPlayerDbObject; roster: RosterDbObject };
+export async function getPlayerInfo(player: ObjectId | PlayerDbObject, db: Db): Promise<PlayerInfoType> {
+  const resolvedPlayer = '_id' in player
+    ? player
+    : await db.collection('players').findOne<PlayerDbObject>({ _id: player });
+  if (!resolvedPlayer) throw new Error('Player not found');
+  const rosterQuery = { players: { $elemMatch: { position: resolvedPlayer.position } } };
+  const roster = await db.collection('rosters').findOne<RosterDbObject>(rosterQuery);
+  if (!roster) throw new Error('Player position does not exist on any roster');
+  const basePlayer = roster.players.find(p => p.position === resolvedPlayer.position);
+  if (!basePlayer) throw new Error('Unable to find base player');
+  return { player: resolvedPlayer, basePlayer, roster };
+}
+
+export async function getPlayerValue(parent: PlayerDbObject, db: Db): Promise<TeamValue> {
+  const { basePlayer, roster } = await getPlayerInfo(parent, db);
   const noHiringFee = (roster.specialRules.includes('Low Cost Linemen') && basePlayer.max >= 12);
   let cost = noHiringFee ? 0 : basePlayer.cost;
   for (const progression of parent.progression) {
     switch (progression) {
-      case 'AV':
-      case 'Random Primary':
+      case ProgressionOption.Av:
+      case ProgressionOption.RandomPrimary:
         cost += 10000;
         break;
-      case 'MA':
-      case 'PA':
-      case 'Chosen Primary':
-      case 'Random Secondary':
+      case ProgressionOption.Ma:
+      case ProgressionOption.Pa:
+      case ProgressionOption.ChosenPrimary:
+      case ProgressionOption.RandomSecondary:
         cost += 20000;
         break;
-      case 'Chosen Secondary':
-      case 'AG':
+      case ProgressionOption.CharacteristicSecondary:
+      case ProgressionOption.ChosenSecondary:
+      case ProgressionOption.Ag:
         cost += 40000;
         break;
-      case 'ST':
+      case ProgressionOption.St:
         cost += 80000;
         break;
     }
@@ -30,24 +45,4 @@ export function getPlayerValue(parent: PlayerDbObject, roster: RosterDbObject): 
   }
 
   return { base: cost, current: parent.injuries.missNextGame ? 0 : cost };
-}
-
-export async function getModifiedSkills(
-  skills: Array<{ id: ObjectId; modifier?: string }>,
-  skillsCollection: Collection
-): Promise<SkillDbObject[]> {
-  const relevantSkills = await skillsCollection
-    .find<SkillDbObject>({ _id: { $in: skills.map(s => s.id) } })
-    .toArray();
-  const result = skills.map(s => {
-    const skill = relevantSkills.find(({ _id }) => _id.equals(s.id));
-    if (!skill) throw new Error('Could not find a skill');
-
-    if (s.modifier !== undefined) {
-      skill.name = skill.name.replace('$$', s.modifier);
-      skill.rules = skill.rules.replace('$$', s.modifier);
-    }
-    return skill;
-  });
-  return result;
 }

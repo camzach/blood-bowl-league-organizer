@@ -18,11 +18,15 @@ query Team(
     cheerleaders
     apothecary
     players {
-      ...TeamTablePlayer
-      progression
-      starPlayerPoints {
-        total
-      }
+      ...TeamPagePlayer
     }
+  }
+}
+
+fragment TeamPagePlayer on Player {
+  ...TeamTablePlayer
+  progression
+  starPlayerPoints {
+    total
   }
 }

@@ -4,11 +4,11 @@ import type {
   BiasedRefDbObject,
   InfamousCoachingStaffDbObject,
   QueryResolvers,
+  SkillDbObject,
   StarPlayerDbObject,
   StarPlayerResolvers,
   WizardDbObject,
 } from '../graphql.gen';
-import { getModifiedSkills } from './utils';
 
 type OtherFilter = Filter<WizardDbObject | BasicInducementDbObject | InfamousCoachingStaffDbObject | BiasedRefDbObject>;
 const Query: QueryResolvers = {
@@ -55,7 +55,9 @@ const Query: QueryResolvers = {
 
 const StarPlayer: StarPlayerResolvers = {
   //
-  skills: async(parent, query, context) => getModifiedSkills(parent.skills, context.db.collection('skills')),
+  skills: async(parent, query, context) => context.db.collection('skills')
+    .find<SkillDbObject>({ _id: { $in: parent.skills } })
+    .toArray(),
 };
 
 export { Query, StarPlayer };

@@ -1,8 +1,10 @@
-type Skill @entity {
+type Skill @entity(additionalFields: [
+  {path: "purchasable", type: "boolean"}
+]) {
   id: String! @id
   name: String! @column
   rules: String! @column
-  category: SkillCategory! @column(overrideType: "'G' | 'A' | 'M' | 'P' | 'S' | 'T'")
+  category: SkillCategory! @column
 }
 
 enum SkillCategory {
