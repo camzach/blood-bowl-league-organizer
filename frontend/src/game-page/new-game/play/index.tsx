@@ -4,6 +4,7 @@ import { gameContext, injuryOptions, sppOptions } from '../game-context';
 import { TeamTable } from '../../../team-table';
 import { combinePlayers } from './utils';
 import { NumberInput } from '../../../number-input';
+import { TimeBank } from '../timer';
 
 const Container = styled.div`
   display: flex;
@@ -229,6 +230,10 @@ export function Play(): React.ReactElement {
           />
         </ControlWrapper>
         <button type="button" onClick={handleGameEnd}>Done!</button>
+        <br />
+        <br />
+        <br />
+        <TimeBank />
       </div>
       <TableContainer>
         <TeamTable players={awayPlayers} cols={teamCols} />
