@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint ./src/**/*.ts",
     "copy-files": "copyfiles ./src/schemas/* build -u 1",
-    "dev": "tsc-watch --onSuccess \"npm run start\"",
+    "dev": "NODE_ENV=development tsc-watch --onSuccess \"npm run start\"",
     "prestart": "npm run copy-files",
     "start": "node ./build/index.js"
   },

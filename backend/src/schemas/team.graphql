@@ -11,6 +11,7 @@ type Team @entity {
   rerolls: Int! @column
   players(missNextGame: Boolean): [Player!]! @link
   teamValue: TeamValue! @column
+  hireableJourneymen: [Player!]! @link
 }
 
 type TeamValue {
@@ -21,4 +22,25 @@ type TeamValue {
 extend type Query {
   team(id: String!): Team
   teams: [Team!]!
+}
+
+type HirePlayerResult {
+  success: Boolean
+}
+
+type HireJourneymanResult {
+  success: Boolean
+}
+
+extend type Mutation {
+  hirePlayer(
+    teamId: String!
+    position: String!
+    number: Int!
+  ): HirePlayerResult!
+  hireJourneyman(
+    teamId: String!
+    playerId: String!
+    number: Int!
+  ): HireJourneymanResult!
 }
