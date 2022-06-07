@@ -83,6 +83,8 @@ const Mutation: MutationResolvers = {
     const player = roster.players.find(p => p.position === query.position);
     if (!player) throw new Error('Position not found');
     if (team.treasury < player.cost) throw new Error('Cannot afford this player');
+    if (teamPlayers.filter(p => p.position === query.position).length >= player.max)
+      throw new Error('Team has the max amount of this position already');
     const newPlayer: PlayerDbObject = {
       _id: new ObjectId(),
       position: player.position,
