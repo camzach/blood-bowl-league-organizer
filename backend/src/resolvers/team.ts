@@ -169,6 +169,15 @@ const Mutation: MutationResolvers = {
 
     return { success: true };
   },
+  firePlayer: async(parent, query, context) => {
+    const teamId = new ObjectId(query.teamId);
+    const playerId = new ObjectId(query.playerId);
+    const team = await context.db.collection('teams').findOne<TeamDbObject>({ _id: teamId });
+    if (!team) throw new Error('Team not found');
+    if (!team.players.some(pid => pid.equals(playerId))) throw new Error('Player not on team');
+    await context.db.collection('teams').updateOne({ _id: teamId }, { $pull: { players: playerId } });
+    return { success: true };
+  },
 };
 
 export { Team, Query, Mutation };

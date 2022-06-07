@@ -12,6 +12,18 @@ mutation HirePlayer(
   }
 }
 
+mutation FirePlayer(
+  $teamId: String!
+  $playerId: String!
+) {
+  firePlayer(
+    teamId: $teamId
+    playerId: $playerId
+  ) {
+    success
+  }
+}
+
 mutation HireJourneyman(
   $teamId: String!
   $playerId: String!

@@ -28,6 +28,10 @@ type HirePlayerResult {
   success: Boolean
 }
 
+type FirePlayerResult {
+  success: Boolean
+}
+
 type HireJourneymanResult {
   success: Boolean
 }
@@ -43,4 +47,8 @@ extend type Mutation {
     playerId: String!
     number: Int!
   ): HireJourneymanResult!
+  firePlayer(
+    teamId: String!
+    playerId: String!
+  ): FirePlayerResult!
 }
