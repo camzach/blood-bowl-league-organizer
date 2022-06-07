@@ -8,16 +8,18 @@ query Team(
     race {
       rerollCost
       players {
-        position
-        primary
-        secondary
+        ...TeamPageRosterPlayer
       }
     }
+    treasury
     rerolls
     coaches
     cheerleaders
     apothecary
     players {
+      ...TeamPagePlayer
+    }
+    hireableJourneymen {
       ...TeamPagePlayer
     }
   }
@@ -29,4 +31,11 @@ fragment TeamPagePlayer on Player {
   starPlayerPoints {
     total
   }
+}
+
+fragment TeamPageRosterPlayer on RosterPlayer {
+  position
+  primary
+  secondary
+  cost
 }

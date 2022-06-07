@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import type { TeamTableProps } from '../../team-table';
 import { TeamTable } from '../../team-table';
 import { AdvancementPicker, advancementCosts } from './advancement-picker';
+import { JourneymanManager } from './journeyman-table';
+import { PlayerHirer } from './player-hirer';
 import type { TeamPagePlayerFragment } from './team.query.gen';
 import { useTeamQuery } from './team.query.gen';
 
@@ -25,8 +27,8 @@ const baseCols = [
 
 export function Content(): React.ReactElement {
   const { team: teamParam } = useParams();
-  const { isLoading, isError, data } = useTeamQuery({ id: teamParam ?? '' });
-  const [mode, setMode] = React.useState<'view' | 'skills' | 'hire'>('skills');
+  const { isLoading, isError, data, refetch } = useTeamQuery({ id: teamParam ?? '' });
+  const [mode, setMode] = React.useState<'view' | 'skills' | 'hire'>('hire');
 
   const [popup, setPopup] = React.useState('');
   const popupRef: React.RefObject<HTMLDialogElement> = React.useRef<HTMLDialogElement>(null);
@@ -52,21 +54,22 @@ export function Content(): React.ReactElement {
         ),
       });
     }
-
     return result;
   }, [mode, showPopup]);
 
-  const handlePlayerImprovement = React.useCallback((player: TeamPagePlayerFragment) => {
-    if (!data?.team) return;
-    const updateIndex = data.team.players.findIndex(p => p.id === player.id);
-    if (updateIndex === -1) return;
-    data.team.players[updateIndex] = player;
+  const handlePlayerImprovement = React.useCallback(() => {
+    void refetch();
     hidePopup();
-  }, [data?.team, hidePopup]);
+  }, [hidePopup, refetch]);
+  const handleHire = React.useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   const renderPopup = React.useCallback((): React.ReactElement | null => {
-    const thisPlayer = data?.team?.players.find(p => p.id === popup);
-    const rosterPlayer = data?.team?.race.players.find(p => p.position === thisPlayer?.position);
+    if (!data?.team) return <>Team not fully loaded</>;
+    const searchSpace = [...data.team.players, ...data.team.hireableJourneymen];
+    const thisPlayer = searchSpace.find(p => p.id === popup);
+    const rosterPlayer = data.team.race.players.find(p => p.position === thisPlayer?.position);
     if (!thisPlayer || !rosterPlayer) return null;
     return (
       <AdvancementPicker
@@ -75,16 +78,36 @@ export function Content(): React.ReactElement {
         onAdvancementChosen={handlePlayerImprovement}
       />
     );
-  }, [data?.team?.players, data?.team?.race.players, handlePlayerImprovement, popup]);
+  }, [data?.team, handlePlayerImprovement, popup]);
 
   if (isLoading) return <>Loading...</>;
   if (isError || !data?.team) return <>Failed to load team info</>;
   const { team } = data;
+  const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)
+    .filter(n => !team.players.some(p => p.number === n));
+
   return (
     <section>
       <dialog ref={popupRef}>{renderPopup()}</dialog>
       <h1>{team.name}</h1>
       <TeamTable players={team.players} cols={cols} />
+      {team.hireableJourneymen.length > 0 && mode !== 'view' &&
+        <JourneymanManager
+          players={team.hireableJourneymen}
+          baseCols={cols}
+          freeNumbers={freeNumbers}
+          mode={mode}
+          teamId={team.id}
+          onHire={handleHire}
+        />}
+      {mode === 'hire' &&
+        <PlayerHirer
+          positions={team.race.players}
+          treasury={team.treasury}
+          freeNumbers={freeNumbers}
+          teamId={team.id}
+          onHire={handleHire}
+        />}
       <table>
         <thead>
           <tr>

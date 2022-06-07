@@ -8,6 +8,7 @@ import type {
   ScheduleSlotResolvers,
   TeamDbObject,
 } from '../graphql.gen';
+import { withTransaction } from './utils';
 
 const Query: QueryResolvers = {
   schedule: async(parent, query, context) => {
@@ -63,17 +64,11 @@ const Mutation: MutationResolvers = {
       winningsAway: 0,
       winningsHome: 0,
     };
-    const session = context.client.startSession();
-    session.startTransaction();
-    try {
+    await withTransaction(context.client, async() => {
       game.game = newGame._id;
       await context.db.collection('schedule').replaceOne({ _id: schedule._id }, schedule);
       await context.db.collection('games').insertOne(newGame);
-    } catch {
-      await session.abortTransaction();
-      return { success: false };
-    }
-    await session.commitTransaction();
+    });
     return { success: true };
   },
 };

@@ -32,7 +32,7 @@ type Player @entity(
   skills: [Skill!]! @link
   progression: [ProgressionOption!]! @column
   starPlayerPoints: StarPlayerPoints! @embedded
-  teamValue: TeamValue! @column
+  teamValue: PlayerValue!
   casualties: Casualties!
 }
 
@@ -69,9 +69,11 @@ type StarPlayerPoints @entity(embedded: true) {
   current: Int!
 }
 
-type TeamValue {
+type PlayerValue {
   base: Int!
   current: Int!
+  hiringFee: Int!
+  improvements: Int!
 }
 
 type Casualties {

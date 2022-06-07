@@ -1,0 +1,27 @@
+mutation HirePlayer(
+  $teamId: String!
+  $position: String!
+  $number: Int!
+) {
+  hirePlayer(
+    teamId: $teamId
+    position: $position
+    number: $number
+  ) {
+    success
+  }
+}
+
+mutation HireJourneyman(
+  $teamId: String!
+  $playerId: String!
+  $number: Int!
+) {
+  hireJourneyman(
+    teamId: $teamId
+    playerId: $playerId
+    number: $number
+  ) {
+    success
+  }
+}
