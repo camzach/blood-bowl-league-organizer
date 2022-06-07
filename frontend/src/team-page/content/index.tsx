@@ -2,7 +2,10 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import type { TeamTableProps } from '../../team-table';
 import { TeamTable } from '../../team-table';
+import { runMutation } from '../../utils';
 import { AdvancementPicker, advancementCosts } from './advancement-picker';
+import type { FirePlayerMutation } from './hire-player.mutation.gen';
+import { FirePlayerDocument } from './hire-player.mutation.gen';
 import { JourneymanManager } from './journeyman-table';
 import { PlayerHirer } from './player-hirer';
 import type { TeamPagePlayerFragment } from './team.query.gen';
@@ -40,22 +43,6 @@ export function Content(): React.ReactElement {
     setPopup('');
     popupRef.current?.close();
   }, []);
-  const cols = React.useMemo(() => {
-    const result: NonNullable<TeamTableProps<TeamPagePlayerFragment>['cols']> = [...baseCols];
-    if (mode === 'skills') {
-      result.splice(11, 0, {
-        name: 'Spend SPP',
-        render: (player: TeamPagePlayerFragment) => (
-          <td key="Spend SPP">
-            {Object.values(advancementCosts).some(costs =>
-              costs[player.progression.length] <= player.starPlayerPoints.current) &&
-                <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
-          </td>
-        ),
-      });
-    }
-    return result;
-  }, [mode, showPopup]);
 
   const handlePlayerImprovement = React.useCallback(() => {
     void refetch();
@@ -64,6 +51,11 @@ export function Content(): React.ReactElement {
   const handleHire = React.useCallback(() => {
     void refetch();
   }, [refetch]);
+  const handleFire = React.useCallback((id: string) => () => {
+    if (!data?.team) return;
+    void runMutation<FirePlayerMutation>(FirePlayerDocument, { playerId: id, teamId: data.team.id })
+      .then(async() => refetch());
+  }, [data?.team, refetch]);
 
   const renderPopup = React.useCallback((): React.ReactElement | null => {
     if (!data?.team) return <>Team not fully loaded</>;
@@ -79,6 +71,33 @@ export function Content(): React.ReactElement {
       />
     );
   }, [data?.team, handlePlayerImprovement, popup]);
+
+  const cols = React.useMemo(() => {
+    const result: NonNullable<TeamTableProps<TeamPagePlayerFragment>['cols']> = [...baseCols];
+    if (mode === 'skills') {
+      result.splice(11, 0, {
+        name: 'Spend SPP',
+        render: (player: TeamPagePlayerFragment) => (
+          <td key="Spend SPP">
+            {Object.values(advancementCosts).some(costs =>
+              costs[player.progression.length] <= player.starPlayerPoints.current) &&
+                <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
+          </td>
+        ),
+      });
+    }
+    if (mode === 'hire') {
+      result.splice(1, 0, {
+        name: 'Fire',
+        render: player => (
+          <td key="Fire">
+            <button type="button" onClick={handleFire(player.id)}>Fire!</button>
+          </td>
+        ),
+      });
+    }
+    return result;
+  }, [handleFire, mode, showPopup]);
 
   if (isLoading) return <>Loading...</>;
   if (isError || !data?.team) return <>Failed to load team info</>;

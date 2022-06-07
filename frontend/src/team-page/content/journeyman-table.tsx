@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TeamTableProps } from '../../team-table';
 import { TeamTable } from '../../team-table';
+import { runMutation } from '../../utils';
 import type { HireJourneymanMutation } from './hire-player.mutation.gen';
 import { HireJourneymanDocument } from './hire-player.mutation.gen';
 import type { TeamPagePlayerFragment } from './team.query.gen';
@@ -18,18 +19,8 @@ type Props = {
 export function JourneymanManager({ players, baseCols, freeNumbers, mode, teamId, onHire }: Props): React.ReactElement {
   const [numbers, setNumbers] = React.useState(Object.fromEntries(players.map((p, idx) => [p.id, freeNumbers[idx]])));
   const hireJourneyman = React.useCallback((playerId: string) => () => {
-    void fetch('http://localhost:3000/graphql', {
-      method: 'POST',
-      body: JSON.stringify({
-        query: HireJourneymanDocument,
-        variables: { number: numbers[playerId], playerId, teamId },
-      }),
-    })
-      .then(async res => res.json() as Promise<{ data: HireJourneymanMutation; errors?: unknown[] }>)
-      .then(d => {
-        if ((d.errors?.length ?? 0) > 0) throw new Error('Failed fetch');
-        onHire();
-      });
+    void runMutation<HireJourneymanMutation>(HireJourneymanDocument, { number: numbers[playerId], playerId, teamId })
+      .then(onHire);
   }, [numbers, onHire, teamId]);
   const handleNumberChange = React.useCallback((id: string) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     const number = parseInt(e.target.value, 10);
@@ -46,6 +37,14 @@ export function JourneymanManager({ players, baseCols, freeNumbers, mode, teamId
     if (!result) return result;
     if (mode === 'hire') {
       result.unshift({
+        name: 'Hire!',
+        render: (player: TeamPagePlayerFragment) => (
+          <td key="Hire!">
+            <button type="button" onClick={hireJourneyman(player.id)}>Hire!</button>
+          </td>
+        ),
+      });
+      result.unshift({
         name: '#',
         render: p => (
           <td key="#">
@@ -57,14 +56,6 @@ export function JourneymanManager({ players, baseCols, freeNumbers, mode, teamId
                   </option>
                 ))}
             </select>
-          </td>
-        ),
-      });
-      result.push({
-        name: 'Hire!',
-        render: (player: TeamPagePlayerFragment) => (
-          <td key="Hire!">
-            <button type="button" onClick={hireJourneyman(player.id)}>Hire!</button>
           </td>
         ),
       });
