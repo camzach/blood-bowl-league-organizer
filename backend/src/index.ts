@@ -1,31 +1,41 @@
-import { loadTypedefsSync } from '@graphql-tools/load';
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { join } from 'path';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { resolvers } from './resolvers';
-import { createServer } from '@graphql-yoga/node';
-import { DIRECTIVES } from '@graphql-codegen/typescript-mongodb';
-import type { Db } from 'mongodb';
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import express from 'express';
+import type { Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import bodyParser from 'body-parser';
 
-export type Context = { db: Db; client: MongoClient };
+const app = express();
+const port = process.env.PORT ?? 8080;
 
-const typedefs = loadTypedefsSync(
-  join(__dirname, 'schemas', '**/*.graphql'),
-  { loaders: [new GraphQLFileLoader()] },
-).map(src => src.document).filter((doc): doc is NonNullable<typeof doc> => !!doc);
-const schema = makeExecutableSchema({ typeDefs: [DIRECTIVES, typedefs], resolvers });
+const prisma = new PrismaClient();
 
-const uri = 'mongodb+srv://admin:abc@bblm.pkmbu.mongodb.net/BBLM?retryWrites=true&w=majority';
+app.use(bodyParser.json());
 
-void new MongoClient(uri, { serverApi: ServerApiVersion.v1 }).connect()
-  .then(c => createServer({
-    schema,
-    port: 3000,
-    cors: { origin: ['*'] },
-    context: { db: c.db('bblm'), client: c },
-  }))
-  .then(async server => server.start())
-  .catch(e => {
-    console.log('Failed to start', e);
-  });
+// Create team
+app.post('/team', (req: { body: Prisma.TeamCreateInput }, res) => {
+  void prisma.team.create({ data: { name: req.body.name } })
+    .then(res.send)
+    .catch(() => res.sendStatus(500));
+});
+
+app.get('/team/:name', (req, res) => {
+  void prisma.team.findFirst({ where: { name: req.params.name } })
+    .then(team => {
+      res.send(team);
+    });
+});
+
+// Hire player
+// Hire staff
+// Generate schedule
+// Start game
+// Take on Journeymen
+// Purchase Inducements
+// End game
+// Update Player
+// Fire Player
+// Retire Player
+// Ready for next game
+
+app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
+});

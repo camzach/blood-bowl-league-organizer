@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id               String  @id @unique @default(uuid()) @db.Uuid
+  name             String
+  team             Team    @relation(fields: [teamName], references: [name])
+  teamName         String
+  nigglingInjuries Int     @default(0)
+  missNextGame     Boolean @default(false)
+  AG               Int
+  MA               Int
+  PA               Int?
+  ST               Int
+  AV               Int
+  starPlayerPoints Int     @default(0)
+  teamValue        Int
+  improvements     Int
+  skills           Skill[]
+}
+
+model Team {
+  name    String   @id @unique
+  players Player[]
+}
+
+model Roster {
+  name         String     @id @unique
+  rerollCost   Int
+  tier         Int
+  positions    Position[]
+  specialRules String[]
+}
+
+enum SkillCategory {
+  G
+  M
+  P
+  S
+  A
+  T
+}
+
+model Position {
+  id         String          @id @unique @default(uuid()) @db.Uuid
+  name       String
+  max        Int
+  cost       Int
+  MA         Int
+  ST         Int
+  AG         Int
+  PA         Int?
+  AV         Int
+  primary    SkillCategory[]
+  secondary  SkillCategory[]
+  skills     Skill[]
+  Roster     Roster          @relation(fields: [rosterName], references: [name])
+  rosterName String
+}
+
+model Skill {
+  name        String        @id @unique
+  rules       String
+  category    SkillCategory
+  players     Player[]
+  positions   Position[]
+  starPlayers StarPlayer[]
+}
+
+model Inducement {
+  name              String             @id @unique
+  max               Int
+  price             Int?
+  specialPriceRule  String?
+  specialPrice      Int?
+  rules             String
+  options           InducementOption[]
+}
+
+model StarPlayer {
+  name          String   @id @unique
+  MA            Int
+  ST            Int
+  PA            Int?
+  AG            Int
+  AV            Int
+  skills        Skill[]
+  specialRule   String
+  hiringFee     Int
+  playsFor      String[]
+  doesntPlayFor String[]
+}
+
+model InducementOption {
+  name              String      @id @unique
+  price             Int
+  specialPriceRule  String?
+  specialPrice      Int?
+  rules             String
+  Inducement        Inducement? @relation(fields: [inducementName], references: [name])
+  inducementName    String?
+}
