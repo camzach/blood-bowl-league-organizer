@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "TeamState" AS ENUM ('Draft', 'Ready', 'AwaitingJourneymenChoice', 'AwaitingInducements', 'PlayingGame', 'PlayerAdvancement', 'HiringFiringRetiring');
+
+-- CreateEnum
 CREATE TYPE "SkillCategory" AS ENUM ('G', 'M', 'P', 'S', 'A', 'T');
 
 -- CreateTable
@@ -15,7 +18,8 @@ CREATE TABLE "Player" (
     "AV" INTEGER NOT NULL,
     "starPlayerPoints" INTEGER NOT NULL DEFAULT 0,
     "teamValue" INTEGER NOT NULL,
-    "improvements" INTEGER NOT NULL,
+    "improvements" INTEGER NOT NULL DEFAULT 0,
+    "positionId" UUID NOT NULL,
 
     CONSTRAINT "Player_pkey" PRIMARY KEY ("id")
 );
@@ -23,6 +27,14 @@ CREATE TABLE "Player" (
 -- CreateTable
 CREATE TABLE "Team" (
     "name" TEXT NOT NULL,
+    "treasury" INTEGER NOT NULL DEFAULT 1000000,
+    "state" "TeamState" NOT NULL DEFAULT 'Draft',
+    "rosterName" TEXT NOT NULL,
+    "rerolls" INTEGER NOT NULL DEFAULT 0,
+    "cheerleaders" INTEGER NOT NULL DEFAULT 0,
+    "assistantCoaches" INTEGER NOT NULL DEFAULT 0,
+    "apothecary" BOOLEAN NOT NULL DEFAULT false,
+    "dedicatedFans" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Team_pkey" PRIMARY KEY ("name")
 );
@@ -69,8 +81,8 @@ CREATE TABLE "Inducement" (
     "name" TEXT NOT NULL,
     "max" INTEGER NOT NULL,
     "price" INTEGER,
-    "specialPriceRule" TEXT NOT NULL,
-    "specialPrice" INTEGER NOT NULL,
+    "specialPriceRule" TEXT,
+    "specialPrice" INTEGER,
     "rules" TEXT NOT NULL,
 
     CONSTRAINT "Inducement_pkey" PRIMARY KEY ("name")
@@ -97,7 +109,7 @@ CREATE TABLE "InducementOption" (
     "name" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
     "specialPriceRule" TEXT,
-    "specialPrice" INTEGER[],
+    "specialPrice" INTEGER,
     "rules" TEXT NOT NULL,
     "inducementName" TEXT,
 
@@ -166,6 +178,12 @@ CREATE INDEX "_SkillToStarPlayer_B_index" ON "_SkillToStarPlayer"("B");
 
 -- AddForeignKey
 ALTER TABLE "Player" ADD CONSTRAINT "Player_teamName_fkey" FOREIGN KEY ("teamName") REFERENCES "Team"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Player" ADD CONSTRAINT "Player_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "Position"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Team" ADD CONSTRAINT "Team_rosterName_fkey" FOREIGN KEY ("rosterName") REFERENCES "Roster"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Position" ADD CONSTRAINT "Position_rosterName_fkey" FOREIGN KEY ("rosterName") REFERENCES "Roster"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
