@@ -42,7 +42,6 @@ async function main(): Promise<void> {
       primary: SkillCategoryType[];
       secondary: SkillCategoryType[];
     }>;
-    apothecaryAllowed?: boolean;
   };
   const rosters = loadJSON('./seeds/rosters.json') as JSONRosterType[];
   await prisma.roster.createMany({
@@ -50,6 +49,7 @@ async function main(): Promise<void> {
       name: r.name,
       rerollCost: r.rerollCost,
       tier: r.tier,
+      specialRules: r.specialRules,
     })),
   });
 

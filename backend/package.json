@@ -8,7 +8,7 @@
     "lint": "eslint ./src/**/*.ts",
     "dev": "NODE_ENV=development tsc-watch --onSuccess \"npm run start\"",
     "build": "tsc",
-    "start": "prisma migrate deploy && node ./build/index.js"
+    "start": "node ./build/index.js"
   },
   "prisma": {
     "seed": "ts-node-esm prisma/seed.ts"
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/express": "^4.17.14",
     "sequelize-cli": "^6.5.1",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsc-watch": "^5.0.3"
   }
 }

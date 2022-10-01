@@ -11,26 +11,47 @@ datasource db {
 }
 
 model Player {
-  id               String  @id @unique @default(uuid()) @db.Uuid
+  id               String   @id @unique @default(uuid()) @db.Uuid
   name             String
-  team             Team    @relation(fields: [teamName], references: [name])
+  team             Team     @relation(fields: [teamName], references: [name])
   teamName         String
-  nigglingInjuries Int     @default(0)
-  missNextGame     Boolean @default(false)
+  nigglingInjuries Int      @default(0)
+  missNextGame     Boolean  @default(false)
   AG               Int
   MA               Int
   PA               Int?
   ST               Int
   AV               Int
-  starPlayerPoints Int     @default(0)
+  starPlayerPoints Int      @default(0)
   teamValue        Int
-  improvements     Int
+  improvements     Int      @default(0)
   skills           Skill[]
+  position         Position @relation(fields: [positionId], references: [id])
+  positionId       String   @db.Uuid
+}
+
+enum TeamState {
+  Draft
+  Ready
+  AwaitingJourneymenChoice
+  AwaitingInducements
+  PlayingGame
+  PlayerAdvancement
+  HiringFiringRetiring
 }
 
 model Team {
-  name    String   @id @unique
-  players Player[]
+  name             String    @id @unique
+  players          Player[]
+  treasury         Int       @default(1000000)
+  state            TeamState @default(Draft)
+  roster           Roster    @relation(fields: [rosterName], references: [name])
+  rosterName       String
+  rerolls          Int       @default(0)
+  cheerleaders     Int       @default(0)
+  assistantCoaches Int       @default(0)
+  apothecary       Boolean   @default(false)
+  dedicatedFans    Int       @default(0)
 }
 
 model Roster {
@@ -39,6 +60,7 @@ model Roster {
   tier         Int
   positions    Position[]
   specialRules String[]
+  Team         Team[]
 }
 
 enum SkillCategory {
@@ -65,6 +87,7 @@ model Position {
   skills     Skill[]
   Roster     Roster          @relation(fields: [rosterName], references: [name])
   rosterName String
+  Player     Player[]
 }
 
 model Skill {
@@ -77,13 +100,13 @@ model Skill {
 }
 
 model Inducement {
-  name              String             @id @unique
-  max               Int
-  price             Int?
-  specialPriceRule  String?
-  specialPrice      Int?
-  rules             String
-  options           InducementOption[]
+  name             String             @id @unique
+  max              Int
+  price            Int?
+  specialPriceRule String?
+  specialPrice     Int?
+  rules            String
+  options          InducementOption[]
 }
 
 model StarPlayer {
@@ -101,11 +124,11 @@ model StarPlayer {
 }
 
 model InducementOption {
-  name              String      @id @unique
-  price             Int
-  specialPriceRule  String?
-  specialPrice      Int?
-  rules             String
-  Inducement        Inducement? @relation(fields: [inducementName], references: [name])
-  inducementName    String?
+  name             String      @id @unique
+  price            Int
+  specialPriceRule String?
+  specialPrice     Int?
+  rules            String
+  Inducement       Inducement? @relation(fields: [inducementName], references: [name])
+  inducementName   String?
 }
