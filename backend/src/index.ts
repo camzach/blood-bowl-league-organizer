@@ -2,6 +2,7 @@ import express from 'express';
 import type { Team } from '@prisma/client';
 import { Prisma, PrismaClient } from '@prisma/client';
 import bodyParser from 'body-parser';
+import { generateSchedule } from './schedule-generator';
 
 const app = express();
 const port = process.env.PORT ?? 8080;
@@ -164,118 +165,96 @@ app.post('/team/:teamName/hireStaff', (req, res) => {
   })();
 });
 
+// Ready team
+const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
+  'Crisis Averted': () => 0,
+  'Minor Incident': () => Math.ceil(Math.random() * 3) * 10_000,
+  'Major Incident': g => Math.floor((g / 5_000) / 2) * 5_000,
+  'Catastrophe': g => g - ((Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) * 10_000),
+};
+const expensiveMistakesTable = [
+  ['Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted'],
+  ['Minor Incident', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted'],
+  ['Minor Incident', 'Minor Incident', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted'],
+  ['Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted', 'Crisis Averted', 'Crisis Averted'],
+  ['Major Incident', 'Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted', 'Crisis Averted'],
+  ['Catastrophe', 'Major Incident', 'Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted'],
+  ['Catastrophe', 'Catastrophe', 'Major Incident', 'Major Incident', 'Major Incident', 'Major Incident'],
+];
+app.post('/team/:teamName/ready', (req, res) => {
+  void (async(): Promise<void> => {
+    const team = await prisma.team.findUnique({ where: { name: req.params.teamName }, include: { players: true } });
+    if (!team) {
+      res.status(400).send('Team not found');
+      return;
+    }
+    if (!['Draft', 'PostGame'].includes(team.state)) {
+      res.status(400).send('Team is not in the post-game or draft phase');
+      return;
+    }
+    if (team.state === 'Draft' && team.players.length < 11) {
+      res.status(400).send('Team has not hired a full roster yet');
+      return;
+    }
+    const expensiveMistake = team.state === 'Draft'
+      ? null
+      : expensiveMistakesTable[
+        Math.min(Math.floor(team.treasury / 100_000), 6)
+      ][Math.floor(Math.random() * 6)];
+    const expensiveMistakesCost = expensiveMistake !== null
+      ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
+      : 0;
+    await prisma.team.update({
+      where: { name: req.params.teamName },
+      data: { state: 'Ready', treasury: { decrement: expensiveMistakesCost } },
+    });
+    res.send({
+      expensiveMistake,
+      expensiveMistakesCost,
+    });
+  })();
+});
+
 // Generate schedule
 app.post('/schedule/generate', (req, res) => {
   void (async(): Promise<void> => {
-    const teams: Array<string | null> = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
-    const pairings: Prisma.ScheduledGameCreateManyInput[] = [];
-    const homeAwayCounts = Object.fromEntries(teams.map(team => [team, [0, 0]])) as Record<string, [number, number]>;
-    if (teams.length % 2 === 1)
-      teams.push(null);
-
-    const teamCount = teams.length;
-    const rounds = teamCount - 1;
-    const half = teamCount / 2;
-
-
-    const teamIndices = teams.map((_, i) => i).slice(1);
-
-    for (let round = 0; round < rounds; round++) {
-      const newTeamIndices = [0].concat(teamIndices);
-
-      const firstHalf = newTeamIndices.slice(0, half);
-      const secondHalf = newTeamIndices.slice(half, teamCount).reverse();
-
-      for (let i = 0; i < firstHalf.length; i++) {
-        const pairing = [teams[firstHalf[i]], teams[secondHalf[i]]];
-        if (pairing[0] === null || pairing[1] === null)
-          continue;
-        if (round % 2 === 0)
-          pairing.reverse();
-        homeAwayCounts[pairing[0]][0] += 1;
-        homeAwayCounts[pairing[1]][1] += 1;
-        pairings.push({
-          homeTeamName: pairing[0],
-          awayTeamName: pairing[1],
-          round,
-        });
-      }
-
-      // Rotating the array
-      teamIndices.push(teamIndices.shift() as number);
-    }
-
-    const isScheduleBalanced = (): boolean =>
-      Object.values(homeAwayCounts).every(([home, away]) => Math.abs(home - away) === (teams.includes(null) ? 0 : 1));
-
-    const switchHomeAway = (game: (typeof pairings)[number]): void => {
-      const { homeTeamName, awayTeamName } = game;
-      game.homeTeamName = awayTeamName;
-      game.awayTeamName = homeTeamName;
-      homeAwayCounts[homeTeamName][0] -= 1;
-      homeAwayCounts[homeTeamName][1] += 1;
-      homeAwayCounts[awayTeamName][0] += 1;
-      homeAwayCounts[awayTeamName][1] -= 1;
-    };
-
-    function rebalance(): void {
-      if (teams.includes(null)) {
-        const [tooManyHome] = Object.entries(homeAwayCounts)
-          .find(([_, [home, away]]) => home - away > 0) ?? [] as never[];
-        const [tooManyAway] = Object.entries(homeAwayCounts)
-          .find(([_, [home, away]]) => away - home > 0) ?? [] as never[];
-        const gameToFix = pairings.find(g => g.homeTeamName === tooManyHome && g.awayTeamName === tooManyAway);
-        if (gameToFix) {
-          switchHomeAway(gameToFix);
-          return;
-        }
-        let gameA = null;
-        let gameB = null;
-        for (const intermediary of teams) {
-          gameA = pairings.find(p => p.homeTeamName === tooManyHome && p.awayTeamName === intermediary);
-          gameB = pairings.find(p => p.awayTeamName === tooManyAway && p.homeTeamName === intermediary);
-          if (!gameA || !gameB) {
-            gameA = null;
-            gameB = null;
-          } else {
-            break;
-          }
-        }
-        if (!gameA || !gameB) {
-          console.error('Somehow failed to balance. This should not be possible, so the logic must be wrong.');
-          process.exit(0);
-          return;
-        }
-        switchHomeAway(gameA);
-        switchHomeAway(gameB);
-      } else {
-        const [tooManyHome] = Object.entries(homeAwayCounts)
-          .find(([_, [home, away]]) => home - away > 1) ?? [null];
-        if (tooManyHome !== null) {
-          const game = pairings.find(g =>
-            g.homeTeamName === tooManyHome &&
-            homeAwayCounts[g.awayTeamName][1] > homeAwayCounts[g.awayTeamName][0]) ?? null as never;
-          switchHomeAway(game);
-          return;
-        }
-        const [tooManyAway] = Object.entries(homeAwayCounts)
-          .find(([_, [home, away]]) => away - home > 1) ?? [] as never[];
-        const game = pairings.find(g =>
-          g.homeTeamName === tooManyAway &&
-            homeAwayCounts[g.awayTeamName][1] > homeAwayCounts[g.awayTeamName][0]) ?? null as never;
-        switchHomeAway(game);
-      }
-    }
-
-    while (!isScheduleBalanced())
-      rebalance();
-
+    const teams = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
+    const pairings = generateSchedule(teams);
     const schedule = await prisma.scheduledGame.createMany({ data: pairings });
     res.send(schedule);
   })();
 });
 
 // Start game
+const weatherTable = [
+  'Sweltering Heat',
+  'Very Sunny',
+  ...Array.from(Array(7), () => 'Perfect Conditions'),
+  'Pouring Rain',
+  'Blizzard',
+];
+app.post('/schedule/game/:gameId/start', (req, res) => {
+  void (async(): Promise<void> => {
+    const game = await prisma.scheduledGame.findUnique({
+      where: { id: req.params.gameId },
+      include: { home: { include: { players: true } }, away: { include: { players: true } } },
+    });
+    if (!game) {
+      res.status(400).send('Game not found');
+      return;
+    }
+    if (!(game.home.state === 'Ready') || !(game.away.state === 'Ready')) {
+      res.status(400).send('Teams not ready');
+      return;
+    }
+    const fanFactorHome = game.home.dedicatedFans + Math.ceil(Math.random() * 6);
+    const fanFactorAway = game.away.dedicatedFans + Math.ceil(Math.random() * 6);
+    const weatherRoll = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);
+    const weatherResult = weatherTable[weatherRoll];
+    res.send({ fanFactorHome, fanFactorAway, weatherRoll, weatherResult });
+  })();
+});
+
 // Take on Journeymen
 // Purchase Inducements
 // End game

@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "lint": "eslint ./src/**/*.ts",
-    "dev": "NODE_ENV=development tsc-watch --onSuccess \"npm run start\"",
+    "dev": "NODE_ENV=development nodemon src/index.ts",
     "build": "tsc",
-    "start": "node ./build/index.js"
+    "start": "node --experimental-specifier-resolution=node ./build/index.js"
   },
   "prisma": {
     "seed": "ts-node-esm prisma/seed.ts"
@@ -24,6 +24,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.14",
+    "@types/node": "^18.7.23",
+    "nodemon": "^2.0.20",
     "sequelize-cli": "^6.5.1",
     "ts-node": "^10.9.1",
     "tsc-watch": "^5.0.3"

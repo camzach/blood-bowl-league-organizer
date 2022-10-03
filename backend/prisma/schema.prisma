@@ -33,11 +33,10 @@ model Player {
 enum TeamState {
   Draft
   Ready
-  AwaitingJourneymenChoice
-  AwaitingInducements
-  PlayingGame
-  PlayerAdvancement
-  HiringFiringRetiring
+  Journeymen
+  Inducements
+  Playing
+  PostGame
 }
 
 model Team {

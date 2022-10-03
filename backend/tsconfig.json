@@ -7,8 +7,12 @@
     "module": "es2022",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "target": "ESNext",
+    "target": "es2022",
     "lib": ["es2022"],
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   },
   "include": [
     "src"
