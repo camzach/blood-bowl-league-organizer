@@ -1,5 +1,5 @@
 import express from 'express';
-import type { Team } from '@prisma/client';
+import type { Position, PrismaPromise, Skill, Team } from '@prisma/client';
 import { Prisma, PrismaClient } from '@prisma/client';
 import bodyParser from 'body-parser';
 import { generateSchedule } from './schedule-generator';
@@ -64,11 +64,32 @@ app.get('/team/:teamName', (req, res) => {
 // Hire player
 type HirePlayerBodyType = {
   position: string;
+  name?: string;
 };
+function newPlayer(
+  position: Position & { skills: Skill[] },
+  name?: string
+): Prisma.PlayerCreateInput {
+  return {
+    MA: position.MA,
+    AG: position.AG,
+    PA: position.PA,
+    ST: position.ST,
+    AV: position.AV,
+    teamValue: position.cost,
+    skills: { connect: position.skills.map(s => ({ name: s.name })) },
+    name,
+    position: { connect: { id: position.id } },
+  };
+}
 app.post('/team/:teamName/hirePlayer', (req, res) => {
   void (async(): Promise<void> => {
     const body = req.body as HirePlayerBodyType;
     const team = res.locals.team as Team;
+    if (!['Draft', 'PostGame'].includes(team.state)) {
+      res.status(400).send('Team cannot hire new players right now');
+      return;
+    }
     const position = await prisma.position.findFirst({
       where: {
         name: body.position,
@@ -80,7 +101,7 @@ app.post('/team/:teamName/hirePlayer', (req, res) => {
       res.status(400).send('Unknown position');
       return;
     }
-    const players = await prisma.player.findMany({ where: { teamName: team.name } });
+    const players = await prisma.player.findMany({ where: { playerTeamName: team.name } });
     if (players.length >= 16) {
       res.status(400).send('Team roster already full');
       return;
@@ -97,19 +118,7 @@ app.post('/team/:teamName/hirePlayer', (req, res) => {
       where: { name: req.params.teamName },
       data: {
         treasury: team.treasury - position.cost,
-        players: {
-          create: {
-            MA: position.MA,
-            AG: position.AG,
-            PA: position.PA,
-            ST: position.ST,
-            AV: position.AV,
-            teamValue: position.cost,
-            skills: { connect: position.skills.map(({ name }) => ({ name })) },
-            name: 'NewPlayer',
-            position: { connect: { id: position.id } },
-          },
-        },
+        players: { create: newPlayer(position, body.name) },
       },
     });
     res.send(abc);
@@ -220,7 +229,7 @@ app.post('/schedule/generate', (req, res) => {
   void (async(): Promise<void> => {
     const teams = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
     const pairings = generateSchedule(teams);
-    const schedule = await prisma.scheduledGame.createMany({ data: pairings });
+    const schedule = await prisma.game.createMany({ data: pairings });
     res.send(schedule);
   })();
 });
@@ -233,11 +242,29 @@ const weatherTable = [
   'Pouring Rain',
   'Blizzard',
 ];
+const startGameTeamFields = {
+  include: {
+    players: true,
+    roster: { include: { positions: { select: { name: true, max: true } } } },
+  },
+} as const;
+type StartGameResponseType = {
+  fanFactorHome: number;
+  fanFactorAway: number;
+  weatherResult: string;
+  journeymenChoices?: {
+    home?: string[];
+    away?: string[];
+  };
+};
 app.post('/schedule/game/:gameId/start', (req, res) => {
   void (async(): Promise<void> => {
-    const game = await prisma.scheduledGame.findUnique({
+    const game = await prisma.game.findUnique({
       where: { id: req.params.gameId },
-      include: { home: { include: { players: true } }, away: { include: { players: true } } },
+      include: {
+        home: startGameTeamFields,
+        away: startGameTeamFields,
+      },
     });
     if (!game) {
       res.status(400).send('Game not found');
@@ -251,11 +278,138 @@ app.post('/schedule/game/:gameId/start', (req, res) => {
     const fanFactorAway = game.away.dedicatedFans + Math.ceil(Math.random() * 6);
     const weatherRoll = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);
     const weatherResult = weatherTable[weatherRoll];
-    res.send({ fanFactorHome, fanFactorAway, weatherRoll, weatherResult });
+
+    const homeJourneymen = Math.max(0, 11 - game.home.players.filter(p => !p.missNextGame).length);
+    const awayJourneymen = Math.max(0, 11 - game.away.players.filter(p => !p.missNextGame).length);
+
+    const result: StartGameResponseType = {
+      fanFactorHome,
+      fanFactorAway,
+      weatherResult,
+    };
+
+    if (homeJourneymen) {
+      result.journeymenChoices ??= {};
+      result.journeymenChoices.home = game.home.roster.positions.filter(p => p.max >= 12).map(p => p.name);
+    }
+    if (awayJourneymen) {
+      result.journeymenChoices ??= {};
+      result.journeymenChoices.away = game.away.roster.positions.filter(p => p.max >= 12).map(p => p.name);
+    }
+
+    const teamUpdates = prisma.team.updateMany({
+      where: { name: { in: [game.home.name, game.away.name] } },
+      data: { state: 'Playing' },
+    });
+    const gameUpdate = prisma.game.update({ where: { id: req.params.gameId }, data: { state: 'Journeymen' } });
+    await prisma.$transaction([teamUpdates, gameUpdate]);
+
+    res.send(result);
   })();
 });
 
 // Take on Journeymen
+type SelectJourneymenBodyType = {
+  home?: string;
+  away?: string;
+};
+app.post('/schedule/game/:gameId/selectJourneymen', (req, res) => {
+  void (async(): Promise<void> => {
+    const body = req.body as SelectJourneymenBodyType;
+    const game = await prisma.game.findUnique({
+      where: { id: req.params.gameId },
+      include: {
+        home: startGameTeamFields,
+        away: startGameTeamFields,
+      },
+    });
+    if (!game) {
+      res.status(400).send('Game not found');
+      return;
+    }
+    if (game.state !== 'Journeymen') {
+      res.status(400).send('Game not awaiting journeymen choice');
+      return;
+    }
+    const homePlayers = game.home.players.filter(p => !p.missNextGame).length;
+    const awayPlayers = game.away.players.filter(p => !p.missNextGame).length;
+    if (homePlayers < 11 && !('home' in body)) {
+      res.status(400).send('Missing journeymen selection for home team');
+      return;
+    }
+    if (awayPlayers < 11 && !('away' in body)) {
+      res.status(400).send('Missing journeymen selection for away team');
+      return;
+    }
+    let homeTV =
+      game.home.players.reduce((sum, player) => sum + player.teamValue, 0) +
+      (Number(game.home.apothecary) * 50_000) +
+      ((game.home.assistantCoaches + game.home.cheerleaders) * 10_000) +
+      (game.home.rerolls * game.home.roster.rerollCost);
+    let awayTV =
+      game.home.players.reduce((sum, player) => sum + player.teamValue, 0) +
+      (Number(game.home.apothecary) * 50_000) +
+      ((game.home.assistantCoaches + game.home.cheerleaders) * 10_000) +
+      (game.home.rerolls * game.home.roster.rerollCost);
+
+    const promises: Array<PrismaPromise<unknown>> = [];
+    if (homePlayers < 11 && 'home' in body) {
+      const position = await prisma.position.findFirst({
+        where: {
+          name: body.home,
+          max: { in: [12, 16] },
+          rosterName: game.home.rosterName,
+        },
+        include: { skills: true },
+      });
+      if (!position) {
+        res.status(400).send('Invalid position for home team');
+        return;
+      }
+      homeTV += position.cost * (11 - homePlayers);
+      promises.push(prisma.team.update({
+        where: { name: game.home.name },
+        data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(position)) } },
+      }));
+    }
+    if (awayPlayers < 11 && 'away' in body) {
+      const position = await prisma.position.findFirst({
+        where: {
+          name: body.away,
+          max: { in: [12, 16] },
+          rosterName: game.away.rosterName,
+        },
+        include: { skills: true },
+      });
+      if (!position) {
+        res.status(400).send('Invalid position for away team');
+        return;
+      }
+      awayTV += position.cost * (11 - awayPlayers);
+      promises.push(prisma.team.update({
+        where: { name: game.away.name },
+        data: { journeymen: { create: Array(11 - awayPlayers).fill(newPlayer(position)) } },
+      }));
+    }
+    const pettyCashHome = Math.max(0, awayTV - homeTV);
+    const pettyCashAway = Math.max(0, homeTV - awayTV);
+    promises.push(prisma.game.update({
+      where: { id: req.params.gameId },
+      data: {
+        state: 'Inducements',
+        pettyCashHome,
+        pettyCashAway,
+      },
+    }));
+    await prisma.$transaction(promises);
+
+    res.send({
+      pettyCashHome,
+      pettyCashAway,
+    });
+  })();
+});
+
 // Purchase Inducements
 // End game
 // Update Player
