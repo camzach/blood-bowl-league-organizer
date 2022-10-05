@@ -11,48 +11,49 @@ datasource db {
 }
 
 model Player {
-  id               String   @id @unique @default(uuid()) @db.Uuid
-  name             String
-  team             Team     @relation(fields: [teamName], references: [name])
-  teamName         String
-  nigglingInjuries Int      @default(0)
-  missNextGame     Boolean  @default(false)
-  AG               Int
-  MA               Int
-  PA               Int?
-  ST               Int
-  AV               Int
-  starPlayerPoints Int      @default(0)
-  teamValue        Int
-  improvements     Int      @default(0)
-  skills           Skill[]
-  position         Position @relation(fields: [positionId], references: [id])
-  positionId       String   @db.Uuid
+  id                 String   @id @unique @default(uuid()) @db.Uuid
+  name               String?
+  playerTeam         Team?    @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
+  journeymanTeam     Team?    @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
+  playerTeamName     String?
+  journeymanTeamName String?
+  nigglingInjuries   Int      @default(0)
+  missNextGame       Boolean  @default(false)
+  AG                 Int
+  MA                 Int
+  PA                 Int?
+  ST                 Int
+  AV                 Int
+  starPlayerPoints   Int      @default(0)
+  teamValue          Int
+  improvements       Int      @default(0)
+  skills             Skill[]
+  position           Position @relation(fields: [positionId], references: [id])
+  positionId         String   @db.Uuid
 }
 
 enum TeamState {
   Draft
   Ready
-  Journeymen
-  Inducements
   Playing
   PostGame
 }
 
 model Team {
-  name             String          @id @unique
-  players          Player[]
-  treasury         Int             @default(1000000)
-  state            TeamState       @default(Draft)
-  roster           Roster          @relation(fields: [rosterName], references: [name])
+  name             String    @id @unique
+  players          Player[]  @relation("players")
+  journeymen       Player[]  @relation("journeymen")
+  treasury         Int       @default(1000000)
+  state            TeamState @default(Draft)
+  roster           Roster    @relation(fields: [rosterName], references: [name])
   rosterName       String
-  rerolls          Int             @default(0)
-  cheerleaders     Int             @default(0)
-  assistantCoaches Int             @default(0)
-  apothecary       Boolean         @default(false)
-  dedicatedFans    Int             @default(0)
-  homeGames        ScheduledGame[] @relation("homeTeam")
-  awayGames        ScheduledGame[] @relation("awayTeam")
+  rerolls          Int       @default(0)
+  cheerleaders     Int       @default(0)
+  assistantCoaches Int       @default(0)
+  apothecary       Boolean   @default(false)
+  dedicatedFans    Int       @default(0)
+  homeGames        Game[]    @relation("homeTeam")
+  awayGames        Game[]    @relation("awayTeam")
 }
 
 model Roster {
@@ -134,11 +135,22 @@ model InducementOption {
   inducementName   String?
 }
 
-model ScheduledGame {
-  id           String @id @unique @default(uuid()) @db.Uuid
-  round        Int
-  home         Team   @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
-  away         Team   @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
-  homeTeamName String
-  awayTeamName String
+enum GameState {
+  Scheduled
+  Journeymen
+  Inducements
+  InProgress
+  Complete
+}
+
+model Game {
+  id            String    @id @unique @default(uuid()) @db.Uuid
+  round         Int
+  home          Team      @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
+  away          Team      @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
+  homeTeamName  String
+  awayTeamName  String
+  state         GameState @default(Scheduled)
+  pettyCashHome Int       @default(0)
+  pettyCashAway Int       @default(0)
 }

@@ -1,14 +1,18 @@
 -- CreateEnum
-CREATE TYPE "TeamState" AS ENUM ('Draft', 'Ready', 'AwaitingJourneymenChoice', 'AwaitingInducements', 'PlayingGame', 'PlayerAdvancement', 'HiringFiringRetiring');
+CREATE TYPE "TeamState" AS ENUM ('Draft', 'Ready', 'Playing', 'PostGame');
 
 -- CreateEnum
 CREATE TYPE "SkillCategory" AS ENUM ('G', 'M', 'P', 'S', 'A', 'T');
 
+-- CreateEnum
+CREATE TYPE "GameState" AS ENUM ('Scheduled', 'Journeymen', 'Inducements', 'InProgress', 'Complete');
+
 -- CreateTable
 CREATE TABLE "Player" (
     "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "teamName" TEXT NOT NULL,
+    "name" TEXT,
+    "playerTeamName" TEXT,
+    "journeymanTeamName" TEXT,
     "nigglingInjuries" INTEGER NOT NULL DEFAULT 0,
     "missNextGame" BOOLEAN NOT NULL DEFAULT false,
     "AG" INTEGER NOT NULL,
@@ -117,6 +121,19 @@ CREATE TABLE "InducementOption" (
 );
 
 -- CreateTable
+CREATE TABLE "Game" (
+    "id" UUID NOT NULL,
+    "round" INTEGER NOT NULL,
+    "homeTeamName" TEXT NOT NULL,
+    "awayTeamName" TEXT NOT NULL,
+    "state" "GameState" NOT NULL DEFAULT 'Scheduled',
+    "pettyCashHome" INTEGER NOT NULL DEFAULT 0,
+    "pettyCashAway" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_PlayerToSkill" (
     "A" UUID NOT NULL,
     "B" TEXT NOT NULL
@@ -159,6 +176,9 @@ CREATE UNIQUE INDEX "StarPlayer_name_key" ON "StarPlayer"("name");
 CREATE UNIQUE INDEX "InducementOption_name_key" ON "InducementOption"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Game_id_key" ON "Game"("id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_PlayerToSkill_AB_unique" ON "_PlayerToSkill"("A", "B");
 
 -- CreateIndex
@@ -177,7 +197,10 @@ CREATE UNIQUE INDEX "_SkillToStarPlayer_AB_unique" ON "_SkillToStarPlayer"("A", 
 CREATE INDEX "_SkillToStarPlayer_B_index" ON "_SkillToStarPlayer"("B");
 
 -- AddForeignKey
-ALTER TABLE "Player" ADD CONSTRAINT "Player_teamName_fkey" FOREIGN KEY ("teamName") REFERENCES "Team"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Player" ADD CONSTRAINT "Player_team__fkey" FOREIGN KEY ("playerTeamName") REFERENCES "Team"("name") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Player" ADD CONSTRAINT "Player_journeyman__fkey" FOREIGN KEY ("journeymanTeamName") REFERENCES "Team"("name") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Player" ADD CONSTRAINT "Player_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "Position"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -190,6 +213,12 @@ ALTER TABLE "Position" ADD CONSTRAINT "Position_rosterName_fkey" FOREIGN KEY ("r
 
 -- AddForeignKey
 ALTER TABLE "InducementOption" ADD CONSTRAINT "InducementOption_inducementName_fkey" FOREIGN KEY ("inducementName") REFERENCES "Inducement"("name") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "ScheduledGame_home__fkey" FOREIGN KEY ("homeTeamName") REFERENCES "Team"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "ScheduledGame_away__fkey" FOREIGN KEY ("awayTeamName") REFERENCES "Team"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_PlayerToSkill" ADD CONSTRAINT "_PlayerToSkill_A_fkey" FOREIGN KEY ("A") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
