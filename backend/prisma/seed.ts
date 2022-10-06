@@ -121,7 +121,7 @@ async function main(): Promise<void> {
   await prisma.inducement.create({
     data: {
       name: 'Wizard',
-      max: 2,
+      max: 1,
       rules: 'Wizards to kerzap shit',
       options: { createMany: { data: wizards } },
     },
