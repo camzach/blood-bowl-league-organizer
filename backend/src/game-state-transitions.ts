@@ -28,7 +28,7 @@ type StartGameResponseType = {
     away?: string[];
   };
 };
-router.post('/schedule/game/:gameId/start', (req, res) => {
+router.post('/schedule/game/:gameId/start', (req, res, next) => {
   void (async(): Promise<void> => {
     const game = await prisma.game.findUnique({
       where: { id: req.params.gameId },
@@ -76,7 +76,7 @@ router.post('/schedule/game/:gameId/start', (req, res) => {
     await prisma.$transaction([teamUpdates, gameUpdate]);
 
     res.send(result);
-  })();
+  })().catch(next);
 });
 
 // Take on Journeymen
@@ -84,7 +84,7 @@ type SelectJourneymenBodyType = {
   home?: string;
   away?: string;
 };
-router.post('/schedule/game/:gameId/selectJourneymen', (req, res) => {
+router.post('/schedule/game/:gameId/selectJourneymen', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as SelectJourneymenBodyType;
     const game = await prisma.game.findUnique({
@@ -178,7 +178,7 @@ router.post('/schedule/game/:gameId/selectJourneymen', (req, res) => {
       pettyCashHome,
       pettyCashAway,
     });
-  })();
+  })().catch(next);
 });
 
 // Purchase Inducements
@@ -275,7 +275,7 @@ async function calculateInducementCosts(
   }
   return inducementCost + starPlayerCost;
 }
-router.post('/schedule/game/:gameId/purchaseInducements', (req, res) => {
+router.post('/schedule/game/:gameId/purchaseInducements', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as PurchaseInducementsBodyType;
     const game = await prisma.game.findUnique({
@@ -294,10 +294,11 @@ router.post('/schedule/game/:gameId/purchaseInducements', (req, res) => {
       return;
     }
 
+    let homeInducementCost = 0;
+    let awayInducementCost = 0;
     try {
-      const homeInducementCost = await calculateInducementCosts(body.home ?? [], game.home);
-      const awayInducementCost = await calculateInducementCosts(body.away ?? [], game.away);
-      res.send({ homeInducementCost, awayInducementCost });
+      homeInducementCost = await calculateInducementCosts(body.home ?? [], game.home);
+      awayInducementCost = await calculateInducementCosts(body.away ?? [], game.away);
     } catch (e) {
       if (e instanceof InducementError) {
         res.status(400).send(e.message);
@@ -305,8 +306,125 @@ router.post('/schedule/game/:gameId/purchaseInducements', (req, res) => {
         console.error(e);
         res.status(500).send('Unknown error');
       }
+      return;
     }
-  })();
+
+    const treasuryCostHome = Math.max(0, homeInducementCost - game.pettyCashHome);
+    const treasuryCostAway = Math.max(0, awayInducementCost - game.pettyCashAway);
+    if (treasuryCostHome > game.home.treasury || treasuryCostAway > game.away.treasury) {
+      res.status(400).send('Inducements are too expensive');
+      return;
+    }
+
+    const homeUpdate = prisma.team.update({
+      where: { name: game.homeTeamName },
+      data: { treasury: { decrement: treasuryCostHome } },
+    });
+    const awayUpdate = prisma.team.update({
+      where: { name: game.awayTeamName },
+      data: { treasury: { decrement: treasuryCostAway } },
+    });
+    const gameStateUpdate = prisma.game.update({ where: { id: game.id }, data: { state: 'InProgress' } });
+    await prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]);
+    res.send({ treasuryCostHome, treasuryCostAway });
+  })().catch(next);
 });
 
 // End game
+type EndGameBodyType = {
+  injuries: Array<{
+    playerId: string;
+    injury: 'MNG' | 'NI' | 'MA' | 'AG' | 'PA' | 'ST' | 'AV' | 'DEAD';
+    causedBy?: string;
+  }>;
+  touchdowns: [number, number];
+  casualties: [number, number];
+};
+const statMinMax = {
+  MA: [1, 9],
+  ST: [1, 8],
+  AG: [1, 6],
+  PA: [1, 6],
+  AV: [3, 11],
+};
+router.post('/schedule/game/:gameId/end', (req, res, next) => {
+  void (async(): Promise<void> => {
+    const body = req.body as EndGameBodyType;
+
+    const selectPlayers = {
+      include: {
+        players: { where: { id: { in: body.injuries.map(i => i.playerId) } } },
+        journeymen: { where: { id: { in: body.injuries.map(i => i.playerId) } } },
+      },
+    };
+    const game = await prisma.game.findUnique({
+      where: { id: req.params.gameId },
+      include: {
+        home: selectPlayers,
+        away: selectPlayers,
+      },
+    });
+    if (!game) {
+      res.status(400).send('Unknown game');
+      return;
+    }
+    const players = [...game.home.players, ...game.home.journeymen, ...game.away.players, ...game.away.journeymen];
+    const updateMap: Record<string, Prisma.PlayerUpdateArgs> = {};
+    for (const injury of body.injuries) {
+      const player = players.find(p => p.id === injury.playerId);
+      if (!player) {
+        res.status(400).send('Player not found');
+        return;
+      }
+      updateMap[injury.playerId] ??= { where: { id: injury.playerId }, data: {} };
+      const mappedUpdate = updateMap[injury.playerId].data;
+      mappedUpdate.missNextGame = true;
+      if (injury.injury === 'MA' || injury.injury === 'ST' || injury.injury === 'AV') {
+        if (player[injury.injury] - 1 < statMinMax[injury.injury][0]) {
+          res.status(400).send('Invalid injury, stat cannot be reduced any more');
+          return;
+        }
+        mappedUpdate[injury.injury] = { decrement: 1 };
+      }
+      if (injury.injury === 'PA' || injury.injury === 'AG') {
+        if ((player[injury.injury] ?? 0) + 1 > statMinMax[injury.injury][1]) {
+          res.status(400).send('Invalid injury, stat cannot be increased any more');
+          return;
+        }
+        mappedUpdate[injury.injury] = { increment: 1 };
+      }
+      if (injury.injury === 'NI')
+        mappedUpdate.nigglingInjuries = { increment: 1 };
+      if (injury.injury === 'DEAD') {
+        mappedUpdate.playerTeam = { disconnect: true };
+        mappedUpdate.journeymanTeam = { disconnect: true };
+      }
+      if (injury.causedBy !== undefined) {
+        const causedBy = players.find(p => p.id === injury.causedBy);
+        if (!causedBy) {
+          res.status(400).send('Invalid player ID');
+          return;
+        }
+        updateMap[injury.causedBy] ??= { where: { id: injury.causedBy }, data: {} };
+        updateMap[injury.causedBy].data.casualties = { increment: 1 };
+      }
+    }
+
+    await prisma.$transaction([
+      ...Object.values(updateMap).map(update => prisma.player.update(update)),
+      prisma.game.update({
+        where: { id: req.params.gameId },
+        data: {
+          tdHome: body.touchdowns[0],
+          tdAway: body.touchdowns[1],
+          casHome: body.casualties[0],
+          casAway: body.casualties[1],
+          state: 'Complete',
+          home: { update: { state: 'PostGame' } },
+          away: { update: { state: 'PostGame' } },
+        },
+      }),
+    ]);
+    res.send(updateMap);
+  })().catch(next);
+});

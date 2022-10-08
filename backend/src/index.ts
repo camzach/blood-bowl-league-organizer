@@ -17,7 +17,7 @@ type CreateTeamBodyType = {
   name: string;
   roster: string;
 };
-app.post('/team', (req, res) => {
+app.post('/team', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as CreateTeamBodyType;
     try {
@@ -39,11 +39,11 @@ app.post('/team', (req, res) => {
             break;
         }
       } else {
-        console.log(err);
+        console.error(err);
         res.sendStatus(500);
       }
     }
-  })();
+  })().catch(next);
 });
 
 app.use('/team/:teamName', (req, res, next) => {
@@ -55,7 +55,7 @@ app.use('/team/:teamName', (req, res, next) => {
     }
     res.locals.team = team;
     next();
-  })();
+  })().catch(next);
 });
 
 app.get('/team/:teamName', (req, res) => {
@@ -67,7 +67,7 @@ type HirePlayerBodyType = {
   position: string;
   name?: string;
 };
-app.post('/team/:teamName/hirePlayer', (req, res) => {
+app.post('/team/:teamName/hirePlayer', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as HirePlayerBodyType;
     const team = res.locals.team as Team;
@@ -107,7 +107,7 @@ app.post('/team/:teamName/hirePlayer', (req, res) => {
       },
     });
     res.send(abc);
-  })();
+  })().catch(next);
 });
 
 // Hire staff
@@ -121,7 +121,7 @@ const maxMap: Record<HireStaffBodyType['type'], number> = {
   cheerleaders: 12,
   rerolls: 8,
 };
-app.post('/team/:teamName/hireStaff', (req, res) => {
+app.post('/team/:teamName/hireStaff', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as HireStaffBodyType;
     const team = res.locals.team as Team;
@@ -156,7 +156,7 @@ app.post('/team/:teamName/hireStaff', (req, res) => {
       },
     });
     res.send('Done :)');
-  })();
+  })().catch(next);
 });
 
 // Ready team
@@ -175,7 +175,7 @@ const expensiveMistakesTable = [
   ['Catastrophe', 'Major Incident', 'Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted'],
   ['Catastrophe', 'Catastrophe', 'Major Incident', 'Major Incident', 'Major Incident', 'Major Incident'],
 ];
-app.post('/team/:teamName/ready', (req, res) => {
+app.post('/team/:teamName/ready', (req, res, next) => {
   void (async(): Promise<void> => {
     const team = await prisma.team.findUnique({ where: { name: req.params.teamName }, include: { players: true } });
     if (!team) {
@@ -206,17 +206,17 @@ app.post('/team/:teamName/ready', (req, res) => {
       expensiveMistake,
       expensiveMistakesCost,
     });
-  })();
+  })().catch(next);
 });
 
 // Generate schedule
-app.post('/schedule/generate', (req, res) => {
+app.post('/schedule/generate', (req, res, next) => {
   void (async(): Promise<void> => {
     const teams = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
     const pairings = generateSchedule(teams);
     const schedule = await prisma.game.createMany({ data: pairings });
     res.send(schedule);
-  })();
+  })().catch(next);
 });
 
 app.use('/', gameStateTransitions);
