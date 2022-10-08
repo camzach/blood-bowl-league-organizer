@@ -14,5 +14,7 @@ export function newPlayer(
     skills: { connect: position.skills.map(s => ({ name: s.name })) },
     name,
     position: { connect: { id: position.id } },
+    primary: position.primary,
+    secondary: position.secondary,
   };
 }

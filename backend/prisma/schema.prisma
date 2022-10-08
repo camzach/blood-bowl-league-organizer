@@ -11,25 +11,37 @@ datasource db {
 }
 
 model Player {
-  id                 String   @id @unique @default(uuid()) @db.Uuid
+  id                 String          @id @unique @default(uuid()) @db.Uuid
   name               String?
-  playerTeam         Team?    @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
-  journeymanTeam     Team?    @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
+  playerTeam         Team?           @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
+  journeymanTeam     Team?           @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
   playerTeamName     String?
   journeymanTeamName String?
-  nigglingInjuries   Int      @default(0)
-  missNextGame       Boolean  @default(false)
+  nigglingInjuries   Int             @default(0)
+  missNextGame       Boolean         @default(false)
   AG                 Int
+  AGImprovements     Int             @default(0)
   MA                 Int
+  MAImprovements     Int             @default(0)
   PA                 Int?
+  PAImprovements     Int             @default(0)
   ST                 Int
+  STImprovements     Int             @default(0)
   AV                 Int
-  starPlayerPoints   Int      @default(0)
+  AVImprovements     Int             @default(0)
+  starPlayerPoints   Int             @default(0)
+  touchdowns         Int             @default(0)
+  completions        Int             @default(0)
+  deflections        Int             @default(0)
+  interceptions      Int             @default(0)
+  casualties         Int             @default(0)
   teamValue          Int
-  improvements       Int      @default(0)
+  learnedSkills      Int             @default(0)
+  primary            SkillCategory[]
+  secondary          SkillCategory[]
   skills             Skill[]
-  position           Position @relation(fields: [positionId], references: [id])
-  positionId         String   @db.Uuid
+  position           Position        @relation(fields: [positionId], references: [id])
+  positionId         String          @db.Uuid
 }
 
 enum TeamState {
@@ -153,4 +165,8 @@ model Game {
   state         GameState @default(Scheduled)
   pettyCashHome Int       @default(0)
   pettyCashAway Int       @default(0)
+  tdHome        Int       @default(0)
+  tdAway        Int       @default(0)
+  casHome       Int       @default(0)
+  casAway       Int       @default(0)
 }

@@ -16,13 +16,25 @@ CREATE TABLE "Player" (
     "nigglingInjuries" INTEGER NOT NULL DEFAULT 0,
     "missNextGame" BOOLEAN NOT NULL DEFAULT false,
     "AG" INTEGER NOT NULL,
+    "AGImprovements" INTEGER NOT NULL DEFAULT 0,
     "MA" INTEGER NOT NULL,
+    "MAImprovements" INTEGER NOT NULL DEFAULT 0,
     "PA" INTEGER,
+    "PAImprovements" INTEGER NOT NULL DEFAULT 0,
     "ST" INTEGER NOT NULL,
+    "STImprovements" INTEGER NOT NULL DEFAULT 0,
     "AV" INTEGER NOT NULL,
+    "AVImprovements" INTEGER NOT NULL DEFAULT 0,
     "starPlayerPoints" INTEGER NOT NULL DEFAULT 0,
+    "touchdowns" INTEGER NOT NULL DEFAULT 0,
+    "completions" INTEGER NOT NULL DEFAULT 0,
+    "deflections" INTEGER NOT NULL DEFAULT 0,
+    "interceptions" INTEGER NOT NULL DEFAULT 0,
+    "casualties" INTEGER NOT NULL DEFAULT 0,
     "teamValue" INTEGER NOT NULL,
-    "improvements" INTEGER NOT NULL DEFAULT 0,
+    "learnedSkills" INTEGER NOT NULL DEFAULT 0,
+    "primary" "SkillCategory"[],
+    "secondary" "SkillCategory"[],
     "positionId" UUID NOT NULL,
 
     CONSTRAINT "Player_pkey" PRIMARY KEY ("id")
@@ -129,6 +141,10 @@ CREATE TABLE "Game" (
     "state" "GameState" NOT NULL DEFAULT 'Scheduled',
     "pettyCashHome" INTEGER NOT NULL DEFAULT 0,
     "pettyCashAway" INTEGER NOT NULL DEFAULT 0,
+    "tdHome" INTEGER NOT NULL DEFAULT 0,
+    "tdAway" INTEGER NOT NULL DEFAULT 0,
+    "casHome" INTEGER NOT NULL DEFAULT 0,
+    "casAway" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );
