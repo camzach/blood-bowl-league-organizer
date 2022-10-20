@@ -35,6 +35,7 @@ model Player {
   deflections        Int             @default(0)
   interceptions      Int             @default(0)
   casualties         Int             @default(0)
+  MVPs               Int             @default(0)
   teamValue          Int
   learnedSkills      Int             @default(0)
   primary            SkillCategory[]

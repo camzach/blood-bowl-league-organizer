@@ -330,12 +330,30 @@ router.post('/schedule/game/:gameId/purchaseInducements', (req, res, next) => {
   })().catch(next);
 });
 
+function incrementUpdateField(updateData: Prisma.IntFieldUpdateOperationsInput | number | undefined, amount: number):
+Prisma.IntFieldUpdateOperationsInput | number {
+  if (updateData === undefined)
+    return { increment: amount };
+  if (typeof updateData === 'number')
+    return updateData + amount;
+  if (updateData.increment === undefined)
+    return { increment: amount };
+  return { increment: updateData.increment + amount };
+}
+
 // End game
 type EndGameBodyType = {
   injuries: Array<{
     playerId: string;
     injury: 'MNG' | 'NI' | 'MA' | 'AG' | 'PA' | 'ST' | 'AV' | 'DEAD';
-    causedBy?: string;
+  }>;
+  starPlayerPoints: Record<string, {
+    touchdowns?: number;
+    casualties?: number;
+    deflections?: number;
+    interceptions?: number;
+    completions?: number;
+    otherSPP?: number;
   }>;
   touchdowns: [number, number];
   casualties: [number, number];
@@ -353,8 +371,8 @@ router.post('/schedule/game/:gameId/end', (req, res, next) => {
 
     const selectPlayers = {
       include: {
-        players: { where: { id: { in: body.injuries.map(i => i.playerId) } } },
-        journeymen: { where: { id: { in: body.injuries.map(i => i.playerId) } } },
+        players: true,
+        journeymen: true,
       },
     };
     const game = await prisma.game.findUnique({
@@ -368,15 +386,21 @@ router.post('/schedule/game/:gameId/end', (req, res, next) => {
       res.status(400).send('Unknown game');
       return;
     }
+    if (game.state !== 'InProgress') {
+      res.status(400).send('Game not in progress');
+      return;
+    }
     const players = [...game.home.players, ...game.home.journeymen, ...game.away.players, ...game.away.journeymen];
-    const updateMap: Record<string, Prisma.PlayerUpdateArgs> = {};
+    let mvpChoicesHome = [...game.home.players.filter(p => !p.missNextGame), ...game.home.journeymen];
+    let mvpChoicesAway = [...game.away.players.filter(p => !p.missNextGame), ...game.away.journeymen];
+    const updateMap: Record<string, Prisma.PlayerUpdateArgs> =
+      Object.fromEntries(players.map(({ id }) => [id, { where: { id }, data: { missNextGame: false } }]));
     for (const injury of body.injuries) {
       const player = players.find(p => p.id === injury.playerId);
       if (!player) {
         res.status(400).send('Player not found');
         return;
       }
-      updateMap[injury.playerId] ??= { where: { id: injury.playerId }, data: {} };
       const mappedUpdate = updateMap[injury.playerId].data;
       mappedUpdate.missNextGame = true;
       if (injury.injury === 'MA' || injury.injury === 'ST' || injury.injury === 'AV') {
@@ -398,17 +422,47 @@ router.post('/schedule/game/:gameId/end', (req, res, next) => {
       if (injury.injury === 'DEAD') {
         mappedUpdate.playerTeam = { disconnect: true };
         mappedUpdate.journeymanTeam = { disconnect: true };
-      }
-      if (injury.causedBy !== undefined) {
-        const causedBy = players.find(p => p.id === injury.causedBy);
-        if (!causedBy) {
-          res.status(400).send('Invalid player ID');
-          return;
-        }
-        updateMap[injury.causedBy] ??= { where: { id: injury.causedBy }, data: {} };
-        updateMap[injury.causedBy].data.casualties = { increment: 1 };
+        mvpChoicesAway = mvpChoicesAway.filter(p => p.id !== player.id);
+        mvpChoicesHome = mvpChoicesHome.filter(p => p.id !== player.id);
       }
     }
+
+    for (const [id, points] of Object.entries(body.starPlayerPoints)) {
+      const player = players.find(p => p.id === id);
+      if (!player) {
+        res.status(400).send('Player not found');
+        return;
+      }
+      updateMap[id] ??= { where: { id }, data: {} };
+      const mappedUpdate = updateMap[id].data;
+
+      mappedUpdate.casualties = incrementUpdateField(mappedUpdate.casualties, points.casualties ?? 0);
+      mappedUpdate.deflections = incrementUpdateField(mappedUpdate.deflections, points.deflections ?? 0);
+      mappedUpdate.interceptions = incrementUpdateField(mappedUpdate.interceptions, points.interceptions ?? 0);
+      mappedUpdate.touchdowns = incrementUpdateField(mappedUpdate.touchdowns, points.touchdowns ?? 0);
+      mappedUpdate.completions = incrementUpdateField(mappedUpdate.completions, points.completions ?? 0);
+      mappedUpdate.starPlayerPoints = incrementUpdateField(
+        mappedUpdate.starPlayerPoints,
+        (points.completions ?? 0) +
+        (points.deflections ?? 0) +
+        (2 * (points.casualties ?? 0)) +
+        (2 * (points.interceptions ?? 0)) +
+        (3 * (points.touchdowns ?? 0)) +
+        (points.otherSPP ?? 0)
+      );
+    }
+
+    const mvpHomeUpdate = updateMap[
+      mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id
+    ].data;
+    mvpHomeUpdate.MVPs = { increment: 1 };
+    mvpHomeUpdate.starPlayerPoints = incrementUpdateField(mvpHomeUpdate.starPlayerPoints, 4);
+
+    const mvpAwayUpdate = updateMap[
+      mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id
+    ].data;
+    mvpAwayUpdate.MVPs = { increment: 1 };
+    mvpAwayUpdate.starPlayerPoints = incrementUpdateField(mvpAwayUpdate.starPlayerPoints, 4);
 
     await prisma.$transaction([
       ...Object.values(updateMap).map(update => prisma.player.update(update)),
