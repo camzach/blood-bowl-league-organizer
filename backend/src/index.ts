@@ -64,12 +64,16 @@ app.get('/team/:teamName', (req, res) => {
 
 // Hire player
 type HirePlayerBodyType = {
-  position: string;
+  position?: string;
   name?: string;
 };
 app.post('/team/:teamName/hirePlayer', (req, res, next) => {
   void (async(): Promise<void> => {
     const body = req.body as HirePlayerBodyType;
+    if (body.position === undefined) {
+      res.status(400).send('No position specified');
+      return;
+    }
     const team = res.locals.team as Team;
     if (!['Draft', 'PostGame'].includes(team.state)) {
       res.status(400).send('Team cannot hire new players right now');
@@ -224,7 +228,6 @@ app.use('/', gameStateTransitions);
 // Update Player
 // Fire Player
 // Retire Player
-// Ready for next game
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
