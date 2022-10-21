@@ -1,10 +1,13 @@
+import { prisma } from './prisma-singleton';
+import { publicProcedure, router } from './trpc';
+
 type PairingsType = Array<{
   homeTeamName: string;
   awayTeamName: string;
   round: number;
 }>;
 
-export function generateSchedule(teams: string[]): PairingsType {
+function generateSchedule(teams: string[]): PairingsType {
   const localTeams: Array<string | null> = [...teams];
   const pairings: PairingsType = [];
   const homeAwayCounts = Object.fromEntries(localTeams.map(team => [team, [0, 0]])) as Record<string, [number, number]>;
@@ -80,11 +83,8 @@ export function generateSchedule(teams: string[]): PairingsType {
           break;
         }
       }
-      if (!gameA || !gameB) {
-        console.error('Somehow failed to balance. This should not be possible, so the logic must be wrong.');
-        process.exit(0);
-        return;
-      }
+      if (!gameA || !gameB)
+        throw new Error('Schedule generator failed');
       switchHomeAway(gameA);
       switchHomeAway(gameB);
     } else {
@@ -111,3 +111,15 @@ export function generateSchedule(teams: string[]): PairingsType {
 
   return pairings;
 }
+
+export const scheduleRouter = router({
+  generate: publicProcedure
+    .mutation(async() => {
+      const games = await prisma.game.count();
+      if (games > 0)
+        throw new Error('Schedule already generated');
+      const teams = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
+      const pairings = generateSchedule(teams);
+      return prisma.game.createMany({ data: pairings });
+    }),
+});
