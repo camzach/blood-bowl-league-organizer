@@ -130,6 +130,52 @@ export const teamRouter = router({
       });
     }),
 
+  fireStaff: publicProcedure
+    .input(z.object({
+      team: z.string(),
+      type: z.enum(['apothecary', 'assistantCoaches', 'cheerleaders', 'rerolls']),
+      quantity: z.number()
+        .int()
+        .gt(0)
+        .default(1),
+    }).transform(async input => ({
+      ...input,
+      team: await prisma.team.findUniqueOrThrow({
+        where: { name: input.team },
+        select: {
+          treasury: true,
+          state: true,
+          name: true,
+          apothecary: true,
+          assistantCoaches: true,
+          cheerleaders: true,
+          rerolls: true,
+          roster: { select: { rerollCost: true } },
+        },
+      }),
+    })))
+    .mutation(async({ input: { team, type, quantity } }) => {
+      if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
+        throw new Error('Team cannot fire staff right now');
+      if (Number(team[type]) - quantity < 0)
+        throw new Error('Not enough staff to fire');
+
+      const costMap = {
+        apothecary: 50_000,
+        assistantCoaches: 10_000,
+        cheerleaders: 10_000,
+        rerolls: team.roster.rerollCost,
+      };
+
+      return prisma.team.update({
+        where: { name: team.name },
+        data: {
+          [type]: { decrement: quantity },
+          treasury: team.state === TeamState.Draft ? { increment: costMap[type] * quantity } : undefined,
+        },
+      });
+    }),
+
   ready: publicProcedure
     .input(z.string()
       .transform(async name =>
