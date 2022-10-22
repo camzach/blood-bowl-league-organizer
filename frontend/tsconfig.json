@@ -24,8 +24,5 @@
     "src",
     "@types",
   ],
-  "exclude": [
-    "*.gen.ts"
-  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
