@@ -1,6 +1,0 @@
-query TeamNames {
-  teams {
-    id
-    name
-  }
-}

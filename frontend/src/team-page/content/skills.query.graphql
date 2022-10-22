@@ -1,8 +1,0 @@
-query Skills {
-  skills {
-    id
-    name
-    rules
-    category
-  }
-}
