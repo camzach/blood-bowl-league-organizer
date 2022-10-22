@@ -1,5 +1,4 @@
 node_modules/
-**/*.gen.ts
 dist/
 build/
 .DS_STORE

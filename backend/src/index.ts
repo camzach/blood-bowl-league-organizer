@@ -1,6 +1,7 @@
 import express from 'express';
 import { router } from './trpc';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import cors from 'cors';
 import { teamRouter } from './team';
 import { scheduleRouter } from './schedule-generator';
 import { gameRouter } from './game';
@@ -16,6 +17,7 @@ const appRouter = router({
   player: playerRouter,
 });
 
+app.use(cors());
 app.use(createExpressMiddleware({ router: appRouter }));
 
 // TODO
@@ -24,3 +26,5 @@ app.use(createExpressMiddleware({ router: appRouter }));
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
+
+export type AppRouter = typeof appRouter;
