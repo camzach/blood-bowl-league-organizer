@@ -19,16 +19,18 @@ model Player {
   journeymanTeamName String?
   nigglingInjuries   Int             @default(0)
   missNextGame       Boolean         @default(false)
+  dead               Boolean         @default(false)
   AG                 Int
-  AGImprovements     Int             @default(0)
   MA                 Int
-  MAImprovements     Int             @default(0)
   PA                 Int?
-  PAImprovements     Int             @default(0)
   ST                 Int
-  STImprovements     Int             @default(0)
   AV                 Int
+  AGImprovements     Int             @default(0)
+  MAImprovements     Int             @default(0)
+  PAImprovements     Int             @default(0)
+  STImprovements     Int             @default(0)
   AVImprovements     Int             @default(0)
+  totalImprovements  Int             @default(0)
   starPlayerPoints   Int             @default(0)
   touchdowns         Int             @default(0)
   completions        Int             @default(0)
@@ -37,7 +39,6 @@ model Player {
   casualties         Int             @default(0)
   MVPs               Int             @default(0)
   teamValue          Int
-  learnedSkills      Int             @default(0)
   primary            SkillCategory[]
   secondary          SkillCategory[]
   skills             Skill[]

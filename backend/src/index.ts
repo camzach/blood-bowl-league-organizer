@@ -19,8 +19,6 @@ const appRouter = router({
 app.use(createExpressMiddleware({ router: appRouter }));
 
 // TODO
-// Update Player
-// Fire Player
 // Retire Player
 
 app.listen(port, () => {
