@@ -314,6 +314,7 @@ export const gameRouter = router({
         if (injury.injury === 'DEAD') {
           mappedUpdate.playerTeam = { disconnect: true };
           mappedUpdate.journeymanTeam = { disconnect: true };
+          mappedUpdate.dead = true;
           mvpChoicesAway = mvpChoicesAway.filter(p => p.id !== player.id);
           mvpChoicesHome = mvpChoicesHome.filter(p => p.id !== player.id);
         }
