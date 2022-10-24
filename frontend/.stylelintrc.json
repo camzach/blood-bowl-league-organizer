@@ -1,6 +1,0 @@
-{
-  "extends": "@camzach/stylelint-config",
-  "ignoreFiles": [
-    "**/*.json"
-  ]
-}

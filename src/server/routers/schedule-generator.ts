@@ -1,5 +1,5 @@
 import { prisma } from './prisma-singleton';
-import { publicProcedure, router } from './trpc';
+import { publicProcedure, router } from '../trpc';
 
 type PairingsType = Array<{
   homeTeamName: string;

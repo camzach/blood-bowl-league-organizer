@@ -1,6 +1,6 @@
 import type { Game, Prisma, PrismaPromise } from '@prisma/client';
 import { GameState } from '@prisma/client';
-import { publicProcedure, router } from '../trpc';
+import { publicProcedure, router } from '../../trpc';
 import { newPlayer } from '../new-player';
 import { prisma } from '../prisma-singleton';
 import { z } from 'zod';
