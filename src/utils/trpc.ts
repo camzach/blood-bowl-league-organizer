@@ -3,7 +3,6 @@ import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/routers/_app';
 
 function getBaseUrl(): string {
-  // @ts-expect-error stuff
   if (typeof window !== 'undefined')
     // Browser should use relative path
     return '';
@@ -22,25 +21,7 @@ function getBaseUrl(): string {
 
 export const trpc = createTRPCNext<AppRouter>({
   config() {
-    return {
-      links: [
-        httpBatchLink({
-          //
-          // If you want to use SSR, you need to use the server's full URL
-          // @link https://trpc.io/docs/ssr
-          //
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
-      //
-      // @link https://tanstack.com/query/v4/docs/reference/QueryClient
-      //
-      // queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
-    };
+    return { links: [httpBatchLink({ url: `${getBaseUrl()}/api/trpc` })] };
   },
-  //
-  // @link https://trpc.io/docs/ssr
-  //
   ssr: true,
 });
-// => { useQuery: ..., useMutation: ...}
