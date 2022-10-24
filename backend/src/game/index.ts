@@ -1,4 +1,4 @@
-import type { Prisma, PrismaPromise } from '@prisma/client';
+import type { Game, Prisma, PrismaPromise } from '@prisma/client';
 import { GameState } from '@prisma/client';
 import { publicProcedure, router } from '../trpc';
 import { newPlayer } from '../new-player';
@@ -7,6 +7,14 @@ import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
 
 export const gameRouter = router({
+  list: publicProcedure
+    .query(async() => prisma.game.findMany({}).then(games => {
+      const maxRound = Math.max(...games.map(game => game.round));
+      const result: Game[][] = Array.from(new Array(maxRound + 1), () => []);
+      games.forEach(game => result[game.round].push(game));
+      return result;
+    })),
+
   start: publicProcedure
     .input(z.string()
       .transform(id => {
@@ -22,6 +30,7 @@ export const gameRouter = router({
           where: { id },
           select: {
             id: true,
+            state: true,
             home: startGameTeamFields,
             away: startGameTeamFields,
           },
