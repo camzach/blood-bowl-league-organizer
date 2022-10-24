@@ -9,7 +9,8 @@
     "resolveJsonModule": true,
     "target": "es2022",
     "lib": [
-      "es2022"
+      "es2022",
+      "DOM"
     ],
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
