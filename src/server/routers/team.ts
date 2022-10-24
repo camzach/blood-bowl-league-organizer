@@ -1,7 +1,7 @@
 import { Prisma, TeamState } from '@prisma/client';
 import { prisma } from './prisma-singleton';
 import { z } from 'zod';
-import { publicProcedure, router } from './trpc';
+import { publicProcedure, router } from '../trpc';
 import { newPlayer } from './new-player';
 
 export const teamRouter = router({
