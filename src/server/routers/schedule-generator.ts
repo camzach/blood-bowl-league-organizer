@@ -1,4 +1,3 @@
-import { prisma } from './prisma-singleton';
 import { publicProcedure, router } from '../trpc';
 
 type PairingsType = Array<{
@@ -114,12 +113,12 @@ function generateSchedule(teams: string[]): PairingsType {
 
 export const scheduleRouter = router({
   generate: publicProcedure
-    .mutation(async() => {
-      const games = await prisma.game.count();
+    .mutation(async({ ctx }) => {
+      const games = await ctx.prisma.game.count();
       if (games > 0)
         throw new Error('Schedule already generated');
-      const teams = (await prisma.team.findMany({ select: { name: true } })).map(t => t.name);
+      const teams = (await ctx.prisma.team.findMany({ select: { name: true } })).map(t => t.name);
       const pairings = generateSchedule(teams);
-      return prisma.game.createMany({ data: pairings });
+      return ctx.prisma.game.createMany({ data: pairings });
     }),
 });

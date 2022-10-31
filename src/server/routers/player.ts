@@ -1,7 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { SkillCategory, TeamState } from '@prisma/client';
 import { string, z } from 'zod';
-import { prisma } from './prisma-singleton';
 import { publicProcedure, router } from '../trpc';
 
 function upperFirst<T extends string>(str: T): Capitalize<T> {
@@ -10,25 +9,26 @@ function upperFirst<T extends string>(str: T): Capitalize<T> {
 
 export const playerRouter = router({
   fire: publicProcedure
-    .input(z.string().transform(async id => prisma.player.findFirstOrThrow({
-      where: { id },
-      select: { playerTeam: { select: { state: true, name: true } }, position: { select: { cost: true } }, id: true },
-    })))
-    .mutation(async({ input }) => {
-      if (input.playerTeam === null)
+    .input(z.string())
+    .mutation(async({ input, ctx }) => {
+      const player = await ctx.prisma.player.findFirstOrThrow({
+        where: { id: input },
+        select: { playerTeam: { select: { state: true, name: true } }, position: { select: { cost: true } }, id: true },
+      });
+      if (player.playerTeam === null)
         throw new Error('Player is not on any team');
-      if (input.playerTeam.state === TeamState.Draft) {
-        return prisma.team.update({
-          where: { name: input.playerTeam.name },
+      if (player.playerTeam.state === TeamState.Draft) {
+        return ctx.prisma.team.update({
+          where: { name: player.playerTeam.name },
           data: {
-            players: { delete: { id: input.id } },
-            treasury: { increment: input.position.cost },
+            players: { delete: { id: player.id } },
+            treasury: { increment: player.position.cost },
           },
         });
       }
-      if (input.playerTeam.state === TeamState.PostGame) {
-        return prisma.player.update({
-          where: { id: input.id },
+      if (player.playerTeam.state === TeamState.PostGame) {
+        return ctx.prisma.player.update({
+          where: { id: player.id },
           data: { playerTeam: { disconnect: true } },
         });
       }
@@ -55,20 +55,14 @@ export const playerRouter = router({
           skill: string(),
         }),
       ]),
-    }).transform(async input => ({
-      ...input,
-      update: 'skill' in input.update
-        ? {
-          ...input.update,
-          skill: await prisma.skill.findUniqueOrThrow({ where: { name: input.update.skill } }),
-        }
-        : input.update,
-      player: await prisma.player.findUniqueOrThrow({
+    }))
+    .mutation(async({ input, ctx }) => {
+      const { update } = input;
+      const player = await ctx.prisma.player.findUniqueOrThrow({
         where: { id: input.player },
         include: { playerTeam: { select: { state: true } }, skills: true },
-      }),
-    })))
-    .mutation(async({ input: { player, update } }) => {
+      });
+
       if (player.playerTeam === null)
         throw new Error('Player is not on any team');
       if (player.playerTeam.state !== TeamState.PostGame)
@@ -90,11 +84,15 @@ export const playerRouter = router({
       if (sppCost > player.starPlayerPoints)
         throw new Error('Player does not have enough SPP');
 
-      if ('skill' in update) {
+      const skill = 'skill' in update
+        ? await ctx.prisma.skill.findUniqueOrThrow({ where: { name: update.skill } })
+        : null;
+
+      if (skill !== null) {
         const category = 'subtype' in update ? update.subtype : 'secondary';
-        if (!player[category].includes(update.skill.category))
+        if (!player[category].includes(skill.category))
           throw new Error('Skill not from a valid category');
-        if (player.skills.some(skill => skill.name === update.skill.name))
+        if (player.skills.some(s => s.name === skill.name))
           throw new Error('Player already has this skill');
       }
 
@@ -114,13 +112,13 @@ export const playerRouter = router({
         totalImprovements: { increment: 1 },
         starPlayerPoints: { decrement: sppCost },
       };
-      if (update.type === 'chosen') {
-        playerUpdate.skills = { connect: { name: update.skill.name } };
+      if (update.type === 'chosen' && skill !== null) {
+        playerUpdate.skills = { connect: { name: skill.name } };
         playerUpdate.teamValue = { increment: tvCostTable[`${update.type}${upperFirst(update.subtype)}`] };
       } else if (update.type === 'random') {
         if (!player[update.subtype].includes(update.category))
           throw new Error('Invalid skill category');
-        const skills = await prisma.skill.findMany({
+        const skills = await ctx.prisma.skill.findMany({
           where: {
             category: update.category,
             name: { notIn: player.skills.map(s => s.name) },
@@ -129,7 +127,7 @@ export const playerRouter = router({
         const rolledSkill = skills[Math.floor(Math.random() * skills.length)];
         playerUpdate.skills = { connect: { name: rolledSkill.name } };
         playerUpdate.teamValue = { increment: tvCostTable[`${update.type}${upperFirst(update.subtype)}`] };
-      } else {
+      } else if (update.type === 'characteristic' && skill !== null) {
         const rollTable: Array<Array<'MA' | 'AV' | 'PA' | 'AG' | 'ST'>> = [
           ['MA', 'AV'],
           ['MA', 'AV'],
@@ -171,10 +169,10 @@ export const playerRouter = router({
           playerUpdate[choice] = player[choice] === null ? 6 : { decrement: 1 };
           playerUpdate[`${choice}Improvements`] = { increment: 1 };
         } else {
-          playerUpdate.skills = { connect: { name: update.skill.name } };
+          playerUpdate.skills = { connect: { name: skill.name } };
         }
       }
 
-      return prisma.player.update({ where: { id: player.id }, data: playerUpdate });
+      return ctx.prisma.player.update({ where: { id: player.id }, data: playerUpdate });
     }),
 });

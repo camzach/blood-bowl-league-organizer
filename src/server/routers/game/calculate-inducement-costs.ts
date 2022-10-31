@@ -1,5 +1,4 @@
-import type { Inducement, InducementOption } from '@prisma/client';
-import { prisma } from '../prisma-singleton';
+import type { Inducement, InducementOption, PrismaClient } from '@prisma/client';
 
 const twoForOnePairs = [['Grak', 'Crumbleberry'], ['Lucian Swift', 'Valen Swift']];
 
@@ -11,10 +10,12 @@ function getInducementPrice(inducement: Inducement | InducementOption, specialRu
 
 class InducementError extends Error { }
 
+// eslint-disable-next-line max-params
 export async function calculateInducementCosts(
   selections: Array<{ name: string; quantity: number; option?: string }>,
   specialRules: string[],
   playerCount: number,
+  prisma: PrismaClient
 ): Promise<number> {
   const starPlayerNames = selections.filter(ind => ind.name === 'Star Player').map(p => p.option as string);
   if (starPlayerNames.length > 2)
