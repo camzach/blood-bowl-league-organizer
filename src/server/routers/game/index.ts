@@ -2,41 +2,84 @@ import type { Game, Prisma, PrismaPromise } from '@prisma/client';
 import { GameState } from '@prisma/client';
 import { publicProcedure, router } from '../../trpc';
 import { newPlayer } from '../new-player';
-import { prisma } from '../prisma-singleton';
 import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
 
 export const gameRouter = router({
   list: publicProcedure
-    .query(async() => prisma.game.findMany({}).then(games => {
+    .query(async({ ctx }) => ctx.prisma.game.findMany({}).then(games => {
       const maxRound = Math.max(...games.map(game => game.round));
       const result: Game[][] = Array.from(new Array(maxRound + 1), () => []);
       games.forEach(game => result[game.round].push(game));
       return result;
     })),
 
+  get: publicProcedure
+    .input(z.string())
+    .query(async({ input: id, ctx }) => {
+      const game = await ctx.prisma.game.findFirstOrThrow({ where: { id } });
+      switch (game.state) {
+        case GameState.Journeymen: {
+          const [homeChoices, awayChoices] = await Promise.all([game.homeTeamName, game.awayTeamName]
+            .map(async teamName =>
+              ctx.prisma.team.findUniqueOrThrow({
+                where: { name: teamName },
+                select: {
+                  roster: {
+                    select: {
+                      positions: {
+                        select: { name: true, id: true },
+                        where: { max: { gte: 12 } },
+                      },
+                    },
+                  },
+                },
+              }).then(team => team.roster.positions)));
+          return {
+            state: GameState.Journeymen,
+            homeTeam: game.homeTeamName,
+            homeChoices,
+            awayTeam: game.awayTeamName,
+            awayChoices,
+          };
+        }
+        case GameState.Inducements:
+          return { state: GameState.Inducements };
+        case GameState.InProgress:
+          return { state: GameState.InProgress };
+        case GameState.Complete:
+          return { state: GameState.Complete };
+        case GameState.Scheduled:
+          return {
+            state: GameState.Scheduled,
+            homeTeam: game.homeTeamName,
+            awayTeam: game.awayTeamName,
+          };
+      }
+      return '' as never;
+    }),
+
   start: publicProcedure
-    .input(z.string()
-      .transform(id => {
-        const startGameTeamFields = {
-          select: {
-            players: { where: { missNextGame: false } },
-            roster: { select: { positions: { where: { max: { gte: 12 } }, select: { name: true } } } },
-            dedicatedFans: true,
-            name: true,
-          },
-        } as const;
-        return prisma.game.findUniqueOrThrow({
-          where: { id },
-          select: {
-            id: true,
-            state: true,
-            home: startGameTeamFields,
-            away: startGameTeamFields,
-          },
-        });
-      }))
-    .query(async({ input: game }) => {
+    .input(z.string())
+    .query(async({ input: id, ctx }) => {
+      const startGameTeamFields = {
+        select: {
+          players: { where: { missNextGame: false } },
+          roster: { select: { positions: { where: { max: { gte: 12 } }, select: { name: true } } } },
+          dedicatedFans: true,
+          name: true,
+        },
+      } as const;
+      const game = await ctx.prisma.game.findUniqueOrThrow({
+        where: { id },
+        select: {
+          id: true,
+          state: true,
+          home: startGameTeamFields,
+          away: startGameTeamFields,
+        },
+      });
+
       const weatherTable = [
         'Sweltering Heat',
         'Very Sunny',
@@ -52,11 +95,11 @@ export const gameRouter = router({
 
       const homeJourneymen = {
         count: Math.max(0, 11 - game.home.players.length),
-        players: game.home.roster.positions.map(({ name }) => name),
+        players: game.home.roster.positions.map(pos => pos.name),
       };
       const awayJourneymen = {
         count: Math.max(0, 11 - game.away.players.length),
-        players: game.away.roster.positions.map(({ name }) => name),
+        players: game.away.roster.positions.map(pos => pos.name),
       };
 
       const result = {
@@ -67,62 +110,53 @@ export const gameRouter = router({
         awayJourneymen,
       };
 
-      const teamUpdates = prisma.team.updateMany({
+      const teamUpdates = ctx.prisma.team.updateMany({
         where: { name: { in: [game.home.name, game.away.name] } },
         data: { state: 'Playing' },
       });
-      const gameUpdate = prisma.game.update({ where: { id: game.id }, data: { state: 'Journeymen' } });
-      return prisma.$transaction([teamUpdates, gameUpdate]).then(() => result);
+      const gameUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: 'Journeymen' } });
+      return ctx.prisma.$transaction([teamUpdates, gameUpdate]).then(() => result);
     }),
 
   selectJourneymen: publicProcedure
-    .input(z.object({ home: z.string().optional(), away: z.string().optional(), game: z.string() })
-      .transform(async input => {
-        const teamFields = {
-          name: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          rerolls: true,
-          roster: { select: { name: true, rerollCost: true } },
-          players: {
-            where: { missNextGame: false },
-            select: { teamValue: true },
-          },
-        } as const;
-        return {
-          ...input,
-          game: await prisma.game.findUniqueOrThrow({
-            where: { id: input.game },
-            select: {
-              id: true,
-              state: true,
-              home: { select: teamFields },
-              away: { select: teamFields },
-            },
-          }),
-        };
-      })
-      .transform(async input => {
-        const makeQuery = (name: string, rosterName: string) => ({
-          where: {
-            name,
-            rosterName,
-            max: { gte: 12 },
-          },
-          include: { skills: true },
-        } as const);
-        return {
-          ...input,
-          homeChoice: input.home !== undefined
-            ? await prisma.position.findFirstOrThrow(makeQuery(input.home, input.game.home.roster.name))
-            : undefined,
-          awayChoice: input.away !== undefined
-            ? await prisma.position.findFirstOrThrow(makeQuery(input.away, input.game.away.roster.name))
-            : undefined,
-        };
-      }))
-    .mutation(async({ input: { game, homeChoice, awayChoice } }) => {
+    .input(z.object({ home: z.string().optional(), away: z.string().optional(), game: z.string() }))
+    .mutation(async({ input, ctx }) => {
+      const teamFields = {
+        name: true,
+        apothecary: true,
+        assistantCoaches: true,
+        cheerleaders: true,
+        rerolls: true,
+        roster: { select: { name: true, rerollCost: true } },
+        players: {
+          where: { missNextGame: false },
+          select: { teamValue: true },
+        },
+      } as const;
+      const game = await ctx.prisma.game.findUniqueOrThrow({
+        where: { id: input.game },
+        select: {
+          id: true,
+          state: true,
+          home: { select: teamFields },
+          away: { select: teamFields },
+        },
+      });
+      const makePositionQuery = (positionName: string, rosterName: string) => ({
+        where: {
+          name: positionName,
+          rosterName,
+          max: { gte: 12 },
+        },
+        include: { skills: true },
+      } as const);
+      const homeChoice = input.home !== undefined
+        ? await ctx.prisma.position.findFirstOrThrow(makePositionQuery(input.home, game.home.roster.name))
+        : undefined;
+      const awayChoice = input.away !== undefined
+        ? await ctx.prisma.position.findFirstOrThrow(makePositionQuery(input.away, game.away.roster.name))
+        : undefined;
+
       if (game.state !== GameState.Journeymen)
         throw new Error('Game not awaiting journeymen choice');
 
@@ -151,14 +185,14 @@ export const gameRouter = router({
       const promises: Array<PrismaPromise<unknown>> = [];
       if (homeChoice) {
         homeTV += homeChoice.cost * (11 - homePlayers);
-        promises.push(prisma.team.update({
+        promises.push(ctx.prisma.team.update({
           where: { name: game.home.name },
           data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(homeChoice)) } },
         }));
       }
       if (awayChoice) {
         awayTV += awayChoice.cost * (11 - homePlayers);
-        promises.push(prisma.team.update({
+        promises.push(ctx.prisma.team.update({
           where: { name: game.home.name },
           data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(awayChoice)) } },
         }));
@@ -166,15 +200,14 @@ export const gameRouter = router({
 
       const pettyCashHome = Math.max(0, awayTV - homeTV);
       const pettyCashAway = Math.max(0, homeTV - awayTV);
-      promises.push(prisma.game.update({
+      promises.push(ctx.prisma.game.update({
         where: { id: game.id },
         data: {
           state: 'Inducements',
-          pettyCashHome,
-          pettyCashAway,
+          pettyCash: [pettyCashHome, pettyCashAway],
         },
       }));
-      return prisma.$transaction(promises).then(() => ({
+      return ctx.prisma.$transaction(promises).then(() => ({
         pettyCashHome,
         pettyCashAway,
       }));
@@ -190,34 +223,31 @@ export const gameRouter = router({
           .gt(0)
           .default(1),
       }));
+      return z.object({
+        game: z.string(),
+        home: choices,
+        away: choices,
+      })
+        .parse(input);
+    })
+    .mutation(async({ input, ctx }) => {
       const teamFields = {
         name: true,
         treasury: true,
         roster: { select: { specialRules: true } },
         players: { where: { missNextGame: false }, select: {} },
       } as const;
-      return z.object({
-        game: z.string(),
-        home: choices,
-        away: choices,
-      })
-        .transform(async i => ({
-          ...i,
-          game: await prisma.game.findUniqueOrThrow({
-            where: { id: i.game },
-            select: {
-              id: true,
-              state: true,
-              pettyCashHome: true,
-              pettyCashAway: true,
-              home: { select: teamFields },
-              away: { select: teamFields },
-            },
-          }),
-        }))
-        .parse(input);
-    })
-    .mutation(async({ input: { game, home, away } }) => {
+      const game = await ctx.prisma.game.findUniqueOrThrow({
+        where: { id: input.game },
+        select: {
+          id: true,
+          state: true,
+          pettyCash: true,
+          home: { select: teamFields },
+          away: { select: teamFields },
+        },
+      });
+
       if (game.state !== GameState.Inducements)
         throw new Error('Game not awaiting inducements');
 
@@ -225,25 +255,26 @@ export const gameRouter = router({
       let awayInducementCost = 0;
 
       homeInducementCost =
-        await calculateInducementCosts(home, game.home.roster.specialRules, game.home.players.length);
+        await calculateInducementCosts(input.home, game.home.roster.specialRules, game.home.players.length, ctx.prisma);
       awayInducementCost =
-        await calculateInducementCosts(away, game.away.roster.specialRules, game.away.players.length);
+        await calculateInducementCosts(input.away, game.away.roster.specialRules, game.away.players.length, ctx.prisma);
 
-      const treasuryCostHome = Math.max(0, homeInducementCost - game.pettyCashHome);
-      const treasuryCostAway = Math.max(0, awayInducementCost - game.pettyCashAway);
+      const [pettyCashHome, pettyCashAway] = game.pettyCash;
+      const treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);
+      const treasuryCostAway = Math.max(0, awayInducementCost - pettyCashAway);
       if (treasuryCostHome > game.home.treasury || treasuryCostAway > game.away.treasury)
         throw new Error('Inducements are too expensive');
 
-      const homeUpdate = prisma.team.update({
+      const homeUpdate = ctx.prisma.team.update({
         where: { name: game.home.name },
         data: { treasury: { decrement: treasuryCostHome } },
       });
-      const awayUpdate = prisma.team.update({
+      const awayUpdate = ctx.prisma.team.update({
         where: { name: game.away.name },
         data: { treasury: { decrement: treasuryCostAway } },
       });
-      const gameStateUpdate = prisma.game.update({ where: { id: game.id }, data: { state: 'InProgress' } });
-      await prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
+      const gameStateUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: 'InProgress' } });
+      await ctx.prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
         treasuryCostHome,
         treasuryCostAway,
       }));
@@ -266,24 +297,18 @@ export const gameRouter = router({
       })),
       touchdowns: z.tuple([z.number().int(), z.number().int()]),
       casualties: z.tuple([z.number().int(), z.number().int()]),
-    })
-      .transform(async i => {
-        const teamFields = { players: true, journeymen: true };
-        return {
-          ...i,
-          game: await prisma.game.findUniqueOrThrow({
-            where: { id: i.game },
-            select: {
-              id: true,
-              state: true,
-              home: { select: teamFields },
-              away: { select: teamFields },
-            },
-          }),
-        };
-      }))
-    .mutation(async({ input }) => {
-      const { game } = input;
+    }))
+    .mutation(async({ input, ctx }) => {
+      const teamFields = { players: true, journeymen: true };
+      const game = await ctx.prisma.game.findUniqueOrThrow({
+        where: { id: input.game },
+        select: {
+          id: true,
+          state: true,
+          home: { select: teamFields },
+          away: { select: teamFields },
+        },
+      });
       const statMinMax = {
         MA: [1, 9],
         ST: [1, 8],
@@ -378,16 +403,14 @@ export const gameRouter = router({
       mvpAwayUpdate.MVPs = { increment: 1 };
       mvpAwayUpdate.starPlayerPoints = incrementUpdateField(mvpAwayUpdate.starPlayerPoints, 4);
 
-      return prisma.$transaction([
-        ...Object.values(updateMap).map(update => prisma.player.update(update)),
-        prisma.game.update({
+      return ctx.prisma.$transaction([
+        ...Object.values(updateMap).map(update => ctx.prisma.player.update(update)),
+        ctx.prisma.game.update({
           where: { id: game.id },
           data: {
-            tdHome: input.touchdowns[0],
-            tdAway: input.touchdowns[1],
-            casHome: input.casualties[0],
-            casAway: input.casualties[1],
             state: 'Complete',
+            touchdowns: input.touchdowns,
+            casualties: input.casualties,
             home: { update: { state: 'PostGame' } },
             away: { update: { state: 'PostGame' } },
           },

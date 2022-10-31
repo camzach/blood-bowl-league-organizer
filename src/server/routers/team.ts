@@ -1,5 +1,4 @@
 import { Prisma, TeamState } from '@prisma/client';
-import { prisma } from './prisma-singleton';
 import { z } from 'zod';
 import { publicProcedure, router } from '../trpc';
 import { newPlayer } from './new-player';
@@ -7,11 +6,11 @@ import { newPlayer } from './new-player';
 export const teamRouter = router({
   create: publicProcedure
     .input(z.object({ name: z.string().min(1), roster: z.string() }))
-    .mutation(async req => {
-      const { name, roster } = req.input;
-      const team = await prisma.team.create({
+    .mutation(async({ input, ctx }) => {
+      const { name: teamName, roster } = input;
+      const team = await ctx.prisma.team.create({
         data: {
-          name,
+          name: teamName,
           roster: { connect: { name: roster } },
         },
       }).catch(err => {
@@ -29,29 +28,26 @@ export const teamRouter = router({
 
   get: publicProcedure
     .input(z.string())
-    .query(({ input: teamName }) => prisma.team.findUniqueOrThrow({ where: { name: teamName } })),
+    .query(({ input: teamName, ctx }) => ctx.prisma.team.findUniqueOrThrow({ where: { name: teamName } })),
 
   hirePlayer: publicProcedure
     .input(z.object({
       team: z.string(),
       position: z.string(),
       name: z.string().optional(),
-    })
-      .transform(async input => ({
-        ...input,
-        team: await prisma.team.findUniqueOrThrow({
-          where: { name: input.team },
-          select: { players: true, treasury: true, state: true, name: true },
-        }),
-        position: await prisma.position.findFirstOrThrow({
-          where: {
-            name: input.position,
-            Roster: { Team: { some: { name: input.team } } },
-          },
-          include: { skills: true },
-        }),
-      })))
-    .mutation(async({ input: { team, position, name } }) => {
+    }))
+    .mutation(async({ input, ctx }) => {
+      const team = await ctx.prisma.team.findUniqueOrThrow({
+        where: { name: input.team },
+        select: { players: true, treasury: true, state: true, name: true },
+      });
+      const position = await ctx.prisma.position.findFirstOrThrow({
+        where: {
+          name: input.position,
+          Roster: { Team: { some: { name: input.team } } },
+        },
+        include: { skills: true },
+      });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team cannot hire new players right now');
 
@@ -62,11 +58,11 @@ export const teamRouter = router({
       if (team.treasury < position.cost)
         throw new Error('Cannot afford player');
 
-      return prisma.team.update({
+      return ctx.prisma.team.update({
         where: { name: team.name },
         data: {
           treasury: team.treasury - position.cost,
-          players: { create: newPlayer(position, name) },
+          players: { create: newPlayer(position, input.name) },
         },
       });
     }),
@@ -79,9 +75,9 @@ export const teamRouter = router({
         .int()
         .gt(0)
         .default(1),
-    }).transform(async input => ({
-      ...input,
-      team: await prisma.team.findUniqueOrThrow({
+    }))
+    .mutation(async({ input, ctx }) => {
+      const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
           treasury: true,
@@ -93,12 +89,10 @@ export const teamRouter = router({
           rerolls: true,
           roster: { select: { specialRules: true, rerollCost: true } },
         },
-      }),
-    })))
-    .mutation(async({ input: { team, type, quantity } }) => {
+      });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team cannot hire staff right now');
-      if (type === 'apothecary' && !team.roster.specialRules.includes('Apothecary Allowed'))
+      if (input.type === 'apothecary' && !team.roster.specialRules.includes('Apothecary Allowed'))
         throw new Error('Apothecary not allowed for this team');
 
       const baseRerollCost = team.roster.rerollCost;
@@ -108,7 +102,7 @@ export const teamRouter = router({
         cheerleaders: 10_000,
         rerolls: team.state === 'Draft' ? baseRerollCost : baseRerollCost * 2,
       };
-      const cost = costMap[type] * quantity;
+      const cost = costMap[input.type] * input.quantity;
       if (cost > team.treasury)
         throw new Error('Not enough money in treasury');
 
@@ -118,13 +112,13 @@ export const teamRouter = router({
         cheerleaders: 12,
         rerolls: 8,
       };
-      if (Number(team[type]) + quantity > maxMap[type])
+      if (Number(team[input.type]) + input.quantity > maxMap[input.type])
         throw new Error('Maximum exceeded');
 
-      return prisma.team.update({
+      return ctx.prisma.team.update({
         where: { name: team.name },
         data: {
-          [type]: type === 'apothecary' ? true : { increment: quantity },
+          [input.type]: input.type === 'apothecary' ? true : { increment: input.quantity },
           treasury: { decrement: cost },
         },
       });
@@ -138,9 +132,9 @@ export const teamRouter = router({
         .int()
         .gt(0)
         .default(1),
-    }).transform(async input => ({
-      ...input,
-      team: await prisma.team.findUniqueOrThrow({
+    }))
+    .mutation(async({ input, ctx }) => {
+      const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
           treasury: true,
@@ -152,12 +146,10 @@ export const teamRouter = router({
           rerolls: true,
           roster: { select: { rerollCost: true } },
         },
-      }),
-    })))
-    .mutation(async({ input: { team, type, quantity } }) => {
+      });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team cannot fire staff right now');
-      if (Number(team[type]) - quantity < 0)
+      if (Number(team[input.type]) - input.quantity < 0)
         throw new Error('Not enough staff to fire');
 
       const costMap = {
@@ -167,23 +159,22 @@ export const teamRouter = router({
         rerolls: team.roster.rerollCost,
       };
 
-      return prisma.team.update({
+      return ctx.prisma.team.update({
         where: { name: team.name },
         data: {
-          [type]: { decrement: quantity },
-          treasury: team.state === TeamState.Draft ? { increment: costMap[type] * quantity } : undefined,
+          [input.type]: { decrement: input.quantity },
+          treasury: team.state === TeamState.Draft ? { increment: costMap[input.type] * input.quantity } : undefined,
         },
       });
     }),
 
   ready: publicProcedure
-    .input(z.string()
-      .transform(async name =>
-        prisma.team.findUniqueOrThrow({
-          where: { name },
-          select: { name: true, state: true, treasury: true, _count: { select: { players: true } } },
-        })))
-    .mutation(async({ input: team }) => {
+    .input(z.string())
+    .mutation(async({ input, ctx }) => {
+      const team = await ctx.prisma.team.findUniqueOrThrow({
+        where: { name: input },
+        select: { name: true, state: true, treasury: true, _count: { select: { players: true } } },
+      });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team not in Draft or PostGame state');
       // eslint-disable-next-line no-underscore-dangle
@@ -213,7 +204,7 @@ export const teamRouter = router({
       const expensiveMistakesCost = expensiveMistake !== null
         ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
         : 0;
-      return prisma.team.update({
+      return ctx.prisma.team.update({
         where: { name: team.name },
         data: { state: 'Ready', treasury: { decrement: expensiveMistakesCost } },
       }).then(() => ({
