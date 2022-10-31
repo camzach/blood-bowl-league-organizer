@@ -17,7 +17,12 @@
     "noEmit": true,
     "incremental": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "ts-node": {
     "esm": true,
@@ -26,8 +31,8 @@
   "include": [
     "src",
     "next-env.d.ts",
-    "nextjs-routes.d.ts"
-  ],
+    ".next/types/**/*.ts"
+, "src/app"  ],
   "exclude": [
     "node_modules"
   ]

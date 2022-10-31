@@ -157,6 +157,14 @@ enum GameState {
   Complete
 }
 
+enum Weather {
+  Blizzard
+  PouringRain
+  Perfect
+  VerySunny
+  BlisteringHeat
+}
+
 model Game {
   id            String    @id @unique @default(uuid()) @db.Uuid
   round         Int
@@ -165,10 +173,9 @@ model Game {
   homeTeamName  String
   awayTeamName  String
   state         GameState @default(Scheduled)
-  pettyCashHome Int       @default(0)
-  pettyCashAway Int       @default(0)
-  tdHome        Int       @default(0)
-  tdAway        Int       @default(0)
-  casHome       Int       @default(0)
-  casAway       Int       @default(0)
+  pettyCash     Int[]
+  touchdowns    Int[]
+  casualties    Int[]
+  fanFactor     Int[]
+  weather       Weather?
 }
