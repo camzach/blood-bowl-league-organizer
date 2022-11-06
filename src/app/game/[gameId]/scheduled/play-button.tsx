@@ -7,9 +7,9 @@ import Link from 'next/link';
 
 export function PlayButton({ game }:
 { game: Awaited<ReturnType<typeof trpc.game.get.query>> & { state: 'Scheduled' } }): ReactElement {
-  const [response, setResponse] = useState<Awaited<ReturnType<typeof trpc.game.start.query>> | null>(null);
+  const [response, setResponse] = useState<Awaited<ReturnType<typeof trpc.game.start.mutate>> | null>(null);
   const startGame = (): void => {
-    void trpc.game.start.query(game.id)
+    void trpc.game.start.mutate(game.id)
       .then(setResponse);
   };
 
