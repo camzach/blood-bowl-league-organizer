@@ -63,7 +63,7 @@ export const gameRouter = router({
 
   start: publicProcedure
     .input(z.string())
-    .query(async({ input: id, ctx }) => {
+    .mutation(async({ input: id, ctx }) => {
       const startGameTeamFields = {
         select: {
           players: { where: { missNextGame: false } },
