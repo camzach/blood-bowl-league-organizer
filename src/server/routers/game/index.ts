@@ -1,6 +1,6 @@
 import type { Game, Prisma, PrismaPromise } from '@prisma/client';
 import { GameState } from '@prisma/client';
-import { publicProcedure, router } from '../../trpc';
+import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
 import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
@@ -36,11 +36,12 @@ export const gameRouter = router({
                 },
               }).then(team => team.roster.positions)));
           return {
+            id,
             state: GameState.Journeymen,
             homeTeam: game.homeTeamName,
-            homeChoices,
+            homeChoices: { count: game.journeymenHome, choices: homeChoices },
             awayTeam: game.awayTeamName,
-            awayChoices,
+            awayChoices: { count: game.journeymenAway, choices: awayChoices },
           };
         }
         case GameState.Inducements:
@@ -51,6 +52,7 @@ export const gameRouter = router({
           return { state: GameState.Complete };
         case GameState.Scheduled:
           return {
+            id,
             state: GameState.Scheduled,
             homeTeam: game.homeTeamName,
             awayTeam: game.awayTeamName,
@@ -88,10 +90,12 @@ export const gameRouter = router({
         'Blizzard',
       ];
 
-      const fanFactorHome = game.home.dedicatedFans + Math.ceil(Math.random() * 6);
-      const fanFactorAway = game.away.dedicatedFans + Math.ceil(Math.random() * 6);
-      const weatherRoll = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);
-      const weatherResult = weatherTable[weatherRoll];
+      const fairweatherFansHome = Math.ceil(Math.random() * 6);
+      const fanFactorHome = game.home.dedicatedFans + fairweatherFansHome;
+      const fairweatherFansAway = Math.ceil(Math.random() * 6);
+      const fanFactorAway = game.away.dedicatedFans + fairweatherFansAway;
+      const weatherRoll = [Math.floor(Math.random() * 6), Math.floor(Math.random() * 6)];
+      const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
 
       const homeJourneymen = {
         count: Math.max(0, 11 - game.home.players.length),
@@ -103,8 +107,11 @@ export const gameRouter = router({
       };
 
       const result = {
+        fairweatherFansHome,
         fanFactorHome,
+        fairweatherFansAway,
         fanFactorAway,
+        weatherRoll,
         weatherResult,
         homeJourneymen,
         awayJourneymen,
@@ -114,7 +121,14 @@ export const gameRouter = router({
         where: { name: { in: [game.home.name, game.away.name] } },
         data: { state: 'Playing' },
       });
-      const gameUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: 'Journeymen' } });
+      const gameUpdate = ctx.prisma.game.update({
+        where: { id: game.id },
+        data: {
+          state: 'Journeymen',
+          journeymenHome: homeJourneymen.count,
+          journeymenAway: awayJourneymen.count,
+        },
+      });
       return ctx.prisma.$transaction([teamUpdates, gameUpdate]).then(() => result);
     }),
 
@@ -204,7 +218,8 @@ export const gameRouter = router({
         where: { id: game.id },
         data: {
           state: 'Inducements',
-          pettyCash: [pettyCashHome, pettyCashAway],
+          pettyCashHome,
+          pettyCashAway,
         },
       }));
       return ctx.prisma.$transaction(promises).then(() => ({
@@ -242,7 +257,8 @@ export const gameRouter = router({
         select: {
           id: true,
           state: true,
-          pettyCash: true,
+          pettyCashHome: true,
+          pettyCashAway: true,
           home: { select: teamFields },
           away: { select: teamFields },
         },
@@ -259,7 +275,7 @@ export const gameRouter = router({
       awayInducementCost =
         await calculateInducementCosts(input.away, game.away.roster.specialRules, game.away.players.length, ctx.prisma);
 
-      const [pettyCashHome, pettyCashAway] = game.pettyCash;
+      const { pettyCashHome, pettyCashAway } = game;
       const treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);
       const treasuryCostAway = Math.max(0, awayInducementCost - pettyCashAway);
       if (treasuryCostHome > game.home.treasury || treasuryCostAway > game.away.treasury)
@@ -409,8 +425,10 @@ export const gameRouter = router({
           where: { id: game.id },
           data: {
             state: 'Complete',
-            touchdowns: input.touchdowns,
-            casualties: input.casualties,
+            touchdownsHome: input.touchdowns[0],
+            touchdownsAway: input.touchdowns[1],
+            casualtiesHome: input.casualties[0],
+            casualtiesAway: input.casualties[1],
             home: { update: { state: 'PostGame' } },
             away: { update: { state: 'PostGame' } },
           },

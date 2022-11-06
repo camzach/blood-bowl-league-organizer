@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { SkillCategory, TeamState } from '@prisma/client';
 import { string, z } from 'zod';
-import { publicProcedure, router } from '../trpc';
+import { publicProcedure, router } from 'server/trpc';
 
 function upperFirst<T extends string>(str: T): Capitalize<T> {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}` as Capitalize<T>;

@@ -166,16 +166,22 @@ enum Weather {
 }
 
 model Game {
-  id            String    @id @unique @default(uuid()) @db.Uuid
-  round         Int
-  home          Team      @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
-  away          Team      @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
-  homeTeamName  String
-  awayTeamName  String
-  state         GameState @default(Scheduled)
-  pettyCash     Int[]
-  touchdowns    Int[]
-  casualties    Int[]
-  fanFactor     Int[]
-  weather       Weather?
+  id             String    @id @unique @default(uuid()) @db.Uuid
+  round          Int
+  home           Team      @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
+  away           Team      @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
+  homeTeamName   String
+  awayTeamName   String
+  state          GameState @default(Scheduled)
+  journeymenHome Int       @default(0)
+  journeymenAway Int       @default(0)
+  pettyCashHome  Int       @default(0)
+  pettyCashAway  Int       @default(0)
+  touchdownsHome Int       @default(0)
+  touchdownsAway Int       @default(0)
+  casualtiesHome Int       @default(0)
+  casualtiesAway Int       @default(0)
+  fanFacotrHome  Int       @default(0)
+  fanFactorAway  Int       @default(0)
+  weather        Weather?
 }

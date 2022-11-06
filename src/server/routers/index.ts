@@ -1,4 +1,4 @@
-import { router } from '../trpc';
+import { router } from 'server/trpc';
 import { gameRouter } from './game';
 import { playerRouter } from './player';
 import { scheduleRouter } from './schedule-generator';

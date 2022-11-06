@@ -22,7 +22,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": "src"
   },
   "ts-node": {
     "esm": true,
