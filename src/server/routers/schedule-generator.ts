@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '../trpc';
+import { publicProcedure, router } from 'server/trpc';
 
 type PairingsType = Array<{
   homeTeamName: string;

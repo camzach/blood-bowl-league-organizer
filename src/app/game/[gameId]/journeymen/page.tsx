@@ -1,36 +1,34 @@
-'use client';
-import { useRouter } from 'next/router';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { trpc } from '../../../../utils/trpc';
+import { trpc } from 'utils/trpc';
 
-export default async function Journeymen(): Promise<ReactNode> {
-  const router = useRouter();
-  const { gameId } = router.query;
-  const data = await trpc.game.get.query(gameId as string);
+export default async function Journeymen({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
+  const game = await trpc.game.get.query(gameId);
 
-  if (data.state !== 'Journeymen')
-    return <>Bad</>;
+  if (game.state !== 'Journeymen')
+    redirect(`game/${gameId}/${game.state.toLowerCase()}`);
 
   return (
-    <div>
+    <>
       <h1>
-        {data.homeTeam} Choices
+        {game.homeTeam} - Need {game.homeChoices.count} Journeymen
       </h1>
-      {data.homeChoices.map(choice => (
+      {game.homeChoices.choices.map(choice => (
         <label key={choice.id}>
           <input type="radio" name="home" />
           {choice.name}
         </label>
       ))}
       <h1>
-        {data.awayTeam} Choices
+        {game.awayTeam} - Need {game.awayChoices.count} Journeymen
       </h1>
-      {data.awayChoices.map(choice => (
+      {game.awayChoices.choices.map(choice => (
         <label key={choice.id}>
           <input type="radio" name="away" />
           {choice.name}
         </label>
       ))}
-    </div>
+      <button>Submit!</button>
+    </>
   );
 }
