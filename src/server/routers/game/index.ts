@@ -45,7 +45,11 @@ export const gameRouter = router({
           };
         }
         case GameState.Inducements:
-          return { state: GameState.Inducements };
+          return {
+            state: GameState.Inducements,
+            pettyCash: [game.pettyCashHome, game.pettyCashAway],
+            inducements: await Promise.all([game.homeTeamName, game.awayTeamName]),
+          };
         case GameState.InProgress:
           return { state: GameState.InProgress };
         case GameState.Complete:
@@ -267,13 +271,13 @@ export const gameRouter = router({
       if (game.state !== GameState.Inducements)
         throw new Error('Game not awaiting inducements');
 
-      let homeInducementCost = 0;
-      let awayInducementCost = 0;
-
-      homeInducementCost =
-        await calculateInducementCosts(input.home, game.home.roster.specialRules, game.home.players.length, ctx.prisma);
-      awayInducementCost =
-        await calculateInducementCosts(input.away, game.away.roster.specialRules, game.away.players.length, ctx.prisma);
+      const [homeInducementCost, awayInducementCost] = await Promise.all((['home', 'away'] as const).map(async t =>
+        calculateInducementCosts(
+          input[t],
+          game[t].roster.specialRules.map(r => r.name),
+          game[t].players.length,
+          ctx.prisma
+        )));
 
       const { pettyCashHome, pettyCashAway } = game;
       const treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);

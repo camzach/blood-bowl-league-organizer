@@ -1,1 +1,1302 @@
-[{"name":"Griff Oberwald","MA":7,"ST":4,"AG":2,"PA":3,"AV":9,"skills":[{"name":"Block"},{"name":"Dodge"},{"name":"Fend"},{"name":"Loner (3+)"},{"name":"Sprint"},{"name":"Sure Feet"}],"specialRule":"Consummate Professional: Once per game, Griff may re-roll one dice that was rolled either as a single dice roll, as a part of a multiple dice roll, or as a part of a dice pool (this cannot be a dice that was rolled as a part of an Armor, Injury, or Casualty roll).","hiringFee":280000,"playsFor":["Halfling Thimble Cup","Old World Classic"]},{"name":"Grak","MA":5,"ST":5,"AG":4,"PA":4,"AV":10,"skills":[{"name":"Bone Head"},{"name":"Kick Team-mate"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Thick Skull"}],"specialRule":"Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.","hiringFee":250000},{"name":"Gretchen Wachter “The Blood Bowl Widow”","MA":7,"ST":3,"AG":2,"PA":null,"AV":9,"skills":[{"name":"Disturbing Presence"},{"name":"Dodge"},{"name":"Foul Appearance"},{"name":"Jump Up"},{"name":"Loner (4+)"},{"name":"No Hands"},{"name":"Regeneration"},{"name":"Shadowing"},{"name":"Side Step"}],"specialRule":"Incorporeal: Once per game, after making an Agility test to dodge, Gretchen may choose to modify the dice roll by adding her strength characteristic to it.","hiringFee":260000,"playsFor":["Sylvanian Spotlight"]},{"name":"Eldril Sidewinder","MA":8,"ST":3,"AG":2,"PA":5,"AV":8,"skills":[{"name":"Catch"},{"name":"Dodge"},{"name":"Hypnotic Gaze"},{"name":"Loner (4+)"},{"name":"Nerves of Steel"},{"name":"On the Ball"}],"specialRule":"Mesmerizing Dance: Once per game, Eldril may re-roll a failed Agility test when attempting to use the Hypnotic Gaze trait.","hiringFee":230000,"playsFor":["Elven Kingdoms League"]},{"name":"Barik Farblast","MA":6,"ST":3,"AG":3,"PA":3,"AV":9,"skills":[{"name":"Hail Mary Pass"},{"name":"Loner (4+)"},{"name":"Pass"},{"name":"Secret Weapon"},{"name":"Strong Arm"},{"name":"Sure Hands"},{"name":"Thick Skull"}],"specialRule":"Blast It!: Once per game, when Barik makes a Hail Mary Pass, he may re-roll any scatter results for determining where the ball lands, and any friendly player attempting to catch the ball gains an additional +1 modifier to the roll.","hiringFee":80000,"playsFor":["Halfling Thimble Cup","Old World Classic","Worlds Edge Superleague"]},{"name":"Bomber Dribblesnot","MA":6,"ST":2,"AG":3,"PA":3,"AV":8,"skills":[{"name":"Accurate"},{"name":"Bombardier"},{"name":"Dodge"},{"name":"Loner (4+)"},{"name":"Right Stuff"},{"name":"Secret Weapon"},{"name":"Stunty"}],"specialRule":"Kaboom: Once per game, if an opposition player catches a Bomb thrown by Bomber, you can choose to have it explode immediately rather than rolling to see if the player can throw it again.","hiringFee":50000,"playsFor":["Badlands Brawl","Underworld Challenge"]},{"name":"Akhorne The Squirrel","MA":7,"ST":1,"AG":2,"PA":null,"AV":6,"skills":[{"name":"Claws"},{"name":"Dauntless"},{"name":"Dodge"},{"name":"Frenzy"},{"name":"Jump Up"},{"name":"Loner (4+)"},{"name":"No Hands"},{"name":"Side Step"},{"name":"Stunty"},{"name":"Titchy"}],"specialRule":"Blind Rage: Akhorne may choose to re-roll the D6 when rolling for the Dauntless sill.","hiringFee":80000},{"name":"Kreek Rustgouger","MA":5,"ST":7,"AG":4,"PA":null,"AV":10,"skills":[{"name":"Ball & Chain"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"No Hands"},{"name":"Prehensile Tail"},{"name":"Secret Weapon"}],"specialRule":"I'll Be Back: The first time in a game that Kreek Rustgouger would be Sent-off as per the secret weapon trait, he is not Sent-off and instead may continue as part of the game.","hiringFee":170000,"playsFor":["Favoured Of...","Underworld Challenge"]},{"name":"Crumbleberry","MA":5,"ST":2,"AG":3,"PA":6,"AV":7,"skills":[{"name":"Dodge"},{"name":"Loner (4+)"},{"name":"Right Stuff"},{"name":"Stunty"},{"name":"Sure Hands"}],"specialRule":"Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.","hiringFee":250000},{"name":"Gloriel Summerbloom","MA":7,"ST":2,"AG":2,"PA":2,"AV":8,"skills":[{"name":"Accurate"},{"name":"Dodge"},{"name":"Loner (3+)"},{"name":"Pass"},{"name":"Side Step"},{"name":"Sure Hands"}],"specialRule":"Shot to Nothing: Once per game, when Gloriel performs a Pass action, she may gain the Hail Mary Pass skill. You must declare this special rule is being used when Gloriel is activated.","hiringFee":150000,"playsFor":["Elven Kingdoms League"]},{"name":"Grombrindal, the White Dwarf","MA":5,"ST":3,"AG":3,"PA":4,"AV":10,"skills":[{"name":"Block"},{"name":"Dauntless"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Stand Firm"},{"name":"Thick Skull"}],"specialRule":"Wisdom of the White Dwarf: One per team turn, when one of Grombrindal's team-mates that is in an adjacent square is activated, that player gains either the Break Tackle, Dauntless, Mighty Blow (+1), or Sure Feet skill until the end of their activation.","hiringFee":210000,"playsFor":["Halfling Thimble Cup","Lustrain Superleague","Old World Classic","Worlds Edge Superleague"]},{"name":"Fungus the Loon","MA":4,"ST":7,"AG":3,"PA":null,"AV":8,"skills":[{"name":"Ball & Chain"},{"name":"Mighty Blow (+1)"},{"name":"Loner (4+)"},{"name":"No Hands"},{"name":"Secret Weapon"},{"name":"Stunty"}],"specialRule":"Whirling Dervish: Once per activation, Fungus may re-roll the D6 when determining which direction he moves in.","hiringFee":80000,"playsFor":["Badlands Brawl","Underworld Challenge"]},{"name":"Grashnak Blackhoof","MA":6,"ST":6,"AG":4,"PA":null,"AV":9,"skills":[{"name":"Frenzy"},{"name":"Horns"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Thick Skull"},{"name":"Unchannelled Fury"}],"specialRule":"Gored by the Bull: Once per game, when Grashnak performs a Blitz action, Grashnak may roll one additional Block dice against the opposition player, regardless of the opposition player's Strength, to a maximum of three Block dice. If Grashnak performs a second Block action due to the Frenzy skill, this second Block action will also benefit from this rule.","hiringFee":240000,"playsFor":["Favoured Of..."]},{"name":"Deeproot Strongbranch","MA":2,"ST":7,"AG":5,"PA":4,"AV":11,"skills":[{"name":"Block"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+2)"},{"name":"Stand Firm"},{"name":"Strong Arm"},{"name":"Thick Skull"},{"name":"Throw Team-mate"},{"name":"Timmm-ber!"}],"specialRule":"Reliable: If Deeproot fumbles a Throw Team-mate action, the player that was thrown will bounce as normal but will automatically land safely.","hiringFee":280000,"playsFor":["Halfling Thimble Cup","Old World Classic"]},{"name":"Glart Smashrip","MA":5,"ST":4,"AG":4,"PA":null,"AV":9,"skills":[{"name":"Block"},{"name":"Claws"},{"name":"Grab"},{"name":"Juggernaut"},{"name":"Loner (4+)"},{"name":"Stand Firm"}],"specialRule":"Frenzied Rush: Once per game, when Glart performs a Blitz action, he may gain the Frenzy skill. You must declare this special rule is being used when Glart is activated. Glart may not use the Grab skill during a turn in which he uses this special rule.","hiringFee":195000,"playsFor":["Favoured Of...","Underworld Challenge"]},{"name":"Willow Rosebark","MA":5,"ST":4,"AG":3,"PA":6,"AV":9,"skills":[{"name":"Dauntless"},{"name":"Loner (4+)"},{"name":"Side Step"},{"name":"Thick Skull"}],"specialRule":"Indomitable: Once per game, when Willow successfully rolls to use her Dauntless skill, she may increase her Strength characteristc to double that of the nominated target of her Block action.","hiringFee":150000,"playsFor":["Elven Kingdoms League"]},{"name":"Zolcath the Zoat","MA":5,"ST":5,"AG":4,"PA":5,"AV":10,"skills":[{"name":"Disturbing Presence"},{"name":"Juggernaut"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Prehensile Tail"},{"name":"Regeneration"},{"name":"Sure Feet"}],"specialRule":"\"Excuse Me, Are You a Zoat?\": Once per game, when Zolcath is activated, he may gain the Hypnotic Gaze trait. You must declare this special rule is being used when Zolcath is activated.","hiringFee":230000,"playsFor":["Lustrian Superleague","Elven Kingdoms League"]},{"name":"Karla Von Kill","MA":6,"ST":4,"AG":3,"PA":4,"AV":9,"skills":[{"name":"Block"},{"name":"Dauntless"},{"name":"Dodge"},{"name":"Jump Up"},{"name":"Loner (4+)"}],"specialRule":"Indomitable: Once per game, when Karla successfully rolls to use her Dauntless skill, she may increase her Strength characteristc to double that of the nominated target of her Block action.","hiringFee":210000,"playsFor":["Halfling Thimble Cup","Lustrian Superleague","Old World Classic"]},{"name":"Lucian Swift","MA":7,"ST":3,"AG":2,"PA":5,"AV":9,"skills":[{"name":"Block"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Tackle"}],"specialRule":"Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.","hiringFee":340000,"playsFor":["Elven Kingdoms League"]},{"name":"Morg ‘n’ Thorg","MA":6,"ST":6,"AG":3,"PA":4,"AV":11,"skills":[{"name":"Block"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+2)"},{"name":"Thick Skull"},{"name":"Throw Team-mate"}],"specialRule":"The Ballista: Once per game, if Morg fails the Passing Ability test when making a Pass action or a Throw team-mate action, you may re-roll the D6.","hiringFee":380000,"doesntPlayFor":["Sylvanian Spotlight"]},{"name":"Varag Ghoul-Chewer","MA":6,"ST":5,"AG":3,"PA":5,"AV":10,"skills":[{"name":"Block"},{"name":"Jump Up"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Thick Skull"}],"specialRule":"Crushing Blow: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Varag, you may apply an additional +1 modifier to the Armor roll. This modifier may be applied after the roll has been made.","hiringFee":280000,"playsFor":["Badlands Brawl","Underworld Challenge"]},{"name":"Frank ‘n’ Stein","MA":4,"ST":5,"AG":4,"PA":null,"AV":10,"skills":[{"name":"Break Tackle"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Regeneration"},{"name":"Stand Firm"},{"name":"Thick Skull"}],"specialRule":"Brutal Block: Once per game, when Frank 'n' Stein makes in Injury roll against an opponent as a result of a Block action, he may choose to add an additional +1 modifier to the Injury roll. This modifier may be applied after the roll has been made.","hiringFee":250000,"playsFor":["Old World Classic","Sylvanian Spotlight"]},{"name":"Wilhelm Chaney","MA":8,"ST":4,"AG":3,"PA":4,"AV":9,"skills":[{"name":"Catch"},{"name":"Claws"},{"name":"Frenzy"},{"name":"Loner (4+)"},{"name":"Regeneration"},{"name":"Wrestle"}],"specialRule":"Savage Mauling: Once per game, when Wilhelm makes an Injury roll against an opposing player, he may choose to re-roll the result.","hiringFee":220000,"playsFor":["Sylvanian Spotlight"]},{"name":"Skrull Halfheight","MA":6,"ST":3,"AG":4,"PA":4,"AV":9,"skills":[{"name":"Accurate"},{"name":"Loner (4+)"},{"name":"Nerves of Steel"},{"name":"Pass"},{"name":"Regeneration"},{"name":"Sure Hands"},{"name":"Thick Skull"}],"specialRule":"Strong Passing Game: Once per game, after making a Passing Ability test to perform a Pass action, Skrull may choose to modify the dice roll by adding his strength characteristic to it.","hiringFee":150000,"playsFor":["Sylvanian Spotlight","Worlds Edge Superleague"]},{"name":"Grim Ironjaw","MA":5,"ST":4,"AG":3,"PA":null,"AV":9,"skills":[{"name":"Block"},{"name":"Dauntless"},{"name":"Frenzy"},{"name":"Loner (4+)"},{"name":"Multiple Block"},{"name":"Thick Skull"}],"specialRule":"Slayer: Once per game, when an opposition player with a Strength characteristic of 5 or more is Knocked Down as a result of a Block action performed by Grim, you may apply an additional +1 modifier to either the Armor roll or Injury roll. This modifier may be applied after the roll has been made.","hiringFee":200000,"playsFor":["Halfling Thimble Cup","Old World Classic","Worlds Edge Superleague"]},{"name":"Hakflem Skuttlespike","MA":9,"ST":3,"AG":2,"PA":3,"AV":8,"skills":[{"name":"Dodge"},{"name":"Extra Arms"},{"name":"Loner (4+)"},{"name":"Prehensile Tail"},{"name":"Two Heads"}],"specialRule":"Treacherous: Once per game, if a team-mate in an adjacent square to Hakflem is in posession of the ball when Hakflem is activated, that player may immediately be Knocked Down and Hakflem may take posession of the ball. No Turnover is caused as a result of using this special rule.","hiringFee":210000,"playsFor":["Favoured Of...","Underworld Challenge"]},{"name":"The Black Gobbo","MA":6,"ST":2,"AG":3,"PA":3,"AV":9,"skills":[{"name":"Bombardier"},{"name":"Disturbing Presence"},{"name":"Dodge"},{"name":"Loner (3+)"},{"name":"Side Step"},{"name":"Sneaky Git"},{"name":"Stab"},{"name":"Stunty"}],"specialRule":"Sneakiest of the Lot: If your team includes the Black Gobbo, you may commit two Foul actions per turn, provided one of your Foul actions is committed by the Black Gobbo himself.","hiringFee":225000,"playsFor":["Badlands Brawl","Underworld Challenge"]},{"name":"Mighty Zug","MA":4,"ST":5,"AG":4,"PA":6,"AV":10,"skills":[{"name":"Block"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"}],"specialRule":"Crushing Blow: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Zug, you may apply an additional +1 modifier to the Armor roll. This modifier may be applied after the roll has been made.","hiringFee":220000,"playsFor":["Halfling Thimble Cup","Lustrian Superleague","Old World Classic"]},{"name":"Roxanna Darknail","MA":8,"ST":3,"AG":1,"PA":4,"AV":8,"skills":[{"name":"Dodge"},{"name":"Frenzy"},{"name":"Jump Up"},{"name":"Juggernaut"},{"name":"Leap"},{"name":"Loner (4+)"}],"specialRule":"Burst of Speed: Once per game, Roxanna may attempt to Rush three times, rather than the usual two. You may declare you are using this special rule after Roxanna has rushed twice.","hiringFee":270000,"playsFor":["Elven Kingdoms League"]},{"name":"Max Spleenripper","MA":5,"ST":4,"AG":4,"PA":null,"AV":9,"skills":[{"name":"Chainsaw"},{"name":"Loner (4+)"},{"name":"Secret Weapon"}],"specialRule":"Maximum Carnage: Once per game, after Max performs a Chainsaw Attack Special action, he may immediately perform another Chainsaw Attack Special action that targets a different opposition player.","hiringFee":130000,"playsFor":["Favoured Of..."]},{"name":"Scyla Anfingrimm","MA":5,"ST":5,"AG":4,"PA":null,"AV":10,"skills":[{"name":"Claws"},{"name":"Frenzy"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Prehensile Tail"},{"name":"Thick Skull"},{"name":"Unchannelled Fury"}],"specialRule":"Fury of the Blood God: Once per game, if Scyla rolls a 1 for his Unchannelled Fury roll after declaring a Block action, instead of applying the usual effects of Unchannelled Fury, Scyla may perform two Block actions instead.","hiringFee":200000,"playsFor":["Favoured Of..."]},{"name":"Helmut Wolf","MA":6,"ST":3,"AG":3,"PA":null,"AV":9,"skills":[{"name":"Chainsaw"},{"name":"Loner (4+)"},{"name":"Pro"},{"name":"Secret Weapon"},{"name":"Stand Firm"}],"specialRule":"Old Pro: Once per game, Helmut may use his Pro sill to re-roll a single dice rolled as part of an Armor roll.","hiringFee":140000},{"name":"Rumbelow Sheepskin","MA":6,"ST":3,"AG":3,"PA":null,"AV":8,"skills":[{"name":"Block"},{"name":"Horns"},{"name":"Juggernaut"},{"name":"Leap"},{"name":"Loner (4+)"},{"name":"No Hands"},{"name":"Tackle"},{"name":"Thick Skull"}],"specialRule":"Ram: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Rumbelow, you may apply an additional +1 modifier to either the Armor or Injury roll. This modifier may be applied after the roll has been made.","hiringFee":170000,"playsFor":["Halfling Thimble Cup","Old World Classic","Worlds Edge Superleague"]},{"name":"Valen Swift","MA":7,"ST":3,"AG":2,"PA":2,"AV":8,"skills":[{"name":"Accurate"},{"name":"Loner (4+)"},{"name":"Nerves of Steel"},{"name":"Pass"},{"name":"Safe Pass"},{"name":"Sure Hands"}],"specialRule":"Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.","hiringFee":340000,"playsFor":["Elven Kingdoms League"]},{"name":"Bryce ‘The Slice’ Cambuel","MA":5,"ST":3,"AG":4,"PA":null,"AV":9,"skills":[{"name":"Chainsaw"},{"name":"Loner (4+)"},{"name":"Regeneration"},{"name":"Secret Weapon"},{"name":"Stand Firm"},{"name":"Thick Skull"}],"specialRule":"Ghostly Flames: Once per half, when Bryce makes the Chainsaw Attack Special action as part of a Blitz action, he may add +4 to the Armor roll against an opponent rather than +3.","hiringFee":130000,"playsFor":["Sylvanian Spotlight"]},{"name":"Lord Borak The Despoiler","MA":5,"ST":5,"AG":3,"PA":5,"AV":10,"skills":[{"name":"Block"},{"name":"Dirty Player (+2)"},{"name":"Loner (4+)"},{"name":"Mighty Blow (+1)"},{"name":"Sneaky Git"}],"specialRule":"Lord of Chaos: A team that includes Lord Borak gains an extra Team re-roll for the first half of the game. If this Team re-roll is not used during the first half, it may be carried over into the second half. However, if Lord Borak is removed from play before this re-roll is used, it is lost.","hiringFee":260000,"playsFor":["Favoured Of..."]}]
+[
+  {
+    "name": "Griff Oberwald",
+    "MA": 7,
+    "ST": 4,
+    "AG": 2,
+    "PA": 3,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Fend"
+      },
+      {
+        "name": "Loner (3+)"
+      },
+      {
+        "name": "Sprint"
+      },
+      {
+        "name": "Sure Feet"
+      }
+    ],
+    "specialRule": "Consummate Professional: Once per game, Griff may re-roll one dice that was rolled either as a single dice roll, as a part of a multiple dice roll, or as a part of a dice pool (this cannot be a dice that was rolled as a part of an Armor, Injury, or Casualty roll).",
+    "hiringFee": 280000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Grak",
+    "MA": 5,
+    "ST": 5,
+    "AG": 4,
+    "PA": 4,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Bone Head"
+      },
+      {
+        "name": "Kick Team-mate"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
+    "hiringFee": 250000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Elven Kingdoms League",
+      "Favoured of Chaos Unidivided",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Slaanesh",
+      "Favoured of Tzeentch",
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Underworld Challenge",
+      "Worlds Edge Superleague",
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Gretchen Wachter “The Blood Bowl Widow”",
+    "MA": 7,
+    "ST": 3,
+    "AG": 2,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Foul Appearance"
+      },
+      {
+        "name": "Jump Up"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "No Hands"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Shadowing"
+      },
+      {
+        "name": "Side Step"
+      }
+    ],
+    "specialRule": "Incorporeal: Once per game, after making an Agility test to dodge, Gretchen may choose to modify the dice roll by adding her strength characteristic to it.",
+    "hiringFee": 260000,
+    "playsFor": [
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Eldril Sidewinder",
+    "MA": 8,
+    "ST": 3,
+    "AG": 2,
+    "PA": 5,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Catch"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Hypnotic Gaze"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Nerves of Steel"
+      },
+      {
+        "name": "On the Ball"
+      }
+    ],
+    "specialRule": "Mesmerizing Dance: Once per game, Eldril may re-roll a failed Agility test when attempting to use the Hypnotic Gaze trait.",
+    "hiringFee": 230000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Barik Farblast",
+    "MA": 6,
+    "ST": 3,
+    "AG": 3,
+    "PA": 3,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Hail Mary Pass"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Pass"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Strong Arm"
+      },
+      {
+        "name": "Sure Hands"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Blast It!: Once per game, when Barik makes a Hail Mary Pass, he may re-roll any scatter results for determining where the ball lands, and any friendly player attempting to catch the ball gains an additional +1 modifier to the roll.",
+    "hiringFee": 80000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Bomber Dribblesnot",
+    "MA": 6,
+    "ST": 2,
+    "AG": 3,
+    "PA": 3,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Accurate"
+      },
+      {
+        "name": "Bombardier"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Right Stuff"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "specialRule": "Kaboom: Once per game, if an opposition player catches a Bomb thrown by Bomber, you can choose to have it explode immediately rather than rolling to see if the player can throw it again.",
+    "hiringFee": 50000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Akhorne The Squirrel",
+    "MA": 7,
+    "ST": 1,
+    "AG": 2,
+    "PA": null,
+    "AV": 6,
+    "skills": [
+      {
+        "name": "Claws"
+      },
+      {
+        "name": "Dauntless"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Jump Up"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "No Hands"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Stunty"
+      },
+      {
+        "name": "Titchy"
+      }
+    ],
+    "specialRule": "Blind Rage: Akhorne may choose to re-roll the D6 when rolling for the Dauntless sill.",
+    "hiringFee": 80000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Elven Kingdoms League",
+      "Favoured of Chaos Unidivided",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Slaanesh",
+      "Favoured of Tzeentch",
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Underworld Challenge",
+      "Worlds Edge Superleague",
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Kreek Rustgouger",
+    "MA": 5,
+    "ST": 7,
+    "AG": 4,
+    "PA": null,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Ball & Chain"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "No Hands"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Secret Weapon"
+      }
+    ],
+    "specialRule": "I'll Be Back: The first time in a game that Kreek Rustgouger would be Sent-off as per the secret weapon trait, he is not Sent-off and instead may continue as part of the game.",
+    "hiringFee": 170000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Crumbleberry",
+    "MA": 5,
+    "ST": 2,
+    "AG": 3,
+    "PA": 6,
+    "AV": 7,
+    "skills": [
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Right Stuff"
+      },
+      {
+        "name": "Stunty"
+      },
+      {
+        "name": "Sure Hands"
+      }
+    ],
+    "specialRule": "Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
+    "hiringFee": 250000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Elven Kingdoms League",
+      "Favoured of Chaos Unidivided",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Slaanesh",
+      "Favoured of Tzeentch",
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Underworld Challenge",
+      "Worlds Edge Superleague",
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Gloriel Summerbloom",
+    "MA": 7,
+    "ST": 2,
+    "AG": 2,
+    "PA": 2,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Accurate"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (3+)"
+      },
+      {
+        "name": "Pass"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Sure Hands"
+      }
+    ],
+    "specialRule": "Shot to Nothing: Once per game, when Gloriel performs a Pass action, she may gain the Hail Mary Pass skill. You must declare this special rule is being used when Gloriel is activated.",
+    "hiringFee": 150000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Grombrindal, the White Dwarf",
+    "MA": 5,
+    "ST": 3,
+    "AG": 3,
+    "PA": 4,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dauntless"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Stand Firm"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Wisdom of the White Dwarf: One per team turn, when one of Grombrindal's team-mates that is in an adjacent square is activated, that player gains either the Break Tackle, Dauntless, Mighty Blow (+1), or Sure Feet skill until the end of their activation.",
+    "hiringFee": 210000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Fungus the Loon",
+    "MA": 4,
+    "ST": 7,
+    "AG": 3,
+    "PA": null,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Ball & Chain"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "No Hands"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "specialRule": "Whirling Dervish: Once per activation, Fungus may re-roll the D6 when determining which direction he moves in.",
+    "hiringFee": 80000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Grashnak Blackhoof",
+    "MA": 6,
+    "ST": 6,
+    "AG": 4,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Horns"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Thick Skull"
+      },
+      {
+        "name": "Unchannelled Fury"
+      }
+    ],
+    "specialRule": "Gored by the Bull: Once per game, when Grashnak performs a Blitz action, Grashnak may roll one additional Block dice against the opposition player, regardless of the opposition player's Strength, to a maximum of three Block dice. If Grashnak performs a second Block action due to the Frenzy skill, this second Block action will also benefit from this rule.",
+    "hiringFee": 240000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided"
+    ]
+  },
+  {
+    "name": "Deeproot Strongbranch",
+    "MA": 2,
+    "ST": 7,
+    "AG": 5,
+    "PA": 4,
+    "AV": 11,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+2)"
+      },
+      {
+        "name": "Stand Firm"
+      },
+      {
+        "name": "Strong Arm"
+      },
+      {
+        "name": "Thick Skull"
+      },
+      {
+        "name": "Throw Team-mate"
+      },
+      {
+        "name": "Timmm-ber!"
+      }
+    ],
+    "specialRule": "Reliable: If Deeproot fumbles a Throw Team-mate action, the player that was thrown will bounce as normal but will automatically land safely.",
+    "hiringFee": 280000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Glart Smashrip",
+    "MA": 5,
+    "ST": 4,
+    "AG": 4,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Claws"
+      },
+      {
+        "name": "Grab"
+      },
+      {
+        "name": "Juggernaut"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Stand Firm"
+      }
+    ],
+    "specialRule": "Frenzied Rush: Once per game, when Glart performs a Blitz action, he may gain the Frenzy skill. You must declare this special rule is being used when Glart is activated. Glart may not use the Grab skill during a turn in which he uses this special rule.",
+    "hiringFee": 195000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Willow Rosebark",
+    "MA": 5,
+    "ST": 4,
+    "AG": 3,
+    "PA": 6,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Dauntless"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Indomitable: Once per game, when Willow successfully rolls to use her Dauntless skill, she may increase her Strength characteristc to double that of the nominated target of her Block action.",
+    "hiringFee": 150000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Zolcath the Zoat",
+    "MA": 5,
+    "ST": 5,
+    "AG": 4,
+    "PA": 5,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Juggernaut"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Sure Feet"
+      }
+    ],
+    "specialRule": "\"Excuse Me, Are You a Zoat?\": Once per game, when Zolcath is activated, he may gain the Hypnotic Gaze trait. You must declare this special rule is being used when Zolcath is activated.",
+    "hiringFee": 230000,
+    "playsFor": [
+      "Lustrian Superleague",
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Karla Von Kill",
+    "MA": 6,
+    "ST": 4,
+    "AG": 3,
+    "PA": 4,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dauntless"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Jump Up"
+      },
+      {
+        "name": "Loner (4+)"
+      }
+    ],
+    "specialRule": "Indomitable: Once per game, when Karla successfully rolls to use her Dauntless skill, she may increase her Strength characteristc to double that of the nominated target of her Block action.",
+    "hiringFee": 210000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Lucian Swift",
+    "MA": 7,
+    "ST": 3,
+    "AG": 2,
+    "PA": 5,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Tackle"
+      }
+    ],
+    "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
+    "hiringFee": 340000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Morg ‘n’ Thorg",
+    "MA": 6,
+    "ST": 6,
+    "AG": 3,
+    "PA": 4,
+    "AV": 11,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+2)"
+      },
+      {
+        "name": "Thick Skull"
+      },
+      {
+        "name": "Throw Team-mate"
+      }
+    ],
+    "specialRule": "The Ballista: Once per game, if Morg fails the Passing Ability test when making a Pass action or a Throw team-mate action, you may re-roll the D6.",
+    "hiringFee": 380000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Elven Kingdoms League",
+      "Favoured of Chaos Unidivided",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Slaanesh",
+      "Favoured of Tzeentch",
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Underworld Challenge",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Varag Ghoul-Chewer",
+    "MA": 6,
+    "ST": 5,
+    "AG": 3,
+    "PA": 5,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Jump Up"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Crushing Blow: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Varag, you may apply an additional +1 modifier to the Armor roll. This modifier may be applied after the roll has been made.",
+    "hiringFee": 280000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Frank ‘n’ Stein",
+    "MA": 4,
+    "ST": 5,
+    "AG": 4,
+    "PA": null,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Break Tackle"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Stand Firm"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Brutal Block: Once per game, when Frank 'n' Stein makes in Injury roll against an opponent as a result of a Block action, he may choose to add an additional +1 modifier to the Injury roll. This modifier may be applied after the roll has been made.",
+    "hiringFee": 250000,
+    "playsFor": [
+      "Old World Classic",
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Wilhelm Chaney",
+    "MA": 8,
+    "ST": 4,
+    "AG": 3,
+    "PA": 4,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Catch"
+      },
+      {
+        "name": "Claws"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Wrestle"
+      }
+    ],
+    "specialRule": "Savage Mauling: Once per game, when Wilhelm makes an Injury roll against an opposing player, he may choose to re-roll the result.",
+    "hiringFee": 220000,
+    "playsFor": [
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Skrull Halfheight",
+    "MA": 6,
+    "ST": 3,
+    "AG": 4,
+    "PA": 4,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Accurate"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Nerves of Steel"
+      },
+      {
+        "name": "Pass"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Sure Hands"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Strong Passing Game: Once per game, after making a Passing Ability test to perform a Pass action, Skrull may choose to modify the dice roll by adding his strength characteristic to it.",
+    "hiringFee": 150000,
+    "playsFor": [
+      "Sylvanian Spotlight",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Grim Ironjaw",
+    "MA": 5,
+    "ST": 4,
+    "AG": 3,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dauntless"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Multiple Block"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Slayer: Once per game, when an opposition player with a Strength characteristic of 5 or more is Knocked Down as a result of a Block action performed by Grim, you may apply an additional +1 modifier to either the Armor roll or Injury roll. This modifier may be applied after the roll has been made.",
+    "hiringFee": 200000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Hakflem Skuttlespike",
+    "MA": 9,
+    "ST": 3,
+    "AG": 2,
+    "PA": 3,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Extra Arms"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Two Heads"
+      }
+    ],
+    "specialRule": "Treacherous: Once per game, if a team-mate in an adjacent square to Hakflem is in posession of the ball when Hakflem is activated, that player may immediately be Knocked Down and Hakflem may take posession of the ball. No Turnover is caused as a result of using this special rule.",
+    "hiringFee": 210000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "The Black Gobbo",
+    "MA": 6,
+    "ST": 2,
+    "AG": 3,
+    "PA": 3,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Bombardier"
+      },
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (3+)"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Sneaky Git"
+      },
+      {
+        "name": "Stab"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "specialRule": "Sneakiest of the Lot: If your team includes the Black Gobbo, you may commit two Foul actions per turn, provided one of your Foul actions is committed by the Black Gobbo himself.",
+    "hiringFee": 225000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Mighty Zug",
+    "MA": 4,
+    "ST": 5,
+    "AG": 4,
+    "PA": 6,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      }
+    ],
+    "specialRule": "Crushing Blow: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Zug, you may apply an additional +1 modifier to the Armor roll. This modifier may be applied after the roll has been made.",
+    "hiringFee": 220000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Roxanna Darknail",
+    "MA": 8,
+    "ST": 3,
+    "AG": 1,
+    "PA": 4,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Jump Up"
+      },
+      {
+        "name": "Juggernaut"
+      },
+      {
+        "name": "Leap"
+      },
+      {
+        "name": "Loner (4+)"
+      }
+    ],
+    "specialRule": "Burst of Speed: Once per game, Roxanna may attempt to Rush three times, rather than the usual two. You may declare you are using this special rule after Roxanna has rushed twice.",
+    "hiringFee": 270000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Max Spleenripper",
+    "MA": 5,
+    "ST": 4,
+    "AG": 4,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Chainsaw"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Secret Weapon"
+      }
+    ],
+    "specialRule": "Maximum Carnage: Once per game, after Max performs a Chainsaw Attack Special action, he may immediately perform another Chainsaw Attack Special action that targets a different opposition player.",
+    "hiringFee": 130000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided"
+    ]
+  },
+  {
+    "name": "Scyla Anfingrimm",
+    "MA": 5,
+    "ST": 5,
+    "AG": 4,
+    "PA": null,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Claws"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Thick Skull"
+      },
+      {
+        "name": "Unchannelled Fury"
+      }
+    ],
+    "specialRule": "Fury of the Blood God: Once per game, if Scyla rolls a 1 for his Unchannelled Fury roll after declaring a Block action, instead of applying the usual effects of Unchannelled Fury, Scyla may perform two Block actions instead.",
+    "hiringFee": 200000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided"
+    ]
+  },
+  {
+    "name": "Helmut Wolf",
+    "MA": 6,
+    "ST": 3,
+    "AG": 3,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Chainsaw"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Pro"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stand Firm"
+      }
+    ],
+    "specialRule": "Old Pro: Once per game, Helmut may use his Pro sill to re-roll a single dice rolled as part of an Armor roll.",
+    "hiringFee": 140000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Elven Kingdoms League",
+      "Favoured of Chaos Unidivided",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Slaanesh",
+      "Favoured of Tzeentch",
+      "Halfling Thimble Cup",
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Underworld Challenge",
+      "Worlds Edge Superleague",
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Rumbelow Sheepskin",
+    "MA": 6,
+    "ST": 3,
+    "AG": 3,
+    "PA": null,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Horns"
+      },
+      {
+        "name": "Juggernaut"
+      },
+      {
+        "name": "Leap"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "No Hands"
+      },
+      {
+        "name": "Tackle"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Ram: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Rumbelow, you may apply an additional +1 modifier to either the Armor or Injury roll. This modifier may be applied after the roll has been made.",
+    "hiringFee": 170000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic",
+      "Worlds Edge Superleague"
+    ]
+  },
+  {
+    "name": "Valen Swift",
+    "MA": 7,
+    "ST": 3,
+    "AG": 2,
+    "PA": 2,
+    "AV": 8,
+    "skills": [
+      {
+        "name": "Accurate"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Nerves of Steel"
+      },
+      {
+        "name": "Pass"
+      },
+      {
+        "name": "Safe Pass"
+      },
+      {
+        "name": "Sure Hands"
+      }
+    ],
+    "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
+    "hiringFee": 340000,
+    "playsFor": [
+      "Elven Kingdoms League"
+    ]
+  },
+  {
+    "name": "Bryce ‘The Slice’ Cambuel",
+    "MA": 5,
+    "ST": 3,
+    "AG": 4,
+    "PA": null,
+    "AV": 9,
+    "skills": [
+      {
+        "name": "Chainsaw"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stand Firm"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "specialRule": "Ghostly Flames: Once per half, when Bryce makes the Chainsaw Attack Special action as part of a Blitz action, he may add +4 to the Armor roll against an opponent rather than +3.",
+    "hiringFee": 130000,
+    "playsFor": [
+      "Sylvanian Spotlight"
+    ]
+  },
+  {
+    "name": "Lord Borak The Despoiler",
+    "MA": 5,
+    "ST": 5,
+    "AG": 3,
+    "PA": 5,
+    "AV": 10,
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dirty Player (+2)"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Sneaky Git"
+      }
+    ],
+    "specialRule": "Lord of Chaos: A team that includes Lord Borak gains an extra Team re-roll for the first half of the game. If this Team re-roll is not used during the first half, it may be carried over into the second half. However, if Lord Borak is removed from play before this re-roll is used, it is lost.",
+    "hiringFee": 260000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Unidivided"
+    ]
+  }
+]
