@@ -3,7 +3,7 @@ import type { Inducement, InducementOption, PrismaClient } from '@prisma/client'
 const twoForOnePairs = [['Grak', 'Crumbleberry'], ['Lucian Swift', 'Valen Swift']];
 
 function getInducementPrice(inducement: Inducement | InducementOption, specialRules: string[]): number | null {
-  if (inducement.specialPriceRule !== null && specialRules.includes(inducement.specialPriceRule))
+  if (inducement.specialPriceRuleName !== null && specialRules.includes(inducement.specialPriceRuleName))
     return inducement.specialPrice as number;
   return inducement.price;
 }
@@ -23,16 +23,20 @@ export async function calculateInducementCosts(
   if (starPlayerNames.length + playerCount > 16)
     throw new InducementError('Star players take the team above 16 players');
 
-  const starPlayers = await prisma.starPlayer.findMany({ where: { name: { in: starPlayerNames } } });
+  const starPlayers = await prisma.starPlayer.findMany({
+    where: { name: { in: starPlayerNames } },
+    select: {
+      name: true,
+      hiringFee: true,
+      playsFor: { select: { name: true } },
+    },
+  });
   if (starPlayers.length !== starPlayerNames.length)
     throw new InducementError('Star player not recognized');
 
   let starPlayerCost = 0;
   for (const player of starPlayers) {
-    if (player.doesntPlayFor.some(rule => specialRules.includes(rule)))
-      throw new InducementError('Invalid Star Player selected');
-
-    if (player.playsFor.length > 0 && !player.playsFor.some(rule => specialRules.includes(rule)))
+    if (player.playsFor.length > 0 && !player.playsFor.some(({ name: rule }) => specialRules.some(r => r === rule)))
       throw new InducementError('Invalid Star Player selected');
 
     starPlayerCost += player.hiringFee;
@@ -73,7 +77,7 @@ export async function calculateInducementCosts(
       throw new InducementError('Inducement maximum exceeded');
 
     const cost = getInducementPrice(foundInducement, specialRules);
-    if (cost === null && foundInducement.specialPriceRule === null) {
+    if (cost === null && foundInducement.specialPriceRuleName === null) {
       if (inducement.option === undefined)
         throw new InducementError('Inducement requires an option');
 

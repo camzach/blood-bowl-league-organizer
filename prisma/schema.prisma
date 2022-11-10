@@ -71,12 +71,20 @@ model Team {
 }
 
 model Roster {
-  name         String     @id @unique
+  name         String        @id @unique
   rerollCost   Int
   tier         Int
   positions    Position[]
-  specialRules String[]
+  specialRules SpecialRule[]
   Team         Team[]
+}
+
+model SpecialRule {
+  name             String             @id @unique
+  rosters          Roster[]
+  Inducement       Inducement[]
+  InducementOption InducementOption[]
+  StarPlayers      StarPlayer[]
 }
 
 enum SkillCategory {
@@ -119,34 +127,35 @@ model Inducement {
   name             String             @id @unique
   max              Int
   price            Int?
-  specialPriceRule String?
+  specialPriceRule SpecialRule?       @relation(fields: [specialPriceRuleName], references: [name])
+  specialPriceRuleName  String?
   specialPrice     Int?
   rules            String
   options          InducementOption[]
 }
 
 model StarPlayer {
-  name          String   @id @unique
-  MA            Int
-  ST            Int
-  PA            Int?
-  AG            Int
-  AV            Int
-  skills        Skill[]
-  specialRule   String
-  hiringFee     Int
-  playsFor      String[]
-  doesntPlayFor String[]
+  name        String        @id @unique
+  MA          Int
+  ST          Int
+  PA          Int?
+  AG          Int
+  AV          Int
+  skills      Skill[]
+  specialRule String
+  hiringFee   Int
+  playsFor    SpecialRule[]
 }
 
 model InducementOption {
-  name             String      @id @unique
-  price            Int
-  specialPriceRule String?
-  specialPrice     Int?
-  rules            String
-  Inducement       Inducement? @relation(fields: [inducementName], references: [name])
-  inducementName   String?
+  name                 String       @id @unique
+  price                Int?
+  specialPriceRule     SpecialRule? @relation(fields: [specialPriceRuleName], references: [name])
+  specialPriceRuleName String?
+  specialPrice         Int?
+  rules                String
+  Inducement           Inducement?  @relation(fields: [inducementName], references: [name])
+  inducementName       String?
 }
 
 enum GameState {

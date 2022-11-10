@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Game" ADD COLUMN     "journeymenAway" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "journeymenHome" INTEGER NOT NULL DEFAULT 0;

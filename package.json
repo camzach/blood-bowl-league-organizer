@@ -13,16 +13,13 @@
     "lint": "next lint"
   },
   "prisma": {
-    "seed": "ts-node-esm prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^4.5.0",
-    "@tanstack/react-query": "^4.13.0",
+    "@prisma/client": "^4.6.1",
     "@trpc/client": "^10.0.0-proxy-beta.26",
-    "@trpc/next": "^10.0.0-proxy-beta.26",
-    "@trpc/react-query": "^10.0.0-proxy-beta.26",
     "@trpc/server": "^10.0.0-proxy-beta.26",
     "next": "^13.0.2",
     "nextjs-routes": "^0.1.5",
@@ -40,7 +37,8 @@
     "eslint": "^8.26.0",
     "eslint-config-next": "12.3.1",
     "eslint-plugin-next": "^0.0.0",
-    "prisma": "^4.5.0",
+    "prisma": "^4.6.1",
+    "ts-node": "^10.9.1",
     "typescript": "^4.8.4"
   }
 }

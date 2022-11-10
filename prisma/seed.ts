@@ -11,11 +11,9 @@ async function main(): Promise<void> {
     rules: string;
     category: SkillCategoryType;
     purchasable: boolean;
-    _id: { $oid: string };
   };
   const skills = (loadJSON('./seeds/skills.json') as JSONSkillType[]);
   // eslint-disable-next-line no-underscore-dangle
-  const getSkillById = (id: string): JSONSkillType | undefined => skills.find(s => s._id.$oid === id);
   await prisma.skill.createMany({
     data: skills.map(skill => ({
       name: skill.name,
@@ -38,20 +36,22 @@ async function main(): Promise<void> {
       AG: number;
       PA: number | null;
       AV: number;
-      skills: Array<{ $oid: string }>;
+      skills: string[];
       primary: SkillCategoryType[];
       secondary: SkillCategoryType[];
     }>;
   };
   const rosters = loadJSON('./seeds/rosters.json') as JSONRosterType[];
-  await prisma.roster.createMany({
-    data: rosters.map(r => ({
-      name: r.name,
-      rerollCost: r.rerollCost,
-      tier: r.tier,
-      specialRules: r.specialRules,
-    })),
-  });
+  const rules = rosters.flatMap(roster => roster.specialRules);
+  await prisma.specialRule.createMany({ data: rules.map(rule => ({ name: rule })), skipDuplicates: true });
+  await Promise.all(rosters.map(roster => prisma.roster.create({
+    data: {
+      name: roster.name,
+      rerollCost: roster.rerollCost,
+      tier: roster.tier,
+      specialRules: { connect: roster.specialRules.map(rule => ({ name: rule })) },
+    },
+  })));
 
   await Promise.all(rosters.flatMap(roster => roster.players.map(async position =>
     prisma.position.create({
@@ -67,12 +67,7 @@ async function main(): Promise<void> {
         secondary: position.secondary,
         max: position.max,
         cost: position.cost,
-        skills: {
-          connect: position.skills
-            .map(({ $oid }) => getSkillById($oid)?.name)
-            .filter((name): name is string => name !== undefined)
-            .map(name => ({ name })),
-        },
+        skills: { connect: position.skills.map(s => ({ name: s })) },
       },
     }))));
 
@@ -86,13 +81,13 @@ async function main(): Promise<void> {
     skills: Array<{ name: string }>;
     specialRule: string;
     hiringFee: number;
-    playsFor?: string[];
-    doesntPlayFor?: string[];
+    playsFor: string[];
   };
   const starPlayers = loadJSON('./seeds/starPlayers.json') as JSONStarPlayerType[];
   await Promise.all(starPlayers.map(star => prisma.starPlayer.create({
     data: {
       ...star,
+      playsFor: { connect: star.playsFor.map(r => ({ name: r })) },
       skills: { connect: star.skills },
     },
   })));
@@ -101,14 +96,16 @@ async function main(): Promise<void> {
     max: number;
     name: string;
     price: number | null;
-    specialPriceRules: string[];
-    specialPrices: number[];
+    specialPriceRule: string;
+    specialPrice: number;
   };
   const inducements = loadJSON('./seeds/inducements.json') as JSONInducementType[];
   await prisma.inducement.createMany({
     data: inducements.map(i => ({
       ...i,
       rules: '',
+      specialPriceRule: undefined,
+      specialPriceRuleName: i.specialPriceRule,
     })),
   });
 
