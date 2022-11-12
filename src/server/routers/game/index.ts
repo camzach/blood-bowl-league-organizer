@@ -1,5 +1,5 @@
 import type { Game, Prisma, PrismaPromise } from '@prisma/client';
-import { GameState } from '@prisma/client';
+import { GameState, TeamState } from '@prisma/client';
 import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
 import { z } from 'zod';
@@ -8,6 +8,8 @@ import { calculateInducementCosts } from './calculate-inducement-costs';
 export const gameRouter = router({
   list: publicProcedure
     .query(async({ ctx }) => ctx.prisma.game.findMany({}).then(games => {
+      if (games.length === 0)
+        return [];
       const maxRound = Math.max(...games.map(game => game.round));
       const result: Game[][] = Array.from(new Array(maxRound + 1), () => []);
       games.forEach(game => result[game.round].push(game));
@@ -46,9 +48,10 @@ export const gameRouter = router({
         }
         case GameState.Inducements:
           return {
+            id,
             state: GameState.Inducements,
-            pettyCash: [game.pettyCashHome, game.pettyCashAway],
-            inducements: await Promise.all([game.homeTeamName, game.awayTeamName]),
+            homeTeam: game.homeTeamName,
+            awayTeam: game.awayTeamName,
           };
         case GameState.InProgress:
           return { state: GameState.InProgress };
@@ -74,6 +77,7 @@ export const gameRouter = router({
           roster: { select: { positions: { where: { max: { gte: 12 } }, select: { name: true } } } },
           dedicatedFans: true,
           name: true,
+          state: true,
         },
       } as const;
       const game = await ctx.prisma.game.findUniqueOrThrow({
@@ -85,6 +89,12 @@ export const gameRouter = router({
           away: startGameTeamFields,
         },
       });
+
+      if (game.home.state !== TeamState.Ready || game.away.state !== TeamState.Ready)
+        throw new Error('Teams are not ready to start a game');
+
+      if (game.state !== GameState.Scheduled)
+        throw new Error('Game has already been started');
 
       const weatherTable = [
         'Sweltering Heat',
@@ -123,12 +133,12 @@ export const gameRouter = router({
 
       const teamUpdates = ctx.prisma.team.updateMany({
         where: { name: { in: [game.home.name, game.away.name] } },
-        data: { state: 'Playing' },
+        data: { state: TeamState.Playing },
       });
       const gameUpdate = ctx.prisma.game.update({
         where: { id: game.id },
         data: {
-          state: 'Journeymen',
+          state: GameState.Journeymen,
           journeymenHome: homeJourneymen.count,
           journeymenAway: awayJourneymen.count,
         },
@@ -221,7 +231,7 @@ export const gameRouter = router({
       promises.push(ctx.prisma.game.update({
         where: { id: game.id },
         data: {
-          state: 'Inducements',
+          state: GameState.Inducements,
           pettyCashHome,
           pettyCashAway,
         },
@@ -254,7 +264,7 @@ export const gameRouter = router({
         name: true,
         treasury: true,
         roster: { select: { specialRules: true } },
-        players: { where: { missNextGame: false }, select: {} },
+        players: { where: { missNextGame: false } },
       } as const;
       const game = await ctx.prisma.game.findUniqueOrThrow({
         where: { id: input.game },
@@ -293,7 +303,7 @@ export const gameRouter = router({
         where: { name: game.away.name },
         data: { treasury: { decrement: treasuryCostAway } },
       });
-      const gameStateUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: 'InProgress' } });
+      const gameStateUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: GameState.InProgress } });
       await ctx.prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
         treasuryCostHome,
         treasuryCostAway,
@@ -428,13 +438,13 @@ export const gameRouter = router({
         ctx.prisma.game.update({
           where: { id: game.id },
           data: {
-            state: 'Complete',
+            state: GameState.Complete,
             touchdownsHome: input.touchdowns[0],
             touchdownsAway: input.touchdowns[1],
             casualtiesHome: input.casualties[0],
             casualtiesAway: input.casualties[1],
-            home: { update: { state: 'PostGame' } },
-            away: { update: { state: 'PostGame' } },
+            home: { update: { state: TeamState.PostGame } },
+            away: { update: { state: TeamState.PostGame } },
           },
         }),
       ]).then(() => updateMap);

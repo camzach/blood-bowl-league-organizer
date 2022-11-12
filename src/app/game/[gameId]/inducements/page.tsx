@@ -2,8 +2,16 @@ import type { ReactNode } from 'react';
 import { trpc } from 'utils/trpc';
 import Content from './content';
 
-export default async function Inducements({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
-  const inducements = await trpc.inducements.list.query({ team: 'Team A' });
+type InducementsResponseType = ReturnType<typeof trpc.inducements.list.query>;
 
-  return <Content inducements={inducements} />;
+export default async function Inducements({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
+  const game = await trpc.game.get.query(gameId);
+
+  if (game.state !== 'Inducements')
+    return 'Wrong page, bucko';
+
+  const inducements = await Promise.all([game.homeTeam, game.awayTeam]
+    .map(async team => trpc.inducements.list.query({ team })) as [InducementsResponseType, InducementsResponseType]);
+
+  return <Content inducements={inducements} gameId={game.id} />;
 }

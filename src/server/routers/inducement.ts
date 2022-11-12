@@ -40,6 +40,18 @@ export const inducementRouter = router({
             : true,
         },
       });
+      if (specialRules) {
+        inducements.forEach(i => {
+          if (i.specialPriceRuleName === null)
+            return;
+          i.price = specialRules.includes(i.specialPriceRuleName) ? i.specialPrice : i.price;
+          i.options.forEach(o => {
+            if (o.specialPriceRuleName === null)
+              return;
+            o.price = specialRules.includes(o.specialPriceRuleName) ? o.specialPrice : o.price;
+          });
+        });
+      }
       const stars = await ctx.prisma.starPlayer.findMany(specialRules
         ? { where: { playsFor: { some: { name: { in: specialRules } } } } }
         : undefined);
