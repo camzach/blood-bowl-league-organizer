@@ -32,7 +32,8 @@ export default function Content(props: Props): ReactElement {
             option: opt,
             quantity: count,
           }));
-        });
+        })
+        .filter(({ quantity }) => quantity > 0);
     void trpc.game.purchaseInducements.mutate({
       game: props.gameId,
       home: flattenChoices(choices.home),
