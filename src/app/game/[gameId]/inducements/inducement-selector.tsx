@@ -29,10 +29,6 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
     return 0;
   };
 
-  console.log('wiz', getCount('Wizard'));
-  console.log('hsl', getCount('Wizard', 'Hireling Sports Wizard'));
-  console.log('w2', getCount('Wizard', 'Wiz 2'));
-
   return (<><ul>
     {options.stars.map(star => (
       <li key={star.name}>
@@ -40,10 +36,10 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
           {star.name}
           <input
             type="checkbox"
-            disabled={getCount('Star Players') >= 2 && getCount('Star Players', star.name) === 0}
+            disabled={getCount('Star Player') >= 2 && getCount('Star Player', star.name) === 0}
             onChange={(e): void => {
               onUpdate({
-                inducement: 'Star Players',
+                inducement: 'Star Player',
                 option: star.name,
                 quantity: Number(e.target.checked),
                 price: e.target.checked ? star.hiringFee : 0,
@@ -76,7 +72,8 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
                           price: opt.price ?? 0,
                         });
                       } } />
-                  </label></li>
+                  </label>
+                </li>
               ))}
             </ul>
           </>

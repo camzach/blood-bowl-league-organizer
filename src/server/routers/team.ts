@@ -28,7 +28,10 @@ export const teamRouter = router({
 
   get: publicProcedure
     .input(z.string())
-    .query(({ input: teamName, ctx }) => ctx.prisma.team.findUniqueOrThrow({ where: { name: teamName } })),
+    .query(({ input, ctx }) => ctx.prisma.team.findUniqueOrThrow({
+      where: { name: input },
+      include: { players: true, roster: { include: { positions: true } } },
+    })),
 
   hirePlayer: publicProcedure
     .input(z.object({
@@ -92,7 +95,7 @@ export const teamRouter = router({
       });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team cannot hire staff right now');
-      if (input.type === 'apothecary' && !team.roster.specialRules.includes('Apothecary Allowed'))
+      if (input.type === 'apothecary' && !team.roster.specialRules.some(rule => rule.name === 'Apothecary Allowed'))
         throw new Error('Apothecary not allowed for this team');
 
       const baseRerollCost = team.roster.rerollCost;
