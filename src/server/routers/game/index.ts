@@ -215,14 +215,14 @@ export const gameRouter = router({
         homeTV += homeChoice.cost * (11 - homePlayers);
         promises.push(ctx.prisma.team.update({
           where: { name: game.home.name },
-          data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(homeChoice)) } },
+          data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(homeChoice, 0)) } },
         }));
       }
       if (awayChoice) {
-        awayTV += awayChoice.cost * (11 - homePlayers);
+        awayTV += awayChoice.cost * (11 - awayPlayers);
         promises.push(ctx.prisma.team.update({
-          where: { name: game.home.name },
-          data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(awayChoice)) } },
+          where: { name: game.away.name },
+          data: { journeymen: { create: Array(11 - awayPlayers).fill(newPlayer(awayChoice, 0)) } },
         }));
       }
 
