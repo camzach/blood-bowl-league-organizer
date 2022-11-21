@@ -1,0 +1,32 @@
+// span
+.wrapper {
+  display: flex;
+  flex-direction: column;
+}
+// label
+.label {
+  margin-bottom: 0;
+  &:not(:focus):not(:active) {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}
+// span
+.innerWrapper {
+  display: flex;
+  & > * {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+}
+// input
+.input {
+  appearance: textfield;
+  max-width: 4em;
+}

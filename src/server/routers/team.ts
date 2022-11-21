@@ -37,6 +37,7 @@ export const teamRouter = router({
     .input(z.object({
       team: z.string(),
       position: z.string(),
+      number: z.number().min(1).max(16),
       name: z.string().optional(),
     }))
     .mutation(async({ input, ctx }) => {
@@ -58,6 +59,8 @@ export const teamRouter = router({
         throw new Error('Team roster already full');
       if (team.players.filter(p => p.positionId === position.id).length >= position.max)
         throw new Error('Maximum positionals already rostered');
+      if (team.players.some(p => p.number === input.number))
+        throw new Error('Player with this number already exists');
       if (team.treasury < position.cost)
         throw new Error('Cannot afford player');
 
@@ -65,7 +68,7 @@ export const teamRouter = router({
         where: { name: team.name },
         data: {
           treasury: team.treasury - position.cost,
-          players: { create: newPlayer(position, input.name) },
+          players: { create: newPlayer(position, input.number, input.name) },
         },
       });
     }),
@@ -125,6 +128,45 @@ export const teamRouter = router({
           treasury: { decrement: cost },
         },
       });
+    }),
+
+  hireJourneyman: publicProcedure
+    .input(z.object({ team: z.string(), player: z.string(), number: z.number().min(1).max(16) }))
+    .mutation(async({ input, ctx }) => {
+      const team = await ctx.prisma.team.findUniqueOrThrow({
+        where: { name: input.team },
+        select: {
+          treasury: true,
+          players: { select: { number: true, positionId: true } },
+          journeymen: { select: { id: true, position: { select: { id: true, max: true, cost: true } } } },
+        },
+      });
+
+      if (team.players.length >= 16)
+        throw new Error('Team cannor hire any more players');
+      const player = team.journeymen.find(p => p.id === input.player);
+      if (!player)
+        throw new Error('Invalid Player ID');
+      if (team.players.filter(p => p.positionId === player.position.id).length >= player.position.max)
+        throw new Error('Cannot hire any more players of this position');
+      if (team.players.some(p => p.number === input.number))
+        throw new Error('Tem already has a player with this number');
+      if (player.position.cost > team.treasury)
+        throw new Error('Cannot afford this player');
+
+      await ctx.prisma.$transaction([
+        ctx.prisma.team.update({
+          where: { name: input.team },
+          data: {
+            journeymen: { disconnect: { id: player.id } },
+            players: { connect: { id: player.id } },
+          },
+        }),
+        ctx.prisma.player.update({
+          where: { id: player.id },
+          data: { number: input.number },
+        }),
+      ]);
     }),
 
   fireStaff: publicProcedure

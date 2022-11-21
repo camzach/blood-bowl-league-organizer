@@ -13,6 +13,7 @@ datasource db {
 model Player {
   id                 String          @id @unique @default(uuid()) @db.Uuid
   name               String?
+  number             Int
   playerTeam         Team?           @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
   journeymanTeam     Team?           @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
   playerTeamName     String?
