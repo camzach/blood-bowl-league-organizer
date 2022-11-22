@@ -10,7 +10,7 @@ type Props = {
   teamName: string;
 };
 
-export function PlayerHirer({ positions, treasury, freeNumbers, teamName, onHire }: Props): React.ReactElement {
+export function PlayerHirer({ positions, treasury, freeNumbers, teamName }: Props): React.ReactElement {
   const router = useRouter();
   const [position, setPosition] = React.useState(positions[0].name);
   const [number, setNumber] = React.useState(freeNumbers[0]);

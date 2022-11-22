@@ -7,14 +7,22 @@
 }
 
 .table {
+  border-collapse: collapse;
+
   thead {
     position: sticky;
     top: 0.25em;
     background-color: hsl(0, 0%, 60%);
   }
 
-  tr:nth-child(2n) {
-    background-color: hsl(0, 0%, 90%);
+  tbody {
+    tr + tr {
+      border-top: 2px solid gray;
+      
+    }  
+    tr:hover {
+      background-color: adjust-color($color: hsl(0, 100%, 90%), $hue: 25);
+    }
   }
 
   td {

@@ -11,8 +11,15 @@ type Props = {
   baseCols: TeamTableProps<FetchedTeamType['journeymen'][number]>['cols'];
   freeNumbers: number[];
   teamName: string;
+  allowHiring: boolean;
 };
-export function JourneymanManager({ players, baseCols, freeNumbers, teamName }: Props): React.ReactElement {
+export function JourneymanManager({
+  players,
+  baseCols,
+  freeNumbers,
+  teamName,
+  allowHiring,
+}: Props): React.ReactElement {
   const [numbers, setNumbers] = React.useState(Object.fromEntries(players.map((p, idx) => [p.id, freeNumbers[idx]])));
 
   const hireJourneyman = (id: string) => (): void => {
@@ -30,29 +37,31 @@ export function JourneymanManager({ players, baseCols, freeNumbers, teamName }: 
 
   const cols: TeamTableProps<FetchedTeamType['journeymen'][number]>['cols'] = baseCols
     ?.filter(c => (typeof c === 'string' ? !hiddenCols.includes(c) : !hiddenCols.includes(c.name)));
-  cols?.unshift({
-    name: 'Hire!',
-    render: (player: FetchedTeamType['journeymen'][number]) => (
-      <td key="Hire!">
-        <button type="button" onClick={hireJourneyman(player.id)}>Hire!</button>
-      </td>
-    ),
-  });
-  cols?.unshift({
-    name: '#',
-    render: p => (
-      <td key="#">
-        <select value={numbers[p.id]} onChange={handleNumberChange(p.id)}>
-          {freeNumbers
-            .map(n => (
-              <option key={n}>
-                {n}
-              </option>
-            ))}
-        </select>
-      </td>
-    ),
-  });
+  if (allowHiring) {
+    cols?.unshift({
+      name: 'Hire!',
+      render: (player: FetchedTeamType['journeymen'][number]) => (
+        <td key="Hire!">
+          <button type="button" onClick={hireJourneyman(player.id)}>Hire!</button>
+        </td>
+      ),
+    });
+    cols?.unshift({
+      name: '#',
+      render: p => (
+        <td key="#">
+          <select value={numbers[p.id]} onChange={handleNumberChange(p.id)}>
+            {freeNumbers
+              .map(n => (
+                <option key={n}>
+                  {n}
+                </option>
+              ))}
+          </select>
+        </td>
+      ),
+    });
+  }
 
   return (
     <TeamTable

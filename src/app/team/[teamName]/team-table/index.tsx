@@ -43,13 +43,15 @@ export function TeamTable<T extends PlayerType>({
         </tr>
       </thead>
       <tbody>
-        {players.map(player => (
-          <Player
-            key={player.id}
-            cols={displayCols}
-            player={player}
-          />
-        ))}
+        {players
+          .sort((a, b) => a.number - b.number)
+          .map(player => (
+            <Player
+              key={player.id}
+              cols={displayCols}
+              player={player}
+            />
+          ))}
       </tbody>
     </table>
   );
