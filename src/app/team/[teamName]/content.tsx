@@ -50,6 +50,12 @@ export default function TeamPage({ team }: Props): React.ReactElement {
         router.refresh();
       });
   };
+  const readyTeam = (): void => {
+    void trpc.team.ready.mutate(team.name)
+      .then(() => {
+        router.refresh();
+      });
+  };
 
   const renderPopup = (): React.ReactElement | null => {
     // TODO: journeymen?
@@ -66,25 +72,29 @@ export default function TeamPage({ team }: Props): React.ReactElement {
     );
   };
 
+  const allowHiring = team.state === 'Draft' || team.state === 'PostGame';
+
   const cols: NonNullable<TeamTableProps<Props['team']['players'][number]>['cols']> = [...baseCols];
-  cols.splice(11, 0, {
-    name: 'Spend SPP',
-    render: player => (
-      <td key="Spend SPP">
-        {Object.values(advancementCosts).some(costs =>
-          costs[player.totalImprovements] <= player.starPlayerPoints) &&
-            <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
-      </td>
-    ),
-  });
-  cols.splice(1, 0, {
-    name: 'Fire',
-    render: player => (
-      <td key="Fire">
-        <button type="button" onClick={handleFire(player.id)}>Fire!</button>
-      </td>
-    ),
-  });
+  if (allowHiring) {
+    cols.splice(11, 0, {
+      name: 'Spend SPP',
+      render: player => (
+        <td key="Spend SPP">
+          {Object.values(advancementCosts).some(costs =>
+            costs[player.totalImprovements] <= player.starPlayerPoints) &&
+              <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
+        </td>
+      ),
+    });
+    cols.splice(1, 0, {
+      name: 'Fire',
+      render: player => (
+        <td key="Fire">
+          <button type="button" onClick={handleFire(player.id)}>Fire!</button>
+        </td>
+      ),
+    });
+  }
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)
     .filter(n => !team.players.some(p => p.number === n));
@@ -100,14 +110,15 @@ export default function TeamPage({ team }: Props): React.ReactElement {
           baseCols={cols}
           freeNumbers={freeNumbers}
           teamName={team.name}
+          allowHiring={allowHiring}
         />}
-      <PlayerHirer
+      {allowHiring && <PlayerHirer
         positions={team.roster.positions.filter(pos =>
           team.players.filter(p => p.position.name === pos.name).length < pos.max)}
         treasury={team.treasury}
         freeNumbers={freeNumbers}
         teamName={team.name}
-      />
+      />}
       <table>
         <thead>
           <tr>
@@ -144,6 +155,9 @@ export default function TeamPage({ team }: Props): React.ReactElement {
           </tr>
         </tbody>
       </table>
+      {allowHiring &&
+        <button onClick={readyTeam}>Ready for next game</button>
+      }
     </section>
   );
 }
