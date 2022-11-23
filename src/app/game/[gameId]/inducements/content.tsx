@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
@@ -21,6 +22,8 @@ export default function Content(props: Props): ReactElement {
     away: new Map<string, { cost: number; count: number } | Map<string, { cost: number; count: number }>>(),
   });
 
+  const [result, setResult] = useState<Awaited<ReturnType<typeof trpc.game.purchaseInducements.mutate>> | null>(null);
+
   const submit = (): void => {
     const flattenChoices = (from: typeof choices['home' | 'away']): SelectInducementsParams =>
       Array.from(from.entries())
@@ -38,7 +41,7 @@ export default function Content(props: Props): ReactElement {
       game: props.gameId,
       home: flattenChoices(choices.home),
       away: flattenChoices(choices.away),
-    });
+    }).then(setResult);
   };
 
   const handleChoicesUpdate = (options: {
@@ -79,6 +82,9 @@ export default function Content(props: Props): ReactElement {
   }) as Array<[string, { count: number; cost: number } | Record<string, { count: number; cost: number }>]>;
   const choicesAsObj = Object.fromEntries(mappedEntries);
 
+  if (result !== null)
+    return <>Now let&apos;s <Link href={`/game/${props.gameId}/inprogress`}>Play!</Link></>;
+
   return <div style={{ display: 'flex' }}>
     <div>
       total cost: {calculateTotalCost(choices.home)}
@@ -92,14 +98,15 @@ export default function Content(props: Props): ReactElement {
     </div>
     <button onClick={submit}>Done :)</button>
     <pre>{JSON.stringify(choicesAsObj, null, 2)}</pre>
-    {/* <div>
+    <div>
       total cost: {calculateTotalCost(choices.away)}
       <InducementSelector
         options={awayInducements}
+        choices={choices.away}
         onUpdate={(options): void => {
           handleChoicesUpdate({ ...options, team: 'away' });
         }}
       />
-    </div> */}
+    </div>
   </div>;
 }
