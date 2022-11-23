@@ -1,7 +1,9 @@
+'use client';
 import type { SkillCategory } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 import React, { use } from 'react';
 import { trpc } from 'utils/trpc';
-import type { FetchedTeamType } from './page';
+import type { FetchedTeamType } from '../page';
 
 export const advancementCosts = {
   'Random Primary': [3, 4, 6, 8, 10, 15],
@@ -31,11 +33,12 @@ type Props = {
   rosterPlayer: FetchedTeamType['roster']['positions'][number];
   onHide: () => void;
 };
-export function AdvancementPicker({
+export function Popup({
   player,
   rosterPlayer,
   onHide,
 }: Props): React.ReactElement {
+  const router = useRouter();
   const skills = use(skillsPromise);
 
   const disabledSkills = getDisabledSkills([...player.skills.map(s => s.name)]);
@@ -107,25 +110,66 @@ export function AdvancementPicker({
     });
   };
 
-  const handleRandomSkill = (): void => {
-    // TODO random skill mutation
-    // if (!randomCategory) return;
-    // mutation here
-    onHide();
-  };
-
-  const handleChosenSkill = (): void => {
-    // TODO: chosen skill mutation
-    // if (selectedSkill === null) return;
-    // mutation here
-    onHide();
-  };
-
-  const handleCharacteristicImprovement = (): void => {
-    // TODO characteristic improvement utation
-    // if (selectedSkill === null) return;
-    // mutation here
-    onHide();
+  const handleUpgrade = (): void => {
+    const update = ((): Parameters<typeof trpc.player.improve.mutate>[0]['update'] => {
+      switch (type) {
+        case 'Characteristic Improvement': {
+          if (selectedSkill === null)
+            throw new Error('Skill not selected');
+          return {
+            type: 'characteristic',
+            preferences: statPrefs.slice(0, statPrefs.findIndex(val =>
+              val === 'Secondary')) as [Exclude<(typeof statPrefs)[number], 'Secondary'>],
+            skill: selectedSkill,
+          };
+        }
+        case 'Chosen Primary': {
+          if (selectedSkill === null)
+            throw new Error('Skill not selected');
+          return {
+            type: 'chosen',
+            subtype: 'primary',
+            skill: selectedSkill,
+          };
+        }
+        case 'Chosen Secondary': {
+          if (selectedSkill === null)
+            throw new Error('Skill not selected');
+          return {
+            type: 'chosen',
+            subtype: 'secondary',
+            skill: selectedSkill,
+          };
+        }
+        case 'Random Primary': {
+          if (randomCategory === null)
+            throw new Error('Skill not selected');
+          return {
+            type: 'random',
+            subtype: 'primary',
+            category: randomCategory,
+          };
+        }
+        case 'Random Secondary': {
+          if (randomCategory === null)
+            throw new Error('Skill not selected');
+          return {
+            type: 'random',
+            subtype: 'secondary',
+            category: randomCategory,
+          };
+        }
+      }
+      return 'above switch is exhaustive' as never;
+    })();
+    void trpc.player.improve.mutate({
+      player: player.id,
+      update,
+    })
+      .then(() => {
+        router.refresh();
+        onHide();
+      });
   };
 
   return (
@@ -148,7 +192,7 @@ export function AdvancementPicker({
               </option>
             ))}
           </select>
-          <button type="button" onClick={handleRandomSkill}>Spin!</button>
+          <button type="button" onClick={handleUpgrade}>Spin!</button>
         </React.Fragment>}
       {type.startsWith('Chosen') && (
         <React.Fragment key={type}>
@@ -163,7 +207,7 @@ export function AdvancementPicker({
               </optgroup>
             ))}
           </select>
-          <button type="button" onClick={handleChosenSkill}>Confirm</button>
+          <button type="button" onClick={handleUpgrade}>Confirm</button>
         </React.Fragment>
       )}
       {type === 'Characteristic Improvement' && (
@@ -196,7 +240,7 @@ export function AdvancementPicker({
                 </li>
               ))}
           </ol>
-          <button type="button" onClick={handleCharacteristicImprovement}>Spin!</button>
+          <button type="button" onClick={handleUpgrade}>Spin!</button>
         </React.Fragment>
       )}
     </>

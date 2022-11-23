@@ -207,7 +207,7 @@ export const teamRouter = router({
       return ctx.prisma.team.update({
         where: { name: team.name },
         data: {
-          [input.type]: { decrement: input.quantity },
+          [input.type]: input.type === 'apothecary' ? false : { decrement: input.quantity },
           treasury: team.state === TeamState.Draft ? { increment: costMap[input.type] * input.quantity } : undefined,
         },
       });
