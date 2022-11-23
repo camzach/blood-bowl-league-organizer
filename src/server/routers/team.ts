@@ -76,7 +76,7 @@ export const teamRouter = router({
   hireStaff: publicProcedure
     .input(z.object({
       team: z.string(),
-      type: z.enum(['apothecary', 'assistantCoaches', 'cheerleaders', 'rerolls']),
+      type: z.enum(['apothecary', 'assistantCoaches', 'cheerleaders', 'rerolls', 'dedicatedFans']),
       quantity: z.number()
         .int()
         .gt(0)
@@ -93,6 +93,7 @@ export const teamRouter = router({
           assistantCoaches: true,
           cheerleaders: true,
           rerolls: true,
+          dedicatedFans: true,
           roster: { select: { specialRules: true, rerollCost: true } },
         },
       });
@@ -100,6 +101,8 @@ export const teamRouter = router({
         throw new Error('Team cannot hire staff right now');
       if (input.type === 'apothecary' && !team.roster.specialRules.some(rule => rule.name === 'Apothecary Allowed'))
         throw new Error('Apothecary not allowed for this team');
+      if (input.type === 'dedicatedFans' && team.state !== TeamState.Draft)
+        throw new Error('Cannot purchase deidcated fans after draft');
 
       const baseRerollCost = team.roster.rerollCost;
       const costMap = {
@@ -107,6 +110,7 @@ export const teamRouter = router({
         assistantCoaches: 10_000,
         cheerleaders: 10_000,
         rerolls: team.state === 'Draft' ? baseRerollCost : baseRerollCost * 2,
+        dedicatedFans: 10_000,
       };
       const cost = costMap[input.type] * input.quantity;
       if (cost > team.treasury)
@@ -117,6 +121,7 @@ export const teamRouter = router({
         assistantCoaches: 6,
         cheerleaders: 12,
         rerolls: 8,
+        dedicatedFans: 7,
       };
       if (Number(team[input.type]) + input.quantity > maxMap[input.type])
         throw new Error('Maximum exceeded');
@@ -172,7 +177,7 @@ export const teamRouter = router({
   fireStaff: publicProcedure
     .input(z.object({
       team: z.string(),
-      type: z.enum(['apothecary', 'assistantCoaches', 'cheerleaders', 'rerolls']),
+      type: z.enum(['apothecary', 'assistantCoaches', 'cheerleaders', 'rerolls', 'dedicatedFans']),
       quantity: z.number()
         .int()
         .gt(0)
@@ -189,6 +194,7 @@ export const teamRouter = router({
           assistantCoaches: true,
           cheerleaders: true,
           rerolls: true,
+          dedicatedFans: true,
           roster: { select: { rerollCost: true } },
         },
       });
@@ -196,12 +202,15 @@ export const teamRouter = router({
         throw new Error('Team cannot fire staff right now');
       if (Number(team[input.type]) - input.quantity < 0)
         throw new Error('Not enough staff to fire');
+      if (input.type === 'dedicatedFans' && team.state !== TeamState.Draft)
+        throw new Error('Cannot purchase deidcated fans after draft');
 
       const costMap = {
         apothecary: 50_000,
         assistantCoaches: 10_000,
         cheerleaders: 10_000,
         rerolls: team.roster.rerollCost,
+        dedicatedFans: 10_000,
       };
 
       return ctx.prisma.team.update({
