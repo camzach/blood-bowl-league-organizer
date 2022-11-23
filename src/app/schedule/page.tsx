@@ -1,47 +1,38 @@
-'use client';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { use } from 'react';
-import { useRouter } from 'next/navigation';
-import { trpc } from 'utils/trpc';
+import type { ReactElement } from 'react';
+import { prisma } from 'utils/prisma';
 import styles from './styles.module.scss';
 
-let gamesPromise = trpc.game.list.query();
-
-export default function Schedule(): ReactNode {
-  const data = use(gamesPromise);
-  const router = useRouter();
+export default async function Schedule(): Promise<ReactElement> {
+  const games = (await prisma.game.findMany({
+    select: {
+      id: true,
+      round: true,
+      homeTeamName: true,
+      awayTeamName: true,
+    },
+  }));
+  const rounds = games.reduce<Array<Array<typeof games[number]>>>((acc, curr) => {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    acc[curr.round] = acc[curr.round] ? [...acc[curr.round], curr] : [curr];
+    return acc;
+  }, []);
 
   return (
-    <>
-      <button
-        onClick={(): void => {
-          void trpc.schedule.generate.mutate()
-            .then(() => {
-              gamesPromise = trpc.game.list.query();
-            })
-            .then(() => {
-              router.refresh();
-            });
-        }}
-      >
-        Generate
-      </button>
-      <ol className={styles.list}>
-        {data.map((round, idx) => (
-          <li key={idx}>
-            <ol>
-              {round.sort((a, b) => a.homeTeamName.localeCompare(b.homeTeamName)).map(game => (
-                <li key={game.id}>
-                  <Link href={{ pathname: `/game/${game.id}` }}>
-                    {`${game.homeTeamName} - ${game.awayTeamName}`}
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </li>
-        ))}
-      </ol>
-    </>
+    <ol className={styles.list}>
+      {rounds.map((round, idx) => (
+        <li key={idx}>
+          <ol>
+            {round.sort((a, b) => a.homeTeamName.localeCompare(b.homeTeamName)).map(game => (
+              <li key={game.id}>
+                <Link href={{ pathname: `/game/${game.id}` }}>
+                  {`${game.homeTeamName} - ${game.awayTeamName}`}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </li>
+      ))}
+    </ol>
   );
 }

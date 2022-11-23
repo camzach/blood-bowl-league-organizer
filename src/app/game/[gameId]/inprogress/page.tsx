@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
-export default function InProgress(): ReactNode {
+export default function InProgress(): ReactElement {
   return <>Game in progress</>;
 }

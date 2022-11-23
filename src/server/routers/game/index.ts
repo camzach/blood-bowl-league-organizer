@@ -1,4 +1,4 @@
-import type { Game, Prisma, PrismaPromise } from '@prisma/client';
+import type { Prisma, PrismaPromise } from '@prisma/client';
 import { GameState, TeamState } from '@prisma/client';
 import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
@@ -6,68 +6,6 @@ import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
 
 export const gameRouter = router({
-  list: publicProcedure
-    .query(async({ ctx }) => ctx.prisma.game.findMany({}).then(games => {
-      if (games.length === 0)
-        return [];
-      const maxRound = Math.max(...games.map(game => game.round));
-      const result: Game[][] = Array.from(new Array(maxRound + 1), () => []);
-      games.forEach(game => result[game.round].push(game));
-      return result;
-    })),
-
-  get: publicProcedure
-    .input(z.string())
-    .query(async({ input: id, ctx }) => {
-      const game = await ctx.prisma.game.findFirstOrThrow({ where: { id } });
-      switch (game.state) {
-        case GameState.Journeymen: {
-          const [homeChoices, awayChoices] = await Promise.all([game.homeTeamName, game.awayTeamName]
-            .map(async teamName =>
-              ctx.prisma.team.findUniqueOrThrow({
-                where: { name: teamName },
-                select: {
-                  roster: {
-                    select: {
-                      positions: {
-                        select: { name: true, id: true },
-                        where: { max: { gte: 12 } },
-                      },
-                    },
-                  },
-                },
-              }).then(team => team.roster.positions)));
-          return {
-            id,
-            state: GameState.Journeymen,
-            homeTeam: game.homeTeamName,
-            homeChoices: { count: game.journeymenHome, choices: homeChoices },
-            awayTeam: game.awayTeamName,
-            awayChoices: { count: game.journeymenAway, choices: awayChoices },
-          };
-        }
-        case GameState.Inducements:
-          return {
-            id,
-            state: GameState.Inducements,
-            homeTeam: game.homeTeamName,
-            awayTeam: game.awayTeamName,
-          };
-        case GameState.InProgress:
-          return { state: GameState.InProgress };
-        case GameState.Complete:
-          return { state: GameState.Complete };
-        case GameState.Scheduled:
-          return {
-            id,
-            state: GameState.Scheduled,
-            homeTeam: game.homeTeamName,
-            awayTeam: game.awayTeamName,
-          };
-      }
-      return '' as never;
-    }),
-
   start: publicProcedure
     .input(z.string())
     .mutation(async({ input: id, ctx }) => {
