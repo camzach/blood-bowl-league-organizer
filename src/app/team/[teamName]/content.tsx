@@ -2,12 +2,13 @@
 import React from 'react';
 import type { TeamTableProps } from './team-table';
 import { TeamTable } from './team-table';
-import { AdvancementPicker, advancementCosts } from './advancement-picker';
+import AdvancementPicker from './advancement-picker';
 import { JourneymanManager } from './journeyman-table';
 import { PlayerHirer } from './player-hirer';
 import type { FetchedTeamType } from './page';
 import { useRouter } from 'next/navigation';
 import { trpc } from 'utils/trpc';
+import StaffHirer from './staff-hirer';
 
 const baseCols = [
   '#',
@@ -33,17 +34,6 @@ type Props = {
 export default function TeamPage({ team }: Props): React.ReactElement {
   const router = useRouter();
 
-  const [popup, setPopup] = React.useState('');
-  const popupRef: React.RefObject<HTMLDialogElement> = React.useRef<HTMLDialogElement>(null);
-  const showPopup = React.useCallback((id: string) => () => {
-    setPopup(id);
-    popupRef.current?.showModal();
-  }, []);
-  const hidePopup = React.useCallback(() => {
-    setPopup('');
-    popupRef.current?.close();
-  }, []);
-
   const handleFire = (id: string) => () => {
     void trpc.player.fire.mutate(id)
       .then(() => {
@@ -57,21 +47,6 @@ export default function TeamPage({ team }: Props): React.ReactElement {
       });
   };
 
-  const renderPopup = (): React.ReactElement | null => {
-    // TODO: journeymen?
-    const searchSpace = [...team.players];
-    const thisPlayer = searchSpace.find(p => p.id === popup);
-    const rosterPlayer = team.roster.positions.find(p => p.id === thisPlayer?.positionId);
-    if (!thisPlayer || !rosterPlayer) return null;
-    return (
-      <AdvancementPicker
-        player={thisPlayer}
-        rosterPlayer={rosterPlayer}
-        onHide={hidePopup}
-      />
-    );
-  };
-
   const allowHiring = team.state === 'Draft' || team.state === 'PostGame';
 
   const cols: NonNullable<TeamTableProps<Props['team']['players'][number]>['cols']> = [...baseCols];
@@ -80,9 +55,7 @@ export default function TeamPage({ team }: Props): React.ReactElement {
       name: 'Spend SPP',
       render: player => (
         <td key="Spend SPP">
-          {Object.values(advancementCosts).some(costs =>
-            costs[player.totalImprovements] <= player.starPlayerPoints) &&
-              <button type="button" onClick={showPopup(player.id)}>Spend SPP</button>}
+          <AdvancementPicker player={player} rosterPlayer={player.position} />
         </td>
       ),
     });
@@ -101,8 +74,8 @@ export default function TeamPage({ team }: Props): React.ReactElement {
 
   return (
     <section>
-      <dialog ref={popupRef}>{renderPopup()}</dialog>
       <h1>{team.name}</h1>
+      Treasury -- {team.treasury}
       <TeamTable players={team.players} cols={cols} />
       {team.journeymen.length > 0 &&
         <JourneymanManager
@@ -131,27 +104,71 @@ export default function TeamPage({ team }: Props): React.ReactElement {
         <tbody>
           <tr>
             <td>Rerolls</td>
-            <td>{team.roster.rerollCost}</td>
-            <td>{team.rerolls}</td>
-            <td>{team.rerolls * team.roster.rerollCost}</td>
+            <td>{team.roster.rerollCost.toLocaleString()} / {(team.roster.rerollCost * 2).toLocaleString()}</td>
+            <td>
+              {allowHiring
+                ? <StaffHirer
+                  teamName={team.name}
+                  type={'rerolls'}
+                  title={'Rerolls'}
+                  max={8}
+                  current={team.rerolls}
+                  cost={team.state === 'Draft' ? team.roster.rerollCost : team.roster.rerollCost * 2}
+                />
+                : team.rerolls}
+            </td>
+            <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>
           </tr>
           <tr>
             <td>Assistant Coaches</td>
             <td>10,000</td>
-            <td>{team.assistantCoaches}</td>
-            <td>{team.assistantCoaches * 10000}</td>
+            <td>
+              {allowHiring
+                ? <StaffHirer
+                  teamName={team.name}
+                  type={'assistantCoaches'}
+                  title={'Assistant Coaches'}
+                  max={10}
+                  current={team.assistantCoaches}
+                  cost={10000}
+                />
+                : team.assistantCoaches}
+            </td>
+            <td>{(team.assistantCoaches * 10000).toLocaleString()}</td>
           </tr>
           <tr>
             <td>Cheerleaders</td>
             <td>10,000</td>
-            <td>{team.cheerleaders}</td>
+            <td>
+              {allowHiring
+                ? <StaffHirer
+                  teamName={team.name}
+                  type={'cheerleaders'}
+                  title={'Cheerleaders'}
+                  max={10}
+                  current={team.cheerleaders}
+                  cost={10000}
+                />
+                : team.cheerleaders}
+            </td>
             <td>{team.cheerleaders * 10000}</td>
           </tr>
           <tr>
             <td>Apothecary</td>
             <td>50,000</td>
-            <td>{team.apothecary ? 1 : 0}</td>
-            <td>{team.apothecary ? 50000 : 0}</td>
+            <td>
+              {allowHiring
+                ? <StaffHirer
+                  teamName={team.name}
+                  type={'apothecary'}
+                  title={'Apothecary'}
+                  max={1}
+                  current={Number(team.apothecary)}
+                  cost={10000}
+                />
+                : <input type="checkbox" checked disabled></input>}
+            </td>
+            <td>{(team.apothecary ? 50000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>

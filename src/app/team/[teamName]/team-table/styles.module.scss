@@ -16,10 +16,12 @@
   }
 
   tbody {
-    tr + tr {
+    tr:not(:first-child) {
       border-top: 2px solid gray;
-      
-    }  
+    }
+    td:not(:first-child) {
+      border-left: 2px dashed lightgray;
+    }
     tr:hover {
       background-color: adjust-color($color: hsl(0, 100%, 90%), $hue: 25);
     }
