@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { trpc } from 'utils/trpc';
 import Content from './content';
@@ -8,7 +9,7 @@ export default async function Inducements({ params: { gameId } }: { params: { ga
   const game = await trpc.game.get.query(gameId);
 
   if (game.state !== 'Inducements')
-    return 'Wrong page, bucko';
+    redirect(`game/${gameId}/${game.state.toLowerCase()}`);
 
   const inducements = await Promise.all([game.homeTeam, game.awayTeam]
     .map(async team => trpc.inducements.list.query({ team })) as [InducementsResponseType, InducementsResponseType]);

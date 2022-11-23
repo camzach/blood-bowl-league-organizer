@@ -31,7 +31,7 @@ export default function Schedule(): ReactNode {
         {data.map((round, idx) => (
           <li key={idx}>
             <ol>
-              {round.map(game => (
+              {round.sort((a, b) => a.homeTeamName.localeCompare(b.homeTeamName)).map(game => (
                 <li key={game.id}>
                   <Link href={{ pathname: `/game/${game.id}` }}>
                     {`${game.homeTeamName} - ${game.awayTeamName}`}

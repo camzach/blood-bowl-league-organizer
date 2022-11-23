@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
@@ -7,14 +8,21 @@ export default function Journeymen({ game }:
 { game: Awaited<ReturnType<typeof trpc.game.get.query>> & { state: 'Journeymen' } }): ReactElement {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
+  const [response, setResponse] = useState<Awaited<ReturnType<typeof trpc.game.selectJourneymen.mutate>> | null>(null);
 
   const submitJourneymen = (): void => {
     void trpc.game.selectJourneymen.mutate({
       game: game.id,
       home: homeChoice,
       away: awayChoice,
-    });
+    }).then(setResponse);
   };
+
+  if (response !== null) {
+    return <>
+      Now go to <Link href={`/game/${game.id}/inducements`}>Inducements</Link>
+    </>;
+  }
 
   return (
     <>
