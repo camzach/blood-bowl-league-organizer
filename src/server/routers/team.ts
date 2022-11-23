@@ -26,13 +26,6 @@ export const teamRouter = router({
       return team;
     }),
 
-  get: publicProcedure
-    .input(z.string())
-    .query(({ input, ctx }) => ctx.prisma.team.findUniqueOrThrow({
-      where: { name: input },
-      include: { players: true, roster: { include: { positions: true } } },
-    })),
-
   hirePlayer: publicProcedure
     .input(z.object({
       team: z.string(),

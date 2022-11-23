@@ -4,15 +4,28 @@ import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
 
-export default function Journeymen({ game }:
-{ game: Awaited<ReturnType<typeof trpc.game.get.query>> & { state: 'Journeymen' } }): ReactElement {
+type TeamWithChoices = {
+  name: string;
+  choices: Array<{
+    name: string;
+    id: string;
+  }>;
+  needed: number;
+};
+type Props = {
+  gameId: string;
+  home: TeamWithChoices;
+  away: TeamWithChoices;
+};
+
+export default function Journeymen({ home, away, gameId }: Props): ReactElement {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
   const [response, setResponse] = useState<Awaited<ReturnType<typeof trpc.game.selectJourneymen.mutate>> | null>(null);
 
   const submitJourneymen = (): void => {
     void trpc.game.selectJourneymen.mutate({
-      game: game.id,
+      game: gameId,
       home: homeChoice,
       away: awayChoice,
     }).then(setResponse);
@@ -20,18 +33,18 @@ export default function Journeymen({ game }:
 
   if (response !== null) {
     return <>
-      Now go to <Link href={`/game/${game.id}/inducements`}>Inducements</Link>
+      Now go to <Link href={`/game/${gameId}/inducements`}>Inducements</Link>
     </>;
   }
 
   return (
     <>
-      {game.homeChoices.count > 0 &&
+      {home.needed > 0 &&
         <>
           <h1>
-            {game.homeTeam} - Need {game.homeChoices.count} Journeymen
+            {home.name} - Need {home.needed} Journeymen
           </h1>
-          {game.homeChoices.choices.map(choice => (
+          {home.choices.map(choice => (
             <label key={choice.id}>
               <input
                 type="radio"
@@ -47,12 +60,12 @@ export default function Journeymen({ game }:
           ))}
         </>
       }
-      {game.awayChoices.count > 0 &&
+      {away.needed > 0 &&
         <>
           <h1>
-            {game.awayTeam} - Need {game.awayChoices.count} Journeymen
+            {away.name} - Need {away.needed} Journeymen
           </h1>
-          {game.awayChoices.choices.map(choice => (
+          {away.choices.map(choice => (
             <label key={choice.id}>
               <input
                 type="radio"

@@ -5,11 +5,10 @@ import { Die } from 'components/die';
 import { trpc } from 'utils/trpc';
 import Link from 'next/link';
 
-export function PlayButton({ game }:
-{ game: Awaited<ReturnType<typeof trpc.game.get.query>> & { state: 'Scheduled' } }): ReactElement {
+export function PlayButton({ gameId }: { gameId: string }): ReactElement {
   const [response, setResponse] = useState<Awaited<ReturnType<typeof trpc.game.start.mutate>> | null>(null);
   const startGame = (): void => {
-    void trpc.game.start.mutate(game.id)
+    void trpc.game.start.mutate(gameId)
       .then(setResponse);
   };
 
@@ -40,7 +39,7 @@ export function PlayButton({ game }:
         </span>
         <br/>
 
-        Now go to <Link href={`/game/${game.id}/journeymen`}>Journeymen</Link>
+        Now go to <Link href={`/game/${gameId}/journeymen`}>Journeymen</Link>
       </>
     );
   }

@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react';
-import { trpc } from 'utils/trpc';
+import { prisma } from 'utils/prisma';
 import { PlayButton } from './play-button';
 import { redirect } from 'next/navigation';
 
 export default async function Game({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactElement> {
-  const game = await trpc.game.get.query(gameId);
+  const game = await prisma.game.findUniqueOrThrow({ where: { id: gameId } });
 
   if (game.state !== 'Scheduled')
     redirect(`game/${gameId}/${game.state.toLowerCase()}`);
 
-  return <PlayButton game={game} />;
+  return <PlayButton gameId={gameId} />;
 }
