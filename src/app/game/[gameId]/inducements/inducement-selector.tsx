@@ -1,9 +1,10 @@
+import { NumberInput } from 'components/number-input';
 import type { ReactElement } from 'react';
 import type { trpc } from 'utils/trpc';
 
 type Props = {
   options: Awaited<ReturnType<typeof trpc.inducements.list.query>>;
-  choices: Map<string, { count: number } | Map<string, { count: number }>>;
+  choices: Map<string, { count: number }>;
   onUpdate: (options: {
     inducement: string;
     option?: string;
@@ -13,20 +14,13 @@ type Props = {
 };
 export default function InducementSelector({ options, choices, onUpdate }: Props): ReactElement {
   const getCount = (inducement: string, option?: string): number => {
-    const level1 = choices.get(inducement);
-    if (option !== undefined) {
-      if (level1 === undefined)
-        return 0;
-      if ('get' in level1)
-        return level1.get(option)?.count ?? 0;
-    }
-    if (level1 === undefined)
-      return 0;
-    if ('count' in level1)
-      return level1.count;
-    if ('values' in level1)
-      return Array.from(level1.values()).reduce((p, c) => p + c.count, 0);
-    return 0;
+    const key = [inducement, option].filter(Boolean).join('--');
+    const value = choices.get(key);
+    return value?.count ?? 0;
+  };
+  const getNestedCount = (inducement: string): number => {
+    const nestedKeys = [...choices.keys()].filter(key => key.startsWith(`${inducement}--`));
+    return nestedKeys.reduce((total, currentKey) => total + (choices.get(currentKey)?.count ?? 0), 0);
   };
 
   return (<><ul>
@@ -36,7 +30,7 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
           {star.name}
           <input
             type="checkbox"
-            disabled={getCount('Star Player') >= 2 && getCount('Star Player', star.name) === 0}
+            disabled={getNestedCount('Star Player') >= 2 && getCount('Star Player', star.name) === 0}
             onChange={(e): void => {
               onUpdate({
                 inducement: 'Star Player',
@@ -63,13 +57,13 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
                     <input
                       type="checkbox"
                       defaultChecked={false}
-                      disabled={getCount(ind.name) >= ind.max && getCount(ind.name, opt.name) === 0}
+                      disabled={getNestedCount(ind.name) >= ind.max && getCount(ind.name, opt.name) === 0}
                       onChange={(e): void => {
                         onUpdate({
                           inducement: ind.name,
                           option: opt.name,
                           quantity: Number(e.target.checked),
-                          price: opt.price ?? 0,
+                          price: e.target.checked ? opt.price ?? 0 : 0,
                         });
                       } } />
                   </label>
@@ -78,21 +72,20 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
             </ul>
           </>
           : <>
-            <label>
-              {ind.name}
-              <input
-                type="number"
-                min={0}
-                max={ind.max}
-                defaultValue={0}
-                onChange={(e): void => {
-                  onUpdate({
-                    inducement: ind.name,
-                    quantity: e.target.valueAsNumber,
-                    price: ind.price ?? 0,
-                  });
-                } } />
-            </label>
+            <NumberInput
+              min={0}
+              max={ind.max}
+              value={getCount(ind.name)}
+              label={ind.name}
+              showLabel
+              onChange={(val): void => {
+                onUpdate({
+                  inducement: ind.name,
+                  quantity: val,
+                  price: ind.price ?? 0,
+                });
+              }}
+            />
           </>}
       </li>
     ))}

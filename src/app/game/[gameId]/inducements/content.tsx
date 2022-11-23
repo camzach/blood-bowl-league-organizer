@@ -11,15 +11,19 @@ type SelectInducementsParams = Parameters<typeof trpc.game.purchaseInducements.m
 
 type Props = {
   inducements: [InducementsResponseType, InducementsResponseType];
+  pettyCash: [number, number];
+  treasury: [number, number];
   gameId: string;
 };
 
 export default function Content(props: Props): ReactElement {
   const [homeInducements, awayInducements] = props.inducements;
+  const [homePettyCash, awayPettyCash] = props.pettyCash;
+  const [homeTreasury, awayTreasury] = props.treasury;
 
   const [choices, setChoices] = useState({
-    home: new Map<string, { cost: number; count: number } | Map<string, { cost: number; count: number }>>(),
-    away: new Map<string, { cost: number; count: number } | Map<string, { cost: number; count: number }>>(),
+    home: new Map<string, { cost: number; count: number }>(),
+    away: new Map<string, { cost: number; count: number }>(),
   });
 
   const [result, setResult] = useState<Awaited<ReturnType<typeof trpc.game.purchaseInducements.mutate>> | null>(null);
@@ -27,14 +31,13 @@ export default function Content(props: Props): ReactElement {
   const submit = (): void => {
     const flattenChoices = (from: typeof choices['home' | 'away']): SelectInducementsParams =>
       Array.from(from.entries())
-        .flatMap(([inducement, quantityOrOptions]) => {
-          if ('count' in quantityOrOptions)
-            return { name: inducement, quantity: quantityOrOptions.count };
-          return Array.from(quantityOrOptions.entries()).map(([opt, { count }]) => ({
+        .map(([key, value]) => {
+          const [inducement, option] = key.split('--');
+          return {
             name: inducement,
-            option: opt,
-            quantity: count,
-          }));
+            option,
+            quantity: value.count,
+          };
         })
         .filter(({ quantity }) => quantity > 0);
     void trpc.game.purchaseInducements.mutate({
@@ -55,38 +58,24 @@ export default function Content(props: Props): ReactElement {
       const map = choices[options.team];
       const cost = options.quantity * options.price;
       const newValue = { cost, count: options.quantity };
-      if (options.option !== undefined) {
-        const map2 = map.get(options.inducement);
-        if (map2 === undefined)
-          map.set(options.inducement, new Map([[options.option, newValue]]));
-        else if ('set' in map2)
-          map2.set(options.option, newValue);
-      } else {
-        map.set(options.inducement, newValue);
-      }
-      return { ...old, [options.team]: map };
+      const key = [options.inducement, options.option].filter(Boolean).join('--');
+      return { ...old, [options.team]: map.set(key, newValue) };
     });
   };
 
   const calculateTotalCost = (from: typeof choices['home' | 'away']): number =>
     Array.from(from.values())
-      .reduce((total, current) => ('cost' in current
-        ? total + current.cost
-        : Array.from(current.values()).reduce((p, c) => p + c.cost, 0)), 0);
-
-  const entries = Array.from(choices.home.entries());
-  const mappedEntries = entries.map(([k, v]) => {
-    if ('get' in v)
-      return [k, Object.fromEntries(v.entries())];
-    return [k, v];
-  }) as Array<[string, { count: number; cost: number } | Record<string, { count: number; cost: number }>]>;
-  const choicesAsObj = Object.fromEntries(mappedEntries);
+      .reduce((total, current) => total + current.cost, 0);
 
   if (result !== null)
     return <>Now let&apos;s <Link href={`/game/${props.gameId}/inprogress`}>Play!</Link></>;
 
   return <div style={{ display: 'flex' }}>
     <div>
+      petty cash: {Math.max(0, homePettyCash - calculateTotalCost(choices.home))}
+      <br/>
+      treasury: {homeTreasury - Math.max(0, calculateTotalCost(choices.home) - homePettyCash)}
+      <br/>
       total cost: {calculateTotalCost(choices.home)}
       <InducementSelector
         options={homeInducements}
@@ -97,8 +86,11 @@ export default function Content(props: Props): ReactElement {
       />
     </div>
     <button onClick={submit}>Done :)</button>
-    <pre>{JSON.stringify(choicesAsObj, null, 2)}</pre>
     <div>
+      petty cash: {Math.max(0, awayPettyCash - calculateTotalCost(choices.away))}
+      <br/>
+      treasury: {awayTreasury - Math.max(0, calculateTotalCost(choices.away) - awayPettyCash)}
+      <br/>
       total cost: {calculateTotalCost(choices.away)}
       <InducementSelector
         options={awayInducements}
