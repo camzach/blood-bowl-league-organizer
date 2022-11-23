@@ -76,6 +76,17 @@ export default function TeamPage({ team }: Props): React.ReactElement {
     <section>
       <h1>{team.name}</h1>
       Treasury -- {team.treasury}
+      <br />
+      Dedicated Fans -- {team.state === 'Draft'
+        ? <StaffHirer
+          title={'Dedicated Fans'}
+          type={'dedicatedFans'}
+          current={team.dedicatedFans}
+          cost={10_000}
+          teamName={team.name}
+          max={7}
+        />
+        : team.dedicatedFans}
       <TeamTable players={team.players} cols={cols} />
       {team.journeymen.length > 0 &&
         <JourneymanManager

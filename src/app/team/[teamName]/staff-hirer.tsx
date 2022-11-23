@@ -6,7 +6,7 @@ import { trpc } from 'utils/trpc';
 
 type Props = {
   title: string;
-  type: 'apothecary' | 'assistantCoaches' | 'cheerleaders' | 'rerolls';
+  type: Parameters<typeof trpc.team.hireStaff.mutate>[0]['type'];
   current: number;
   cost: number;
   teamName: string;
