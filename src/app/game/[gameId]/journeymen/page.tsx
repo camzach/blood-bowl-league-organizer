@@ -1,7 +1,9 @@
+import { Prisma } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
 import Content from './content';
+import TeamArgs = Prisma.TeamArgs;
 
 const teamFields = {
   select: {
@@ -16,7 +18,7 @@ const teamFields = {
       },
     },
   },
-};
+} satisfies TeamArgs;
 
 type Props = {
   params: { gameId: string };
