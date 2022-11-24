@@ -9,6 +9,7 @@ import type { FetchedTeamType } from './page';
 import { useRouter } from 'next/navigation';
 import { trpc } from 'utils/trpc';
 import StaffHirer from './staff-hirer';
+import calculateTV from 'utils/calculate-tv';
 
 const baseCols = [
   '#',
@@ -75,6 +76,7 @@ export default function TeamPage({ team }: Props): React.ReactElement {
   return (
     <section>
       <h1>{team.name}</h1>
+      <h2>TV - {calculateTV(team)}</h2>
       Treasury -- {team.treasury}
       <br />
       Dedicated Fans -- {team.state === 'Draft'
