@@ -4,6 +4,7 @@ import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
 import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
+import calculateTV from 'utils/calculate-tv';
 
 export const gameRouter = router({
   start: publicProcedure
@@ -137,16 +138,8 @@ export const gameRouter = router({
       else if (awayPlayers >= 11 && awayChoice)
         throw new Error('Away team will not take any journeymen');
 
-      let homeTV =
-        game.home.players.reduce((sum, player) => sum + player.teamValue, 0) +
-        (Number(game.home.apothecary) * 50_000) +
-        ((game.home.assistantCoaches + game.home.cheerleaders) * 10_000) +
-        (game.home.rerolls * game.home.roster.rerollCost);
-      let awayTV =
-        game.home.players.reduce((sum, player) => sum + player.teamValue, 0) +
-        (Number(game.home.apothecary) * 50_000) +
-        ((game.home.assistantCoaches + game.home.cheerleaders) * 10_000) +
-        (game.home.rerolls * game.home.roster.rerollCost);
+      let homeTV = calculateTV(game.home);
+      let awayTV = calculateTV(game.away);
 
       const promises: Array<PrismaPromise<unknown>> = [];
       if (homeChoice) {

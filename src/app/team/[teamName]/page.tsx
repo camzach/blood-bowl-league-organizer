@@ -18,7 +18,7 @@ async function fetchTeam(teamName: string) {
 export type FetchedTeamType = Awaited<ReturnType<typeof fetchTeam>>;
 
 export default async function TeamPage({ params: { teamName } }: Props): Promise<ReactElement> {
-  const team = await fetchTeam(teamName);
+  const team = await fetchTeam(decodeURIComponent(teamName));
 
   return <Content team={team} />;
 }
