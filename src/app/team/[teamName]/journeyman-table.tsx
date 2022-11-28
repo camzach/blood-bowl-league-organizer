@@ -1,8 +1,8 @@
 import React from 'react';
 import { trpc } from 'utils/trpc';
 import type { FetchedTeamType } from './page';
-import type { TeamTableProps } from './team-table';
-import { TeamTable } from './team-table';
+import type { TeamTableProps } from 'components/team-table';
+import { TeamTable } from 'components/team-table';
 
 const hiddenCols = ['#', 'Name', 'Fire'];
 
