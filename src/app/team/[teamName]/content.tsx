@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import type { TeamTableProps } from './team-table';
-import { TeamTable } from './team-table';
+import type { TeamTableProps } from 'components/team-table';
+import { TeamTable } from 'components/team-table';
 import AdvancementPicker from './advancement-picker';
 import { JourneymanManager } from './journeyman-table';
 import { PlayerHirer } from './player-hirer';
