@@ -30,9 +30,10 @@ const baseCols = [
 
 type Props = {
   team: FetchedTeamType;
+  skills: Array<{ name: string; category: string }>;
 };
 
-export default function TeamPage({ team }: Props): React.ReactElement {
+export default function TeamPage({ team, skills }: Props): React.ReactElement {
   const router = useRouter();
 
   const handleFire = (id: string) => () => {
@@ -56,7 +57,7 @@ export default function TeamPage({ team }: Props): React.ReactElement {
       name: 'Spend SPP',
       render: player => (
         <td key="Spend SPP">
-          <AdvancementPicker player={player} rosterPlayer={player.position} />
+          <AdvancementPicker player={player} rosterPlayer={player.position} skills={skills} />
         </td>
       ),
     });

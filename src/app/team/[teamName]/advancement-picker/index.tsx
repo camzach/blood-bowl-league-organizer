@@ -7,9 +7,10 @@ import { Popup, advancementCosts } from './popup';
 type Props = {
   player: FetchedTeamType['players'][number];
   rosterPlayer: FetchedTeamType['roster']['positions'][number];
+  skills: Array<{ name: string; category: string }>;
 };
 
-export default function AdvancementPicker({ player, rosterPlayer }: Props): ReactElement {
+export default function AdvancementPicker({ player, rosterPlayer, skills }: Props): ReactElement {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const canAdvance = Object.values(advancementCosts).some(list =>
     list[player.totalImprovements] <= player.starPlayerPoints);
@@ -19,6 +20,7 @@ export default function AdvancementPicker({ player, rosterPlayer }: Props): Reac
       <Popup
         player={player}
         rosterPlayer={rosterPlayer}
+        skills={skills}
         onHide={(): void => dialogRef.current?.close()}
       />
     </dialog>
