@@ -1,7 +1,7 @@
 'use client';
 import type { SkillCategory } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import React, { use } from 'react';
+import React from 'react';
 import { trpc } from 'utils/trpc';
 import type { FetchedTeamType } from '../page';
 
@@ -26,20 +26,19 @@ function getDisabledSkills(skills: string[]): string[] {
   return skills.flatMap(s => [s, ...skillConflicts[s] ?? []]);
 }
 
-const skillsPromise = trpc.skill.list.query();
-
 type Props = {
   player: FetchedTeamType['players'][number];
   rosterPlayer: FetchedTeamType['roster']['positions'][number];
+  skills: Array<{ name: string; category: string }>;
   onHide: () => void;
 };
 export function Popup({
   player,
   rosterPlayer,
+  skills,
   onHide,
 }: Props): React.ReactElement {
   const router = useRouter();
-  const skills = use(skillsPromise);
 
   const disabledSkills = getDisabledSkills([...player.skills.map(s => s.name)]);
   const isSkillSelectable = React.useCallback(

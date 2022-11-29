@@ -19,6 +19,7 @@ export type FetchedTeamType = Awaited<ReturnType<typeof fetchTeam>>;
 
 export default async function TeamPage({ params: { teamName } }: Props): Promise<ReactElement> {
   const team = await fetchTeam(decodeURIComponent(teamName));
+  const skills = await prisma.skill.findMany({});
 
-  return <Content team={team} />;
+  return <Content team={team} skills={skills} />;
 }
