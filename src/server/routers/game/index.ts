@@ -146,14 +146,28 @@ export const gameRouter = router({
         homeTV += homeChoice.cost * (11 - homePlayers);
         promises.push(ctx.prisma.team.update({
           where: { name: game.home.name },
-          data: { journeymen: { create: Array(11 - homePlayers).fill(newPlayer(homeChoice, 0)) } },
+          data: {
+            journeymen: {
+              create: Array.from(
+                Array(11 - homePlayers),
+                (_, i) => newPlayer(homeChoice, 99 - i)
+              ),
+            },
+          },
         }));
       }
       if (awayChoice) {
         awayTV += awayChoice.cost * (11 - awayPlayers);
         promises.push(ctx.prisma.team.update({
           where: { name: game.away.name },
-          data: { journeymen: { create: Array(11 - awayPlayers).fill(newPlayer(awayChoice, 0)) } },
+          data: {
+            journeymen: {
+              create: Array.from(
+                Array(11 - awayPlayers),
+                (_, i) => newPlayer(awayChoice, 99 - i)
+              ),
+            },
+          },
         }));
       }
 
@@ -248,7 +262,7 @@ export const gameRouter = router({
         playerId: z.string(),
         injury: z.enum(['MNG', 'NI', 'MA', 'AG', 'PA', 'ST', 'AV', 'DEAD']),
       })),
-      starPlayerPoints: z.map(z.string(), z.object({
+      starPlayerPoints: z.record(z.string(), z.object({
         touchdowns: z.number().int().default(0),
         casualties: z.number().int().default(0),
         deflections: z.number().int().default(0),
@@ -328,7 +342,7 @@ export const gameRouter = router({
         return { increment: updateData.increment + amount };
       }
 
-      for (const [id, points] of input.starPlayerPoints.entries()) {
+      for (const [id, points] of Object.entries(input.starPlayerPoints)) {
         const player = players.find(p => p.id === id);
         if (!player)
           throw new Error('Player not found');
