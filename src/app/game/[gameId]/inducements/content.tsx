@@ -70,13 +70,42 @@ export default function Content(props: Props): ReactElement {
   if (result !== null)
     return <>Now let&apos;s <Link href={`/game/${props.gameId}/inprogress`}>Play!</Link></>;
 
-  return <div style={{ display: 'flex' }}>
-    <div>
-      petty cash: {Math.max(0, homePettyCash - calculateTotalCost(choices.home))}
+  const homeInducementCost = calculateTotalCost(choices.home);
+  const awayInducementCost = calculateTotalCost(choices.away);
+
+  let treasuryCostHome = 0;
+  let homeFinalPettyCash = homePettyCash;
+  let treasuryCostAway = 0;
+  let awayFinalPettyCash = awayPettyCash;
+
+  if (homePettyCash > 0) {
+    treasuryCostAway = Math.max(0, awayInducementCost - awayPettyCash);
+    treasuryCostHome = Math.max(0, homeInducementCost - (homePettyCash + treasuryCostAway));
+    homeFinalPettyCash += treasuryCostAway;
+  } else if (awayPettyCash > 0) {
+    treasuryCostHome = Math.max(0, homeInducementCost - homePettyCash);
+    treasuryCostAway = Math.max(0, awayInducementCost - (awayPettyCash + treasuryCostHome));
+    awayFinalPettyCash += treasuryCostHome;
+  }
+
+  return <div style={{
+    display: 'grid',
+    gridTemplateRows: 'auto 1fr',
+    gridTemplateColumns: '1fr auto 1fr',
+    gridTemplateAreas: `"ul uc ur"
+                        "ll lc lr"`,
+    placeItems: 'center',
+    width: '60%',
+    marginInline: 'auto',
+  }}>
+    <div style={{ gridArea: 'ul' }}>
+      petty cash: {Math.max(0, homeFinalPettyCash - calculateTotalCost(choices.home))}
       <br/>
-      treasury: {homeTreasury - Math.max(0, calculateTotalCost(choices.home) - homePettyCash)}
+      treasury: {homeTreasury - Math.max(0, calculateTotalCost(choices.home) - homeFinalPettyCash)}
       <br/>
       total cost: {calculateTotalCost(choices.home)}
+    </div>
+    <div style={{ gridArea: 'll' }}>
       <InducementSelector
         options={homeInducements}
         choices={choices.home}
@@ -85,13 +114,21 @@ export default function Content(props: Props): ReactElement {
         }}
       />
     </div>
-    <button onClick={submit}>Done :)</button>
-    <div>
-      petty cash: {Math.max(0, awayPettyCash - calculateTotalCost(choices.away))}
+    <div style={{ gridArea: 'uc' }}>
+      Treasury Transfer
+      <br />
+      {homePettyCash > 0 ? '<==' : '==>'}
+      <br />
+      {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
+    </div>
+    <div style={{ gridArea: 'ur' }}>
+      petty cash: {Math.max(0, awayFinalPettyCash - calculateTotalCost(choices.away))}
       <br/>
-      treasury: {awayTreasury - Math.max(0, calculateTotalCost(choices.away) - awayPettyCash)}
+      treasury: {awayTreasury - Math.max(0, calculateTotalCost(choices.away) - awayFinalPettyCash)}
       <br/>
       total cost: {calculateTotalCost(choices.away)}
+    </div>
+    <div style={{ gridArea: 'lr' }}>
       <InducementSelector
         options={awayInducements}
         choices={choices.away}
@@ -100,5 +137,6 @@ export default function Content(props: Props): ReactElement {
         }}
       />
     </div>
+    <button onClick={submit} style={{ gridArea: 'lc' }}>Done :)</button>
   </div>;
 }
