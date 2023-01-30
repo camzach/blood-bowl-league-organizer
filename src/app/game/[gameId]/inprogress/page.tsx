@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { TeamTable } from 'components/team-table';
-import { ComponentProps } from 'react';
-import type { ReactElement } from 'react';
+import type { ComponentProps, ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
 import styles from './styles.module.scss';
 import TeamArgs = Prisma.TeamArgs;
