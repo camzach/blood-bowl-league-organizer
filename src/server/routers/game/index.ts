@@ -235,9 +235,25 @@ export const gameRouter = router({
         )));
 
       const { pettyCashHome, pettyCashAway } = game;
-      const treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);
-      const treasuryCostAway = Math.max(0, awayInducementCost - pettyCashAway);
-      if (treasuryCostHome > game.home.treasury || treasuryCostAway > game.away.treasury)
+      let treasuryCostHome = 0;
+      let treasuryCostAway = 0;
+      const extraPettyCash = { home: 0, away: 0 };
+
+      if (pettyCashHome > 0) {
+        treasuryCostAway = Math.max(0, awayInducementCost - pettyCashAway);
+        treasuryCostHome = Math.max(0, homeInducementCost - (pettyCashHome + treasuryCostAway));
+        extraPettyCash.home += treasuryCostAway;
+      } else if (pettyCashAway > 0) {
+        treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);
+        treasuryCostAway = Math.max(0, awayInducementCost - (pettyCashAway + treasuryCostHome));
+        extraPettyCash.away += treasuryCostHome;
+      }
+      if (
+        (pettyCashHome === 0 && treasuryCostAway > 0) ||
+        (pettyCashAway === 0 && treasuryCostHome > 0) ||
+        treasuryCostHome > game.home.treasury ||
+        treasuryCostAway > game.away.treasury
+      )
         throw new Error('Inducements are too expensive');
 
       const homeUpdate = ctx.prisma.team.update({
@@ -248,8 +264,15 @@ export const gameRouter = router({
         where: { name: game.away.name },
         data: { treasury: { decrement: treasuryCostAway } },
       });
-      const gameStateUpdate = ctx.prisma.game.update({ where: { id: game.id }, data: { state: GameState.InProgress } });
-      await ctx.prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
+      const gameStateUpdate = ctx.prisma.game.update({
+        where: { id: game.id },
+        data: {
+          state: GameState.InProgress,
+          pettyCashHome: { increment: extraPettyCash.home },
+          pettyCashAway: { increment: extraPettyCash.away },
+        },
+      });
+      return ctx.prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
         treasuryCostHome,
         treasuryCostAway,
       }));
