@@ -2,13 +2,19 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["filteredRelationCount"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Coach {
+  name         String @id @unique
+  teams        Team[]
+  passwordHash String
 }
 
 model Player {
@@ -70,6 +76,8 @@ model Team {
   dedicatedFans    Int       @default(0)
   homeGames        Game[]    @relation("homeTeam")
   awayGames        Game[]    @relation("awayTeam")
+  Coach            Coach?    @relation(fields: [coachName], references: [name])
+  coachName        String?   @db.Citext
 }
 
 model Roster {
@@ -126,14 +134,14 @@ model Skill {
 }
 
 model Inducement {
-  name             String             @id @unique
-  max              Int
-  price            Int?
-  specialPriceRule SpecialRule?       @relation(fields: [specialPriceRuleName], references: [name])
-  specialPriceRuleName  String?
-  specialPrice     Int?
-  rules            String
-  options          InducementOption[]
+  name                 String             @id @unique
+  max                  Int
+  price                Int?
+  specialPriceRule     SpecialRule?       @relation(fields: [specialPriceRuleName], references: [name])
+  specialPriceRuleName String?
+  specialPrice         Int?
+  rules                String
+  options              InducementOption[]
 }
 
 model StarPlayer {
