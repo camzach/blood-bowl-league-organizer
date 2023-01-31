@@ -57,7 +57,7 @@ export const authOptions: AuthOptions = {
           where: { name: { equals: username, mode: 'insensitive' } },
           include: { teams: { select: { name: true } } },
         });
-        console.log(user, password);
+
         const isValid = await compare(password, user.passwordHash);
 
         if (!isValid)
