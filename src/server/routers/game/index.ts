@@ -5,6 +5,14 @@ import { newPlayer } from '../new-player';
 import { z } from 'zod';
 import { calculateInducementCosts } from './calculate-inducement-costs';
 import calculateTV from 'utils/calculate-tv';
+import type { Session } from 'next-auth';
+
+function ensureAuthenticationForTeams(session: Session | null, teams: string[]): void {
+  if (!session)
+    throw new Error('Not authenticated');
+  if (!teams.some(t => session.user.teams.includes(t)))
+    throw new Error('User does not have permission to modify this team');
+}
 
 export const gameRouter = router({
   start: publicProcedure
@@ -28,6 +36,8 @@ export const gameRouter = router({
           away: startGameTeamFields,
         },
       });
+
+      ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
 
       if (game.home.state !== TeamState.Ready || game.away.state !== TeamState.Ready)
         throw new Error('Teams are not ready to start a game');
@@ -109,6 +119,7 @@ export const gameRouter = router({
           away: { select: teamFields },
         },
       });
+      ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
       const makePositionQuery = (positionName: string, rosterName: string) => ({
         where: {
           name: positionName,
@@ -223,6 +234,8 @@ export const gameRouter = router({
         },
       });
 
+      ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
+
       if (game.state !== GameState.Inducements)
         throw new Error('Game not awaiting inducements');
 
@@ -297,7 +310,7 @@ export const gameRouter = router({
       casualties: z.tuple([z.number().int(), z.number().int()]),
     }))
     .mutation(async({ input, ctx }) => {
-      const teamFields = { players: true, journeymen: true };
+      const teamFields = { players: true, journeymen: true, name: true };
       const game = await ctx.prisma.game.findUniqueOrThrow({
         where: { id: input.game },
         select: {
@@ -307,6 +320,8 @@ export const gameRouter = router({
           away: { select: teamFields },
         },
       });
+      ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
+
       const statMinMax = {
         MA: [1, 9],
         ST: [1, 8],

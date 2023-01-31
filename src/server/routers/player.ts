@@ -17,6 +17,10 @@ export const playerRouter = router({
       });
       if (player.playerTeam === null)
         throw new Error('Player is not on any team');
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(player.playerTeam.name))
+        throw new Error('User does not have permission to modify this team');
       if (player.playerTeam.state === TeamState.Draft) {
         return ctx.prisma.team.update({
           where: { name: player.playerTeam.name },
@@ -60,11 +64,15 @@ export const playerRouter = router({
       const { update } = input;
       const player = await ctx.prisma.player.findUniqueOrThrow({
         where: { id: input.player },
-        include: { playerTeam: { select: { state: true } }, skills: true },
+        include: { playerTeam: { select: { state: true, name: true } }, skills: true },
       });
 
       if (player.playerTeam === null)
         throw new Error('Player is not on any team');
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(player.playerTeam.name))
+        throw new Error('User does not have permission to modify this team');
       if (player.playerTeam.state !== TeamState.PostGame)
         throw new Error('Team is not in PostGame state');
       if (player.totalImprovements >= 6)

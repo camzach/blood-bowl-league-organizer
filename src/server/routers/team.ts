@@ -34,6 +34,10 @@ export const teamRouter = router({
       name: z.string().optional(),
     }))
     .mutation(async({ input, ctx }) => {
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(input.team))
+        throw new Error('User does not have permission to modify this team');
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: { players: true, treasury: true, state: true, name: true },
@@ -76,6 +80,10 @@ export const teamRouter = router({
         .default(1),
     }))
     .mutation(async({ input, ctx }) => {
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(input.team))
+        throw new Error('User does not have permission to modify this team');
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
@@ -131,6 +139,10 @@ export const teamRouter = router({
   hireJourneyman: publicProcedure
     .input(z.object({ team: z.string(), player: z.string(), number: z.number().min(1).max(16) }))
     .mutation(async({ input, ctx }) => {
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(input.team))
+        throw new Error('User does not have permission to modify this team');
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
@@ -177,6 +189,10 @@ export const teamRouter = router({
         .default(1),
     }))
     .mutation(async({ input, ctx }) => {
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(input.team))
+        throw new Error('User does not have permission to modify this team');
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
@@ -218,6 +234,10 @@ export const teamRouter = router({
   ready: publicProcedure
     .input(z.string())
     .mutation(async({ input, ctx }) => {
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(input))
+        throw new Error('User does not have permission to modify this team');
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input },
         select: { name: true, state: true, treasury: true, _count: { select: { players: true } } },

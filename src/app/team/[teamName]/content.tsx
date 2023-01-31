@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { trpc } from 'utils/trpc';
 import StaffHirer from './staff-hirer';
 import calculateTV from 'utils/calculate-tv';
+import { useSession } from 'next-auth/react';
 
 const baseCols = [
   '#',
@@ -35,6 +36,7 @@ type Props = {
 
 export default function TeamPage({ team, skills }: Props): React.ReactElement {
   const router = useRouter();
+  const session = useSession();
 
   const handleFire = (id: string) => () => {
     void trpc.player.fire.mutate(id)
@@ -49,7 +51,9 @@ export default function TeamPage({ team, skills }: Props): React.ReactElement {
       });
   };
 
-  const allowHiring = team.state === 'Draft' || team.state === 'PostGame';
+  const allowHiring = (team.state === 'Draft' || team.state === 'PostGame') &&
+                     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                     (session.data?.user.teams?.includes(team.name) ?? false);
 
   const cols: NonNullable<TeamTableProps<Props['team']['players'][number]>['cols']> = [...baseCols];
   if (allowHiring) {
@@ -80,7 +84,7 @@ export default function TeamPage({ team, skills }: Props): React.ReactElement {
       <h2>TV - {calculateTV(team)}</h2>
       Treasury -- {team.treasury}
       <br />
-      Dedicated Fans -- {team.state === 'Draft'
+      Dedicated Fans -- {team.state === 'Draft' && allowHiring
         ? <StaffHirer
           title={'Dedicated Fans'}
           type={'dedicatedFans'}

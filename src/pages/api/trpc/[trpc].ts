@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import * as trpcNext from '@trpc/server/adapters/next';
+import { getServerSession } from 'next-auth';
 import { appRouter } from 'server/routers';
+import { authOptions } from '../auth/[...nextauth]';
 
 export default trpcNext.createNextApiHandler({
   router: appRouter,
-  createContext: () => ({ prisma: new PrismaClient() }),
+  createContext: async ctx => {
+    const { req, res } = ctx;
+    const session = await getServerSession(req, res, authOptions);
+    return {
+      prisma: new PrismaClient({ log: ['warn', 'error'] }),
+      session,
+    };
+  },
 });
