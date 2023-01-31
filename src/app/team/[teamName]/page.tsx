@@ -4,6 +4,13 @@ import Content from './content';
 
 type Props = { params: { teamName: string } };
 
+export async function generateStaticParams(): Promise<Array<{ teamName: string }>> {
+  const teams = await prisma.team.findMany({ select: { name: true } });
+  return teams.map(t => ({ teamName: t.name }));
+}
+
+export const dynamicParams = false;
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function fetchTeam(teamName: string) {
   return prisma.team.findUniqueOrThrow({
