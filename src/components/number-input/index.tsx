@@ -25,7 +25,13 @@ export function NumberInput({ value, label, showLabel = false, min, max, onChang
     <span className={styles.wrapper}>
       <label htmlFor={id} className={classNames(!showLabel && styles.hiddenLabel)}>{label}</label>
       <span className={styles.innerWrapper}>
-        <button type="button" onClick={handleTick('down')}>-</button>
+        <button
+          type="button"
+          onClick={handleTick('down')}
+          disabled={min !== undefined && value <= min}
+        >
+          -
+        </button>
         <input
           className={styles.input}
           id={id}
@@ -37,7 +43,13 @@ export function NumberInput({ value, label, showLabel = false, min, max, onChang
           type="number"
           ref={inputRef}
         />
-        <button type="button" onClick={handleTick('up')}>+</button>
+        <button
+          type="button"
+          onClick={handleTick('up')}
+          disabled={max !== undefined && value >= max}
+        >
+          +
+        </button>
       </span>
     </span>
   );
