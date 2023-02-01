@@ -6,6 +6,7 @@ import styles from './styles.module.scss';
 import TeamArgs = Prisma.TeamArgs;
 import PlayerFindManyArgs = Prisma.PlayerFindManyArgs;
 import ScoreWidget from './score-widget';
+import { notFound } from 'next/navigation';
 
 type Props = {
   params: { gameId: string };
@@ -35,13 +36,15 @@ const cols = [
 ] satisfies ComponentProps<typeof TeamTable>['cols'];
 
 export default async function InProgress({ params: { gameId } }: Props): Promise<ReactElement> {
-  const game = await prisma.game.findUniqueOrThrow({
+  const game = await prisma.game.findUnique({
     where: { id: gameId },
     select: {
       home: teamSelect,
       away: teamSelect,
     },
   });
+  if (!game)
+    return notFound();
 
   return <div className={styles.layout}>
     <TeamTable

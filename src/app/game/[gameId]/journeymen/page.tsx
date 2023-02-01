@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
 import Content from './content';
@@ -25,7 +25,7 @@ type Props = {
 };
 
 export default async function Journeymen({ params: { gameId } }: Props): Promise<ReactElement> {
-  const game = await prisma.game.findUniqueOrThrow({
+  const game = await prisma.game.findUnique({
     where: { id: gameId },
     select: {
       home: teamFields,
@@ -33,6 +33,8 @@ export default async function Journeymen({ params: { gameId } }: Props): Promise
       state: true,
     },
   });
+  if (!game)
+    return notFound();
 
   if (game.state !== 'Journeymen')
     redirect(`game/${gameId}/${game.state.toLowerCase()}`);
