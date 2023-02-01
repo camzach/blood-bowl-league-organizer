@@ -1,7 +1,8 @@
+'use client';
 import React from 'react';
 import type { Position } from '@prisma/client';
 import { trpc } from 'utils/trpc';
-import { useRouter } from 'next/navigation';
+import useServerMutation from 'utils/use-server-mutation';
 
 type Props = {
   positions: Position[];
@@ -11,9 +12,9 @@ type Props = {
 };
 
 export function PlayerHirer({ positions, treasury, freeNumbers, teamName }: Props): React.ReactElement {
-  const router = useRouter();
   const [position, setPosition] = React.useState(positions[0].name);
   const [number, setNumber] = React.useState(freeNumbers[0]);
+  const { startMutation, endMutation, isMutating } = useServerMutation();
 
   const handlePositionSelect = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setPosition(e.target.value);
@@ -26,12 +27,16 @@ export function PlayerHirer({ positions, treasury, freeNumbers, teamName }: Prop
   }, []);
 
   const hirePlayer = (): void => {
+    startMutation();
     void trpc.team.hirePlayer.mutate({ team: teamName, position, number })
       .then(() => {
         setNumber(freeNumbers.find(n => n !== number) ?? freeNumbers[0]);
-        router.refresh();
+        endMutation();
       });
   };
+
+  if (isMutating)
+    return <>Hiring...</>;
 
   return (
     <>

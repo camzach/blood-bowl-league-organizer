@@ -1,8 +1,8 @@
 'use client';
 import { NumberInput } from 'components/number-input';
-import { useRouter } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { trpc } from 'utils/trpc';
+import useServerMutation from 'utils/use-server-mutation';
 
 type Props = {
   title: string;
@@ -14,21 +14,19 @@ type Props = {
 };
 
 export default function StaffHirer({ title, current, type, teamName, max }: Props): ReactElement {
-  const router = useRouter();
+  const { startMutation, endMutation, isMutating } = useServerMutation();
 
   const hireStaff = (val: number): void => {
-    if (val > current) {
-      void trpc.team.hireStaff.mutate({ team: teamName, type, quantity: val - current })
-        .then(() => {
-          router.refresh();
-        });
-    } else {
-      void trpc.team.fireStaff.mutate({ team: teamName, type, quantity: current - val })
-        .then(() => {
-          router.refresh();
-        });
-    }
+    startMutation();
+    const action = val > current
+      ? trpc.team.hireStaff.mutate({ team: teamName, type, quantity: val - current })
+      : trpc.team.fireStaff.mutate({ team: teamName, type, quantity: current - val });
+    void action
+      .then(endMutation);
   };
+
+  if (isMutating)
+    return <>Mutating...</>;
 
   return max > 1
     ? <NumberInput
