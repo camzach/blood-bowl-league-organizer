@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { trpc } from 'utils/trpc';
 import { prisma } from 'utils/prisma';
@@ -7,7 +7,7 @@ import Content from './content';
 type InducementsResponseType = ReturnType<typeof trpc.inducements.list.query>;
 
 export default async function Inducements({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
-  const game = await (prisma.game.findUniqueOrThrow({
+  const game = await (prisma.game.findUnique({
     where: { id: gameId },
     select: {
       state: true,
@@ -17,6 +17,8 @@ export default async function Inducements({ params: { gameId } }: { params: { ga
       pettyCashAway: true,
     },
   }));
+  if (!game)
+    return notFound();
 
   if (game.state !== 'Inducements')
     redirect(`game/${gameId}/${game.state.toLowerCase()}`);
