@@ -1,30 +1,41 @@
+'use client';
 import React from 'react';
-import { trpc } from 'utils/trpc';
-import type { FetchedTeamType } from './page';
+import type { FetchedTeamType } from '../page';
 import type { TeamTableProps } from 'components/team-table';
 import { TeamTable } from 'components/team-table';
+import AdvancementPicker from '../advancement-picker';
+import HireButton from './hire-button';
 
-const hiddenCols = ['#', 'Name', 'Fire'];
+const baseCols = [
+  'Position',
+  'Skills',
+  'MA',
+  'ST',
+  'PA',
+  'AG',
+  'AV',
+  'NI',
+  'MNG?',
+  'SPP',
+  'TV',
+  'CTV',
+] as const;
 
 type Props = {
   players: FetchedTeamType['journeymen'];
-  baseCols: TeamTableProps<FetchedTeamType['journeymen'][number]>['cols'];
   freeNumbers: number[];
   teamName: string;
   allowHiring: boolean;
+  skills: Array<{ name: string; category: string }>;
 };
 export function JourneymanManager({
   players,
-  baseCols,
   freeNumbers,
   teamName,
   allowHiring,
+  skills,
 }: Props): React.ReactElement {
   const [numbers, setNumbers] = React.useState(Object.fromEntries(players.map((p, idx) => [p.id, freeNumbers[idx]])));
-
-  const hireJourneyman = (id: string) => (): void => {
-    void trpc.team.hireJourneyman.mutate({ team: teamName, player: id, number: numbers[id] });
-  };
 
   const handleNumberChange = React.useCallback((id: string) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     const number = parseInt(e.target.value, 10);
@@ -35,18 +46,17 @@ export function JourneymanManager({
     }));
   }, []);
 
-  const cols: TeamTableProps<FetchedTeamType['journeymen'][number]>['cols'] = baseCols
-    ?.filter(c => (typeof c === 'string' ? !hiddenCols.includes(c) : !hiddenCols.includes(c.name)));
+  const cols: TeamTableProps<FetchedTeamType['journeymen'][number]>['cols'] = [...baseCols];
   if (allowHiring) {
-    cols?.unshift({
+    cols.unshift({
       name: 'Hire!',
       render: (player: FetchedTeamType['journeymen'][number]) => (
         <td key="Hire!">
-          <button type="button" onClick={hireJourneyman(player.id)}>Hire!</button>
+          <HireButton player={player.id} team={teamName} number={numbers[player.id]} />
         </td>
       ),
     });
-    cols?.unshift({
+    cols.unshift({
       name: '#',
       render: p => (
         <td key="#">
@@ -58,6 +68,14 @@ export function JourneymanManager({
                 </option>
               ))}
           </select>
+        </td>
+      ),
+    });
+    cols.splice(11, 0, {
+      name: 'Spend SPP',
+      render: player => (
+        <td key="Spend SPP">
+          <AdvancementPicker player={player} rosterPlayer={player.position} skills={skills} />
         </td>
       ),
     });
