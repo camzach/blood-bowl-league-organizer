@@ -7,7 +7,7 @@ import Content from './content';
 type InducementsResponseType = ReturnType<typeof trpc.inducements.list.query>;
 
 export default async function Inducements({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
-  const game = await (prisma.game.findUnique({
+  const game = await prisma.game.findUnique({
     where: { id: gameId },
     select: {
       state: true,
@@ -16,7 +16,7 @@ export default async function Inducements({ params: { gameId } }: { params: { ga
       pettyCashHome: true,
       pettyCashAway: true,
     },
-  }));
+  });
   if (!game)
     return notFound();
 
