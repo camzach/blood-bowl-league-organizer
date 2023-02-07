@@ -4,27 +4,31 @@ import credentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../../../utils/prisma';
 import { compare } from 'bcryptjs';
 
-/** Example on how to extend the built-in session types */
 declare module 'next-auth' {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Session {
-    /** This is an example. You can find me in types/next-auth.d.ts */
     user: {
+      id: string;
       teams: string[];
+      needsNewPassword: boolean;
     };
   }
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface User {
+    id: string;
     teams: string[];
+    needsNewPassword: boolean;
   }
 }
 
-/** Example on how to extend the built-in types for JWT */
 declare module 'next-auth/jwt' {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface JWT {
-    /** This is an example. You can find me in types/next-auth.d.ts */
-    user: { teams: string[] };
+    user: {
+      id: string;
+      teams: string[];
+      needsNewPassword: boolean;
+    };
   }
 }
 
@@ -62,8 +66,8 @@ export const authOptions: AuthOptions = {
 
         if (!isValid)
           throw new Error('Wrong credentials. Try again.');
-
-        return { id: user.name, teams: user.teams.map(t => t.name) };
+        const userObj = { id: user.name, teams: user.teams.map(t => t.name), needsNewPassword: user.needsNewPassword };
+        return userObj;
       },
     }),
   ],
