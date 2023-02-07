@@ -33,7 +33,10 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: AuthOptions = {
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 60 * 30,
+  },
   callbacks: {
     jwt: ({ token, user }) => {
       if (user)
