@@ -11,7 +11,7 @@ function ensureAuthenticationForTeams(session: Session | null, teams: string[]):
   if (!session)
     throw new Error('Not authenticated');
   if (!teams.some(t => session.user.teams.includes(t)))
-    throw new Error('User does not have permission to modify this team');
+    throw new Error('User does not have permission to update this game');
 }
 
 export const gameRouter = router({
