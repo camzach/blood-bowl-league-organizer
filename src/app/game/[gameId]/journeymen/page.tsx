@@ -26,7 +26,7 @@ type Props = {
 
 export default async function Journeymen({ params: { gameId } }: Props): Promise<ReactElement> {
   const game = await prisma.game.findUnique({
-    where: { id: gameId },
+    where: { id: decodeURIComponent(gameId) },
     select: {
       home: teamFields,
       away: teamFields,
