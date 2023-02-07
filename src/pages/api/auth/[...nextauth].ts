@@ -57,15 +57,18 @@ export const authOptions: AuthOptions = {
           password: string;
         };
 
-        const user = await prisma.coach.findFirstOrThrow({
+        const user = await prisma.coach.findFirst({
           where: { name: { equals: username, mode: 'insensitive' } },
           include: { teams: { select: { name: true } } },
         });
 
+        if (!user)
+          throw new Error('CredentialsSignin');
+
         const isValid = await compare(password, user.passwordHash);
 
         if (!isValid)
-          throw new Error('Wrong credentials. Try again.');
+          throw new Error('CredentialsSignin');
         const userObj = { id: user.name, teams: user.teams.map(t => t.name), needsNewPassword: user.needsNewPassword };
         return userObj;
       },
