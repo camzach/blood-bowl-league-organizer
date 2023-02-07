@@ -8,7 +8,7 @@ type InducementsResponseType = ReturnType<typeof trpc.inducements.list.query>;
 
 export default async function Inducements({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
   const game = await prisma.game.findUnique({
-    where: { id: gameId },
+    where: { id: decodeURIComponent(gameId) },
     select: {
       state: true,
       home: { select: { treasury: true, name: true } },
