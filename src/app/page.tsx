@@ -7,7 +7,6 @@ export default async function Home(): Promise<ReactNode> {
 
   return (<>
     <h1>BBLO</h1>
-    <pre>{JSON.stringify(session, null, 2)}</pre>
     <ul>
       <li><a href="/schedule">View schedule</a></li>
       <li><a href={`/team/${session?.user.teams[0]}`}>View your teams</a></li>
