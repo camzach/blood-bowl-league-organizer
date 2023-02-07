@@ -12,9 +12,10 @@ datasource db {
 }
 
 model Coach {
-  name         String @id @unique
-  teams        Team[]
-  passwordHash String
+  name             String  @id @unique
+  teams            Team[]
+  passwordHash     String
+  needsNewPassword Boolean @default(true)
 }
 
 model Player {
