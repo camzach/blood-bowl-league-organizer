@@ -9,7 +9,7 @@ export default async function Home(): Promise<ReactNode> {
     <h1>BBLO</h1>
     <ul>
       <li><a href="/schedule">View schedule</a></li>
-      <li><a href={`/team/${session?.user.teams[0]}`}>View your teams</a></li>
+      <li><a href={`/team/${session?.user.teams[0]}`}>View your team</a></li>
     </ul>
   </>
   );
