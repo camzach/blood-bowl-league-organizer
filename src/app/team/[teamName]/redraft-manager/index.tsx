@@ -3,7 +3,6 @@ import React from 'react';
 import type { FetchedTeamType } from '../page';
 import type { TeamTableProps } from 'components/team-table';
 import { TeamTable } from 'components/team-table';
-import AdvancementPicker from '../advancement-picker';
 import HireButton from './hire-button';
 
 const baseCols = [
@@ -15,9 +14,7 @@ const baseCols = [
   'AG',
   'AV',
   'NI',
-  'MNG?',
   'SPP',
-  'TV',
   'CTV',
 ] as const;
 
@@ -28,12 +25,11 @@ type Props = {
   allowHiring: boolean;
   skills: Array<{ name: string; category: string }>;
 };
-export function JourneymanManager({
+export function RedraftManager({
   players,
   freeNumbers,
   teamName,
   allowHiring,
-  skills,
 }: Props): React.ReactElement {
   const [numbers, setNumbers] = React.useState(Object.fromEntries(players.map(p =>
     [p.id, freeNumbers.includes(p.number) ? p.number : freeNumbers[0]])));
@@ -72,11 +68,19 @@ export function JourneymanManager({
         </td>
       ),
     });
-    cols.splice(11, 0, {
-      name: 'Spend SPP',
-      render: player => (
-        <td key="Spend SPP">
-          <AdvancementPicker player={player} rosterPlayer={player.position} skills={skills} />
+    cols.push({
+      name: 'Seasons',
+      render: p => (
+        <td key="Seasons">
+          {p.seasonsPlayed}
+        </td>
+      ),
+    });
+    cols.push({
+      name: 'Hiring fee',
+      render: p => (
+        <td key="hiring fee">
+          {`${(p.teamValue + (20_000 * p.seasonsPlayed)) / 1000}k`}
         </td>
       ),
     });

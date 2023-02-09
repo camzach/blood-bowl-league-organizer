@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
 import React from 'react';
 import { JourneymanManager } from './journeyman-manager';
+import { RedraftManager } from './redraft-manager';
 import { PlayerHirer } from './player-hirer';
 import StaffHirer from './staff-hirer';
 import calculateTV from 'utils/calculate-tv';
@@ -10,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
 import AugmentedTeamTable from './augmented-team-table';
 import ReadyTeam from './ready-team';
+import { TeamState } from '@prisma/client';
 
 type Props = { params: { teamName: string } };
 
@@ -21,6 +23,7 @@ async function fetchTeam(teamName: string) {
       roster: { include: { positions: true } },
       players: { include: { skills: true, position: true } },
       journeymen: { include: { skills: true, position: true } },
+      redrafts: { include: { skills: true, position: true } },
     },
   });
 }
@@ -34,7 +37,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
   if (!team)
     return notFound();
 
-  const allowHiring = (team.state === 'Draft' || team.state === 'PostGame') &&
+  const allowHiring = (team.state === TeamState.Draft || team.state === TeamState.PostGame) &&
                      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                      (session?.user.teams?.includes(team.name) ?? false);
 
@@ -47,7 +50,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
       <h2>TV - {calculateTV(team)}</h2>
       Treasury -- {team.treasury}
       <br />
-      Dedicated Fans -- {team.state === 'Draft' && allowHiring
+      Dedicated Fans -- {team.state === TeamState.Draft && allowHiring
         ? <StaffHirer
           title={'Dedicated Fans'}
           type={'dedicatedFans'}
@@ -59,6 +62,13 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
         />
         : team.dedicatedFans}
       <AugmentedTeamTable players={team.players} skills={skills} allowHiring={allowHiring} />
+      {allowHiring && <PlayerHirer
+        positions={team.roster.positions.filter(pos =>
+          team.players.filter(p => p.position.name === pos.name).length < pos.max)}
+        treasury={team.treasury}
+        freeNumbers={freeNumbers}
+        teamName={team.name}
+      />}
       {team.journeymen.length > 0 &&
         <JourneymanManager
           players={team.journeymen}
@@ -67,13 +77,14 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           allowHiring={allowHiring}
           skills={skills}
         />}
-      {allowHiring && <PlayerHirer
-        positions={team.roster.positions.filter(pos =>
-          team.players.filter(p => p.position.name === pos.name).length < pos.max)}
-        treasury={team.treasury}
-        freeNumbers={freeNumbers}
-        teamName={team.name}
-      />}
+      {team.state === TeamState.Draft && team.redrafts.length > 0 &&
+        <RedraftManager
+          players={team.redrafts}
+          freeNumbers={freeNumbers}
+          teamName={team.name}
+          allowHiring={allowHiring}
+          skills={skills}
+        />}
       <table>
         <thead>
           <tr>
@@ -95,7 +106,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
                   title={'Rerolls'}
                   treasury={team.treasury}
                   current={team.rerolls}
-                  cost={team.state === 'Draft' ? team.roster.rerollCost : team.roster.rerollCost * 2}
+                  cost={team.state === TeamState.Draft ? team.roster.rerollCost : team.roster.rerollCost * 2}
                   max={6}
                 />
                 : team.rerolls}

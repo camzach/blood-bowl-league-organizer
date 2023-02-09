@@ -29,7 +29,7 @@ export default function PlayerFirer({ player, number, team }: Props): ReactEleme
 
   const handleHire = (): void => {
     startMutation();
-    void trpc.team.hireExistingPlayer.mutate({ player, number, team })
+    void trpc.team.hireExistingPlayer.mutate({ player, number, team, from: 'redrafts' })
       .catch(() => { setError(true); })
       .finally(endMutation);
   };

@@ -136,39 +136,56 @@ export const teamRouter = router({
       });
     }),
 
-  hireJourneyman: publicProcedure
-    .input(z.object({ team: z.string(), player: z.string(), number: z.number().min(1).max(16) }))
+  hireExistingPlayer: publicProcedure
+    .input(z.object({
+      team: z.string(),
+      player: z.string(),
+      number: z.number().min(1).max(16),
+      from: z.enum(['journeymen', 'redrafts']).default('journeymen'),
+    }))
     .mutation(async({ input, ctx }) => {
       if (!ctx.session)
         throw new Error('Not authenticated');
       if (!ctx.session.user.teams.includes(input.team))
         throw new Error('User does not have permission to modify this team');
+
+      const hiredPlayerQuery = {
+        select: {
+          id: true,
+          position: { select: { id: true, max: true } },
+          teamValue: true,
+          seasonsPlayed: true,
+        },
+      };
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
         select: {
           treasury: true,
           players: { select: { number: true, positionId: true } },
-          journeymen: { select: { id: true, position: { select: { id: true, max: true } }, teamValue: true } },
+          journeymen: hiredPlayerQuery,
+          redrafts: hiredPlayerQuery,
         },
       });
 
       if (team.players.length >= 16)
         throw new Error('Team cannor hire any more players');
-      const player = team.journeymen.find(p => p.id === input.player);
+      const player = team[input.from].find(p => p.id === input.player);
       if (!player)
         throw new Error('Invalid Player ID');
       if (team.players.filter(p => p.positionId === player.position.id).length >= player.position.max)
         throw new Error('Cannot hire any more players of this position');
       if (team.players.some(p => p.number === input.number))
-        throw new Error('Tem already has a player with this number');
-      if (player.teamValue > team.treasury)
+        throw new Error('Team already has a player with this number');
+
+      const cost = player.teamValue + (player.seasonsPlayed * 20_000);
+      if (cost > team.treasury)
         throw new Error('Cannot afford this player');
 
       await ctx.prisma.$transaction([
         ctx.prisma.team.update({
           where: { name: input.team },
           data: {
-            journeymen: { disconnect: { id: player.id } },
+            [input.from]: { disconnect: { id: player.id } },
             players: { connect: { id: player.id } },
             treasury: { decrement: player.teamValue },
           },
