@@ -24,8 +24,10 @@ model Player {
   number             Int
   playerTeam         Team?           @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
   journeymanTeam     Team?           @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
+  redraftTeam        Team?           @relation("redrafts", map: "Player_redrafts__fkey", fields: [redraftTeamName], references: [name])
   playerTeamName     String?
   journeymanTeamName String?
+  redraftTeamName    String?
   nigglingInjuries   Int             @default(0)
   missNextGame       Boolean         @default(false)
   dead               Boolean         @default(false)
@@ -53,6 +55,7 @@ model Player {
   skills             Skill[]
   position           Position        @relation(fields: [positionId], references: [id])
   positionId         String          @db.Uuid
+  seasonsPlayed      Int             @default(0)
 }
 
 enum TeamState {
@@ -66,6 +69,7 @@ model Team {
   name             String    @id @unique
   players          Player[]  @relation("players")
   journeymen       Player[]  @relation("journeymen")
+  redrafts         Player[]  @relation("redrafts")
   treasury         Int       @default(1000000)
   state            TeamState @default(Draft)
   roster           Roster    @relation(fields: [rosterName], references: [name])
