@@ -148,7 +148,7 @@ export const teamRouter = router({
         select: {
           treasury: true,
           players: { select: { number: true, positionId: true } },
-          journeymen: { select: { id: true, position: { select: { id: true, max: true, cost: true } } } },
+          journeymen: { select: { id: true, position: { select: { id: true, max: true } }, teamValue: true } },
         },
       });
 
@@ -161,7 +161,7 @@ export const teamRouter = router({
         throw new Error('Cannot hire any more players of this position');
       if (team.players.some(p => p.number === input.number))
         throw new Error('Tem already has a player with this number');
-      if (player.position.cost > team.treasury)
+      if (player.teamValue > team.treasury)
         throw new Error('Cannot afford this player');
 
       await ctx.prisma.$transaction([
@@ -170,6 +170,7 @@ export const teamRouter = router({
           data: {
             journeymen: { disconnect: { id: player.id } },
             players: { connect: { id: player.id } },
+            treasury: { decrement: player.teamValue },
           },
         }),
         ctx.prisma.player.update({
