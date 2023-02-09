@@ -13,7 +13,7 @@ export const playerRouter = router({
     .mutation(async({ input, ctx }) => {
       const player = await ctx.prisma.player.findFirstOrThrow({
         where: { id: input },
-        select: { playerTeam: { select: { state: true, name: true } }, position: { select: { cost: true } }, id: true },
+        select: { playerTeam: { select: { state: true, name: true } }, teamValue: true, id: true },
       });
       if (player.playerTeam === null)
         throw new Error('Player is not on any team');
@@ -26,7 +26,7 @@ export const playerRouter = router({
           where: { name: player.playerTeam.name },
           data: {
             players: { delete: { id: player.id } },
-            treasury: { increment: player.position.cost },
+            treasury: { increment: player.teamValue },
           },
         });
       }
