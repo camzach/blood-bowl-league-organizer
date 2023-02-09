@@ -6,6 +6,7 @@ import { TeamTable } from 'components/team-table';
 import HireButton from './hire-button';
 
 const baseCols = [
+  'Name',
   'Position',
   'Skills',
   'MA',
