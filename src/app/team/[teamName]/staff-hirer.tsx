@@ -12,11 +12,16 @@ type Props = {
   cost: number;
   teamName: string;
   max: number;
+  treasury: number;
 };
 
-export default function StaffHirer({ title, current, type, teamName, max }: Props): ReactElement {
+export default function StaffHirer({ title, current, type, teamName, cost, max, treasury }: Props): ReactElement {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
+
+  // Rather than using the normal max, calculate a temporary max based on your treasury
+  // This helps disable the tick up button when you can't afford any more
+  const inputMax = Math.min(max, Math.floor(treasury / cost) + current);
 
   useEffect(() => {
     if (error && !isMutating) {
@@ -51,7 +56,7 @@ export default function StaffHirer({ title, current, type, teamName, max }: Prop
       value={current}
       label={title}
       min={0}
-      max={max}
+      max={inputMax}
       onChange={hireStaff}
     />
     : <input

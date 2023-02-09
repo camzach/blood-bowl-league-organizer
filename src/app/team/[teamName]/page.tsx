@@ -54,6 +54,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           current={team.dedicatedFans}
           cost={10_000}
           teamName={team.name}
+          treasury={team.treasury}
           max={7}
         />
         : team.dedicatedFans}
@@ -92,9 +93,10 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
                   teamName={team.name}
                   type={'rerolls'}
                   title={'Rerolls'}
-                  max={8}
+                  treasury={team.treasury}
                   current={team.rerolls}
                   cost={team.state === 'Draft' ? team.roster.rerollCost : team.roster.rerollCost * 2}
+                  max={6}
                 />
                 : team.rerolls}
             </td>
@@ -109,9 +111,10 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
                   teamName={team.name}
                   type={'assistantCoaches'}
                   title={'Assistant Coaches'}
-                  max={10}
+                  treasury={team.treasury}
                   current={team.assistantCoaches}
-                  cost={10000}
+                  cost={10_000}
+                  max={10}
                 />
                 : team.assistantCoaches}
             </td>
@@ -126,9 +129,10 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
                   teamName={team.name}
                   type={'cheerleaders'}
                   title={'Cheerleaders'}
-                  max={10}
+                  treasury={team.treasury}
                   current={team.cheerleaders}
-                  cost={10000}
+                  cost={10_000}
+                  max={10}
                 />
                 : team.cheerleaders}
             </td>
@@ -138,18 +142,19 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
             <td>Apothecary</td>
             <td>50,000</td>
             <td>
-              {allowHiring
+              {allowHiring && team.treasury >= 50_000
                 ? <StaffHirer
                   teamName={team.name}
                   type={'apothecary'}
                   title={'Apothecary'}
-                  max={1}
                   current={Number(team.apothecary)}
-                  cost={10000}
+                  cost={50_000}
+                  treasury={team.treasury}
+                  max={1}
                 />
-                : <input type="checkbox" checked disabled></input>}
+                : <input type="checkbox" checked={team.apothecary} disabled></input>}
             </td>
-            <td>{(team.apothecary ? 50000 : 0).toLocaleString()}</td>
+            <td>{(team.apothecary ? 50_000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
