@@ -120,22 +120,6 @@ export const playerRouter = router({
         throw new Error('User does not have permission to modify this team');
       if (player.playerTeam.state !== TeamState.PostGame)
         throw new Error('Team is not in PostGame state');
-      if (player.totalImprovements >= 6)
-        throw new Error('Cannot improve player any more');
-
-      const sppCostTable = {
-        randomPrimary: [3, 4, 6, 8, 10, 15],
-        chosenPrimary: [6, 8, 12, 16, 20, 30],
-        randomSecondary: [6, 8, 12, 16, 20, 30],
-        chosenSecondary: [12, 14, 18, 22, 26, 40],
-        characteristic: [18, 20, 24, 28, 32, 50],
-      };
-
-      const sppCost = update.type === 'characteristic'
-        ? sppCostTable[update.type][player.totalImprovements]
-        : sppCostTable[`${update.type}${upperFirst(update.subtype)}`][player.totalImprovements];
-      if (sppCost > player.starPlayerPoints)
-        throw new Error('Player does not have enough SPP');
 
       const skill = 'skill' in update
         ? await ctx.prisma.skill.findUniqueOrThrow({ where: { name: update.skill } })
@@ -161,10 +145,11 @@ export const playerRouter = router({
         ST: 80_000,
       };
 
-      const playerUpdate: Prisma.PlayerUpdateInput = {
-        totalImprovements: { increment: 1 },
-        starPlayerPoints: { decrement: sppCost },
-      };
+      const playerUpdate: Prisma.PlayerUpdateInput = { totalImprovements: { increment: 1 } };
+      let characteristicChoice:
+      (typeof update & { type: 'characteristic' })['preferences'][number] |
+      'chosenSecondary' |
+      null = null;
       if (update.type === 'chosen' && skill !== null) {
         playerUpdate.skills = { connect: { name: skill.name } };
         playerUpdate.teamValue = { increment: tvCostTable[`${update.type}${upperFirst(update.subtype)}`] };
@@ -199,6 +184,43 @@ export const playerRouter = router({
           ['AG', 'ST'],
           ['MA', 'AV', 'PA', 'AG', 'ST'],
         ];
+
+        const availableOptions = rollTable[Math.floor(Math.random() * 16)];
+        characteristicChoice = update.preferences.find(pref => availableOptions.includes(pref)) ?? 'chosenSecondary';
+
+        playerUpdate.teamValue = { increment: tvCostTable[characteristicChoice] };
+
+        if (characteristicChoice !== 'chosenSecondary') {
+          if (characteristicChoice === 'MA' || characteristicChoice === 'AV' || characteristicChoice === 'ST')
+            playerUpdate[characteristicChoice] = { increment: 1 };
+          else
+            playerUpdate[characteristicChoice] = player[characteristicChoice] === null ? 6 : { decrement: 1 };
+
+          playerUpdate[`${characteristicChoice}Improvements`] = { increment: 1 };
+        } else {
+          playerUpdate.skills = { connect: { name: skill.name } };
+        }
+      }
+
+      return ctx.prisma.$transaction(async tx => {
+        const sppCostTable = {
+          randomPrimary: [3, 4, 6, 8, 10, 15],
+          chosenPrimary: [6, 8, 12, 16, 20, 30],
+          randomSecondary: [6, 8, 12, 16, 20, 30],
+          chosenSecondary: [12, 14, 18, 22, 26, 40],
+          characteristic: [18, 20, 24, 28, 32, 50],
+        };
+        const sppCost = update.type === 'characteristic'
+          ? sppCostTable[update.type][player.totalImprovements]
+          : sppCostTable[`${update.type}${upperFirst(update.subtype)}`][player.totalImprovements];
+        playerUpdate.starPlayerPoints = { decrement: sppCost };
+        const updatedPlayer = await tx.player.update({ where: { id: player.id }, data: playerUpdate });
+
+        if (updatedPlayer.totalImprovements > 6)
+          throw new Error('Player cannot be improved further');
+        if (updatedPlayer.starPlayerPoints < 0)
+          throw new Error('Player does not have enough SPP');
+
         const statMinMax = {
           MA: [1, 9],
           ST: [1, 8],
@@ -206,26 +228,15 @@ export const playerRouter = router({
           PA: [1, 6],
           AV: [3, 11],
         };
-
-        const availableOptions = rollTable[Math.floor(Math.random() * 16)];
-        const choice = update.preferences.find(pref => availableOptions.includes(pref)) ?? 'chosenSecondary';
-        playerUpdate.teamValue = { increment: tvCostTable[choice] };
-
-        if (choice === 'MA' || choice === 'AV' || choice === 'ST') {
-          if (player[choice] >= statMinMax[choice][1] || player[`${choice}Improvements`] >= 2)
-            throw new Error('Characteristc can not be improved any further');
-          playerUpdate[choice] = { increment: 1 };
-          playerUpdate[`${choice}Improvements`] = { increment: 1 };
-        } else if (choice === 'PA' || choice === 'AG') {
-          if ((player[choice] ?? 7) <= statMinMax[choice][0] || player[`${choice}Improvements`] >= 2)
-            throw new Error('Characteristc can not be improved any further');
-          playerUpdate[choice] = player[choice] === null ? 6 : { decrement: 1 };
-          playerUpdate[`${choice}Improvements`] = { increment: 1 };
-        } else {
-          playerUpdate.skills = { connect: { name: skill.name } };
+        const stats = Object.keys(statMinMax) as Array<keyof typeof statMinMax>;
+        for (const stat of stats) {
+          if (
+            (updatedPlayer[stat] ?? 1) < statMinMax[stat][0] ||
+            (updatedPlayer[stat] ?? 1) > statMinMax[stat][1] ||
+            updatedPlayer[`${stat}Improvements`] > 2
+          )
+            throw new Error('Stat cannot be improved further');
         }
-      }
-
-      return ctx.prisma.player.update({ where: { id: player.id }, data: playerUpdate });
+      });
     }),
 });
