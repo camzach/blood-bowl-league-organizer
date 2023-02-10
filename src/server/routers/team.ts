@@ -245,7 +245,7 @@ export const teamRouter = router({
 
         if (updatedTeam.state !== TeamState.Draft && updatedTeam.state !== TeamState.PostGame)
           throw new Error('Team cannot fire staff right now');
-        if (Number(updatedTeam[input.type]) - input.quantity < 0)
+        if (Number(updatedTeam[input.type]) < 0)
           throw new Error('Not enough staff to fire');
         if (input.type === 'dedicatedFans' && updatedTeam.state !== TeamState.Draft)
           throw new Error('Cannot purchase deidcated fans after draft');
