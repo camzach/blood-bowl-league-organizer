@@ -38,35 +38,36 @@ export const teamRouter = router({
         throw new Error('Not authenticated');
       if (!ctx.session.user.teams.includes(input.team))
         throw new Error('User does not have permission to modify this team');
-      const team = await ctx.prisma.team.findUniqueOrThrow({
-        where: { name: input.team },
-        select: { players: true, treasury: true, state: true, name: true },
-      });
-      const position = await ctx.prisma.position.findFirstOrThrow({
-        where: {
-          name: input.position,
-          Roster: { Team: { some: { name: input.team } } },
-        },
-        include: { skills: true },
-      });
-      if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
-        throw new Error('Team cannot hire new players right now');
 
-      if (team.players.length >= 16)
-        throw new Error('Team roster already full');
-      if (team.players.filter(p => p.positionId === position.id).length >= position.max)
-        throw new Error('Maximum positionals already rostered');
-      if (team.players.some(p => p.number === input.number))
-        throw new Error('Player with this number already exists');
-      if (team.treasury < position.cost)
-        throw new Error('Cannot afford player');
+      return ctx.prisma.$transaction(async tx => {
+        const position = await tx.position.findFirstOrThrow({
+          where: {
+            name: input.position,
+            Roster: { Team: { some: { name: input.team } } },
+          },
+          include: { skills: true },
+        });
 
-      return ctx.prisma.team.update({
-        where: { name: team.name },
-        data: {
-          treasury: team.treasury - position.cost,
-          players: { create: newPlayer(position, input.number, input.name) },
-        },
+        const team = await tx.team.update({
+          where: { name: input.team },
+          data: {
+            treasury: { decrement: position.cost },
+            players: { create: newPlayer(position, input.number, input.name) },
+          },
+          include: { players: { select: { id: true, positionId: true, number: true } } },
+        });
+
+        if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
+          throw new Error('Team cannot hire new players right now');
+
+        if (team.players.length >= 16)
+          throw new Error('Team roster already full');
+        if (team.players.filter(p => p.positionId === position.id).length >= position.max)
+          throw new Error('Maximum positionals already rostered');
+        if (team.players.filter(p => p.number === input.number).length > 1)
+          throw new Error('Player with this number already exists');
+        if (team.treasury < position.cost)
+          throw new Error('Cannot afford player');
       });
     }),
 
@@ -84,55 +85,54 @@ export const teamRouter = router({
         throw new Error('Not authenticated');
       if (!ctx.session.user.teams.includes(input.team))
         throw new Error('User does not have permission to modify this team');
+
       const team = await ctx.prisma.team.findUniqueOrThrow({
         where: { name: input.team },
-        select: {
-          treasury: true,
-          state: true,
-          name: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          rerolls: true,
-          dedicatedFans: true,
-          roster: { select: { specialRules: true, rerollCost: true } },
-        },
+        select: { roster: { select: { specialRules: true, rerollCost: true } }, state: true },
       });
-      if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
-        throw new Error('Team cannot hire staff right now');
-      if (input.type === 'apothecary' && !team.roster.specialRules.some(rule => rule.name === 'Apothecary Allowed'))
-        throw new Error('Apothecary not allowed for this team');
-      if (input.type === 'dedicatedFans' && team.state !== TeamState.Draft)
-        throw new Error('Cannot purchase deidcated fans after draft');
 
-      const baseRerollCost = team.roster.rerollCost;
-      const costMap = {
-        apothecary: 50_000,
-        assistantCoaches: 10_000,
-        cheerleaders: 10_000,
-        rerolls: team.state === 'Draft' ? baseRerollCost : baseRerollCost * 2,
-        dedicatedFans: 10_000,
-      };
-      const cost = costMap[input.type] * input.quantity;
-      if (cost > team.treasury)
-        throw new Error('Not enough money in treasury');
+      return ctx.prisma.$transaction(async tx => {
+        const baseRerollCost = team.roster.rerollCost;
+        const costMap = {
+          apothecary: 50_000,
+          assistantCoaches: 10_000,
+          cheerleaders: 10_000,
+          rerolls: team.state === 'Draft' ? baseRerollCost : baseRerollCost * 2,
+          dedicatedFans: 10_000,
+        };
+        const cost = costMap[input.type] * input.quantity;
 
-      const maxMap = {
-        apothecary: 1,
-        assistantCoaches: 6,
-        cheerleaders: 12,
-        rerolls: 8,
-        dedicatedFans: 7,
-      };
-      if (Number(team[input.type]) + input.quantity > maxMap[input.type])
-        throw new Error('Maximum exceeded');
+        const updatedTeam = await tx.team.update({
+          where: { name: input.team },
+          data: {
+            [input.type]: input.type === 'apothecary' ? true : { increment: input.quantity },
+            treasury: { decrement: cost },
+          },
+          include: { roster: { select: { specialRules: true } } },
+        });
+        if (updatedTeam.state !== TeamState.Draft && updatedTeam.state !== TeamState.PostGame)
+          throw new Error('Team cannot hire staff right now');
+        if (input.type === 'apothecary' &&
+          !updatedTeam.roster.specialRules.some(rule => rule.name === 'Apothecary Allowed')
+        )
+          throw new Error('Apothecary not allowed for this team');
+        if (input.type === 'dedicatedFans' && updatedTeam.state !== TeamState.Draft)
+          throw new Error('Cannot purchase deidcated fans after draft');
 
-      return ctx.prisma.team.update({
-        where: { name: team.name },
-        data: {
-          [input.type]: input.type === 'apothecary' ? true : { increment: input.quantity },
-          treasury: { decrement: cost },
-        },
+        if (updatedTeam.treasury < 0)
+          throw new Error('Not enough money in treasury');
+
+        const maxMap = {
+          apothecary: 1,
+          assistantCoaches: 6,
+          cheerleaders: 12,
+          rerolls: 8,
+          dedicatedFans: 7,
+        };
+        if (Number(updatedTeam[input.type]) + input.quantity > maxMap[input.type])
+          throw new Error('Maximum exceeded');
+
+        return updatedTeam;
       });
     }),
 
@@ -157,44 +157,49 @@ export const teamRouter = router({
           seasonsPlayed: true,
         },
       };
-      const team = await ctx.prisma.team.findUniqueOrThrow({
-        where: { name: input.team },
-        select: {
-          treasury: true,
-          players: { select: { number: true, positionId: true } },
-          journeymen: hiredPlayerQuery,
-          redrafts: hiredPlayerQuery,
-        },
-      });
 
-      if (team.players.length >= 16)
-        throw new Error('Team cannor hire any more players');
-      const player = team[input.from].find(p => p.id === input.player);
-      if (!player)
-        throw new Error('Invalid Player ID');
-      if (team.players.filter(p => p.positionId === player.position.id).length >= player.position.max)
-        throw new Error('Cannot hire any more players of this position');
-      if (team.players.some(p => p.number === input.number))
-        throw new Error('Team already has a player with this number');
-
-      const cost = player.teamValue + (player.seasonsPlayed * 20_000);
-      if (cost > team.treasury)
-        throw new Error('Cannot afford this player');
-
-      await ctx.prisma.$transaction([
-        ctx.prisma.team.update({
+      return ctx.prisma.$transaction(async tx => {
+        const team = await tx.team.findUniqueOrThrow({
           where: { name: input.team },
-          data: {
-            [input.from]: { disconnect: { id: player.id } },
-            players: { connect: { id: player.id } },
-            treasury: { decrement: player.teamValue },
+          select: {
+            journeymen: hiredPlayerQuery,
+            redrafts: hiredPlayerQuery,
           },
-        }),
-        ctx.prisma.player.update({
+        });
+
+        const player = team[input.from].find(p => p.id === input.player);
+        if (!player)
+          throw new Error('Invalid Player ID');
+
+        const cost = player.teamValue + (player.seasonsPlayed * 20_000);
+
+        const updatedTeam =
+          await tx.team.update({
+            where: { name: input.team },
+            data: {
+              [input.from]: { disconnect: { id: player.id } },
+              players: { connect: { id: player.id } },
+              treasury: { decrement: cost },
+            },
+            include: { players: true },
+          });
+
+        if (updatedTeam.players.length > 16)
+          throw new Error('Team cannor hire any more players');
+        if (updatedTeam.players.filter(p => p.positionId === player.position.id).length > player.position.max)
+          throw new Error('Cannot hire any more players of this position');
+        if (updatedTeam.players.filter(p => p.number === input.number).length > 1)
+          throw new Error('Team already has a player with this number');
+        if (updatedTeam.treasury < 0)
+          throw new Error('Team cannot afford this player');
+
+        const updatedPlayer = await tx.player.update({
           where: { id: player.id },
           data: { number: input.number },
-        }),
-      ]);
+        });
+
+        return [updatedTeam, updatedPlayer];
+      });
     }),
 
   fireStaff: publicProcedure
@@ -211,41 +216,41 @@ export const teamRouter = router({
         throw new Error('Not authenticated');
       if (!ctx.session.user.teams.includes(input.team))
         throw new Error('User does not have permission to modify this team');
-      const team = await ctx.prisma.team.findUniqueOrThrow({
-        where: { name: input.team },
-        select: {
-          treasury: true,
-          state: true,
-          name: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          rerolls: true,
-          dedicatedFans: true,
-          roster: { select: { rerollCost: true } },
-        },
-      });
-      if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
-        throw new Error('Team cannot fire staff right now');
-      if (Number(team[input.type]) - input.quantity < 0)
-        throw new Error('Not enough staff to fire');
-      if (input.type === 'dedicatedFans' && team.state !== TeamState.Draft)
-        throw new Error('Cannot purchase deidcated fans after draft');
 
-      const costMap = {
-        apothecary: 50_000,
-        assistantCoaches: 10_000,
-        cheerleaders: 10_000,
-        rerolls: team.roster.rerollCost,
-        dedicatedFans: 10_000,
-      };
+      return ctx.prisma.$transaction(async tx => {
+        const team = await tx.team.findUniqueOrThrow({
+          where: { name: input.team },
+          select: {
+            state: true,
+            name: true,
+            roster: { select: { rerollCost: true } },
+          },
+        });
 
-      return ctx.prisma.team.update({
-        where: { name: team.name },
-        data: {
-          [input.type]: input.type === 'apothecary' ? false : { decrement: input.quantity },
-          treasury: team.state === TeamState.Draft ? { increment: costMap[input.type] * input.quantity } : undefined,
-        },
+        const costMap = {
+          apothecary: 50_000,
+          assistantCoaches: 10_000,
+          cheerleaders: 10_000,
+          rerolls: team.roster.rerollCost,
+          dedicatedFans: 10_000,
+        };
+
+        const updatedTeam = await tx.team.update({
+          where: { name: team.name },
+          data: {
+            [input.type]: input.type === 'apothecary' ? false : { decrement: input.quantity },
+            treasury: team.state === TeamState.Draft ? { increment: costMap[input.type] * input.quantity } : undefined,
+          },
+        });
+
+        if (updatedTeam.state !== TeamState.Draft && updatedTeam.state !== TeamState.PostGame)
+          throw new Error('Team cannot fire staff right now');
+        if (Number(updatedTeam[input.type]) - input.quantity < 0)
+          throw new Error('Not enough staff to fire');
+        if (input.type === 'dedicatedFans' && updatedTeam.state !== TeamState.Draft)
+          throw new Error('Cannot purchase deidcated fans after draft');
+
+        return updatedTeam;
       });
     }),
 
