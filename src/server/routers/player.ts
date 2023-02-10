@@ -39,6 +39,51 @@ export const playerRouter = router({
       throw new Error('Team not in Draft or PostGame state');
     }),
 
+  update: publicProcedure
+    .input(z.object({
+      player: string(),
+      number: z.number().min(1).max(16)
+        .optional(),
+      name: z.string().optional(),
+    }))
+    .mutation(async({ input, ctx }) => {
+      const player = await ctx.prisma.player.findUniqueOrThrow({
+        where: { id: input.player },
+        include: { playerTeam: { select: { state: true, name: true } }, skills: true },
+      });
+
+      if (player.playerTeam === null)
+        throw new Error('Player is not on any team');
+      if (!ctx.session)
+        throw new Error('Not authenticated');
+      if (!ctx.session.user.teams.includes(player.playerTeam.name))
+        throw new Error('User does not have permission to modify this team');
+      if (!([TeamState.PostGame, TeamState.Draft] as TeamState[]).includes(player.playerTeam.state))
+        throw new Error('Team is not modifiable');
+
+      const mutations = [
+        ctx.prisma.player.update({
+          where: { id: player.id },
+          data: { number: input.number, name: input.name },
+        }),
+      ];
+      if (input.number !== undefined) {
+        const otherPlayer = await ctx.prisma.player.findFirst({
+          where: {
+            number: input.number,
+            playerTeamName: player.playerTeamName,
+          },
+        });
+        if (otherPlayer) {
+          mutations.push(ctx.prisma.player.update({
+            where: { id: otherPlayer.id },
+            data: { number: player.number },
+          }));
+        }
+      }
+      return ctx.prisma.$transaction(mutations);
+    }),
+
   improve: publicProcedure
     .input(z.object({
       player: string(),
