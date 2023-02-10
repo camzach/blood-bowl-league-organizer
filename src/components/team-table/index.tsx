@@ -38,7 +38,7 @@ export function TeamTable<T extends PlayerType>({
         <tr>
           {displayCols.map(col => {
             const colname = typeof col === 'string' ? col : col.name;
-            return <th key={`th-${colname}`} col-name={col}>{colname}</th>;
+            return <th key={`th-${colname}`} col-name={colname}>{colname}</th>;
           })}
         </tr>
       </thead>
