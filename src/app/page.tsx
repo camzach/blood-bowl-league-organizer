@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
+import Link from 'next/link';
 
 export default async function Home(): Promise<ReactNode> {
   const session = await getServerSession(authOptions);
@@ -8,8 +9,8 @@ export default async function Home(): Promise<ReactNode> {
   return (<>
     <h1>BBLO</h1>
     <ul>
-      <li><a href="/schedule">View schedule</a></li>
-      <li><a href={`/team/${session?.user.teams[0]}`}>View your team</a></li>
+      <li><Link href="/schedule">View schedule</Link></li>
+      <li><Link href={`/team/${session?.user.teams[0]}`}>View your team</Link></li>
     </ul>
   </>
   );
