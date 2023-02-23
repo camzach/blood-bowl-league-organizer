@@ -62,6 +62,7 @@ export default function StaffHirer({ title, current, type, teamName, cost, max, 
     : <input
       type="checkbox"
       checked={current > 0}
+      disabled={current === 0 && treasury < cost}
       onChange={(e): void => {
         hireStaff(Number(e.target.checked));
       }}

@@ -153,7 +153,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
             <td>Apothecary</td>
             <td>50,000</td>
             <td>
-              {allowHiring && team.treasury >= 50_000
+              {allowHiring
                 ? <StaffHirer
                   teamName={team.name}
                   type={'apothecary'}
