@@ -62,7 +62,7 @@ export const teamRouter = router({
 
         if (team.players.length >= 16)
           throw new Error('Team roster already full');
-        if (team.players.filter(p => p.positionId === position.id).length >= position.max)
+        if (team.players.filter(p => p.positionId === position.id).length > position.max)
           throw new Error('Maximum positionals already rostered');
         if (team.players.filter(p => p.number === input.number).length > 1)
           throw new Error('Player with this number already exists');
