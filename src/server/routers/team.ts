@@ -66,7 +66,7 @@ export const teamRouter = router({
           throw new Error('Maximum positionals already rostered');
         if (team.players.filter(p => p.number === input.number).length > 1)
           throw new Error('Player with this number already exists');
-        if (team.treasury < position.cost)
+        if (team.treasury < 0)
           throw new Error('Cannot afford player');
       });
     }),
@@ -129,7 +129,7 @@ export const teamRouter = router({
           rerolls: 8,
           dedicatedFans: 7,
         };
-        if (Number(updatedTeam[input.type]) + input.quantity > maxMap[input.type])
+        if (Number(updatedTeam[input.type]) > maxMap[input.type])
           throw new Error('Maximum exceeded');
 
         return updatedTeam;
