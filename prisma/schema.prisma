@@ -78,7 +78,7 @@ model Team {
   cheerleaders     Int       @default(0)
   assistantCoaches Int       @default(0)
   apothecary       Boolean   @default(false)
-  dedicatedFans    Int       @default(0)
+  dedicatedFans    Int       @default(1)
   homeGames        Game[]    @relation("homeTeam")
   awayGames        Game[]    @relation("awayTeam")
   Coaches          Coach[]

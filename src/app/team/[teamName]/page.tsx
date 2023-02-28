@@ -58,7 +58,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           cost={10_000}
           teamName={team.name}
           treasury={team.treasury}
-          max={7}
+          max={6}
         />
         : team.dedicatedFans}
       <AugmentedTeamTable players={team.players} skills={skills} allowHiring={allowHiring} />

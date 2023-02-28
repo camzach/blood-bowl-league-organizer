@@ -127,7 +127,7 @@ export const teamRouter = router({
           assistantCoaches: 6,
           cheerleaders: 12,
           rerolls: 8,
-          dedicatedFans: 7,
+          dedicatedFans: 6,
         };
         if (Number(updatedTeam[input.type]) > maxMap[input.type])
           throw new Error('Maximum exceeded');
@@ -249,6 +249,8 @@ export const teamRouter = router({
           throw new Error('Not enough staff to fire');
         if (input.type === 'dedicatedFans' && updatedTeam.state !== TeamState.Draft)
           throw new Error('Cannot purchase deidcated fans after draft');
+        if (updatedTeam.dedicatedFans > 6)
+          throw new Error('Cannot have more than 6 dedicated fans');
 
         return updatedTeam;
       });
