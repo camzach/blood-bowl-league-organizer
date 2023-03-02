@@ -61,7 +61,12 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           max={6}
         />
         : team.dedicatedFans}
-      <AugmentedTeamTable players={team.players} skills={skills} allowHiring={allowHiring} />
+      <AugmentedTeamTable
+        players={team.players}
+        skills={skills}
+        allowHiring={allowHiring}
+        allowSPP={team.state === TeamState.PostGame}
+      />
       {allowHiring && <PlayerHirer
         positions={team.roster.positions.filter(pos =>
           team.players.filter(p => p.position.name === pos.name).length < pos.max)}

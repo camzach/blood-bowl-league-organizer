@@ -310,7 +310,12 @@ export const gameRouter = router({
       casualties: z.tuple([z.number().int(), z.number().int()]),
     }))
     .mutation(async({ input, ctx }) => {
-      const teamFields = { players: true, journeymen: true, name: true };
+      const teamFields = {
+        name: true,
+        players: true,
+        journeymen: true,
+        dedicatedFans: true,
+      } satisfies Prisma.TeamSelect;
       const game = await ctx.prisma.game.findUniqueOrThrow({
         where: { id: input.game },
         select: {
@@ -416,6 +421,19 @@ export const gameRouter = router({
       mvpAwayUpdate.MVPs = { increment: 1 };
       mvpAwayUpdate.starPlayerPoints = incrementUpdateField(mvpAwayUpdate.starPlayerPoints, 4);
 
+      const fansUpdate = (won: boolean, fans: number): Prisma.TeamUpdateInput['dedicatedFans'] => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        if (won)
+          return { increment: roll >= fans && fans < 6 ? 1 : 0 };
+        return { decrement: roll < fans && fans > 1 ? 1 : 0 };
+      };
+      const [homeFansUpdate, awayFansUpdate] = input.touchdowns[0] === input.touchdowns[1]
+        ? [undefined, undefined]
+        : [
+          fansUpdate(input.touchdowns[0] > input.touchdowns[1], game.home.dedicatedFans),
+          fansUpdate(input.touchdowns[1] > input.touchdowns[0], game.away.dedicatedFans),
+        ];
+
       return ctx.prisma.$transaction([
         ...Object.values(updateMap).map(update => ctx.prisma.player.update(update)),
         ctx.prisma.game.update({
@@ -426,8 +444,8 @@ export const gameRouter = router({
             touchdownsAway: input.touchdowns[1],
             casualtiesHome: input.casualties[0],
             casualtiesAway: input.casualties[1],
-            home: { update: { state: TeamState.PostGame } },
-            away: { update: { state: TeamState.PostGame } },
+            home: { update: { state: TeamState.PostGame, dedicatedFans: homeFansUpdate } },
+            away: { update: { state: TeamState.PostGame, dedicatedFans: awayFansUpdate } },
           },
         }),
       ]).then(() => updateMap);

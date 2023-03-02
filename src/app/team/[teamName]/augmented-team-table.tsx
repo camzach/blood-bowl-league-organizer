@@ -1,5 +1,5 @@
 'use client';
-import type { PlayerType, TeamTableProps } from 'components/team-table';
+import type { TeamTableProps } from 'components/team-table';
 import { TeamTable } from 'components/team-table';
 import type { ReactElement } from 'react';
 import AdvancementPicker from './advancement-picker';
@@ -25,18 +25,19 @@ const baseCols = [
   'CTV',
 ] as const;
 
-type Props<T extends PlayerType> = {
+type Props = {
   allowHiring: boolean;
   players: FetchedTeamType['players'];
   skills: Array<{ name: string; category: string }>;
-  extraCols?: TeamTableProps<T>['cols'];
+  allowSPP: boolean;
 };
 
-export default function AugmentedTeamTable<T extends PlayerType>({
+export default function AugmentedTeamTable({
   players,
   allowHiring,
+  allowSPP,
   skills,
-}: Props<T>): ReactElement {
+}: Props): ReactElement {
   const cols: NonNullable<TeamTableProps<FetchedTeamType['players'][number]>['cols']> = [...baseCols];
   if (allowHiring) {
     cols[cols.indexOf('Name')] = {
@@ -55,14 +56,16 @@ export default function AugmentedTeamTable<T extends PlayerType>({
         </td>
       ),
     };
-    cols.splice(11, 0, {
-      name: 'Spend SPP',
-      render: player => (
-        <td key="Spend SPP">
-          <AdvancementPicker player={player} rosterPlayer={player.position} skills={skills} />
-        </td>
-      ),
-    });
+    if (allowSPP) {
+      cols.splice(11, 0, {
+        name: 'Spend SPP',
+        render: player => (
+          <td key="Spend SPP">
+            <AdvancementPicker player={player} rosterPlayer={player.position} skills={skills} />
+          </td>
+        ),
+      });
+    }
     cols.splice(1, 0, {
       name: 'Fire',
       render: player => (
