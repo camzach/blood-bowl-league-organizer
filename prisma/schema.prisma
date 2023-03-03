@@ -56,6 +56,7 @@ model Player {
   position           Position        @relation(fields: [positionId], references: [id])
   positionId         String          @db.Uuid
   seasonsPlayed      Int             @default(0)
+  MVPGames           Game[]
 }
 
 enum TeamState {
@@ -159,6 +160,8 @@ model StarPlayer {
   specialRule String
   hiringFee   Int
   playsFor    SpecialRule[]
+  HomeGames   Game[]        @relation("starPlayerHomeGames")
+  AwayGames   Game[]        @relation("starPlayerAwayGames")
 }
 
 model InducementOption {
@@ -170,6 +173,8 @@ model InducementOption {
   rules                String
   Inducement           Inducement?  @relation(fields: [inducementName], references: [name])
   inducementName       String?
+  HomeGames            Game[]       @relation("inducementOptionsHome")
+  AwayGames            Game[]       @relation("inducementOptionsAway")
 }
 
 enum GameState {
@@ -189,22 +194,29 @@ enum Weather {
 }
 
 model Game {
-  id             String    @id @unique @default(uuid()) @db.Uuid
-  round          Int
-  home           Team      @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
-  away           Team      @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
-  homeTeamName   String
-  awayTeamName   String
-  state          GameState @default(Scheduled)
-  journeymenHome Int       @default(0)
-  journeymenAway Int       @default(0)
-  pettyCashHome  Int       @default(0)
-  pettyCashAway  Int       @default(0)
-  touchdownsHome Int       @default(0)
-  touchdownsAway Int       @default(0)
-  casualtiesHome Int       @default(0)
-  casualtiesAway Int       @default(0)
-  fanFactorHome  Int       @default(0)
-  fanFactorAway  Int       @default(0)
-  weather        Weather?
+  id                    String             @id @unique @default(uuid()) @db.Uuid
+  round                 Int
+  home                  Team               @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
+  away                  Team               @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
+  homeTeamName          String
+  awayTeamName          String
+  state                 GameState          @default(Scheduled)
+  journeymenHome        Int                @default(0)
+  journeymenAway        Int                @default(0)
+  inducementsHome       Json               @default("{}")
+  inducementsAway       Json               @default("{}")
+  inducementOptionsHome InducementOption[] @relation("inducementOptionsHome")
+  inducementOptionsAway InducementOption[] @relation("inducementOptionsAway")
+  starPlayersHome       StarPlayer[]       @relation("starPlayerHomeGames")
+  starPlayersAway       StarPlayer[]       @relation("starPlayerAwayGames")
+  pettyCashHome         Int                @default(0)
+  pettyCashAway         Int                @default(0)
+  touchdownsHome        Int                @default(0)
+  touchdownsAway        Int                @default(0)
+  casualtiesHome        Int                @default(0)
+  casualtiesAway        Int                @default(0)
+  fanFactorHome         Int                @default(0)
+  fanFactorAway         Int                @default(0)
+  MVPs                  Player[]
+  weather               Weather?
 }

@@ -235,10 +235,8 @@ export const gameRouter = router({
       });
 
       ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
-
       if (game.state !== GameState.Inducements)
         throw new Error('Game not awaiting inducements');
-
       const [homeInducementCost, awayInducementCost] = await Promise.all((['home', 'away'] as const).map(async t =>
         calculateInducementCosts(
           input[t],
@@ -246,21 +244,19 @@ export const gameRouter = router({
           game[t].players.length,
           ctx.prisma
         )));
-
       const { pettyCashHome, pettyCashAway } = game;
-      let treasuryCostHome = 0;
-      let treasuryCostAway = 0;
       const extraPettyCash = { home: 0, away: 0 };
-
+      let treasuryCostHome = homeInducementCost - pettyCashHome;
+      let treasuryCostAway = awayInducementCost - pettyCashAway;
       if (pettyCashHome > 0) {
-        treasuryCostAway = Math.max(0, awayInducementCost - pettyCashAway);
-        treasuryCostHome = Math.max(0, homeInducementCost - (pettyCashHome + treasuryCostAway));
         extraPettyCash.home += treasuryCostAway;
+        treasuryCostHome -= extraPettyCash.home;
       } else if (pettyCashAway > 0) {
-        treasuryCostHome = Math.max(0, homeInducementCost - pettyCashHome);
-        treasuryCostAway = Math.max(0, awayInducementCost - (pettyCashAway + treasuryCostHome));
         extraPettyCash.away += treasuryCostHome;
+        treasuryCostAway -= extraPettyCash.away;
       }
+      treasuryCostHome = Math.max(0, treasuryCostHome);
+      treasuryCostAway = Math.max(0, treasuryCostAway);
       if (
         (pettyCashHome === 0 && treasuryCostAway > 0) ||
         (pettyCashAway === 0 && treasuryCostHome > 0) ||
@@ -283,6 +279,40 @@ export const gameRouter = router({
           state: GameState.InProgress,
           pettyCashHome: { increment: extraPettyCash.home },
           pettyCashAway: { increment: extraPettyCash.away },
+          inducementsHome: input.home
+            .filter(ind => ind.option === undefined && ind.name !== 'Star Player')
+            .reduce<Record<string, number>>((prev, current) => {
+            const next = { ...prev };
+            next[current.name] = current.quantity;
+            return next;
+          }, {}),
+          inducementsAway: input.away
+            .filter(ind => ind.option === undefined && ind.name !== 'Star Player')
+            .reduce<Record<string, number>>((prev, current) => {
+            const next = { ...prev };
+            next[current.name] = current.quantity;
+            return next;
+          }, {}),
+          inducementOptionsHome: {
+            connect: input.home
+              .filter(ind => ind.option !== undefined && ind.name !== 'Star Player')
+              .flatMap(ind => Array(ind.quantity).fill({ name: ind.option }) as Array<{ name: string }>),
+          },
+          inducementOptionsAway: {
+            connect: input.away
+              .filter(ind => ind.option !== undefined && ind.name !== 'Star Player')
+              .flatMap(ind => Array(ind.quantity).fill({ name: ind.option }) as Array<{ name: string }>),
+          },
+          starPlayersHome: {
+            connect: input.home
+              .filter(ind => ind.name === 'Star Player')
+              .map(ind => ({ name: ind.option })),
+          },
+          starPlayersAway: {
+            connect: input.away
+              .filter(ind => ind.name === 'Star Player')
+              .map(ind => ({ name: ind.option })),
+          },
         },
       });
       return ctx.prisma.$transaction([homeUpdate, awayUpdate, gameStateUpdate]).then(() => ({
