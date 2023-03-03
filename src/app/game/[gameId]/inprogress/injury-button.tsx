@@ -1,4 +1,3 @@
-'use client';
 import type { ReactElement } from 'react';
 import { useRef, useState } from 'react';
 import type { trpc } from 'utils/trpc';

@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
 import InjuryButton from './injury-button';
+import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
 
 type PlayerType = { id: string; name: string | null; number: number };
@@ -65,6 +66,18 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     }
   };
 
+  const onSPP = (player: string, type: keyof typeof starPlayerPoints[string]): void => {
+    setStarPlayerPoints({
+      ...starPlayerPoints,
+      [player]: player in starPlayerPoints
+        ? {
+          ...starPlayerPoints[player],
+          [type]: (starPlayerPoints[player][type] ?? 0) + 1,
+        }
+        : { [type]: 1 },
+    });
+  };
+
   return <div>
     {touchdowns[0]} - {touchdowns[1]}
     <br/>
@@ -73,6 +86,12 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     <br/>
     <InjuryButton
       onSubmit={onInjury}
+      home={home}
+      away={away}
+    />
+    <br/>
+    <SPPButton
+      onSubmit={onSPP}
       home={home}
       away={away}
     />
