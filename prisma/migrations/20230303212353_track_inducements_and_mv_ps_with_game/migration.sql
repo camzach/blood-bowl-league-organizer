@@ -6,8 +6,8 @@
 
 */
 -- AlterTable
-ALTER TABLE "Game" ADD COLUMN     "inducementsAway" JSONB NOT NULL DEFAULT "{}";
-ALTER TABLE "Game" ADD COLUMN     "inducementsHome" JSONB NOT NULL DEFAULT "{}";
+ALTER TABLE "Game" ADD COLUMN     "inducementsAway" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "Game" ADD COLUMN     "inducementsHome" JSONB NOT NULL DEFAULT '{}';
 
 -- CreateTable
 CREATE TABLE "_inducementOptionsHome" (
