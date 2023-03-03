@@ -33,6 +33,7 @@ const cols = [
   'AV',
   'AG',
   'PA',
+  'NI',
 ] satisfies ComponentProps<typeof TeamTable>['cols'];
 
 export default async function InProgress({ params: { gameId } }: Props): Promise<ReactElement> {
