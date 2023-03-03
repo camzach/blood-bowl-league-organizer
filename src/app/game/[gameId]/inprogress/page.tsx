@@ -48,10 +48,18 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
     return notFound();
 
   return <div className={styles.layout}>
-    <TeamTable
-      players={game.home.players}
-      cols={cols}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <TeamTable
+        players={game.home.players}
+        cols={cols}
+      />
+      {game.home.journeymen.length > 0 &&
+        <TeamTable
+          players={game.home.journeymen}
+          cols={cols}
+        />
+      }
+    </div>
     <ScoreWidget
       gameId={gameId}
       home={{
@@ -63,9 +71,17 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
         journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
       }}
     />
-    <TeamTable
-      players={game.away.players}
-      cols={cols}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <TeamTable
+        players={game.away.players}
+        cols={cols}
+      />
+      {game.away.journeymen.length > 0 &&
+        <TeamTable
+          players={game.away.journeymen}
+          cols={cols}
+        />
+      }
+    </div>
   </div>;
 }
