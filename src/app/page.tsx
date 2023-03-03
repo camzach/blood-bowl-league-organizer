@@ -11,6 +11,7 @@ export default async function Home(): Promise<ReactNode> {
     <ul>
       <li><Link href="/schedule">View schedule</Link></li>
       <li><Link href={`/team/${session?.user.teams[0]}`}>View your team</Link></li>
+      <li><Link href="/league-table">View league table</Link></li>
     </ul>
   </>
   );
