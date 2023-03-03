@@ -1,6 +1,7 @@
 'use client';
+import { getSession } from 'next-auth/react';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { trpc } from 'utils/trpc';
 import InjuryButton from './injury-button';
 import SPPButton from './spp-button';
@@ -18,6 +19,16 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   const [casualties, setCasualties] = useState<[number, number]>([0, 0]);
   const [injuries, setInjuries] = useState<InputType['injuries']>([]);
   const [starPlayerPoints, setStarPlayerPoints] = useState<InputType['starPlayerPoints']>({});
+
+  useEffect(() => {
+    // Keep the session alive while on this page, since you'll sit here for a few hours without server interaction
+    const interval = setInterval(() => {
+      void getSession();
+    }, 1_000 * 60 * 25);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   const submit = (): void => {
     void trpc.game.end.mutate({
