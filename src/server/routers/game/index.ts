@@ -1,4 +1,4 @@
-import type { Prisma, PrismaPromise } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { GameState, TeamState } from '@prisma/client';
 import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
@@ -152,7 +152,7 @@ export const gameRouter = router({
       let homeTV = calculateTV(game.home);
       let awayTV = calculateTV(game.away);
 
-      const promises: Array<PrismaPromise<unknown>> = [];
+      const promises: Array<Prisma.PrismaPromise<unknown>> = [];
       if (homeChoice) {
         homeTV += homeChoice.cost * (11 - homePlayers);
         promises.push(ctx.prisma.team.update({
@@ -323,6 +323,8 @@ export const gameRouter = router({
           state: true,
           home: { select: teamFields },
           away: { select: teamFields },
+          fanFactorHome: true,
+          fanFactorAway: true,
         },
       });
       ensureAuthenticationForTeams(ctx.session, [game.home.name, game.away.name]);
@@ -434,6 +436,9 @@ export const gameRouter = router({
           fansUpdate(input.touchdowns[1] > input.touchdowns[0], game.away.dedicatedFans),
         ];
 
+      const [homeWinnings, awayWinnings] = [input.touchdowns[0], input.touchdowns[1]]
+        .map(score => (score + ((game.fanFactorHome + game.fanFactorAway) / 2)) * 10_000);
+
       return ctx.prisma.$transaction([
         ...Object.values(updateMap).map(update => ctx.prisma.player.update(update)),
         ctx.prisma.game.update({
@@ -444,8 +449,20 @@ export const gameRouter = router({
             touchdownsAway: input.touchdowns[1],
             casualtiesHome: input.casualties[0],
             casualtiesAway: input.casualties[1],
-            home: { update: { state: TeamState.PostGame, dedicatedFans: homeFansUpdate } },
-            away: { update: { state: TeamState.PostGame, dedicatedFans: awayFansUpdate } },
+            home: {
+              update: {
+                state: TeamState.PostGame,
+                dedicatedFans: homeFansUpdate,
+                treasury: { increment: homeWinnings },
+              },
+            },
+            away: {
+              update: {
+                state: TeamState.PostGame,
+                dedicatedFans: awayFansUpdate,
+                treasury: { increment: awayWinnings },
+              },
+            },
           },
         }),
       ]).then(() => updateMap);

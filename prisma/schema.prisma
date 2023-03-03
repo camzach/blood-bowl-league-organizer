@@ -204,7 +204,7 @@ model Game {
   touchdownsAway Int       @default(0)
   casualtiesHome Int       @default(0)
   casualtiesAway Int       @default(0)
-  fanFacotrHome  Int       @default(0)
+  fanFactorHome  Int       @default(0)
   fanFactorAway  Int       @default(0)
   weather        Weather?
 }
