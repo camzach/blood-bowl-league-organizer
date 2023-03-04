@@ -5,8 +5,10 @@ import { prisma } from 'utils/prisma';
 import styles from './styles.module.scss';
 import TeamArgs = Prisma.TeamArgs;
 import PlayerFindManyArgs = Prisma.PlayerFindManyArgs;
+import StarPlayerArgs = Prisma.StarPlayerArgs;
 import ScoreWidget from './score-widget';
 import { notFound } from 'next/navigation';
+import StarPlayerTable from './star-player-table';
 
 type Props = {
   params: { gameId: string };
@@ -23,6 +25,7 @@ const teamSelect = {
     journeymen: playerSelect,
   },
 } satisfies TeamArgs;
+const starPlayerSelect = { include: { skills: true } } satisfies StarPlayerArgs;
 const cols = [
   '#',
   'Name',
@@ -42,6 +45,8 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
     select: {
       home: teamSelect,
       away: teamSelect,
+      starPlayersHome: starPlayerSelect,
+      starPlayersAway: starPlayerSelect,
     },
   });
   if (!game)
@@ -58,6 +63,9 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
           players={game.home.journeymen}
           cols={cols}
         />
+      }
+      {game.starPlayersHome.length > 0 &&
+        <StarPlayerTable stars={game.starPlayersHome} />
       }
     </div>
     <ScoreWidget
@@ -81,6 +89,9 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
           players={game.away.journeymen}
           cols={cols}
         />
+      }
+      {game.starPlayersAway.length > 0 &&
+        <StarPlayerTable stars={game.starPlayersAway} />
       }
     </div>
   </div>;
