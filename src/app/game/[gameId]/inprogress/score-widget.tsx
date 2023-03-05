@@ -1,8 +1,9 @@
 'use client';
 import { getSession } from 'next-auth/react';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { trpc } from 'utils/trpc';
+import useServerMutation from 'utils/use-server-mutation';
 import InjuryButton from './injury-button';
 import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
@@ -19,6 +20,8 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   const [casualties, setCasualties] = useState<[number, number]>([0, 0]);
   const [injuries, setInjuries] = useState<InputType['injuries']>([]);
   const [starPlayerPoints, setStarPlayerPoints] = useState<InputType['starPlayerPoints']>({});
+  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const [submissionResult, setSubmissionResult] = useState<null | 'success' | 'failure'>(null);
 
   useEffect(() => {
     // Keep the session alive while on this page, since you'll sit here for a few hours without server interaction
@@ -31,13 +34,21 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   }, []);
 
   const submit = (): void => {
+    startMutation();
     void trpc.game.end.mutate({
       game: gameId,
       touchdowns,
       casualties,
       injuries,
       starPlayerPoints,
-    });
+    })
+      .then(() => {
+        setSubmissionResult('success');
+      })
+      .catch(() => {
+        setSubmissionResult('failure');
+      })
+      .finally(endMutation);
   };
 
   const onTD = (team: 'home' | 'away', player?: string): void => {
@@ -107,7 +118,26 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       away={away}
     />
     <br/>
-    <button onClick={submit}>Done</button>
+    {((): ReactNode => {
+      if (isMutating) return 'Submitting...';
+      if (submissionResult === 'failure') {
+        return (<>
+          There was an error with your submission.
+          <br/>
+          Click <a href="#" onClick={(): void => {
+            void navigator.clipboard.writeText(JSON.stringify({
+              game: gameId,
+              touchdowns,
+              casualties,
+              injuries,
+              starPlayerPoints,
+            }));
+          }}>here</a> to copy your submission parameters.
+        </>);
+      }
+      if (submissionResult === 'success') return 'Success! Good game!';
+      return <button onClick={submit}>Done</button>;
+    })()}
     <br/>
     <pre>{JSON.stringify(injuries, null, 2)}</pre>
     =======
