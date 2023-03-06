@@ -441,15 +441,13 @@ export const gameRouter = router({
         );
       }
 
-      const mvpHomeUpdate = updateMap[
-        mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id
-      ].data;
+      const mvpHome = mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id;
+      const mvpHomeUpdate = updateMap[mvpHome].data;
       mvpHomeUpdate.MVPs = { increment: 1 };
       mvpHomeUpdate.starPlayerPoints = incrementUpdateField(mvpHomeUpdate.starPlayerPoints, 4);
 
-      const mvpAwayUpdate = updateMap[
-        mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id
-      ].data;
+      const mvpAway = mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id;
+      const mvpAwayUpdate = updateMap[mvpAway].data;
       mvpAwayUpdate.MVPs = { increment: 1 };
       mvpAwayUpdate.starPlayerPoints = incrementUpdateField(mvpAwayUpdate.starPlayerPoints, 4);
 
@@ -479,6 +477,7 @@ export const gameRouter = router({
             touchdownsAway: input.touchdowns[1],
             casualtiesHome: input.casualties[0],
             casualtiesAway: input.casualties[1],
+            MVPs: { connect: [{ id: mvpHome }, { id: mvpAway }] },
             home: {
               update: {
                 state: TeamState.PostGame,
