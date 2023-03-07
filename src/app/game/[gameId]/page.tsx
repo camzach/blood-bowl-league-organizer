@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { prisma } from 'utils/prisma';
+import styles from './styles.module.scss';
 
 export default async function Game({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
   const game = await prisma.game.findUnique({ where: { id: decodeURIComponent(gameId) }, include: { MVPs: true } });
@@ -13,17 +14,24 @@ export default async function Game({ params: { gameId } }: { params: { gameId: s
   const [homeMVP, awayMVP] = [game.homeTeamName, game.awayTeamName]
     .map(team => game.MVPs.find(p => [p.playerTeamName, p.journeymanTeamName].includes(team)));
 
-  return <div>
-    Score:
-    <span>{game.touchdownsHome} - {game.touchdownsAway}</span>
-    <br/>
-    Casualties:
-    <span>{game.casualtiesHome} - {game.casualtiesAway}</span>
-    <br/>
-    MVPs:
-    <br/>
-    <span>Home: {homeMVP?.name ?? homeMVP?.number ?? 'None'}</span>
-    <br/>
-    <span>Away: {awayMVP?.name ?? awayMVP?.number ?? 'None'}</span>
+  return <div className={styles.wrapper}>
+    <table className={styles.table}>
+      <thead>
+        <tr>
+          <th />
+          <th>{game.homeTeamName}</th>
+          <th>{game.awayTeamName}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Score</td><td>{game.touchdownsHome}</td><td>{game.touchdownsAway}</td></tr>
+        <tr><td>Casualties</td><td>{game.casualtiesHome}</td><td>{game.casualtiesAway}</td></tr>
+        <tr>
+          <td>MVP</td>
+          <td>{homeMVP?.name ?? homeMVP?.number ?? 'None'}</td>
+          <td>{awayMVP?.name ?? awayMVP?.number ?? 'None'}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>;
 }
