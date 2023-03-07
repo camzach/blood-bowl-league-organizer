@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
 import type { PropsWithChildren, ReactElement } from 'react';
 import PasswordChangeNotif from './password-change-notif';
+import './global.css';
+import styles from './styles.module.scss';
 
 export default async function RootLayout({ children }: PropsWithChildren): Promise<ReactElement> {
   const session = await getServerSession(authOptions);
@@ -11,6 +13,12 @@ export default async function RootLayout({ children }: PropsWithChildren): Promi
   return (
     <html>
       <body>
+        <header className={styles.header}>
+          <h1>BBLO</h1>
+          <Link href={`/team/${session?.user.teams[0]}`}>Teams</Link>
+          <Link href="/schedule">Schedule</Link>
+          <Link href="/league-table">League Table</Link>
+        </header>
         <SessionProvider session={session}>
           {!session && <Link href="/api/auth/signin">Sign In</Link>}
           {((session?.user.needsNewPassword) === true) && <PasswordChangeNotif name={session.user.id} />}

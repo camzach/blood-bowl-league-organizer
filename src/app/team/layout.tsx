@@ -11,14 +11,12 @@ export default async function TeamLayout({ children }: PropsWithChildren): Promi
         display: 'grid',
         gridTemplateColumns: '200px auto',
       }}>
-        <nav>
-          <ul>
-            {teams.sort(({ name: a }, { name: b }) => a.localeCompare(b)).map(team => <li key={team.name}>
-              <Link href={`/team/${team.name}`}>{team.name}</Link>
-            </li>)}
-          </ul>
-        </nav>
-        {children}
+        <ul>
+          {teams.sort(({ name: a }, { name: b }) => a.localeCompare(b)).map(team => <li key={team.name}>
+            <Link href={`/team/${team.name}`}>{team.name}</Link>
+          </li>)}
+        </ul>
+        <main style={{ margin: '1em' }}>{children}</main>
       </div>
     </>
   );

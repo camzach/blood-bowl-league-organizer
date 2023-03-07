@@ -7,7 +7,6 @@ export default async function Home(): Promise<ReactNode> {
   const session = await getServerSession(authOptions);
 
   return (<>
-    <h1>BBLO</h1>
     <ul>
       <li><Link href="/schedule">View schedule</Link></li>
       <li><Link href={`/team/${session?.user.teams[0]}`}>View your team</Link></li>
