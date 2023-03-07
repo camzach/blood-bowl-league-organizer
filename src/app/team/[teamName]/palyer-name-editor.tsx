@@ -10,7 +10,7 @@ type Props = {
 export default function PlayerNameEditor({ name: playerName, id }: Props): ReactElement {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const handleNameChange = (newName: string): void => {
-    if (newName === playerName) return;
+    if (newName === playerName || newName === '') return;
     startMutation();
     void trpc.player.update.mutate({ player: id, name: newName }).then(endMutation);
   };

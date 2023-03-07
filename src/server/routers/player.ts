@@ -44,7 +44,7 @@ export const playerRouter = router({
       player: string(),
       number: z.number().min(1).max(16)
         .optional(),
-      name: z.string().optional(),
+      name: z.string().min(1).optional(),
     }))
     .mutation(async({ input, ctx }) => {
       const player = await ctx.prisma.player.findUniqueOrThrow({
