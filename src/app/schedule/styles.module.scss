@@ -1,5 +1,10 @@
-.list {
-  li {
-    margin-bottom: 2em;
+.table {
+  border-collapse: collapse;
+  td {
+    padding-inline: 2em;
   }
+}
+
+.bordered-row {
+  border-top: 2px solid gray;
 }
