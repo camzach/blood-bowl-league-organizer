@@ -42,7 +42,7 @@ export default async function Schedule(): Promise<ReactElement> {
         {rounds.map((round, roundIdx) => <Fragment key={roundIdx}>
           {round.map((game, gameIdx) =>
             <tr key={game.id} className={cx(gameIdx === 0 && styles['bordered-row'])}>
-              {gameIdx === 0 && <td rowSpan={round.length}>{roundIdx}</td>}
+              {gameIdx === 0 && <td rowSpan={round.length}>{roundIdx + 1}</td>}
               <td>{game.homeTeamName}</td>
               <td>{game.awayTeamName}</td>
               <td>{game.touchdownsHome} - {game.touchdownsAway}</td>
