@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-export default function useServerMutation(): {
+export default function useServerMutation(refresh = true): {
   startMutation: () => void;
   endMutation: () => void;
   isMutating: boolean;
@@ -16,7 +16,7 @@ export default function useServerMutation(): {
   const endMutation = (): void => {
     setIsUpdating(false);
     startTransition(() => {
-      router.refresh();
+      if (refresh) router.refresh();
     });
   };
 

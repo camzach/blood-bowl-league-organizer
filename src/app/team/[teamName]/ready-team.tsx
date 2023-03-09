@@ -1,7 +1,10 @@
 'use client';
+import { Die } from 'components/die';
 import { useRouter } from 'next/navigation';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useRef, useState } from 'react';
 import { trpc } from 'utils/trpc';
+import useServerMutation from 'utils/use-server-mutation';
 
 type Props = {
   team: string;
@@ -9,10 +12,39 @@ type Props = {
 
 export default function ReadyButton({ team }: Props): ReactElement {
   const router = useRouter();
+  const popup = useRef<HTMLDialogElement>(null);
+  const { startMutation, endMutation, isMutating } = useServerMutation(false);
+  const [response, setResponse] = useState<
+  | Awaited<ReturnType<typeof trpc.team.ready.mutate>>
+  | null
+  | undefined
+  >(undefined);
   const readyTeam = (): void => {
-    void trpc.team.ready.mutate(team).then(() => {
-      router.refresh();
+    startMutation();
+    void trpc.team.ready.mutate(team).then(res => {
+      setResponse(res);
+      popup.current?.showModal();
+      endMutation();
     });
   };
-  return <button onClick={readyTeam}>Ready for next game</button>;
+  return <>
+    <dialog ref={popup}>
+      {((): ReactNode => {
+        switch (response) {
+          case null:
+          case undefined:
+            return 'sus';
+          default: return <>
+            <Die result={response.expensiveMistakeRoll} size="2em" />
+            {response.expensiveMistake} - Lost {response.expensiveMistakesCost} gold!
+            <button onClick={(): void => {
+              popup.current?.close();
+              router.refresh();
+            }}>OK</button>
+          </>;
+        }
+      })()}
+    </dialog>
+    {isMutating ? 'Submitting...' : <button onClick={readyTeam}>Ready for next game</button>}
+  </>;
 }
