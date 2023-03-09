@@ -287,12 +287,13 @@ export const teamRouter = router({
         ['Major Incident', 'Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted', 'Crisis Averted'],
         ['Catastrophe', 'Major Incident', 'Major Incident', 'Minor Incident', 'Minor Incident', 'Crisis Averted'],
         ['Catastrophe', 'Catastrophe', 'Major Incident', 'Major Incident', 'Major Incident', 'Major Incident'],
-      ];
+      ] as const;
+      const expensiveMistakeRoll = Math.floor(Math.random() * 6);
       const expensiveMistake = team.state === TeamState.Draft
         ? null
         : expensiveMistakesTable[
           Math.min(Math.floor(team.treasury / 100_000), 6)
-        ][Math.floor(Math.random() * 6)];
+        ][expensiveMistakeRoll];
       const expensiveMistakesCost = expensiveMistake !== null
         ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
         : 0;
@@ -302,6 +303,7 @@ export const teamRouter = router({
       }).then(() => ({
         expensiveMistake,
         expensiveMistakesCost,
+        expensiveMistakeRoll,
       }));
     }),
 });
