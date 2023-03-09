@@ -299,7 +299,12 @@ export const teamRouter = router({
         : 0;
       return ctx.prisma.team.update({
         where: { name: team.name },
-        data: { state: 'Ready', treasury: { decrement: expensiveMistakesCost } },
+        data: {
+          state: 'Ready',
+          treasury: { decrement: expensiveMistakesCost },
+          journeymen: { set: [] },
+          redrafts: { set: [] },
+        },
       }).then(() => ({
         expensiveMistake,
         expensiveMistakesCost,
