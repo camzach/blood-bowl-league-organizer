@@ -1,12 +1,12 @@
-'use client';
 import type { ReactElement } from 'react';
 import { useRef } from 'react';
 
 type Props = {
+  team: string;
   onSubmit: (player?: string) => void;
 } & Record<'players' | 'journeymen', Array<{ id: string; name: string | null; number: number }>>;
 
-export default function TDButton({ players, journeymen, onSubmit }: Props): ReactElement {
+export default function TDButton({ players, journeymen, team, onSubmit }: Props): ReactElement {
   const ref = useRef<HTMLDialogElement>(null);
   const ref2 = useRef<HTMLSelectElement>(null);
 
@@ -34,6 +34,6 @@ export default function TDButton({ players, journeymen, onSubmit }: Props): Reac
       </label>
       <button onClick={handleSubmit}>Done</button>
     </dialog>
-    <button onClick={openModal}>TD Home</button>
+    <button onClick={openModal}>TD {team}</button>
   </>;
 }

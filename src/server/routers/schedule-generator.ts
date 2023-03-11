@@ -134,7 +134,6 @@ export const scheduleRouter = router({
       });
       const games = await prisma.game.findMany({ where: { state: GameState.Complete } });
       const leagueTable = games.reduce((prev, game) => {
-        console.log(game.homeTeamName, game.awayTeamName);
         const next = { ...prev };
 
         // Win / Loss / Draw

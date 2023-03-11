@@ -21,6 +21,7 @@ const playerSelect = {
 
 const teamSelect = {
   select: {
+    name: true,
     players: playerSelect,
     journeymen: playerSelect,
   },
@@ -71,10 +72,12 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
     <ScoreWidget
       gameId={gameId}
       home={{
+        name: game.home.name,
         players: game.home.players.sort((a, b) => a.number - b.number),
         journeymen: game.home.journeymen.sort((a, b) => a.number - b.number),
       }}
       away={{
+        name: game.away.name,
         players: game.away.players.sort((a, b) => a.number - b.number),
         journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
       }}
