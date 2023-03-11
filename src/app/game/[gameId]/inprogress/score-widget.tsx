@@ -1,9 +1,10 @@
 'use client';
-import { getSession } from 'next-auth/react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { trpc } from 'utils/trpc';
 import useServerMutation from 'utils/use-server-mutation';
+import { z } from 'zod';
 import InjuryButton from './injury-button';
 import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
@@ -13,35 +14,69 @@ type InputType = Parameters<typeof trpc.game.end.mutate>[0];
 
 type Props = {
   gameId: string;
-} & Record<'home' | 'away', Record<'players' | 'journeymen', PlayerType[]>>;
+} & Record<'home' | 'away', { name: string } & Record<'players' | 'journeymen', PlayerType[]>>;
+
+function safeParse(input: string): unknown {
+  try {
+    return JSON.parse(input);
+  } catch {
+    return null;
+  }
+}
 
 export default function ScoreWidget({ home, away, gameId }: Props): ReactElement {
-  const [touchdowns, setTouchdowns] = useState<[number, number]>([0, 0]);
-  const [casualties, setCasualties] = useState<[number, number]>([0, 0]);
-  const [injuries, setInjuries] = useState<InputType['injuries']>([]);
-  const [starPlayerPoints, setStarPlayerPoints] = useState<InputType['starPlayerPoints']>({});
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [gameState, setGameState] = useState<InputType>(() => {
+    const encodedGameState = searchParams?.get('gameState');
+    const parser = z.object({
+      touchdowns: z.tuple([z.number(), z.number()]),
+      casualties: z.tuple([z.number(), z.number()]),
+      injuries: z.array(z.object({
+        playerId: z.string(),
+        injury: z.enum(['AG', 'MA', 'PA', 'ST', 'AV', 'MNG', 'NI', 'DEAD']),
+      })),
+      starPlayerPoints: z.record(z.object({
+        touchdowns: z.number().optional(),
+        completions: z.number().optional(),
+        deflections: z.number().optional(),
+        interceptions: z.number().optional(),
+        casualties: z.number().optional(),
+        otherSPP: z.number().optional(),
+      })),
+    }).catch({ touchdowns: [0, 0], casualties: [0, 0], injuries: [], starPlayerPoints: {} });
+    return {
+      game: gameId,
+      ...parser.parse(safeParse(atob(decodeURIComponent(encodedGameState ?? '')))),
+    };
+  });
+
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams ?? '');
+    newParams.set('gameState', btoa(JSON.stringify(gameState)));
+    router.replace(`${pathname}?${newParams.toString()}`);
+  }, [gameState, pathname, router, searchParams]);
+
+  const { touchdowns, casualties, injuries, starPlayerPoints } = gameState;
+  const setTouchdowns = (update: InputType['touchdowns']): void => {
+    setGameState(o => ({ ...o, touchdowns: update }));
+  };
+  const setCasualties = (update: InputType['casualties']): void => {
+    setGameState(o => ({ ...o, casualties: update }));
+  };
+  const setInjuries = (update: InputType['injuries']): void => {
+    setGameState(o => ({ ...o, injuries: update }));
+  };
+  const setStarPlayerPoints = (update: InputType['starPlayerPoints']): void => {
+    setGameState(o => ({ ...o, starPlayerPoints: update }));
+  };
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [submissionResult, setSubmissionResult] = useState<null | 'success' | 'failure'>(null);
 
-  useEffect(() => {
-    // Keep the session alive while on this page, since you'll sit here for a few hours without server interaction
-    const interval = setInterval(() => {
-      void getSession();
-    }, 1_000 * 60 * 25);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
   const submit = (): void => {
     startMutation();
-    void trpc.game.end.mutate({
-      game: gameId,
-      touchdowns,
-      casualties,
-      injuries,
-      starPlayerPoints,
-    })
+    void trpc.game.end.mutate(gameState)
       .then(() => {
         setSubmissionResult('success');
       })
@@ -103,8 +138,8 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   return <div>
     {touchdowns[0]} - {touchdowns[1]}
     <br/>
-    <TDButton {...home} onSubmit={(player): void => { onTD('home', player); }} />
-    <TDButton {...away} onSubmit={(player): void => { onTD('away', player); }} />
+    <TDButton team={home.name} {...home} onSubmit={(player): void => { onTD('home', player); }} />
+    <TDButton team={away.name} {...away} onSubmit={(player): void => { onTD('away', player); }} />
     <br/>
     <InjuryButton
       onSubmit={onInjury}
