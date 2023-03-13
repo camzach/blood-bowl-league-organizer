@@ -1,5 +1,5 @@
 import type { Prisma } from '@prisma/client';
-import { GameState, TeamState } from '@prisma/client';
+import { GameState, TeamState, Weather } from '@prisma/client';
 import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
 import { z } from 'zod';
@@ -46,11 +46,11 @@ export const gameRouter = router({
         throw new Error('Game has already been started');
 
       const weatherTable = [
-        'Sweltering Heat',
-        'Very Sunny',
-        ...Array.from(Array(7), () => 'Perfect Conditions'),
-        'Pouring Rain',
-        'Blizzard',
+        Weather.SwelteringHeat,
+        Weather.VerySunny,
+        ...Array.from(Array(7), () => Weather.Perfect),
+        Weather.PouringRain,
+        Weather.Blizzard,
       ];
 
       const fairweatherFansHome = Math.ceil(Math.random() * 6);
@@ -90,6 +90,9 @@ export const gameRouter = router({
           state: GameState.Journeymen,
           journeymenHome: homeJourneymen.count,
           journeymenAway: awayJourneymen.count,
+          weather: weatherResult,
+          fanFactorHome,
+          fanFactorAway,
         },
       });
       return ctx.prisma.$transaction([teamUpdates, gameUpdate]).then(() => result);

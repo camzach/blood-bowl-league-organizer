@@ -190,7 +190,7 @@ enum Weather {
   PouringRain
   Perfect
   VerySunny
-  BlisteringHeat
+  SwelteringHeat
 }
 
 model Game {
