@@ -58,7 +58,7 @@
       }
     ],
     "specialRule": "Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
-    "hiringFee": 250000,
+    "hiringFee": 125000,
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
@@ -345,7 +345,7 @@
       }
     ],
     "specialRule": "Two for One: Grak and Crumbleberry must be hired as a pair and count as two Star Players. However, if either Grak or Crumbleberry is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
-    "hiringFee": 250000,
+    "hiringFee": 125000,
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
@@ -677,7 +677,7 @@
     ]
   },
   {
-    "name": "Lucian Swift",
+    "name": "Lucien Swift",
     "MA": 7,
     "ST": 3,
     "AG": 2,
@@ -698,7 +698,7 @@
       }
     ],
     "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
-    "hiringFee": 340000,
+    "hiringFee": 170000,
     "playsFor": [
       "Elven Kingdoms League"
     ]
@@ -1227,7 +1227,7 @@
       }
     ],
     "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
-    "hiringFee": 340000,
+    "hiringFee": 170000,
     "playsFor": [
       "Elven Kingdoms League"
     ]
@@ -1297,6 +1297,489 @@
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
       "Favoured of Chaos Unidivided"
+    ]
+  },
+  {
+    "name": "Bilerot Vomitflesh",
+    "MA": 4,
+    "ST": 5,
+    "AG": 4,
+    "PA": 6,
+    "AV": 10,
+    "specialRule": "Putrid Regurgitation: Once per game, Bilerot may use the Projectile Vomit Special Action. This may still be used even if Bilerot has already performed a Block action this turn.",
+    "skills": [
+      {
+        "name": "Dirty Player (+1)"
+      },
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Foul Appearance"
+      },
+      {
+        "name": "Loner (4+)"
+      }
+    ],
+    "hiringFee": 180000,
+    "playsFor": [
+      "Favoured of Nurgle"
+    ]
+  },
+  {
+    "name": "Boa Kon’ssstriktr",
+    "MA": 6,
+    "ST": 3,
+    "AG": 3,
+    "PA": 4,
+    "AV": 9,
+    "specialRule": "Look into my Eyes: Once per game, if Boa starts his activation marking an opposition player with the ball, he may roll a D6. On a 1, nothing happens. On a 2+ the opposition player loses possession of the ball, Boa immediately gains possession of the ball and Boa’s activation immediately ends.",
+    "skills": [
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Hypnotic Gaze"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Safe Pair of Hands"
+      },
+      {
+        "name": "Side Step"
+      }
+    ],
+    "hiringFee": 200000,
+    "playsFor": [
+      "Lustrian Superleague"
+    ]
+  },
+  {
+    "name": "Cindy Piewhistle",
+    "MA": 5,
+    "ST": 2,
+    "AG": 3,
+    "PA": 3,
+    "AV": 7,
+    "specialRule": "All You Can Eat: Once per game, Cindy may perform two Throw Bomb Special actions rather than one, though she must commit to doing so before making the first action. If she does, immediately after performing the second Throw Bomb Special action roll a D6. On a 1-3 Cindy is immediately Sent Off.",
+    "skills": [
+      {
+        "name": "Accurate"
+      },
+      {
+        "name": "Bombardier"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "hiringFee": 50000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Dribl",
+    "MA": 8,
+    "ST": 2,
+    "AG": 3,
+    "PA": 4,
+    "AV": 8,
+    "specialRule": "A Sneaky Pair: Dribl & Drull must be hired as a pair and count as two Star Players. Additionally, whenever Dribl or Drull perform either a Stab or Foul action against an opposition player marked by both Dribl & Drull, they may apply a +1 modifier to the injury roll.",
+    "skills": [
+      {
+        "name": "Dirty Player (+1)"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Sneaky Git"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "hiringFee": 95000,
+    "playsFor": [
+      "Lustrian Superleague"
+    ]
+  },
+  {
+    "name": "Drull",
+    "MA": 8,
+    "ST": 2,
+    "AG": 3,
+    "PA": 4,
+    "AV": 8,
+    "specialRule": "A Sneaky Pair: Dribl & Drull must be hired as a pair and count as two Star Players. Additionally, whenever Dribl or Drull perform either a Stab or Foul action against an opposition player marked by both Dribl & Drull, they may apply a +1 modifier to the injury roll.",
+    "skills": [
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Side Step"
+      },
+      {
+        "name": "Stab"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "hiringFee": 190000,
+    "playsFor": [
+      "Lustrian Superleague"
+    ]
+  },
+  {
+    "name": "Estelle La Veneaux",
+    "MA": 6,
+    "ST": 3,
+    "AG": 3,
+    "PA": 4,
+    "AV": 8,
+    "specialRule": "Baleful Hex: One per game, at the beginning of Estelle’s activation, choose an opposition player within five squares and roll a D6. On a 2+ the chosen player loses their Tackle Zone and cannot be activated until the end of the opposition’s next team turn.",
+    "skills": [
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Guard"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Side Step"
+      }
+    ],
+    "hiringFee": 190000,
+    "playsFor": [
+      "Lustrian Superleague"
+    ]
+  },
+  {
+    "name": "Glotl Stop",
+    "MA": 6,
+    "ST": 6,
+    "AG": 5,
+    "PA": null,
+    "AV": 10,
+    "specialRule": "Primal Savagery: Once per game, when Glotl fails an Animal Savagery roll, it may lash out at an opposition player rather than a team mate.",
+    "skills": [
+      {
+        "name": "Animal Savagery"
+      },
+      {
+        "name": "Frenzy"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Stand Firm"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "hiringFee": 270000,
+    "playsFor": [
+      "Lustrian Superleague"
+    ]
+  },
+  {
+    "name": "Ivar Eriksson",
+    "MA": 6,
+    "ST": 4,
+    "AG": 3,
+    "PA": 4,
+    "AV": 9,
+    "specialRule": "Raiding Party: Once per drive, whenever Ivar begins his activation, he may choose one Open player on his team within five squares. The chosen player may immediately move one square, ignoring Tackle Zones, though they must end this move Marking an opposition player.",
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Guard"
+      },
+      {
+        "name": "Loner (3+)"
+      },
+      {
+        "name": "Tackle"
+      }
+    ],
+    "hiringFee": 245000,
+    "playsFor": [
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Nobbla Blackwart",
+    "MA": 6,
+    "ST": 2,
+    "AG": 3,
+    "PA": null,
+    "AV": 8,
+    "specialRule": "Kick ’em While They’re Down!: Once per game, Nobbla may use the Chainsaw Attack Special action against a Prone or Stunned opposition player. This does not count as a Foul action and so Nobbla cannot be Sent-off when using this ability.",
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Chainsaw"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Secret Weapon"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "hiringFee": 120000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Puggy Baconbreath",
+    "MA": 5,
+    "ST": 3,
+    "AG": 3,
+    "PA": 4,
+    "AV": 7,
+    "specialRule": "Halfling Luck: Once per game, Puggy may re-roll one dice that was rolled either as a single dice, or as part of a dice pool (this cannot be a dice that was rolled part of an Armour, Injury, or Casualty roll).",
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (3+)"
+      },
+      {
+        "name": "Nerves of Steel"
+      },
+      {
+        "name": "Right Stuff"
+      },
+      {
+        "name": "Stunty"
+      }
+    ],
+    "hiringFee": 120000,
+    "playsFor": [
+      "Halfling Thimble Cup",
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Ripper Bolgrot",
+    "MA": 4,
+    "ST": 6,
+    "AG": 5,
+    "PA": 4,
+    "AV": 10,
+    "specialRule": "Thinking Man’s Troll: Once per half, Ripper may re-roll one dice that was rolled either as a single dice, as part of a multiple dice pool (this cannot be a dice that was rolled as part of an Armour, Injury or Casualty roll).",
+    "skills": [
+      {
+        "name": "Grab"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      },
+      {
+        "name": "Regeneration"
+      },
+      {
+        "name": "Throw Team Mate"
+      }
+    ],
+    "hiringFee": 250000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Scrappa Sorehead",
+    "MA": 7,
+    "ST": 2,
+    "AG": 3,
+    "PA": 5,
+    "AV": 8,
+    "specialRule": "Yoink!: Once per game, when Scrappa attempts to interfere with a Pass action, he may roll a D6. On a 2+, Scrappa does not need to roll to interfere with the Pass action, instead he automatically makes an Interception and gains control of the ball.",
+    "skills": [
+      {
+        "name": "Dirty Player (+1)"
+      },
+      {
+        "name": "Dodge"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Pogo Stick"
+      },
+      {
+        "name": "Right Stuff"
+      },
+      {
+        "name": "Sprint"
+      },
+      {
+        "name": "Stunty"
+      },
+      {
+        "name": "Sure Feet"
+      }
+    ],
+    "hiringFee": 130000,
+    "playsFor": [
+      "Badlands Brawl",
+      "Underworld Challenge"
+    ]
+  },
+  {
+    "name": "Skrorg Snowpelt",
+    "MA": 5,
+    "ST": 5,
+    "AG": 4,
+    "PA": null,
+    "AV": 9,
+    "specialRule": "Pump Up the Crowd: Once per game, when Skrorg causes an opposition player to be removed as a Casualty as the result of a Block action, Skrorg’s controlling coach gains one team re-roll. If this re-roll has not been used by the end of the drive, it is lost.",
+    "skills": [
+      {
+        "name": "Claws"
+      },
+      {
+        "name": "Disturbing Presence"
+      },
+      {
+        "name": "Juggernaut"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Mighty Blow (+1)"
+      }
+    ],
+    "hiringFee": 250000,
+    "playsFor": [
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Thorsson Stoutmead",
+    "MA": 6,
+    "ST": 3,
+    "AG": 4,
+    "PA": 3,
+    "AV": 8,
+    "specialRule": "Beer Barrel Bash!: Once per drive, at the start of his activation, Thorsson may perform a Throw Keg Special action. When he does, select an opposition player within three squares of Thorsson and roll a D6. On a 3+, the player is immediately Knocked Down. However, on a 1, Thorsson is Knocked Down instead.",
+    "skills": [
+      {
+        "name": "Block"
+      },
+      {
+        "name": "Drunkard"
+      },
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Thick Skull"
+      }
+    ],
+    "hiringFee": 170000,
+    "playsFor": [
+      "Old World Classic"
+    ]
+  },
+  {
+    "name": "Withergrasp Doubledrool",
+    "MA": 6,
+    "ST": 3,
+    "AG": 4,
+    "PA": 4,
+    "AV": 9,
+    "specialRule": "Watch Out!: The first time each half that Withergrasp is the target of an opposition player’s Block action, he counts as having the Dodge skill.",
+    "skills": [
+      {
+        "name": "Loner (4+)"
+      },
+      {
+        "name": "Prehensile Tail"
+      },
+      {
+        "name": "Tackle"
+      },
+      {
+        "name": "Tentacles"
+      },
+      {
+        "name": "Two Heads"
+      },
+      {
+        "name": "Wrestle"
+      }
+    ],
+    "hiringFee": 170000,
+    "playsFor": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured fo Slaanesh",
+      "Favoured of Chaos Undivided"
     ]
   }
 ]
