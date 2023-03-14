@@ -1,6 +1,6 @@
 import type { Inducement, InducementOption, PrismaClient } from '@prisma/client';
 
-const twoForOnePairs = [['Grak', 'Crumbleberry'], ['Lucian Swift', 'Valen Swift']];
+const twoForOnePairs = [['Grak', 'Crumbleberry'], ['Lucian Swift', 'Valen Swift'], ['Dribl', 'Drull']];
 
 function getInducementPrice(inducement: Inducement | InducementOption, specialRules: string[]): number | null {
   if (inducement.specialPriceRuleName !== null && specialRules.includes(inducement.specialPriceRuleName))
