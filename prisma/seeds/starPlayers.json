@@ -28,10 +28,7 @@
     ],
     "specialRule": "Consummate Professional: Once per game, Griff may re-roll one dice that was rolled either as a single dice roll, as a part of a multiple dice roll, or as a part of a dice pool (this cannot be a dice that was rolled as a part of an Armor, Injury, or Casualty roll).",
     "hiringFee": 280000,
-    "playsFor": [
-      "Halfling Thimble Cup",
-      "Old World Classic"
-    ]
+    "playsFor": ["Halfling Thimble Cup", "Old World Classic"]
   },
   {
     "name": "Grak",
@@ -62,7 +59,7 @@
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Slaanesh",
@@ -113,9 +110,7 @@
     ],
     "specialRule": "Incorporeal: Once per game, after making an Agility test to dodge, Gretchen may choose to modify the dice roll by adding her strength characteristic to it.",
     "hiringFee": 260000,
-    "playsFor": [
-      "Sylvanian Spotlight"
-    ]
+    "playsFor": ["Sylvanian Spotlight"]
   },
   {
     "name": "Eldril Sidewinder",
@@ -146,9 +141,7 @@
     ],
     "specialRule": "Mesmerizing Dance: Once per game, Eldril may re-roll a failed Agility test when attempting to use the Hypnotic Gaze trait.",
     "hiringFee": 230000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Barik Farblast",
@@ -220,10 +213,7 @@
     ],
     "specialRule": "Kaboom: Once per game, if an opposition player catches a Bomb thrown by Bomber, you can choose to have it explode immediately rather than rolling to see if the player can throw it again.",
     "hiringFee": 50000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Akhorne The Squirrel",
@@ -269,7 +259,7 @@
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Slaanesh",
@@ -316,7 +306,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Underworld Challenge"
     ]
   },
@@ -349,7 +339,7 @@
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Slaanesh",
@@ -391,9 +381,7 @@
     ],
     "specialRule": "Shot to Nothing: Once per game, when Gloriel performs a Pass action, she may gain the Hail Mary Pass skill. You must declare this special rule is being used when Gloriel is activated.",
     "hiringFee": 150000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Grombrindal, the White Dwarf",
@@ -460,10 +448,7 @@
     ],
     "specialRule": "Whirling Dervish: Once per activation, Fungus may re-roll the D6 when determining which direction he moves in.",
     "hiringFee": 80000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Grashnak Blackhoof",
@@ -499,7 +484,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided"
+      "Favoured of Chaos Undivided"
     ]
   },
   {
@@ -537,10 +522,7 @@
     ],
     "specialRule": "Reliable: If Deeproot fumbles a Throw Team-mate action, the player that was thrown will bounce as normal but will automatically land safely.",
     "hiringFee": 280000,
-    "playsFor": [
-      "Halfling Thimble Cup",
-      "Old World Classic"
-    ]
+    "playsFor": ["Halfling Thimble Cup", "Old World Classic"]
   },
   {
     "name": "Glart Smashrip",
@@ -576,7 +558,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Underworld Challenge"
     ]
   },
@@ -603,9 +585,7 @@
     ],
     "specialRule": "Indomitable: Once per game, when Willow successfully rolls to use her Dauntless skill, she may increase her Strength characteristc to double that of the nominated target of her Block action.",
     "hiringFee": 150000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Zolcath the Zoat",
@@ -639,10 +619,7 @@
     ],
     "specialRule": "\"Excuse Me, Are You a Zoat?\": Once per game, when Zolcath is activated, he may gain the Hypnotic Gaze trait. You must declare this special rule is being used when Zolcath is activated.",
     "hiringFee": 230000,
-    "playsFor": [
-      "Lustrian Superleague",
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Lustrian Superleague", "Elven Kingdoms League"]
   },
   {
     "name": "Karla Von Kill",
@@ -699,9 +676,7 @@
     ],
     "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
     "hiringFee": 170000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Morg ‘n’ Thorg",
@@ -732,7 +707,7 @@
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Slaanesh",
@@ -770,10 +745,7 @@
     ],
     "specialRule": "Crushing Blow: Once per game, when an opposition player is Knocked Down as a result of a Block action performed by Varag, you may apply an additional +1 modifier to the Armor roll. This modifier may be applied after the roll has been made.",
     "hiringFee": 280000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Frank ‘n’ Stein",
@@ -804,10 +776,7 @@
     ],
     "specialRule": "Brutal Block: Once per game, when Frank 'n' Stein makes in Injury roll against an opponent as a result of a Block action, he may choose to add an additional +1 modifier to the Injury roll. This modifier may be applied after the roll has been made.",
     "hiringFee": 250000,
-    "playsFor": [
-      "Old World Classic",
-      "Sylvanian Spotlight"
-    ]
+    "playsFor": ["Old World Classic", "Sylvanian Spotlight"]
   },
   {
     "name": "Wilhelm Chaney",
@@ -838,9 +807,7 @@
     ],
     "specialRule": "Savage Mauling: Once per game, when Wilhelm makes an Injury roll against an opposing player, he may choose to re-roll the result.",
     "hiringFee": 220000,
-    "playsFor": [
-      "Sylvanian Spotlight"
-    ]
+    "playsFor": ["Sylvanian Spotlight"]
   },
   {
     "name": "Skrull Halfheight",
@@ -874,10 +841,7 @@
     ],
     "specialRule": "Strong Passing Game: Once per game, after making a Passing Ability test to perform a Pass action, Skrull may choose to modify the dice roll by adding his strength characteristic to it.",
     "hiringFee": 150000,
-    "playsFor": [
-      "Sylvanian Spotlight",
-      "Worlds Edge Superleague"
-    ]
+    "playsFor": ["Sylvanian Spotlight", "Worlds Edge Superleague"]
   },
   {
     "name": "Grim Ironjaw",
@@ -945,7 +909,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Underworld Challenge"
     ]
   },
@@ -984,10 +948,7 @@
     ],
     "specialRule": "Sneakiest of the Lot: If your team includes the Black Gobbo, you may commit two Foul actions per turn, provided one of your Foul actions is committed by the Black Gobbo himself.",
     "hiringFee": 225000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Mighty Zug",
@@ -1044,9 +1005,7 @@
     ],
     "specialRule": "Burst of Speed: Once per game, Roxanna may attempt to Rush three times, rather than the usual two. You may declare you are using this special rule after Roxanna has rushed twice.",
     "hiringFee": 270000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Max Spleenripper",
@@ -1073,7 +1032,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided"
+      "Favoured of Chaos Undivided"
     ]
   },
   {
@@ -1113,7 +1072,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided"
+      "Favoured of Chaos Undivided"
     ]
   },
   {
@@ -1145,7 +1104,7 @@
     "playsFor": [
       "Badlands Brawl",
       "Elven Kingdoms League",
-      "Favoured of Chaos Unidivided",
+      "Favoured of Chaos Undivided",
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Slaanesh",
@@ -1228,9 +1187,7 @@
     ],
     "specialRule": "Two for One: The Swift Twins must be hired as a pair and count as two Star Players. However, if either Lucien or Valen is removed from play due to sufferign a KO'd or Casualty! result on the Injury table, the other replaces the Loner (4+) trait with the Loner (2+) trait.",
     "hiringFee": 170000,
-    "playsFor": [
-      "Elven Kingdoms League"
-    ]
+    "playsFor": ["Elven Kingdoms League"]
   },
   {
     "name": "Bryce ‘The Slice’ Cambuel",
@@ -1261,9 +1218,7 @@
     ],
     "specialRule": "Ghostly Flames: Once per half, when Bryce makes the Chainsaw Attack Special action as part of a Blitz action, he may add +4 to the Armor roll against an opponent rather than +3.",
     "hiringFee": 130000,
-    "playsFor": [
-      "Sylvanian Spotlight"
-    ]
+    "playsFor": ["Sylvanian Spotlight"]
   },
   {
     "name": "Lord Borak The Despoiler",
@@ -1296,7 +1251,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Unidivided"
+      "Favoured of Chaos Undivided"
     ]
   },
   {
@@ -1322,9 +1277,7 @@
       }
     ],
     "hiringFee": 180000,
-    "playsFor": [
-      "Favoured of Nurgle"
-    ]
+    "playsFor": ["Favoured of Nurgle"]
   },
   {
     "name": "Boa Kon’ssstriktr",
@@ -1355,9 +1308,7 @@
       }
     ],
     "hiringFee": 200000,
-    "playsFor": [
-      "Lustrian Superleague"
-    ]
+    "playsFor": ["Lustrian Superleague"]
   },
   {
     "name": "Cindy Piewhistle",
@@ -1388,10 +1339,7 @@
       }
     ],
     "hiringFee": 50000,
-    "playsFor": [
-      "Halfling Thimble Cup",
-      "Old World Classic"
-    ]
+    "playsFor": ["Halfling Thimble Cup", "Old World Classic"]
   },
   {
     "name": "Dribl",
@@ -1422,9 +1370,7 @@
       }
     ],
     "hiringFee": 95000,
-    "playsFor": [
-      "Lustrian Superleague"
-    ]
+    "playsFor": ["Lustrian Superleague"]
   },
   {
     "name": "Drull",
@@ -1452,9 +1398,7 @@
       }
     ],
     "hiringFee": 190000,
-    "playsFor": [
-      "Lustrian Superleague"
-    ]
+    "playsFor": ["Lustrian Superleague"]
   },
   {
     "name": "Estelle La Veneaux",
@@ -1482,9 +1426,7 @@
       }
     ],
     "hiringFee": 190000,
-    "playsFor": [
-      "Lustrian Superleague"
-    ]
+    "playsFor": ["Lustrian Superleague"]
   },
   {
     "name": "Glotl Stop",
@@ -1518,9 +1460,7 @@
       }
     ],
     "hiringFee": 270000,
-    "playsFor": [
-      "Lustrian Superleague"
-    ]
+    "playsFor": ["Lustrian Superleague"]
   },
   {
     "name": "Ivar Eriksson",
@@ -1545,9 +1485,7 @@
       }
     ],
     "hiringFee": 245000,
-    "playsFor": [
-      "Old World Classic"
-    ]
+    "playsFor": ["Old World Classic"]
   },
   {
     "name": "Nobbla Blackwart",
@@ -1578,10 +1516,7 @@
       }
     ],
     "hiringFee": 120000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Puggy Baconbreath",
@@ -1612,10 +1547,7 @@
       }
     ],
     "hiringFee": 120000,
-    "playsFor": [
-      "Halfling Thimble Cup",
-      "Old World Classic"
-    ]
+    "playsFor": ["Halfling Thimble Cup", "Old World Classic"]
   },
   {
     "name": "Ripper Bolgrot",
@@ -1639,14 +1571,11 @@
         "name": "Regeneration"
       },
       {
-        "name": "Throw Team Mate"
+        "name": "Throw Team-mate"
       }
     ],
     "hiringFee": 250000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Scrappa Sorehead",
@@ -1683,10 +1612,7 @@
       }
     ],
     "hiringFee": 130000,
-    "playsFor": [
-      "Badlands Brawl",
-      "Underworld Challenge"
-    ]
+    "playsFor": ["Badlands Brawl", "Underworld Challenge"]
   },
   {
     "name": "Skrorg Snowpelt",
@@ -1714,9 +1640,7 @@
       }
     ],
     "hiringFee": 250000,
-    "playsFor": [
-      "Old World Classic"
-    ]
+    "playsFor": ["Old World Classic"]
   },
   {
     "name": "Thorsson Stoutmead",
@@ -1741,9 +1665,7 @@
       }
     ],
     "hiringFee": 170000,
-    "playsFor": [
-      "Old World Classic"
-    ]
+    "playsFor": ["Old World Classic"]
   },
   {
     "name": "Withergrasp Doubledrool",
@@ -1778,7 +1700,7 @@
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
-      "Favoured fo Slaanesh",
+      "Favoured of Slaanesh",
       "Favoured of Chaos Undivided"
     ]
   }
