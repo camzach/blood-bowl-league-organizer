@@ -53,9 +53,9 @@ export const gameRouter = router({
         Weather.Blizzard,
       ];
 
-      const fairweatherFansHome = Math.ceil(Math.random() * 6);
+      const fairweatherFansHome = Math.ceil(Math.random() * 3);
       const fanFactorHome = game.home.dedicatedFans + fairweatherFansHome;
-      const fairweatherFansAway = Math.ceil(Math.random() * 6);
+      const fairweatherFansAway = Math.ceil(Math.random() * 3);
       const fanFactorAway = game.away.dedicatedFans + fairweatherFansAway;
       const weatherRoll = [Math.floor(Math.random() * 6), Math.floor(Math.random() * 6)];
       const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
