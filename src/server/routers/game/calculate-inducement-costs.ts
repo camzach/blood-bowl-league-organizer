@@ -71,8 +71,10 @@ export async function calculateInducementCosts(
     if (!foundInducement)
       throw new InducementError('Unknown inducement specified');
 
-    inducementCounts[inducement.name] ??= 0;
+    if (!(inducement.name in inducementCounts))
+      inducementCounts[inducement.name] = 0;
     inducementCounts[inducement.name] += 1;
+
     if (inducementCounts[inducement.name] > foundInducement.max)
       throw new InducementError('Inducement maximum exceeded');
 
