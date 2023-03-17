@@ -14,4 +14,7 @@ export default trpcNext.createNextApiHandler({
       session,
     };
   },
+  responseMeta() {
+    return { headers: { 'cache-control': 'no-cache' } };
+  },
 });
