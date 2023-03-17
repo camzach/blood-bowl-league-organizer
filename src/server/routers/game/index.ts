@@ -425,7 +425,8 @@ export const gameRouter = router({
         if (!player)
           throw new Error('Player not found');
 
-        updateMap[id] ??= { where: { id }, data: {} };
+        if (!(id in updateMap))
+          updateMap[id] = { where: { id }, data: {} };
         const mappedUpdate = updateMap[id].data;
 
         mappedUpdate.casualties = incrementUpdateField(mappedUpdate.casualties, points.casualties);
