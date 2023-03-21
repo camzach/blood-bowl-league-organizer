@@ -1,9 +1,15 @@
 import type { ReactElement } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 import type { trpc } from 'utils/trpc';
 
 type SPPType = keyof Parameters<typeof trpc['game']['end']['mutate']>[0]['starPlayerPoints'][string];
 type PlayerType = { id: string; name: string | null; number: number };
+type FormValues = {
+  team: 'home' | 'away';
+  player: string;
+  type: SPPType;
+};
 
 type Props = {
   onSubmit: (
@@ -14,27 +20,29 @@ type Props = {
 
 export default function SPPButton({ home, away, onSubmit }: Props): ReactElement {
   const ref = useRef<HTMLDialogElement>(null);
-  const [team, setTeam] = useState<'home' | 'away'>('home');
-  const [player, setPlayer] = useState<string | null>(null);
-  const [type, setType] = useState<SPPType | null>(null);
+  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({ defaultValues: { team: 'home' } });
+
+  const team = watch('team');
+  const { players, journeymen } = team === 'home' ? home : away;
+
+  useEffect(() => {
+    setValue('player', [...players, ...journeymen][0].id);
+  }, [journeymen, players, setValue]);
 
   const openModal = (): void => {
     ref.current?.showModal();
   };
 
-  const handleSubmit = (): void => {
-    if (player === null || type === null) return;
+  const onSubmitForm = handleSubmit(({ player, type }) => {
     onSubmit(player, type);
     ref.current?.close();
-  };
-
-  const { players, journeymen } = team === 'home' ? home : away;
+  });
 
   return <>
     <dialog ref={ref}>
       <label>
         Team:
-        <select value={team} onChange={(e): void => { setTeam(e.target.value as 'home' | 'away'); }}>
+        <select {...register('team')}>
           <option>home</option>
           <option>away</option>
         </select>
@@ -42,7 +50,7 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
       <br/>
       <label>
         Player:
-        <select value={player ?? undefined} onChange={(e): void => { setPlayer(e.target.value); }}>
+        <select {...register('player')}>
           <optgroup label="Rostered">
             {players.map(p => <option value={p.id} key={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>
@@ -54,7 +62,7 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
       <br/>
       <label>
         Type of SPP:
-        <select value={type ?? undefined} onChange={(e): void => { setType(e.target.value as SPPType); }}>
+        <select {...register('type')}>
           <option value="casualties">Casualty</option>
           <option value="deflections">Deflection</option>
           <option value="interceptions">Interception</option>
@@ -62,7 +70,7 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
           <option value="otherSPP">Misc.</option>
         </select>
       </label>
-      <button onClick={handleSubmit}>Done</button>
+      <button onClick={() => { void onSubmitForm(); }}>Done</button>
     </dialog>
     <button onClick={openModal}>Other SPP</button>
   </>;

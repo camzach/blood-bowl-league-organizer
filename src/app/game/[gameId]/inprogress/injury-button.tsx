@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 import type { trpc } from 'utils/trpc';
 
 type InjuryType = Parameters<typeof trpc['game']['end']['mutate']>[0]['injuries'][number]['injury'];
@@ -12,47 +13,81 @@ type Props = {
   ) => void;
 } & Record<'home' | 'away', Record<'players' | 'journeymen', PlayerType[]>>;
 
+type FormValues = {
+  injuredTeam: 'home' | 'away';
+  injuredPlayer: string;
+  causingTeam: 'home' | 'away' | 'neither';
+  causingPlayer?: string;
+  type: InjuryType;
+};
+
 export default function InjuryButton({ home, away, onSubmit }: Props): ReactElement {
+  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
+    defaultValues: {
+      injuredTeam: 'home',
+      causingTeam: 'neither',
+    },
+  });
   const ref = useRef<HTMLDialogElement>(null);
-  const ref2 = useRef<HTMLSelectElement>(null);
-  const ref3 = useRef<HTMLSelectElement>(null);
-  const ref4 = useRef<HTMLSelectElement>(null);
-  const [injuredTeam, setInjuredTeam] = useState<'home' | 'away'>('home');
-  const [causingTeam, setCausingTeam] = useState<'home' | 'away' | 'neither'>('home');
+
+  const [injuredTeam, causingTeam] = watch(['injuredTeam', 'causingTeam']);
+  const causingPlayers = (() => {
+    switch (causingTeam) {
+      case 'home':
+        return { players: home.players, journeymen: home.journeymen };
+      case 'away':
+        return { players: away.players, journeymen: away.journeymen };
+      default:
+        return null;
+    }
+  })();
+  const injuredPlayers = injuredTeam === 'home'
+    ? { players: home.players, journeymen: home.journeymen }
+    : { players: away.players, journeymen: away.journeymen };
+
+  useEffect(() => {
+    if (causingTeam === 'neither') {
+      setValue('causingPlayer', undefined);
+    } else {
+      const players = [...causingPlayers?.players ?? [], ...causingPlayers?.journeymen ?? []];
+      setValue('causingPlayer', players[0]?.id);
+    }
+  }, [setValue, causingTeam, causingPlayers?.players, causingPlayers?.journeymen]);
+
+  useEffect(() => {
+    setValue('injuredPlayer', [...injuredPlayers.players, ...injuredPlayers.journeymen][0].id);
+  }, [setValue, injuredTeam, injuredPlayers.players, injuredPlayers.journeymen]);
 
   const openModal = (): void => {
     ref.current?.showModal();
   };
 
-  const handleSubmit = (): void => {
-    if (!ref2.current) return;
-    if (!ref3.current) return;
-    onSubmit(causingTeam, {
-      player: ref2.current.value,
-      injury: ref3.current.value as InjuryType,
-      by: ref4.current?.value,
+  const onFormSubmit = handleSubmit(data => {
+    onSubmit(data.causingTeam, {
+      player: data.injuredPlayer,
+      injury: data.type,
+      by: data.causingPlayer,
     });
     ref.current?.close();
-  };
+  });
 
   return <>
     <dialog ref={ref}>
       <label>
         Injured Player&apos;s team:
-        <select value={injuredTeam} onChange={(e): void => { setInjuredTeam(e.target.value as 'home' | 'away'); }}>
+        <select {...register('injuredTeam')}>
           <option>home</option>
           <option>away</option>
         </select>
       </label>
       <label>
         Injured Player:
-        <select ref={ref2}>
+        <select {...register('injuredPlayer')}>
           <optgroup label="Rostered Players">
-            {(injuredTeam === 'home' ? home : away)
-              .players.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
+            {injuredPlayers.players.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>
-          {(injuredTeam === 'home' ? home : away).journeymen.length > 0 && <optgroup label="Journeymen">
-            {(injuredTeam === 'home' ? home : away)
+          {injuredPlayers.journeymen.length > 0 && <optgroup label="Journeymen">
+            {injuredPlayers
               .journeymen.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>}
         </select>
@@ -60,7 +95,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props): ReactElem
       <br/>
       <label>
         Type of injury:
-        <select ref={ref3}>
+        <select {...register('type')}>
           <option value="BH">Badly Hurt</option>
           <option value="MNG">Miss Next Game</option>
           <option value="NI">Niggling Injury</option>
@@ -75,29 +110,24 @@ export default function InjuryButton({ home, away, onSubmit }: Props): ReactElem
       <br/>
       <label>
         Caused by Team:
-        <select
-          value={causingTeam}
-          onChange={(e): void => { setCausingTeam(e.target.value as 'home' | 'away' | 'neither'); }}
-        >
+        <select {...register('causingTeam')}>
           <option>home</option>
           <option>away</option>
           <option>neither</option>
         </select>
       </label>
-      {causingTeam !== 'neither' && <label>
+      {causingPlayers && <label>
         Caused By:
-        <select ref={ref4}>
+        <select {...register('causingPlayer')}>
           <optgroup label="Rostered Players">
-            {(causingTeam === 'home' ? home : away)
-              .players.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
+            {causingPlayers.players.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>
-          {(causingTeam === 'home' ? home : away).journeymen.length > 0 && <optgroup label="Journeymen">
-            {(causingTeam === 'home' ? home : away)
-              .journeymen.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
+          {causingPlayers.journeymen.length > 0 && <optgroup label="Journeymen">
+            {causingPlayers.journeymen.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>}
         </select>
       </label>}
-      <button onClick={handleSubmit}>Done</button>
+      <button onClick={() => { void onFormSubmit(); }}>Done</button>
     </dialog>
     <button onClick={openModal}>Booboo</button>
   </>;

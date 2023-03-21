@@ -1,29 +1,34 @@
 import type { ReactElement } from 'react';
 import { useRef } from 'react';
+import { useForm } from 'react-hook-form';
 
 type Props = {
   team: string;
   onSubmit: (player?: string) => void;
 } & Record<'players' | 'journeymen', Array<{ id: string; name: string | null; number: number }>>;
 
+type FormValues = {
+  scoredBy: string;
+};
+
 export default function TDButton({ players, journeymen, team, onSubmit }: Props): ReactElement {
+  const { register, handleSubmit } = useForm<FormValues>();
   const ref = useRef<HTMLDialogElement>(null);
-  const ref2 = useRef<HTMLSelectElement>(null);
 
   const openModal = (): void => {
     ref.current?.showModal();
   };
 
-  const handleSubmit = (): void => {
-    onSubmit(ref2.current?.value);
+  const onFormSubmit = handleSubmit(({ scoredBy }: FormValues): void => {
+    onSubmit(scoredBy);
     ref.current?.close();
-  };
+  });
 
   return <>
     <dialog ref={ref}>
       <label>
             Scored By:
-        <select ref={ref2}>
+        <select {...register('scoredBy')}>
           <optgroup label="Rostered Players">
             {players.map(p => <option key={p.id} value={p.id}>{p.name ?? p.number}</option>)}
           </optgroup>
@@ -32,7 +37,7 @@ export default function TDButton({ players, journeymen, team, onSubmit }: Props)
           </optgroup>}
         </select>
       </label>
-      <button onClick={handleSubmit}>Done</button>
+      <button onClick={() => { void onFormSubmit(); }}>Done</button>
     </dialog>
     <button onClick={openModal}>TD {team}</button>
   </>;
