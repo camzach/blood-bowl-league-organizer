@@ -46,6 +46,8 @@ export const gameRouter = router({
         throw new Error('Game has already been started');
 
       const weatherTable = [
+        null as never,
+        null as never,
         Weather.SwelteringHeat,
         Weather.VerySunny,
         ...Array.from(Array(7), () => Weather.Perfect),
@@ -57,7 +59,7 @@ export const gameRouter = router({
       const fanFactorHome = game.home.dedicatedFans + fairweatherFansHome;
       const fairweatherFansAway = Math.ceil(Math.random() * 3);
       const fanFactorAway = game.away.dedicatedFans + fairweatherFansAway;
-      const weatherRoll = [Math.floor(Math.random() * 6), Math.floor(Math.random() * 6)];
+      const weatherRoll = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
       const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
 
       const homeJourneymen = {
