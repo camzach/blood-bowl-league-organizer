@@ -83,6 +83,8 @@ model Team {
   homeGames        Game[]    @relation("homeTeam")
   awayGames        Game[]    @relation("awayTeam")
   Coaches          Coach[]
+  touchdownSong    Song?     @relation(fields: [songName], references: [name])
+  songName         String?
 }
 
 model Roster {
@@ -219,4 +221,10 @@ model Game {
   fanFactorAway         Int                @default(0)
   MVPs                  Player[]
   weather               Weather?
+}
+
+model Song {
+  name String @id
+  data String
+  Team Team[]
 }
