@@ -8,13 +8,14 @@ import { z } from 'zod';
 import InjuryButton from './injury-button';
 import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
+import { Fireworks } from 'fireworks-js';
 
 type PlayerType = { id: string; name: string | null; number: number };
 type InputType = Parameters<typeof trpc.game.end.mutate>[0];
 
 type Props = {
   gameId: string;
-} & Record<'home' | 'away', { name: string } & Record<'players' | 'journeymen', PlayerType[]>>;
+} & Record<'home' | 'away', { name: string; song?: string } & Record<'players' | 'journeymen', PlayerType[]>>;
 
 function safeParse(input: string): unknown {
   try {
@@ -91,6 +92,21 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       team === 'home' ? touchdowns[0] + 1 : touchdowns[0],
       team === 'away' ? touchdowns[1] + 1 : touchdowns[1],
     ]);
+    // @ts-expect-error #root will always exist, chill
+    const fw = new Fireworks(document.querySelector('#fireworks'));
+    const song = team === 'home' ? home.song : away.song;
+    fw.start();
+    if (song !== undefined) {
+      const audio = new Audio(`http://docs.google.com/uc?export=open&id=${song}`);
+      void audio.play();
+      audio.onended = () => {
+        fw.stop(true);
+      };
+    } else {
+      setTimeout(() => {
+        fw.stop(true);
+      }, 5000);
+    }
     if (player === undefined)
       return;
     setStarPlayerPoints({
@@ -136,6 +152,11 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   };
 
   return <div>
+    <div id="fireworks" style={{
+      height: '500px',
+      position: 'absolute',
+      pointerEvents: 'none',
+    }} />
     {touchdowns[0]} - {touchdowns[1]}
     <br/>
     <TDButton team={home.name} {...home} onSubmit={(player): void => { onTD('home', player); }} />

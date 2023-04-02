@@ -25,6 +25,7 @@
     "@trpc/server": "^10.9.1",
     "bcryptjs": "^2.4.3",
     "classnames": "^2.3.2",
+    "fireworks-js": "^2.10.2",
     "next": "^13.2.0",
     "next-auth": "^4.19.0",
     "normalize.css": "^8.0.1",

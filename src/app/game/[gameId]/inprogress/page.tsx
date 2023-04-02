@@ -24,6 +24,7 @@ const teamSelect = {
     name: true,
     players: playerSelect,
     journeymen: playerSelect,
+    touchdownSong: true,
   },
 } satisfies TeamArgs;
 const starPlayerSelect = { include: { skills: true } } satisfies StarPlayerArgs;
@@ -73,11 +74,13 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
       gameId={gameId}
       home={{
         name: game.home.name,
+        song: game.home.touchdownSong?.data,
         players: game.home.players.sort((a, b) => a.number - b.number),
         journeymen: game.home.journeymen.sort((a, b) => a.number - b.number),
       }}
       away={{
         name: game.away.name,
+        song: game.away.touchdownSong?.data,
         players: game.away.players.sort((a, b) => a.number - b.number),
         journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
       }}
