@@ -166,6 +166,12 @@ export const scheduleRouter = router({
         if (game.touchdownsAway === 0)
           next[game.homeTeamName].points += 1;
 
+        // Major Win
+        if (game.touchdownsHome >= 3)
+          next[game.homeTeamName].points += 1;
+        if (game.touchdownsAway >= 3)
+          next[game.awayTeamName].points += 1;
+
         // Stats
         next[game.homeTeamName].td += game.touchdownsHome;
         next[game.awayTeamName].td += game.touchdownsAway;
