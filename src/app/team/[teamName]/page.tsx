@@ -44,10 +44,22 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)
     .filter(n => !team.players.some(p => p.number === n));
 
+
   return (
     <section>
       <h1>{team.name}</h1>
-      <h2>TV - {calculateTV(team)}</h2>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: '1.2em',
+        marginBlock: '1em',
+      }}>
+        <span>TV - {calculateTV(team).toLocaleString()}</span>
+        <span>Current TV - {calculateTV({
+          ...team,
+          players: team.players.filter(p => !p.missNextGame),
+        }).toLocaleString()}</span>
+      </div>
       Treasury -- {team.treasury}
       <br />
       Dedicated Fans -- {team.state === TeamState.Draft && allowHiring
