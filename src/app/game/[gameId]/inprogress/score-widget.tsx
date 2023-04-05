@@ -1,7 +1,7 @@
 'use client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { ReactElement, ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import type { MutableRefObject, ReactElement, ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { trpc } from 'utils/trpc';
 import useServerMutation from 'utils/use-server-mutation';
 import { z } from 'zod';
@@ -87,26 +87,32 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       .finally(endMutation);
   };
 
+  const fireworksCanvas = useRef<HTMLCanvasElement>(null);
+  const fireworks: MutableRefObject<Fireworks | null> = useRef(null);
+  useEffect(() => {
+    if (!fireworksCanvas.current) return;
+    fireworks.current = new Fireworks(fireworksCanvas.current);
+  });
+
   const onTD = (team: 'home' | 'away', player?: string): void => {
     setTouchdowns([
       team === 'home' ? touchdowns[0] + 1 : touchdowns[0],
       team === 'away' ? touchdowns[1] + 1 : touchdowns[1],
     ]);
-    // @ts-expect-error #root will always exist, chill
-    const fw = new Fireworks(document.querySelector('#fireworks'));
-    const song = team === 'home' ? home.song : away.song;
-    fw.start();
-    if (song !== undefined) {
-      const audio = new Audio(`http://docs.google.com/uc?export=open&id=${song}`);
-      void audio.play();
-      audio.onended = () => {
-        fw.stop(true);
-      };
-    } else {
+
+    const fw = fireworks.current;
+    const scoringTeam = team === 'home' ? home.name : away.name;
+    fw?.start();
+    const audio = new Audio(`/api/songs/${scoringTeam}`);
+    void audio.play();
+    audio.onended = () => {
+      fw?.stop();
+    };
+    audio.onerror = () => {
       setTimeout(() => {
-        fw.stop(true);
+        fw?.stop();
       }, 5000);
-    }
+    };
     if (player === undefined)
       return;
     setStarPlayerPoints({
@@ -151,10 +157,11 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     });
   };
 
-  return <div>
-    <div id="fireworks" style={{
-      height: '500px',
+  return <div style={{ position: 'relative' }}>
+    <canvas ref={fireworksCanvas} style={{
       position: 'absolute',
+      height: '500px',
+      width: '50dvh',
       pointerEvents: 'none',
     }} />
     {touchdowns[0]} - {touchdowns[1]}
