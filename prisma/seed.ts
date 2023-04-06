@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client/edge';
 import { readFileSync } from 'fs';
 const prisma = new PrismaClient();
 
@@ -122,28 +122,6 @@ async function main(): Promise<void> {
       rules: 'Wizards to kerzap shit',
       options: { createMany: { data: wizards } },
     },
-  });
-
-  // TODO: REMOVE THESE
-  await prisma.coach.create({
-    data: {
-      name: 'a',
-      passwordHash: '$2a$12$GX8LRNICR.mwdEt4o8F46eZ7ypAOx0wAfvPU/bb8KnVDbtWGHUvlO',
-      needsNewPassword: false,
-      teams: {
-        create: [
-          { name: 'a', roster: { connect: { name: 'Amazon' } } },
-          { name: 'b', roster: { connect: { name: 'Black Orc' } } },
-        ],
-      },
-    },
-  });
-  await prisma.game.createMany({
-    data: Array.from(Array(4), (_, idx) => ({
-      homeTeamName: 'a',
-      awayTeamName: 'b',
-      round: idx,
-    })),
   });
 }
 
