@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client/edge';
 import * as trpcNext from '@trpc/server/adapters/next';
 import { getServerSession } from 'next-auth';
 import { appRouter } from 'server/routers';

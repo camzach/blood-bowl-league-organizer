@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client/edge';
 import { initTRPC } from '@trpc/server';
 import type { Session } from 'next-auth';
 

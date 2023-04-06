@@ -11,7 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
 import AugmentedTeamTable from './augmented-team-table';
 import ReadyTeam from './ready-team';
-import { TeamState } from '@prisma/client';
+import { TeamState } from '@prisma/client/edge';
 import SongControls from './touchdown-song-controls';
 
 type Props = { params: { teamName: string } };

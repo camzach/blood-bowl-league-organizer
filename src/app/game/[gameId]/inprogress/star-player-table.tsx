@@ -1,5 +1,5 @@
 'use client';
-import type { Skill, StarPlayer } from '@prisma/client';
+import type { Skill, StarPlayer } from '@prisma/client/edge';
 import { TeamTable } from 'components/team-table';
 import type { ReactElement } from 'react';
 

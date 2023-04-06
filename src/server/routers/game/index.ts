@@ -1,5 +1,5 @@
-import type { Prisma } from '@prisma/client';
-import { GameState, TeamState, Weather } from '@prisma/client';
+import type { Prisma } from '@prisma/client/edge';
+import { GameState, TeamState, Weather } from '@prisma/client/edge';
 import { publicProcedure, router } from 'server/trpc';
 import { newPlayer } from '../new-player';
 import { z } from 'zod';

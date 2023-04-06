@@ -1,5 +1,5 @@
-import type { Prisma } from '@prisma/client';
-import { SkillCategory, TeamState } from '@prisma/client';
+import type { Prisma } from '@prisma/client/edge';
+import { SkillCategory, TeamState } from '@prisma/client/edge';
 import { string, z } from 'zod';
 import { publicProcedure, router } from 'server/trpc';
 

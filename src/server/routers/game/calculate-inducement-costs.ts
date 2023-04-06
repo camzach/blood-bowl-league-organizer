@@ -1,4 +1,4 @@
-import type { Inducement, InducementOption, PrismaClient } from '@prisma/client';
+import type { Inducement, InducementOption, PrismaClient } from '@prisma/client/edge';
 
 const twoForOnePairs = [['Grak', 'Crumbleberry'], ['Lucian Swift', 'Valen Swift'], ['Dribl', 'Drull']];
 

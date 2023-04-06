@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client/edge';
 import { notFound, redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
