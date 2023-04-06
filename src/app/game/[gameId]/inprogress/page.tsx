@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client/edge';
 import { TeamTable } from 'components/team-table';
 import type { ComponentProps, ReactElement } from 'react';
 import { prisma } from 'utils/prisma';

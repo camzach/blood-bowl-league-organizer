@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import type { Position } from '@prisma/client';
+import type { Position } from '@prisma/client/edge';
 import { trpc } from 'utils/trpc';
 import useServerMutation from 'utils/use-server-mutation';
 

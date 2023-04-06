@@ -4,7 +4,7 @@ import { Fragment } from 'react';
 import { prisma } from 'utils/prisma';
 import styles from './styles.module.scss';
 import cx from 'classnames';
-import { GameState } from '@prisma/client';
+import { GameState } from '@prisma/client/edge';
 
 export default async function Schedule(): Promise<ReactElement> {
   const games = (await prisma.game.findMany({

@@ -1,5 +1,5 @@
 'use client';
-import type { SkillCategory } from '@prisma/client';
+import type { SkillCategory } from '@prisma/client/edge';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { trpc } from 'utils/trpc';
