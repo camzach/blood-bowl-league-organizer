@@ -11,7 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate --data-proxy && prisma migrate deploy && next build",
     "prepare": "husky install"
   },
   "prisma": {
