@@ -4,6 +4,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import { getServerSession } from 'next-auth';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { authOptions } from 'pages/api/auth/[...nextauth]';
 import { prisma } from 'utils/prisma';
 
 export async function GET(req: NextRequest, { params }: { params: { team: string } }) {
@@ -37,8 +38,9 @@ export async function GET(req: NextRequest, { params }: { params: { team: string
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { team: string } }) {
-  const session = await getServerSession();
+export async function POST(req: NextRequest, { params }: { params: { team: string } }) {
+  const session = await getServerSession(authOptions);
+
   if (!(session?.user.teams.includes(params.team) ?? false))
     return new NextResponse('You do not have permission', { status: 403 });
 
@@ -60,27 +62,44 @@ export async function PUT(req: NextRequest, { params }: { params: { team: string
   if (!type || !type.mime.startsWith('audio'))
     return new NextResponse('Audio files only', { status: 400 });
 
+  const s3 = new S3({
+    region: process.env.S3_REGION ?? '',
+    credentials: {
+      accessKeyId: process.env.S3_KEY_ID ?? '',
+      secretAccessKey: process.env.S3_KEY ?? '',
+    },
+  });
+
   try {
-    const s3 = new S3({
-      region: process.env.S3_REGION ?? '',
-      credentials: {
-        accessKeyId: process.env.S3_KEY_ID ?? '',
-        secretAccessKey: process.env.S3_KEY ?? '',
-      },
+    const { touchdownSong: current } = await prisma.team.findUniqueOrThrow({
+      where: { name: params.team },
+      select: { touchdownSong: true },
     });
-    const Key = randomUUID();
+    if (current) {
+      await s3.deleteObject({
+        Bucket: process.env.S3_BUCKET ?? '',
+        Key: current.data,
+      });
+    }
+  } catch {
+    return new NextResponse('There was an issue removing the old song');
+  }
+
+  const Key = randomUUID();
+  try {
     await s3.putObject({
       Bucket: process.env.S3_BUCKET ?? '',
       Key,
       Body: Buffer.from(buffer),
       ContentType: type.mime,
     });
-    await prisma.team.update({
-      where: { name: params.team },
-      data: { touchdownSong: { create: { data: Key, name: songName } } },
-    });
-    return new NextResponse('Success');
   } catch {
     return new NextResponse('There was an issue storing the song.', { status: 500 });
   }
+
+  await prisma.team.update({
+    where: { name: params.team },
+    data: { touchdownSong: { create: { data: Key, name: songName } } },
+  });
+  return new NextResponse('Success');
 }

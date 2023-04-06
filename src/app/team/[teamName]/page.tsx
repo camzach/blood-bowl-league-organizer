@@ -12,6 +12,7 @@ import { authOptions } from 'pages/api/auth/[...nextauth]';
 import AugmentedTeamTable from './augmented-team-table';
 import ReadyTeam from './ready-team';
 import { TeamState } from '@prisma/client';
+import SongControls from './touchdown-song-controls';
 
 type Props = { params: { teamName: string } };
 
@@ -24,6 +25,7 @@ async function fetchTeam(teamName: string) {
       players: { include: { skills: true, position: true } },
       journeymen: { include: { skills: true, position: true } },
       redrafts: { include: { skills: true, position: true } },
+      touchdownSong: { select: { name: true } },
     },
   });
 }
@@ -73,6 +75,7 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           max={6}
         />
         : team.dedicatedFans}
+      <SongControls team={team.name} currentSong={team.touchdownSong?.name} />
       <AugmentedTeamTable
         players={team.players}
         skills={skills}
