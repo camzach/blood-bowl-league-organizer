@@ -46,7 +46,6 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)
     .filter(n => !team.players.some(p => p.number === n));
 
-
   return (
     <section>
       <h1>{team.name}</h1>
@@ -75,7 +74,11 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
           max={6}
         />
         : team.dedicatedFans}
-      <SongControls team={team.name} currentSong={team.touchdownSong?.name} />
+      <SongControls
+        team={team.name}
+        currentSong={team.touchdownSong?.name}
+        isEditable={(session?.user.teams.includes(team.name) ?? false)}
+      />
       <AugmentedTeamTable
         players={team.players}
         skills={skills}

@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import useServerMutation from 'utils/use-server-mutation';
 
-type Props = { team: string; currentSong?: string };
+type Props = { team: string; currentSong?: string; isEditable: boolean };
 
 type FormValues = { songName: string; file: File };
 
-export default function SongControls({ team, currentSong }: Props) {
+export default function SongControls({ team, currentSong, isEditable }: Props) {
   const [showForm, setShowForm] = useState(false);
 
   const { startMutation, endMutation, isMutating } = useServerMutation();
@@ -30,8 +30,7 @@ export default function SongControls({ team, currentSong }: Props) {
 
   if (isMutating) return <div>Submitting song...</div>;
 
-  return <div>
-    {currentSong !== undefined ? `Touchdown song: ${currentSong}` : 'No touchdown song selected'}
+  const editor = <>
     <span
       style={{
         height: 0,
@@ -39,7 +38,8 @@ export default function SongControls({ team, currentSong }: Props) {
         border: '5px solid transparent',
         borderTopColor: !showForm ? 'black' : 'transparent',
         borderBottomColor: showForm ? 'black' : 'transparent',
-        transform: `translateY(${showForm ? '-' : ''}50%)`,
+        transform: `translateY(${showForm ? '-10%' : '33%'})`,
+        marginInline: '1ch',
         display: 'inline-block',
       }}
       onClick={() => {
@@ -65,5 +65,10 @@ export default function SongControls({ team, currentSong }: Props) {
       />
       <button type="submit">Submit</button>
     </form>
+  </>;
+
+  return <div>
+    {currentSong !== undefined ? `Touchdown song: ${currentSong}` : 'No touchdown song selected'}
+    {isEditable && editor}
   </div>;
 }
