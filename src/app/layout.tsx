@@ -6,6 +6,12 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import PasswordChangeNotif from './password-change-notif';
 import './global.css';
 import styles from './styles.module.scss';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: { template: '%s | BBLO', absolute: 'BBLO' },
+  description: 'Blood Bowl League Organizer',
+};
 
 export default async function RootLayout({ children }: PropsWithChildren): Promise<ReactElement> {
   const session = await getServerSession(authOptions);

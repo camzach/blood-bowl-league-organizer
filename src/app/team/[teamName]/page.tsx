@@ -13,8 +13,13 @@ import AugmentedTeamTable from './augmented-team-table';
 import ReadyTeam from './ready-team';
 import { TeamState } from '@prisma/client/edge';
 import SongControls from './touchdown-song-controls';
+import type { Metadata } from 'next';
 
 type Props = { params: { teamName: string } };
+
+export function generateMetadata({ params }: Props): Metadata {
+  return { title: params.teamName };
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function fetchTeam(teamName: string) {
