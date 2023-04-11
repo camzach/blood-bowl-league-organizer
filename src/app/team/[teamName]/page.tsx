@@ -27,9 +27,9 @@ async function fetchTeam(teamName: string) {
     where: { name: teamName },
     include: {
       roster: { include: { positions: true } },
-      players: { include: { skills: true, position: true } },
-      journeymen: { include: { skills: true, position: true } },
-      redrafts: { include: { skills: true, position: true } },
+      players: { include: { skills: { include: { faq: true } }, position: true } },
+      journeymen: { include: { skills: { include: { faq: true } }, position: true } },
+      redrafts: { include: { skills: { include: { faq: true } }, position: true } },
       touchdownSong: { select: { name: true } },
     },
   });

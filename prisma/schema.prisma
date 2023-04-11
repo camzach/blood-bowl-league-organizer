@@ -136,9 +136,18 @@ model Skill {
   name        String        @id @unique
   rules       String
   category    SkillCategory
+  faq         Faq[]
   players     Player[]
   positions   Position[]
   starPlayers StarPlayer[]
+}
+
+model Faq {
+  id        String @id @unique @default(uuid()) @db.Uuid
+  Skill     Skill  @relation(fields: [skillName], references: [name])
+  skillName String
+  q         String
+  a         String
 }
 
 model Inducement {
