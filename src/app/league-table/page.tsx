@@ -1,9 +1,11 @@
 import type { ReactElement } from 'react';
 import { trpc } from 'utils/trpc';
 import styles from 'components/team-table/styles.module.scss';
+import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata: Metadata = { title: 'League Table' };
 
 export default async function Page(): Promise<ReactElement> {
   const table = await trpc.schedule.leagueTable.query();

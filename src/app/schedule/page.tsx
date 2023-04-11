@@ -5,6 +5,9 @@ import { prisma } from 'utils/prisma';
 import styles from './styles.module.scss';
 import cx from 'classnames';
 import { GameState } from '@prisma/client/edge';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Schedule' };
 
 export default async function Schedule(): Promise<ReactElement> {
   const games = (await prisma.game.findMany({
