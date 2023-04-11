@@ -18,7 +18,7 @@ import type { Metadata } from 'next';
 type Props = { params: { teamName: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
-  return { title: params.teamName };
+  return { title: decodeURIComponent(params.teamName) };
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
