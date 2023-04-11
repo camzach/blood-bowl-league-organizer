@@ -1295,7 +1295,7 @@
         "PA": 3,
         "AV": 9,
         "skills": [
-          "Animosity (all)",
+          "Animosity (All)",
           "Pass",
           "Safe Pair of Hands"
         ],
@@ -1319,7 +1319,7 @@
         "PA": 4,
         "AV": 8,
         "skills": [
-          "Animosity (all)",
+          "Animosity (All)",
           "Dodge",
           "Right Stuff",
           "Stunty"
@@ -1344,7 +1344,7 @@
         "PA": 5,
         "AV": 10,
         "skills": [
-          "Animosity (all)"
+          "Animosity (All)"
         ],
         "primary": [
           "G",
@@ -1365,7 +1365,7 @@
         "PA": 4,
         "AV": 8,
         "skills": [
-          "Animosity (all)"
+          "Animosity (All)"
         ],
         "primary": [
           "G",
@@ -1386,7 +1386,7 @@
         "PA": 3,
         "AV": 9,
         "skills": [
-          "Animosity (all)"
+          "Animosity (All)"
         ],
         "primary": [
           "A",
@@ -1942,7 +1942,7 @@
           "Foul Appearance",
           "No Hands",
           "Regeneration",
-          "Side Step"
+          "Sidestep"
         ],
         "primary": [
           "G",
@@ -2161,7 +2161,7 @@
         "skills": [
           "Dodge",
           "Right Stuff",
-          "Side Step",
+          "Sidestep",
           "Stunty",
           "Swarming",
           "Titchy"
@@ -2644,7 +2644,7 @@
         "AV": 9,
         "skills": [
           "Block",
-          "Side Step"
+          "Sidestep"
         ],
         "primary": [
           "A",
@@ -2876,7 +2876,7 @@
         "skills": [
           "Dodge",
           "Right Stuff",
-          "Side Step",
+          "Sidestep",
           "Stunty",
           "Titchy"
         ],
@@ -3303,7 +3303,7 @@
         "skills": [
           "Dodge",
           "Right Stuff",
-          "Side Step",
+          "Sidestep",
           "Stunty",
           "Swarming",
           "Titchy"
@@ -3329,7 +3329,7 @@
           "Dodge",
           "Right Stuff",
           "Secret Weapon",
-          "Side Step",
+          "Sidestep",
           "Stunty",
           "Titchy"
         ],
@@ -3354,7 +3354,7 @@
           "Dodge",
           "Pogo Stick",
           "Right Stuff",
-          "Side Step",
+          "Sidestep",
           "Stunty"
         ],
         "primary": [
@@ -3376,7 +3376,7 @@
         "skills": [
           "Dodge",
           "Right Stuff",
-          "Side Step",
+          "Sidestep",
           "Sprint",
           "Stunty"
         ],

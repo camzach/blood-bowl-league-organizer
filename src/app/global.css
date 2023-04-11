@@ -1,4 +1,5 @@
 @import url('../../node_modules/normalize.css/normalize.css');
+@import url('../../node_modules/react-tooltip/dist/react-tooltip.css');
 
 body {
   margin: 0;

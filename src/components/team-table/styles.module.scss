@@ -1,5 +1,5 @@
 .skill {
-  &:nth-child(2n) {
+  &:nth-of-type(2n) {
     color: #9e0000;
   }
 

@@ -16,7 +16,7 @@ type Props = {
 
 const playerSelect = {
   where: { missNextGame: false },
-  include: { skills: true, position: true },
+  include: { skills: { include: { faq: true } }, position: true },
 } satisfies PlayerFindManyArgs;
 
 const teamSelect = {

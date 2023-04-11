@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import type { PlayerType } from '.';
 import type { cols as presetCols } from './cols';
-import styles from './styles.module.scss';
+import Skill from './skill';
 
 type Props<T extends PlayerType> = {
   player: T ;
@@ -33,7 +33,7 @@ export function Player<T extends PlayerType>({ player, cols }: Props<T>): React.
         <td key="Skills">
           {player.skills.map((skill, idx) => (
             <React.Fragment key={skill.name}>
-              <dfn className={styles.skill} title={skill.rules}>{skill.name}</dfn>
+              <Skill skill={skill} />
               {idx < player.skills.length - 1 ? ', ' : ''}
             </React.Fragment>
           ))}

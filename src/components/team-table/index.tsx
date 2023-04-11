@@ -16,7 +16,7 @@ export type PlayerType = {
   missNextGame: boolean;
   starPlayerPoints: number;
   nigglingInjuries: number;
-  skills: Array<{ name: string; rules: string }>;
+  skills: Array<{ name: string; rules: string; faq?: Array<{ q: string; a: string }> }>;
   position: { name: string };
 };
 

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client/edge';
+import type { Prisma } from '@prisma/client';
 import { readFileSync } from 'fs';
 const prisma = new PrismaClient();
 
@@ -11,6 +12,7 @@ async function main(): Promise<void> {
     rules: string;
     category: SkillCategoryType;
     purchasable: boolean;
+    faq?: Array<{ q: string; a: string }>;
   };
   const skills = (loadJSON('./seeds/skills.json') as JSONSkillType[]);
   // eslint-disable-next-line no-underscore-dangle
@@ -20,6 +22,16 @@ async function main(): Promise<void> {
       rules: skill.rules,
       category: skill.purchasable ? skill.category : 'T',
     })),
+  });
+  await prisma.faq.createMany({
+    data: skills.flatMap(s => {
+      if (!s.faq) return null;
+      return s.faq.map(({ q, a }) => ({
+        q,
+        a,
+        skillName: s.name,
+      }));
+    }).filter(a => a !== null) as Prisma.FaqCreateManyInput[],
   });
 
   type JSONRosterType = {
@@ -53,6 +65,16 @@ async function main(): Promise<void> {
     },
   })));
 
+  const existingSkills = new Set(skills.map(s => s.name));
+  rosters.forEach(roster => {
+    roster.players.forEach(player => {
+      if (player.skills.some(skill => !existingSkills.has(skill))) {
+        console.log(player.skills);
+        throw new Error('Some non-existent skills found in a player');
+      }
+    });
+  });
+
   await Promise.all(rosters.flatMap(roster => roster.players.map(async position =>
     prisma.position.create({
       data: {
@@ -84,6 +106,12 @@ async function main(): Promise<void> {
     playsFor: string[];
   };
   const starPlayers = loadJSON('./seeds/starPlayers.json') as JSONStarPlayerType[];
+  starPlayers.forEach(player => {
+    if (player.skills.some(skill => !existingSkills.has(skill.name))) {
+      console.log(player.skills);
+      throw new Error('Some non-existent skills found in a star player');
+    }
+  });
   await Promise.all(starPlayers.map(star => prisma.starPlayer.create({
     data: {
       ...star,
