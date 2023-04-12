@@ -7,6 +7,7 @@ import PasswordChangeNotif from './password-change-notif';
 import './global.css';
 import styles from './styles.module.scss';
 import type { Metadata } from 'next';
+import Tooltip from 'components/tooltip';
 
 export const metadata: Metadata = {
   title: { template: '%s | BBLO', absolute: 'BBLO' },
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: PropsWithChildren): Promi
           {((session?.user.needsNewPassword) === true) && <PasswordChangeNotif name={session.user.id} />}
           {children}
         </SessionProvider>
+        <Tooltip />
       </body>
     </html>
   );

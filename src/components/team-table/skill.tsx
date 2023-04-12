@@ -1,19 +1,17 @@
-'use client';
-import { useId } from 'react';
-import { Tooltip } from 'react-tooltip';
 import styles from './styles.module.scss';
+import ReactDOMServer from 'react-dom/server';
+import { tooltipId } from 'components/tooltip';
 
 type Props = {
   skill: { name: string; rules: string; faq?: Array<{ q: string; a: string }> };
 };
 
 export default function Skill({ skill }: Props) {
-  const id = useId();
   return <>
-    <Tooltip
-      id={id}
-      clickable
-      render={() => <div
+    <a
+      className={styles.skill}
+      data-tooltip-id={tooltipId}
+      data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div
         style={{
           width: '600px',
           whiteSpace: 'pre-wrap',
@@ -30,13 +28,7 @@ export default function Skill({ skill }: Props) {
             A: {a}
           </li>)}
         </ul>}
-      </div>
-      }
-    />
-    <a
-      className={styles.skill}
-      data-tooltip-id={id}
-      data-tooltip-content={skill.rules}
+      </div>)}
       style={{ whiteSpace: 'nowrap' }}
     >
       {skill.name}
