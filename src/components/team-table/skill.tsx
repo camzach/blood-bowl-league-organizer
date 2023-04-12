@@ -1,3 +1,4 @@
+'use client';
 import styles from './styles.module.scss';
 import ReactDOMServer from 'react-dom/server';
 import { tooltipId } from 'components/tooltip';
