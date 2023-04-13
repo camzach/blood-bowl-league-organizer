@@ -178,12 +178,6 @@
     "purchasable": true
   },
   {
-    "name": "Portal Navigator",
-    "rules": "When this player teleports using a Portal, they may re-roll the D6 to determine which Portal they teleport to.",
-    "category": "G",
-    "purchasable": true
-  },
-  {
     "name": "Pro",
     "rules": "During their activation, this player may attempt to re-roll one dice. This dice may have been rolled either as a single dice roll, as part of a multiple dice roll or as part of a dice pool, but cannot be a dice that was rolled as part of an Armour, Injury or Casualty roll. Roll a D6:\n- On a roll of 3+, the dice can be re-rolled.\n- On a roll of 1 or 2, the dice cannot be re-rolled.\nOnce this player has attempted to use this Skill, they may not use a re-roll from any other source to re-roll this one dice.",
     "category": "G",
@@ -368,12 +362,6 @@
     ]
   },
   {
-    "name": "Give and Go",
-    "rules": "If this player performs a Hand-off action, their activation does not have to end once the Hand-off is resolved. If you wish and if this player has not used their full Movement Allowance, they may continue to move after resolving the Hand-off.",
-    "category": "P",
-    "purchasable": true
-  },
-  {
     "name": "Leader",
     "rules": "A team which has one or more players with this Skill gains a single extra team re-roll, However, the Leader re-roll can only be used if there is at least one player with this Skill on the pitch (even if the player with this Skill is Prone, Stunned or has lost their Tackle Zone). If all players with this Skill are removed from play before the Leader re-roll is used, is lost. The Leader Re-roll can be carried over into extra time if it is not used, but the team does not receive a new one at the start of extra time. Unlike standard Team Re-rolls, the Leader Re-roll cannot be lost due to a Halfling Master Chef. Otherwise, the Leader re-roll is treated just like a normal team re-roll.",
     "category": "P",
@@ -406,12 +394,6 @@
   {
     "name": "Pass",
     "rules": "This player may re-roll a failed Passing Ability test when performing a Pass action.",
-    "category": "P",
-    "purchasable": true
-  },
-  {
-    "name": "Portal Passer",
-    "rules": "During its activation, when this player teleports using a Portal, it may declare a Pass action after determining which Portal it is teleporting to. This Skill may be used even if the player did not declare a Pass action at the beginning of their activation.",
     "category": "P",
     "purchasable": true
   },
