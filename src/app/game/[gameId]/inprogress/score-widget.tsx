@@ -129,8 +129,8 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   ): void => {
     if (team !== 'neither') {
       setCasualties([
-        team === 'home' ? touchdowns[0] + 1 : touchdowns[0],
-        team === 'away' ? touchdowns[1] + 1 : touchdowns[1],
+        team === 'home' ? casualties[0] + 1 : casualties[0],
+        team === 'away' ? casualties[1] + 1 : casualties[1],
       ]);
     }
     if (options.injury !== 'BH')
