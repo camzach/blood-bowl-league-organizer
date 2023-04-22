@@ -1,4 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import type { AnyProcedure, inferProcedureInput } from '@trpc/server';
 import type { AppRouter } from 'server/routers';
 
 function getBaseUrl(): string {
@@ -13,3 +14,11 @@ function getBaseUrl(): string {
 }
 
 export const trpc = createTRPCProxyClient<AppRouter>({ links: [httpBatchLink({ url: `${getBaseUrl()}/api/trpc` })] });
+
+export type ProcedureInputs<
+  Router extends keyof AppRouter['_def']['procedures'],
+  Procedure extends keyof AppRouter['_def']['procedures'][Router],
+> =
+  AppRouter['_def']['procedures'][Router][Procedure]extends AnyProcedure
+    ? inferProcedureInput<AppRouter['_def']['procedures'][Router][Procedure]>
+    : never;

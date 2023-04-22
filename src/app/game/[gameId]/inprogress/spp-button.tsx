@@ -13,7 +13,7 @@ type FormValues = {
 
 type Props = {
   onSubmit: (
-    player: string,
+    player: { name: string | null; id: string },
     type: SPPType
   ) => void;
 } & Record<'home' | 'away', Record<'players' | 'journeymen', PlayerType[]>>;
@@ -34,7 +34,10 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
   };
 
   const onSubmitForm = handleSubmit(({ player, type }) => {
-    onSubmit(player, type);
+    // Player should always exist
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const targetPlayer = [...journeymen, ...players].find(p => p.id === player)!;
+    onSubmit(targetPlayer, type);
     ref.current?.close();
   });
 
