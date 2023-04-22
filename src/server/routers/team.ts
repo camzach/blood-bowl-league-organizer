@@ -309,7 +309,7 @@ export const teamRouter = router({
         expensiveMistake,
         expensiveMistakesCost,
         // Roll should appear to the user as 1-6 instead of 0-5
-        expensiveMistakeRoll,
+        expensiveMistakeRoll: expensiveMistakeRoll + 1,
       }));
     }),
 });
