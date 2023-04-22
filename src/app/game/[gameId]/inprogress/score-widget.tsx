@@ -10,6 +10,7 @@ import InjuryButton from './injury-button';
 import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
 import { Fireworks } from 'fireworks-js';
+import { getSession } from 'next-auth/react';
 
 type NameAndId = { id: string; name: string | null };
 type InputType = ProcedureInputs<'game', 'end'>;
@@ -65,6 +66,16 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     newParams.set('gameState', btoa(JSON.stringify(gameState)));
     router.replace(`${pathname}?${newParams.toString()}`);
   }, [gameState, pathname, router, searchParams]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void getSession();
+    }, 1000 * 5);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   const { touchdowns, casualties, playerUpdates } = gameState;
   const setTouchdowns = (update: InputType['touchdowns']): void => {
     setGameState(o => ({ ...o, touchdowns: update }));
