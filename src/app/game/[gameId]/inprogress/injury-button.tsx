@@ -1,15 +1,16 @@
 import type { ReactElement } from 'react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import type { trpc } from 'utils/trpc';
+import type { ProcedureInputs } from 'utils/trpc';
 
-type InjuryType = Parameters<typeof trpc['game']['end']['mutate']>[0]['injuries'][number]['injury'];
+type InjuryType = ProcedureInputs<'game', 'end'>['injuries'][number]['injury'];
 type PlayerType = { id: string; name: string | null; number: number };
 
+type NameAndId = { name: string | null; id: string };
 type Props = {
   onSubmit: (
     team: 'home' | 'away' | 'neither',
-    options: { by?: string; player: string; injury: InjuryType | 'BH' }
+    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | 'BH' }
   ) => void;
 } & Record<'home' | 'away', Record<'players' | 'journeymen', PlayerType[]>>;
 
@@ -64,9 +65,12 @@ export default function InjuryButton({ home, away, onSubmit }: Props): ReactElem
 
   const onFormSubmit = handleSubmit(data => {
     onSubmit(data.causingTeam, {
-      player: data.injuredPlayer,
+      // Player should always exist, if it doesn't something jank is going on
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      player: [...injuredPlayers.journeymen, ...injuredPlayers.players].find(p => p.id === data.injuredPlayer)!,
       injury: data.type,
-      by: data.causingPlayer,
+      by: [...causingPlayers?.journeymen ?? [], ...causingPlayers?.players ?? []]
+        .find(p => p.id === data.causingPlayer),
     });
     ref.current?.close();
   });

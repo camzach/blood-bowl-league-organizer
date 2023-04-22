@@ -1,4 +1,3 @@
-'use client';
 import type { SkillCategory } from '@prisma/client/edge';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -175,9 +174,8 @@ export function Popup({
     <>
       <select value={type} onChange={handleTypeChange}>
         {Object.entries(advancementCosts)
-          .filter(([, costs]) => costs[player.totalImprovements] <= player.starPlayerPoints)
           .map(([adv, costs]) => (
-            <option key={adv} value={adv}>
+            <option key={adv} value={adv} disabled={costs[player.totalImprovements] > player.starPlayerPoints}>
               {adv} - {costs[player.totalImprovements]}
             </option>
           ))}

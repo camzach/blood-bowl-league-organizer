@@ -2,9 +2,11 @@ import type { ReactElement } from 'react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 
+type NameAndId = { name: string | null; id: string };
+
 type Props = {
   team: string;
-  onSubmit: (player?: string) => void;
+  onSubmit: (player?: NameAndId) => void;
 } & Record<'players' | 'journeymen', Array<{ id: string; name: string | null; number: number }>>;
 
 type FormValues = {
@@ -20,7 +22,8 @@ export default function TDButton({ players, journeymen, team, onSubmit }: Props)
   };
 
   const onFormSubmit = handleSubmit(({ scoredBy }: FormValues): void => {
-    onSubmit(scoredBy);
+    const player = [...players, ...journeymen].find(p => p.id === scoredBy);
+    onSubmit(player);
     ref.current?.close();
   });
 

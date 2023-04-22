@@ -1,7 +1,8 @@
 'use client';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { MutableRefObject, ReactElement, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import type { ProcedureInputs } from 'utils/trpc';
 import { trpc } from 'utils/trpc';
 import useServerMutation from 'utils/use-server-mutation';
 import { z } from 'zod';
@@ -10,12 +11,34 @@ import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
 import { Fireworks } from 'fireworks-js';
 
-type PlayerType = { id: string; name: string | null; number: number };
-type InputType = Parameters<typeof trpc.game.end.mutate>[0];
+type NameAndId = { id: string; name: string | null };
+type InputType = ProcedureInputs<'game', 'end'>;
 
 type Props = {
   gameId: string;
-} & Record<'home' | 'away', { name: string; song?: string } & Record<'players' | 'journeymen', PlayerType[]>>;
+} & Record<'home' | 'away',
+{ name: string; song?: string } & Record<'players' | 'journeymen',
+Array<NameAndId & { number: number }>>>;
+
+const gameStateParser = z.object({
+  touchdowns: z.tuple([z.number(), z.number()]),
+  casualties: z.tuple([z.number(), z.number()]),
+  playerUpdates: z.record(z.string(), z.object({
+    playerName: z.string().or(z.null()),
+    injury: z.enum(['AG', 'MA', 'PA', 'ST', 'AV', 'MNG', 'NI', 'DEAD']).optional(),
+    starPlayerPoints: z.object({
+      touchdowns: z.number().optional(),
+      completions: z.number().optional(),
+      deflections: z.number().optional(),
+      interceptions: z.number().optional(),
+      casualties: z.number().optional(),
+      otherSPP: z.number().optional(),
+    }).optional(),
+  })),
+}).catch({ touchdowns: [0, 0], casualties: [0, 0], playerUpdates: {} });
+
+type PlayerUpdates = Partial<z.infer<typeof gameStateParser>['playerUpdates']>;
+type GameState = Omit<z.infer<typeof gameStateParser>, 'playerUpdates'> & { playerUpdates: PlayerUpdates };
 
 function safeParse(input: string): unknown {
   try {
@@ -28,56 +51,81 @@ function safeParse(input: string): unknown {
 export default function ScoreWidget({ home, away, gameId }: Props): ReactElement {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [gameState, setGameState] = useState<InputType>(() => {
-    const encodedGameState = searchParams?.get('gameState');
-    const parser = z.object({
-      touchdowns: z.tuple([z.number(), z.number()]),
-      casualties: z.tuple([z.number(), z.number()]),
-      injuries: z.array(z.object({
-        playerId: z.string(),
-        injury: z.enum(['AG', 'MA', 'PA', 'ST', 'AV', 'MNG', 'NI', 'DEAD']),
-      })),
-      starPlayerPoints: z.record(z.object({
-        touchdowns: z.number().optional(),
-        completions: z.number().optional(),
-        deflections: z.number().optional(),
-        interceptions: z.number().optional(),
-        casualties: z.number().optional(),
-        otherSPP: z.number().optional(),
-      })),
-    }).catch({ touchdowns: [0, 0], casualties: [0, 0], injuries: [], starPlayerPoints: {} });
+  const [gameState, setGameState] = useState<GameState & { game: string }>(() => {
+    const encodedGameState = location.hash.substring(1);
     return {
       game: gameId,
-      ...parser.parse(safeParse(atob(decodeURIComponent(encodedGameState ?? '')))),
+      ...gameStateParser.parse(safeParse(atob(decodeURIComponent(encodedGameState)))),
     };
   });
 
   useEffect(() => {
-    const newParams = new URLSearchParams(searchParams ?? '');
-    newParams.set('gameState', btoa(JSON.stringify(gameState)));
-    router.replace(`${pathname}?${newParams.toString()}`);
-  }, [gameState, pathname, router, searchParams]);
-
-  const { touchdowns, casualties, injuries, starPlayerPoints } = gameState;
+    const statePayload = btoa(JSON.stringify(gameState));
+    router.push(`${pathname}#${statePayload}`);
+  }, [gameState, pathname, router]);
+  const { touchdowns, casualties, playerUpdates } = gameState;
   const setTouchdowns = (update: InputType['touchdowns']): void => {
     setGameState(o => ({ ...o, touchdowns: update }));
   };
   const setCasualties = (update: InputType['casualties']): void => {
     setGameState(o => ({ ...o, casualties: update }));
   };
-  const setInjuries = (update: InputType['injuries']): void => {
-    setGameState(o => ({ ...o, injuries: update }));
+  const addSPP = (
+    player: NameAndId,
+    type: keyof NonNullable<NonNullable<GameState['playerUpdates'][string]>['starPlayerPoints']>
+  ): void => {
+    const { name: playerName, id: playerId } = player;
+    setGameState(o => ({
+      ...o,
+      playerUpdates: {
+        ...o.playerUpdates,
+        [playerId]: {
+          // TS Records are non-nullable, but the player might not be in there yet
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          ...o.playerUpdates?.[playerId] ?? { playerName },
+          starPlayerPoints: {
+            ...o.playerUpdates[playerId]?.starPlayerPoints,
+            [type]: (o.playerUpdates[playerId]?.starPlayerPoints?.[type] ?? 0) + 1,
+          },
+        },
+      },
+    }));
   };
-  const setStarPlayerPoints = (update: InputType['starPlayerPoints']): void => {
-    setGameState(o => ({ ...o, starPlayerPoints: update }));
+  const addInjury = (
+    player: NameAndId,
+    type: NonNullable<NonNullable<GameState['playerUpdates'][number]>['injury']>
+  ): void => {
+    const { name: playerName, id: playerId } = player;
+    setGameState(o => ({
+      ...o,
+      playerUpdates: {
+        ...o.playerUpdates,
+        [playerId]: {
+          ...o.playerUpdates[playerId] ?? { playerName },
+          injury: type,
+        },
+      },
+    }));
   };
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [submissionResult, setSubmissionResult] = useState<null | 'success' | 'failure'>(null);
 
   const submit = (): void => {
+    const [injuries, starPlayerPoints] = Object.entries(gameState.playerUpdates)
+      .reduce<[InputType['injuries'], InputType['starPlayerPoints']]>((prev, curr) => {
+      if (!curr[1]) return prev;
+      const [prevInj, prevSPP] = prev;
+      const [playerId, { injury, starPlayerPoints: currSPP }] = curr;
+      if (injury !== undefined)
+        prevInj.push({ playerId, injury });
+      if (currSPP)
+        prevSPP[playerId] = currSPP;
+      return [prevInj, prevSPP];
+    }, [[], {}]);
     startMutation();
-    void trpc.game.end.mutate(gameState)
+    const clonedState = { ...structuredClone(gameState), playerUpdates: undefined, injuries, starPlayerPoints };
+    delete clonedState.playerUpdates;
+    void trpc.game.end.mutate(clonedState)
       .then(() => {
         setSubmissionResult('success');
       })
@@ -94,7 +142,7 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     fireworks.current = new Fireworks(fireworksCanvas.current);
   });
 
-  const onTD = (team: 'home' | 'away', player?: string): void => {
+  const onTD = (team: 'home' | 'away', player?: NameAndId): void => {
     setTouchdowns([
       team === 'home' ? touchdowns[0] + 1 : touchdowns[0],
       team === 'away' ? touchdowns[1] + 1 : touchdowns[1],
@@ -115,17 +163,16 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     };
     if (player === undefined)
       return;
-    setStarPlayerPoints({
-      ...starPlayerPoints,
-      [player]: player in starPlayerPoints
-        ? { ...starPlayerPoints[player], touchdowns: (starPlayerPoints[player].touchdowns ?? 0) + 1 }
-        : { touchdowns: 1 },
-    });
+    addSPP(player, 'touchdowns');
   };
 
   const onInjury = (
     team: 'home' | 'away' | 'neither',
-    options: { by?: string; player: string; injury: typeof injuries[number]['injury'] | 'BH' }
+    options: {
+      by?: NameAndId;
+      player: NameAndId;
+      injury: NonNullable<NonNullable<GameState['playerUpdates'][string]>['injury'] | 'BH'>;
+    }
   ): void => {
     if (team !== 'neither') {
       setCasualties([
@@ -134,27 +181,9 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       ]);
     }
     if (options.injury !== 'BH')
-      setInjuries([...injuries, { playerId: options.player, injury: options.injury }]);
-    if (options.by !== undefined) {
-      setStarPlayerPoints({
-        ...starPlayerPoints,
-        [options.by]: options.by in starPlayerPoints
-          ? { ...starPlayerPoints[options.by], casualties: (starPlayerPoints[options.by].casualties ?? 0) + 1 }
-          : { casualties: 1 },
-      });
-    }
-  };
-
-  const onSPP = (player: string, type: keyof typeof starPlayerPoints[string]): void => {
-    setStarPlayerPoints({
-      ...starPlayerPoints,
-      [player]: player in starPlayerPoints
-        ? {
-          ...starPlayerPoints[player],
-          [type]: (starPlayerPoints[player][type] ?? 0) + 1,
-        }
-        : { [type]: 1 },
-    });
+      addInjury(options.player, options.injury);
+    if (options.by !== undefined)
+      addSPP(options.by, 'casualties');
   };
 
   return <div style={{ position: 'relative' }}>
@@ -176,7 +205,7 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
     />
     <br/>
     <SPPButton
-      onSubmit={onSPP}
+      onSubmit={addSPP}
       home={home}
       away={away}
     />
@@ -188,13 +217,7 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
           There was an error with your submission.
           <br/>
           Click <a href="#" onClick={(): void => {
-            void navigator.clipboard.writeText(JSON.stringify({
-              game: gameId,
-              touchdowns,
-              casualties,
-              injuries,
-              starPlayerPoints,
-            }));
+            void navigator.clipboard.writeText(JSON.stringify(gameState));
           }}>here</a> to copy your submission parameters.
         </>);
       }
@@ -202,8 +225,6 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       return <button onClick={submit}>Done</button>;
     })()}
     <br/>
-    <pre>{JSON.stringify(injuries, null, 2)}</pre>
-    =======
-    <pre>{JSON.stringify(starPlayerPoints, null, 2)}</pre>
+    <pre>{JSON.stringify(playerUpdates, null, 2)}</pre>
   </div>;
 }
