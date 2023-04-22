@@ -1,5 +1,5 @@
 'use client';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { MutableRefObject, ReactElement, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type { ProcedureInputs } from 'utils/trpc';
@@ -51,8 +51,9 @@ function safeParse(input: string): unknown {
 export default function ScoreWidget({ home, away, gameId }: Props): ReactElement {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [gameState, setGameState] = useState<GameState & { game: string }>(() => {
-    const encodedGameState = location.hash.substring(1);
+    const encodedGameState = searchParams?.get('gameState') ?? '';
     return {
       game: gameId,
       ...gameStateParser.parse(safeParse(atob(decodeURIComponent(encodedGameState)))),
@@ -60,9 +61,10 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   });
 
   useEffect(() => {
-    const statePayload = btoa(JSON.stringify(gameState));
-    router.push(`${pathname}#${statePayload}`);
-  }, [gameState, pathname, router]);
+    const newParams = new URLSearchParams(searchParams ?? '');
+    newParams.set('gameState', btoa(JSON.stringify(gameState)));
+    router.replace(`${pathname}?${newParams.toString()}`);
+  }, [gameState, pathname, router, searchParams]);
   const { touchdowns, casualties, playerUpdates } = gameState;
   const setTouchdowns = (update: InputType['touchdowns']): void => {
     setGameState(o => ({ ...o, touchdowns: update }));
