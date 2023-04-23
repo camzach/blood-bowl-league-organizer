@@ -68,11 +68,19 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
   }, [gameState, pathname, router, searchParams]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      void getSession();
-    }, 1000 * 5);
+    let timeout: number | null = null;
+    const checkSession = async() => {
+      const session = await getSession();
+      if (!session) return;
+      const time = Math.max(0, (new Date(session.expires).getTime() - Date.now()) * 0.75);
+      timeout = window.setTimeout(() => {
+        void checkSession();
+      }, time);
+    };
+    void checkSession();
     return () => {
-      clearInterval(interval);
+      if (timeout !== null)
+        clearTimeout(timeout);
     };
   }, []);
 
