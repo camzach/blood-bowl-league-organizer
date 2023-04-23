@@ -35,7 +35,7 @@ declare module 'next-auth/jwt' {
 export const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt',
-    maxAge: 10,
+    maxAge: 60 * 30,
   },
   callbacks: {
     jwt: ({ token, user }) => {
