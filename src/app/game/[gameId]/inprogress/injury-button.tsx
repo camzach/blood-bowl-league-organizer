@@ -66,8 +66,6 @@ export default function InjuryButton({ home, away, onSubmit }: Props): ReactElem
 
   const onFormSubmit = handleSubmit(data => {
     onSubmit(data.causingTeam, {
-      // Player should always exist, if it doesn't something jank is going on
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       player: [...injuredPlayers.journeymen, ...injuredPlayers.players].find(p => p.id === data.injuredPlayer)!,
       injury: data.type,
       by: [...causingPlayers?.journeymen ?? [], ...causingPlayers?.players ?? []]

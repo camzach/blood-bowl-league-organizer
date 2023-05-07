@@ -23,7 +23,6 @@ export default async function Schedule(): Promise<ReactElement> {
     },
   }));
   const rounds = games.reduce<Array<Array<typeof games[number]>>>((acc, curr) => {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     acc[curr.round] = acc[curr.round] ? [...acc[curr.round], curr] : [curr];
     return acc;
   }, []);

@@ -57,8 +57,6 @@ export async function POST(req: NextRequest, { params }: { params: { team: strin
   const buffer = await file.arrayBuffer();
   const type = await fileTypeFromBuffer(buffer);
 
-  // Need to use the || here for type narrowing
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
   if (!type || !type.mime.startsWith('audio'))
     return new NextResponse('Audio files only', { status: 400 });
 

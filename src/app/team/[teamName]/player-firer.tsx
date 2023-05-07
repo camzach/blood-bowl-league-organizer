@@ -22,7 +22,6 @@ export default function PlayerFirer({ playerId }: Props): ReactElement {
         clearTimeout(timeout);
       };
     }
-    return () => {};
   }, [error, isMutating]);
 
   const handleFire = (): void => {

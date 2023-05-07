@@ -24,7 +24,6 @@ export default function PlayerFirer({ player, number, team }: Props): ReactEleme
         clearTimeout(timeout);
       };
     }
-    return () => {};
   }, [error, isMutating]);
 
 

@@ -102,8 +102,6 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       playerUpdates: {
         ...o.playerUpdates,
         [playerId]: {
-          // TS Records are non-nullable, but the player might not be in there yet
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           ...o.playerUpdates?.[playerId] ?? { playerName },
           starPlayerPoints: {
             ...o.playerUpdates[playerId]?.starPlayerPoints,

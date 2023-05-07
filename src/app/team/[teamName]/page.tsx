@@ -21,7 +21,6 @@ export function generateMetadata({ params }: Props): Metadata {
   return { title: decodeURIComponent(params.teamName) };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function fetchTeam(teamName: string) {
   return prisma.team.findUnique({
     where: { name: teamName },
@@ -45,7 +44,6 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
     return notFound();
 
   const allowHiring = (team.state === TeamState.Draft || team.state === TeamState.PostGame) &&
-                     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                      (session?.user.teams?.includes(team.name) ?? false);
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)

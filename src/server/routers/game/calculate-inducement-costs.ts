@@ -10,7 +10,6 @@ function getInducementPrice(inducement: Inducement | InducementOption, specialRu
 
 class InducementError extends Error { }
 
-// eslint-disable-next-line max-params
 export async function calculateInducementCosts(
   selections: Array<{ name: string; quantity: number; option?: string }>,
   specialRules: string[],
