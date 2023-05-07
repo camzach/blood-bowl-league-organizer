@@ -15,7 +15,6 @@ async function main(): Promise<void> {
     faq?: Array<{ q: string; a: string }>;
   };
   const skills = (loadJSON('./seeds/skills.json') as JSONSkillType[]);
-  // eslint-disable-next-line no-underscore-dangle
   await prisma.skill.createMany({
     data: skills.map(skill => ({
       name: skill.name,

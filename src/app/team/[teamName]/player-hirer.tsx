@@ -32,7 +32,6 @@ export function PlayerHirer({ positions, treasury, freeNumbers, teamName }: Prop
         clearTimeout(timeout);
       };
     }
-    return () => {};
   }, [error, isMutating]);
 
   const handlePositionSelect = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {

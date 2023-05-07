@@ -2,9 +2,7 @@
 
 import Button from 'components/button';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-duplicate-imports
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { trpc } from 'utils/trpc';
 
 type Props = {

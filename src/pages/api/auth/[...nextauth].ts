@@ -5,7 +5,6 @@ import { prisma } from '../../../utils/prisma';
 import { compare } from 'bcryptjs';
 
 declare module 'next-auth' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Session {
     user: {
       id: string;
@@ -13,7 +12,6 @@ declare module 'next-auth' {
       needsNewPassword: boolean;
     };
   }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface User {
     id: string;
     teams: string[];
@@ -22,7 +20,6 @@ declare module 'next-auth' {
 }
 
 declare module 'next-auth/jwt' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface JWT {
     user: {
       id: string;

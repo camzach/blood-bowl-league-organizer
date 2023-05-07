@@ -32,7 +32,6 @@ export default function StaffHirer({ title, current, type, teamName, cost, max, 
         clearTimeout(timeout);
       };
     }
-    return () => {};
   }, [error, isMutating]);
 
   const hireStaff = (val: number): void => {

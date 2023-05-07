@@ -269,7 +269,6 @@ export const teamRouter = router({
       });
       if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
         throw new Error('Team not in Draft or PostGame state');
-      // eslint-disable-next-line no-underscore-dangle
       if (team.state === TeamState.Draft && team._count.players < 11)
         throw new Error('11 players required to draft a team');
 

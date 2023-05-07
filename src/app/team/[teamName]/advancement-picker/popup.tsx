@@ -214,7 +214,6 @@ export function Popup({
             {statPrefs
               .filter(isCharacteristicSelectable)
               .map((c, idx, arr) => (
-                // eslint-disable-next-line react/no-array-index-key
                 <li key={`${c}-${idx}`}>
                   {c}
                   {c === 'Secondary' &&
