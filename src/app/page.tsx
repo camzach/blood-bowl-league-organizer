@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from 'pages/api/auth/[...nextauth]';
-import Link from 'next/link';
+import Link from 'components/link';
 
 export default async function Home(): Promise<ReactNode> {
   const session = await getServerSession(authOptions);

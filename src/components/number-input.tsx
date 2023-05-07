@@ -1,7 +1,6 @@
-'use client';
 import React from 'react';
-import styles from './styles.module.scss';
 import classNames from 'classnames';
+import Button from 'components/button';
 
 type Props = {
   value: number;
@@ -22,18 +21,19 @@ export function NumberInput({ value, label, showLabel = false, min, max, onChang
   }, [value, min, max, onChange]);
   const id = React.useId();
   return (
-    <span className={styles.wrapper}>
-      <label htmlFor={id} className={classNames(!showLabel && styles.hiddenLabel)}>{label}</label>
-      <span className={styles.innerWrapper}>
-        <button
+    <span className="inline-flex flex-col">
+      <label htmlFor={id} className={classNames(!showLabel && 'invisible h-0 w-0')}>{label}</label>
+      <span className="flex [&>*]:flex-1 [&>*]:min-w-0 [&>*]:text-center w-min">
+        <Button
+          className="p-1"
           type="button"
           onClick={handleTick('down')}
           disabled={min !== undefined && value <= min}
         >
           -
-        </button>
+        </Button>
         <input
-          className={styles.input}
+          style={{ appearance: 'textfield', maxWidth: '4em' }}
           id={id}
           aria-label={label}
           value={value}
@@ -43,13 +43,14 @@ export function NumberInput({ value, label, showLabel = false, min, max, onChang
           type="number"
           ref={inputRef}
         />
-        <button
+        <Button
+          className="p-1"
           type="button"
           onClick={handleTick('up')}
           disabled={max !== undefined && value >= max}
         >
           +
-        </button>
+        </Button>
       </span>
     </span>
   );

@@ -1,3 +1,4 @@
+import Button from 'components/button';
 import type { ReactElement } from 'react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -131,8 +132,8 @@ export default function InjuryButton({ home, away, onSubmit }: Props): ReactElem
           </optgroup>}
         </select>
       </label>}
-      <button onClick={() => { void onFormSubmit(); }}>Done</button>
+      <Button onClick={() => { void onFormSubmit(); }}>Done</Button>
     </dialog>
-    <button onClick={openModal}>Booboo</button>
+    <Button onClick={openModal}>Booboo</Button>
   </>;
 }

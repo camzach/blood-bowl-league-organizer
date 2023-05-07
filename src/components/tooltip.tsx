@@ -7,9 +7,5 @@ export default function Tooltip() {
   return <BaseTooltip
     clickable
     id={tooltipId}
-    style={{
-      overflow: 'auto',
-      maxHeight: '50dvh',
-    }}
   />;
 }

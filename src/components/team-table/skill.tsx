@@ -1,5 +1,4 @@
 'use client';
-import styles from './styles.module.scss';
 import ReactDOMServer from 'react-dom/server';
 import { tooltipId } from 'components/tooltip';
 
@@ -10,19 +9,21 @@ type Props = {
 export default function Skill({ skill }: Props) {
   return <>
     <a
-      className={styles.skill}
+      className="[&:nth-of-type(2n)]:text-red-800 whitespace-nowrap"
       data-tooltip-id={tooltipId}
       data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div
-        style={{
-          width: '600px',
-          whiteSpace: 'pre-wrap',
-          textAlign: 'start',
-          fontFamily: 'sans-serif',
-          lineHeight: 1.5,
-        }}
+        className={`
+          max-w-xl
+          max-h-64
+          overflow-auto
+          whitespace-pre-wrap
+          text-start
+          font-sans
+          leading-6
+        `}
       >
         {skill.rules.split('\n').map((text, i) => <p key={i}>{text}</p>)}
-        {skill.faq && <ul style={{ gap: '2px' }}>
+        {skill.faq && <ul className="gap-4 mt-3">
           {skill.faq.map(({ q, a }, x) => <li key={x}>
             Q: {q}
             <br/>
@@ -30,7 +31,6 @@ export default function Skill({ skill }: Props) {
           </li>)}
         </ul>}
       </div>)}
-      style={{ whiteSpace: 'nowrap' }}
     >
       {skill.name}
     </a>

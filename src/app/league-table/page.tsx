@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import { trpc } from 'utils/trpc';
-import styles from 'components/team-table/styles.module.scss';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -9,8 +8,8 @@ export const metadata: Metadata = { title: 'League Table' };
 
 export default async function Page(): Promise<ReactElement> {
   const table = await trpc.schedule.leagueTable.query();
-  return <table className={styles.table}>
-    <thead>
+  return <table className="border-collapse">
+    <thead className="sticky top-1 bg-gray-400">
       <tr>
         <th>Team</th>
         <th>League Points</th>
@@ -23,7 +22,13 @@ export default async function Page(): Promise<ReactElement> {
         <th>Cas Difference</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody
+      className={`
+        [&>tr:not(:first-child)]:border-t-2 [&>tr:not(:first-child)]:border-t-gray-400
+        [&_td:not(:first-child)]:border-l-2 [&_td:not(:first-child)]:border-l-gray-300
+        [&>tr:hover]:bg-orange-200
+      `}
+    >
       {Object.entries(table).sort(([, a], [, b]) => {
         if (a.points !== b.points)
           return b.points - a.points;

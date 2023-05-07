@@ -1,9 +1,10 @@
 'use client';
-import Link from 'next/link';
+import Link from 'components/link';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
 import InducementSelector from './inducement-selector';
+import Button from 'components/button';
 
 type InducementsResponseType = Awaited<ReturnType<typeof trpc.inducements.list.query>>;
 
@@ -88,24 +89,32 @@ export default function Content(props: Props): ReactElement {
     awayFinalPettyCash += treasuryCostHome;
   }
 
-  return <div style={{
-    display: 'grid',
-    gridTemplateRows: 'auto 1fr',
-    gridTemplateColumns: '1fr auto 1fr',
-    gridTemplateAreas: `"ul uc ur"
-                        "ll lc lr"`,
-    placeItems: 'center',
-    width: '60%',
-    marginInline: 'auto',
-  }}>
-    <div style={{ gridArea: 'ul' }}>
+  return <div
+    className="grid grid-rows-[auto_minmax(0,1fr)] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] w-3/5 mx-auto"
+    style={{ placeItems: 'start center' }}
+  >
+    <div>
       petty cash: {Math.max(0, homeFinalPettyCash - calculateTotalCost(choices.home))}
       <br/>
       treasury: {homeTreasury - Math.max(0, calculateTotalCost(choices.home) - homeFinalPettyCash)}
       <br/>
       total cost: {calculateTotalCost(choices.home)}
     </div>
-    <div style={{ gridArea: 'll' }}>
+    <div>
+      Treasury Transfer
+      <br />
+      {homePettyCash > 0 ? '<==' : '==>'}
+      <br />
+      {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
+    </div>
+    <div>
+      petty cash: {Math.max(0, awayFinalPettyCash - calculateTotalCost(choices.away))}
+      <br/>
+      treasury: {awayTreasury - Math.max(0, calculateTotalCost(choices.away) - awayFinalPettyCash)}
+      <br/>
+      total cost: {calculateTotalCost(choices.away)}
+    </div>
+    <div>
       <InducementSelector
         options={homeInducements}
         choices={choices.home}
@@ -114,21 +123,8 @@ export default function Content(props: Props): ReactElement {
         }}
       />
     </div>
-    <div style={{ gridArea: 'uc' }}>
-      Treasury Transfer
-      <br />
-      {homePettyCash > 0 ? '<==' : '==>'}
-      <br />
-      {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
-    </div>
-    <div style={{ gridArea: 'ur' }}>
-      petty cash: {Math.max(0, awayFinalPettyCash - calculateTotalCost(choices.away))}
-      <br/>
-      treasury: {awayTreasury - Math.max(0, calculateTotalCost(choices.away) - awayFinalPettyCash)}
-      <br/>
-      total cost: {calculateTotalCost(choices.away)}
-    </div>
-    <div style={{ gridArea: 'lr' }}>
+    <Button onClick={submit}>Done :)</Button>
+    <div>
       <InducementSelector
         options={awayInducements}
         choices={choices.away}
@@ -137,6 +133,5 @@ export default function Content(props: Props): ReactElement {
         }}
       />
     </div>
-    <button onClick={submit} style={{ gridArea: 'lc' }}>Done :)</button>
   </div>;
 }

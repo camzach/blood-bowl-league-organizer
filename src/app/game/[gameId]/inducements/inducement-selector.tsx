@@ -27,9 +27,9 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
     {options.stars.map(star => (
       <li key={star.name}>
         <label>
-          {star.name}
           <input
             type="checkbox"
+            className="mr-2"
             disabled={getNestedCount('Star Player') >= 2 && getCount('Star Player', star.name) === 0}
             onChange={(e): void => {
               onUpdate({
@@ -40,6 +40,7 @@ export default function InducementSelector({ options, choices, onUpdate }: Props
               });
             }}
           />
+          {star.name}
         </label>
       </li>
     ))}

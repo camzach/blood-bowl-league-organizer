@@ -1,3 +1,4 @@
+import Button from 'components/button';
 import type { ReactElement } from 'react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -40,8 +41,8 @@ export default function TDButton({ players, journeymen, team, onSubmit }: Props)
           </optgroup>}
         </select>
       </label>
-      <button onClick={() => { void onFormSubmit(); }}>Done</button>
+      <Button onClick={() => { void onFormSubmit(); }}>Done</Button>
     </dialog>
-    <button onClick={openModal}>TD {team}</button>
+    <Button onClick={openModal}>TD {team}</Button>
   </>;
 }

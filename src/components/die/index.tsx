@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import styles from './styles.module.scss';
 
-const regex = /(?<size>\d+)(?<unit>px|r?em|%|v[hw(min)(max)]|ch|ex|in|cm|mm|pc|pt)/;
+const regex = /(?<size>\d+(?:.\d+))(?<unit>px|r?em|%|v[hw(min)(max)]|ch|ex|in|cm|mm|pc|pt)/;
 
 type Props = {
   size: `${number}${

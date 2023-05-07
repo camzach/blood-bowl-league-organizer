@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { prisma } from 'utils/prisma';
-import styles from './styles.module.scss';
 
 export default async function Game({ params: { gameId } }: { params: { gameId: string } }): Promise<ReactNode> {
   const game = await prisma.game.findUnique({ where: { id: decodeURIComponent(gameId) }, include: { MVPs: true } });
@@ -14,11 +13,16 @@ export default async function Game({ params: { gameId } }: { params: { gameId: s
   const [homeMVP, awayMVP] = [game.homeTeamName, game.awayTeamName]
     .map(team => game.MVPs.find(p => [p.playerTeamName, p.journeymanTeamName].includes(team)));
 
-  return <div className={styles.wrapper}>
-    <table className={styles.table}>
+  return <div className="grid place-items-center w-full">
+    <table className={`
+      border-collapse 
+      [&_:where(td,th:not(:first-child))]:border-gray-500 
+      [&_:where(td,th:not(:first-child))]:border-2
+      [&_:where(td,th:not(:first-child))]:p-1
+    `}>
       <thead>
         <tr>
-          <th />
+          <th className="border-0" />
           <th>{game.homeTeamName}</th>
           <th>{game.awayTeamName}</th>
         </tr>

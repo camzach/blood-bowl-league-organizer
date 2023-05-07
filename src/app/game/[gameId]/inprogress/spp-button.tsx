@@ -1,3 +1,4 @@
+import Button from 'components/button';
 import type { ReactElement } from 'react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -73,8 +74,8 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
           <option value="otherSPP">Misc.</option>
         </select>
       </label>
-      <button onClick={() => { void onSubmitForm(); }}>Done</button>
+      <Button onClick={() => { void onSubmitForm(); }}>Done</Button>
     </dialog>
-    <button onClick={openModal}>Other SPP</button>
+    <Button onClick={openModal}>Other SPP</Button>
   </>;
 }
