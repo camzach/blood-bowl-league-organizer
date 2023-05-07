@@ -1,5 +1,5 @@
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 
 export default function useServerMutation(refresh = true): {
   startMutation: () => void;

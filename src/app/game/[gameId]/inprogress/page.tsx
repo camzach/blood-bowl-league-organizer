@@ -1,13 +1,13 @@
-import { Prisma } from '@prisma/client/edge';
-import { TeamTable } from 'components/team-table';
-import type { ComponentProps, ReactElement } from 'react';
-import { prisma } from 'utils/prisma';
+import { Prisma } from "@prisma/client/edge";
+import { TeamTable } from "components/team-table";
+import type { ComponentProps, ReactElement } from "react";
+import { prisma } from "utils/prisma";
 import TeamArgs = Prisma.TeamArgs;
 import PlayerFindManyArgs = Prisma.PlayerFindManyArgs;
 import StarPlayerArgs = Prisma.StarPlayerArgs;
-import ScoreWidget from './score-widget';
-import { notFound } from 'next/navigation';
-import StarPlayerTable from './star-player-table';
+import ScoreWidget from "./score-widget";
+import { notFound } from "next/navigation";
+import StarPlayerTable from "./star-player-table";
 
 type Props = {
   params: { gameId: string };
@@ -28,19 +28,21 @@ const teamSelect = {
 } satisfies TeamArgs;
 const starPlayerSelect = { include: { skills: true } } satisfies StarPlayerArgs;
 const cols = [
-  '#',
-  'Name',
-  'Position',
-  'Skills',
-  'MA',
-  'ST',
-  'AV',
-  'AG',
-  'PA',
-  'NI',
-] satisfies ComponentProps<typeof TeamTable>['cols'];
+  "#",
+  "Name",
+  "Position",
+  "Skills",
+  "MA",
+  "ST",
+  "AV",
+  "AG",
+  "PA",
+  "NI",
+] satisfies ComponentProps<typeof TeamTable>["cols"];
 
-export default async function InProgress({ params: { gameId } }: Props): Promise<ReactElement> {
+export default async function InProgress({
+  params: { gameId },
+}: Props): Promise<ReactElement> {
   const game = await prisma.game.findUnique({
     where: { id: decodeURIComponent(gameId) },
     select: {
@@ -50,57 +52,46 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
       starPlayersAway: starPlayerSelect,
     },
   });
-  if (!game)
-    return notFound();
+  if (!game) return notFound();
 
-  return <div
-    className="grid grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,3fr)] gap-3 w-4/5 mx-auto"
-    style={{ placeItems: 'start center' }}
-  >
-    <div className="flex flex-col w-full">
-      <TeamTable
-        players={game.home.players}
-        cols={cols}
+  return (
+    <div
+      className="mx-auto grid w-4/5 grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,3fr)] gap-3"
+      style={{ placeItems: "start center" }}
+    >
+      <div className="flex w-full flex-col">
+        <TeamTable players={game.home.players} cols={cols} />
+        {game.home.journeymen.length > 0 && (
+          <TeamTable players={game.home.journeymen} cols={cols} />
+        )}
+        {game.starPlayersHome.length > 0 && (
+          <StarPlayerTable stars={game.starPlayersHome} />
+        )}
+      </div>
+      <ScoreWidget
+        gameId={gameId}
+        home={{
+          name: game.home.name,
+          song: game.home.touchdownSong?.data,
+          players: game.home.players.sort((a, b) => a.number - b.number),
+          journeymen: game.home.journeymen.sort((a, b) => a.number - b.number),
+        }}
+        away={{
+          name: game.away.name,
+          song: game.away.touchdownSong?.data,
+          players: game.away.players.sort((a, b) => a.number - b.number),
+          journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
+        }}
       />
-      {game.home.journeymen.length > 0 &&
-        <TeamTable
-          players={game.home.journeymen}
-          cols={cols}
-        />
-      }
-      {game.starPlayersHome.length > 0 &&
-        <StarPlayerTable stars={game.starPlayersHome} />
-      }
+      <div className="flex w-full flex-col">
+        <TeamTable players={game.away.players} cols={cols} />
+        {game.away.journeymen.length > 0 && (
+          <TeamTable players={game.away.journeymen} cols={cols} />
+        )}
+        {game.starPlayersAway.length > 0 && (
+          <StarPlayerTable stars={game.starPlayersAway} />
+        )}
+      </div>
     </div>
-    <ScoreWidget
-      gameId={gameId}
-      home={{
-        name: game.home.name,
-        song: game.home.touchdownSong?.data,
-        players: game.home.players.sort((a, b) => a.number - b.number),
-        journeymen: game.home.journeymen.sort((a, b) => a.number - b.number),
-      }}
-      away={{
-        name: game.away.name,
-        song: game.away.touchdownSong?.data,
-        players: game.away.players.sort((a, b) => a.number - b.number),
-        journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
-      }}
-    />
-    <div className="flex flex-col w-full">
-      <TeamTable
-        players={game.away.players}
-        cols={cols}
-      />
-      {game.away.journeymen.length > 0 &&
-        <TeamTable
-          players={game.away.journeymen}
-          cols={cols}
-        />
-      }
-      {game.starPlayersAway.length > 0 &&
-        <StarPlayerTable stars={game.starPlayersAway} />
-      }
-    </div>
-  </div>;
+  );
 }

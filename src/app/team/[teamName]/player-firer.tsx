@@ -1,9 +1,9 @@
-'use client';
-import Button from 'components/button';
-import type { ReactElement } from 'react';
-import { useEffect, useState } from 'react';
-import { trpc } from 'utils/trpc';
-import useServerMutation from 'utils/use-server-mutation';
+"use client";
+import Button from "components/button";
+import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
+import { trpc } from "utils/trpc";
+import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
   playerId: string;
@@ -26,16 +26,21 @@ export default function PlayerFirer({ playerId }: Props): ReactElement {
 
   const handleFire = (): void => {
     startMutation();
-    void trpc.player.fire.mutate(playerId)
-      .catch(() => { setError(true); })
+    void trpc.player.fire
+      .mutate(playerId)
+      .catch(() => {
+        setError(true);
+      })
       .finally(endMutation);
   };
 
-  if (isMutating)
-    return <>Firing...</>;
+  if (isMutating) return <>Firing...</>;
 
-  if (error)
-    return <>Failed to fire player</>;
+  if (error) return <>Failed to fire player</>;
 
-  return <Button type="button" onClick={handleFire}>Fire!</Button>;
+  return (
+    <Button type="button" onClick={handleFire}>
+      Fire!
+    </Button>
+  );
 }

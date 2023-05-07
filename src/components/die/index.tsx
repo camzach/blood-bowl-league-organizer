@@ -1,19 +1,40 @@
-import type { CSSProperties, ReactElement } from 'react';
-import styles from './styles.module.scss';
+import type { CSSProperties, ReactElement } from "react";
+import styles from "./styles.module.scss";
 
-const regex = /(?<size>\d+(?:.\d+))(?<unit>px|r?em|%|v[hw(min)(max)]|ch|ex|in|cm|mm|pc|pt)/;
+const regex =
+  /(?<size>\d+(?:.\d+))(?<unit>px|r?em|%|v[hw(min)(max)]|ch|ex|in|cm|mm|pc|pt)/;
 
 type Props = {
   size: `${number}${
-    '%' | 'ch' | 'cm' | 'em' | 'ex' | 'in' | 'mm' | 'pc' | 'pt' | 'px' | 'rem' | 'vh' | 'vmax' | 'vmin' | 'vw'
-  }`;
+    | "%"
+    | "ch"
+    | "cm"
+    | "em"
+    | "ex"
+    | "in"
+    | "mm"
+    | "pc"
+    | "pt"
+    | "px"
+    | "rem"
+    | "vh"
+    | "vmax"
+    | "vmin"
+    | "vw"}`;
   result: number;
 };
 
 export function Die({ size: sizeprop, result }: Props): ReactElement {
-  const { size, unit } = regex.exec(sizeprop)?.groups ?? { size: '200', unit: 'px' };
+  const { size, unit } = regex.exec(sizeprop)?.groups ?? {
+    size: "200",
+    unit: "px",
+  };
   return (
-    <div className={styles.scene} role="presentation" style={{ '--sceneSize': `${size}${unit}` } as CSSProperties}>
+    <div
+      className={styles.scene}
+      role="presentation"
+      style={{ "--sceneSize": `${size}${unit}` } as CSSProperties}
+    >
       <div
         className={styles.cube}
         aria-label={`Die showing a ${result}`}

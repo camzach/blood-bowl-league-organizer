@@ -1,9 +1,9 @@
-'use client';
-import classNames from 'classnames';
-import Button from 'components/button';
-import { useState } from 'react';
-import { useController, useForm } from 'react-hook-form';
-import useServerMutation from 'utils/use-server-mutation';
+"use client";
+import classNames from "classnames";
+import Button from "components/button";
+import { useState } from "react";
+import { useController, useForm } from "react-hook-form";
+import useServerMutation from "utils/use-server-mutation";
 
 type Props = { team: string; currentSong?: string; isEditable: boolean };
 
@@ -14,7 +14,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
 
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const { register, handleSubmit, control } = useForm<FormValues>();
-  const { field: fileControl } = useController({ control, name: 'file' });
+  const { field: fileControl } = useController({ control, name: "file" });
   const onSubmit = handleSubmit((data: FormValues) => {
     const formData = new FormData();
     Object.entries(data).forEach(([k, v]) => {
@@ -23,7 +23,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     startMutation();
     setShowForm(false);
     void fetch(`/api/songs/${team}`, {
-      method: 'POST',
+      method: "POST",
       body: formData,
     }).then(() => {
       endMutation();
@@ -36,28 +36,28 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     <>
       <span
         className={classNames([
-          'mx-1 inline-block h-full w-0 border-4 border-transparent',
-          !showForm && 'border-t-black',
-          showForm && 'border-b-black -translate-y-1/3',
+          "mx-1 inline-block h-full w-0 border-4 border-transparent",
+          !showForm && "border-t-black",
+          showForm && "-translate-y-1/3 border-b-black",
         ])}
         onClick={() => {
-          setShowForm(o => !o);
+          setShowForm((o) => !o);
         }}
       />
       <form
-        className={showForm ? undefined : 'hidden'}
-        onSubmit={e => {
+        className={showForm ? undefined : "hidden"}
+        onSubmit={(e) => {
           void onSubmit(e);
         }}
       >
         <input
-          {...register('songName', { required: true })}
+          {...register("songName", { required: true })}
           placeholder="Song name"
         />
         <input
           name={fileControl.name}
           ref={fileControl.ref}
-          onChange={e => {
+          onChange={(e) => {
             if (!e.target.files) return;
             fileControl.onChange(e.target.files[0]);
           }}
@@ -73,7 +73,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     <div>
       {currentSong !== undefined
         ? `Touchdown song: ${currentSong}`
-        : 'No touchdown song selected'}
+        : "No touchdown song selected"}
       {isEditable && editor}
     </div>
   );

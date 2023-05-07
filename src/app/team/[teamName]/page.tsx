@@ -1,19 +1,19 @@
-import { notFound } from 'next/navigation';
-import type { ReactElement } from 'react';
-import { prisma } from 'utils/prisma';
-import React from 'react';
-import { JourneymanManager } from './journeyman-manager';
-import { RedraftManager } from './redraft-manager';
-import { PlayerHirer } from './player-hirer';
-import StaffHirer from './staff-hirer';
-import calculateTV from 'utils/calculate-tv';
-import { getServerSession } from 'next-auth';
-import { authOptions } from 'pages/api/auth/[...nextauth]';
-import AugmentedTeamTable from './augmented-team-table';
-import ReadyTeam from './ready-team';
-import { TeamState } from '@prisma/client/edge';
-import SongControls from './touchdown-song-controls';
-import type { Metadata } from 'next';
+import { notFound } from "next/navigation";
+import type { ReactElement } from "react";
+import { prisma } from "utils/prisma";
+import React from "react";
+import { JourneymanManager } from "./journeyman-manager";
+import { RedraftManager } from "./redraft-manager";
+import { PlayerHirer } from "./player-hirer";
+import StaffHirer from "./staff-hirer";
+import calculateTV from "utils/calculate-tv";
+import { getServerSession } from "next-auth";
+import { authOptions } from "pages/api/auth/[...nextauth]";
+import AugmentedTeamTable from "./augmented-team-table";
+import ReadyTeam from "./ready-team";
+import { TeamState } from "@prisma/client/edge";
+import SongControls from "./touchdown-song-controls";
+import type { Metadata } from "next";
 
 type Props = { params: { teamName: string } };
 
@@ -26,56 +26,73 @@ async function fetchTeam(teamName: string) {
     where: { name: teamName },
     include: {
       roster: { include: { positions: true } },
-      players: { include: { skills: { include: { faq: true } }, position: true } },
-      journeymen: { include: { skills: { include: { faq: true } }, position: true } },
-      redrafts: { include: { skills: { include: { faq: true } }, position: true } },
+      players: {
+        include: { skills: { include: { faq: true } }, position: true },
+      },
+      journeymen: {
+        include: { skills: { include: { faq: true } }, position: true },
+      },
+      redrafts: {
+        include: { skills: { include: { faq: true } }, position: true },
+      },
       touchdownSong: { select: { name: true } },
     },
   });
 }
-export type FetchedTeamType = NonNullable<Awaited<ReturnType<typeof fetchTeam>>>;
+export type FetchedTeamType = NonNullable<
+  Awaited<ReturnType<typeof fetchTeam>>
+>;
 
-export default async function TeamPage({ params: { teamName } }: Props): Promise<ReactElement> {
+export default async function TeamPage({
+  params: { teamName },
+}: Props): Promise<ReactElement> {
   const team = await fetchTeam(decodeURIComponent(teamName));
   const skills = await prisma.skill.findMany({});
   const session = await getServerSession(authOptions);
 
-  if (!team)
-    return notFound();
+  if (!team) return notFound();
 
-  const allowHiring = (team.state === TeamState.Draft || team.state === TeamState.PostGame) &&
-                     (session?.user.teams?.includes(team.name) ?? false);
+  const allowHiring =
+    (team.state === TeamState.Draft || team.state === TeamState.PostGame) &&
+    (session?.user.teams?.includes(team.name) ?? false);
 
-  const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1)
-    .filter(n => !team.players.some(p => p.number === n));
+  const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(
+    (n) => !team.players.some((p) => p.number === n)
+  );
 
   return (
     <section>
       <h1 className="text-4xl">{team.name}</h1>
-      <div className="flex flex-col text-lg my-4">
+      <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
-        <span>Current TV - {calculateTV({
-          ...team,
-          players: team.players.filter(p => !p.missNextGame),
-        }).toLocaleString()}</span>
+        <span>
+          Current TV -{" "}
+          {calculateTV({
+            ...team,
+            players: team.players.filter((p) => !p.missNextGame),
+          }).toLocaleString()}
+        </span>
       </div>
       Treasury -- {team.treasury}
       <br />
-      Dedicated Fans -- {team.state === TeamState.Draft && allowHiring
-        ? <StaffHirer
-          title={'Dedicated Fans'}
-          type={'dedicatedFans'}
+      Dedicated Fans --{" "}
+      {team.state === TeamState.Draft && allowHiring ? (
+        <StaffHirer
+          title={"Dedicated Fans"}
+          type={"dedicatedFans"}
           current={team.dedicatedFans}
           cost={10_000}
           teamName={team.name}
           treasury={team.treasury}
           max={6}
         />
-        : team.dedicatedFans}
+      ) : (
+        team.dedicatedFans
+      )}
       <SongControls
         team={team.name}
         currentSong={team.touchdownSong?.name}
-        isEditable={(session?.user.teams.includes(team.name) ?? false)}
+        isEditable={session?.user.teams.includes(team.name) ?? false}
       />
       <AugmentedTeamTable
         players={team.players}
@@ -83,29 +100,36 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
         allowHiring={allowHiring}
         allowSPP={team.state === TeamState.PostGame}
       />
-      {allowHiring && <PlayerHirer
-        positions={team.roster.positions.filter(pos =>
-          team.players.filter(p => p.position.name === pos.name).length < pos.max)}
-        treasury={team.treasury}
-        freeNumbers={freeNumbers}
-        teamName={team.name}
-      />}
-      {team.journeymen.length > 0 &&
+      {allowHiring && (
+        <PlayerHirer
+          positions={team.roster.positions.filter(
+            (pos) =>
+              team.players.filter((p) => p.position.name === pos.name).length <
+              pos.max
+          )}
+          treasury={team.treasury}
+          freeNumbers={freeNumbers}
+          teamName={team.name}
+        />
+      )}
+      {team.journeymen.length > 0 && (
         <JourneymanManager
           players={team.journeymen}
           freeNumbers={freeNumbers}
           teamName={team.name}
           allowHiring={allowHiring}
           skills={skills}
-        />}
-      {team.state === TeamState.Draft && team.redrafts.length > 0 &&
+        />
+      )}
+      {team.state === TeamState.Draft && team.redrafts.length > 0 && (
         <RedraftManager
           players={team.redrafts}
           freeNumbers={freeNumbers}
           teamName={team.name}
           allowHiring={allowHiring}
           skills={skills}
-        />}
+        />
+      )}
       <table>
         <thead>
           <tr>
@@ -118,19 +142,28 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
         <tbody>
           <tr>
             <td>Rerolls</td>
-            <td>{team.roster.rerollCost.toLocaleString()} / {(team.roster.rerollCost * 2).toLocaleString()}</td>
             <td>
-              {allowHiring
-                ? <StaffHirer
+              {team.roster.rerollCost.toLocaleString()} /{" "}
+              {(team.roster.rerollCost * 2).toLocaleString()}
+            </td>
+            <td>
+              {allowHiring ? (
+                <StaffHirer
                   teamName={team.name}
-                  type={'rerolls'}
-                  title={'Rerolls'}
+                  type={"rerolls"}
+                  title={"Rerolls"}
                   treasury={team.treasury}
                   current={team.rerolls}
-                  cost={team.state === TeamState.Draft ? team.roster.rerollCost : team.roster.rerollCost * 2}
+                  cost={
+                    team.state === TeamState.Draft
+                      ? team.roster.rerollCost
+                      : team.roster.rerollCost * 2
+                  }
                   max={6}
                 />
-                : team.rerolls}
+              ) : (
+                team.rerolls
+              )}
             </td>
             <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>
           </tr>
@@ -138,17 +171,19 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
             <td>Assistant Coaches</td>
             <td>10,000</td>
             <td>
-              {allowHiring
-                ? <StaffHirer
+              {allowHiring ? (
+                <StaffHirer
                   teamName={team.name}
-                  type={'assistantCoaches'}
-                  title={'Assistant Coaches'}
+                  type={"assistantCoaches"}
+                  title={"Assistant Coaches"}
                   treasury={team.treasury}
                   current={team.assistantCoaches}
                   cost={10_000}
                   max={10}
                 />
-                : team.assistantCoaches}
+              ) : (
+                team.assistantCoaches
+              )}
             </td>
             <td>{(team.assistantCoaches * 10000).toLocaleString()}</td>
           </tr>
@@ -156,17 +191,19 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
             <td>Cheerleaders</td>
             <td>10,000</td>
             <td>
-              {allowHiring
-                ? <StaffHirer
+              {allowHiring ? (
+                <StaffHirer
                   teamName={team.name}
-                  type={'cheerleaders'}
-                  title={'Cheerleaders'}
+                  type={"cheerleaders"}
+                  title={"Cheerleaders"}
                   treasury={team.treasury}
                   current={team.cheerleaders}
                   cost={10_000}
                   max={10}
                 />
-                : team.cheerleaders}
+              ) : (
+                team.cheerleaders
+              )}
             </td>
             <td>{team.cheerleaders * 10000}</td>
           </tr>
@@ -174,25 +211,29 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
             <td>Apothecary</td>
             <td>50,000</td>
             <td>
-              {allowHiring
-                ? <StaffHirer
+              {allowHiring ? (
+                <StaffHirer
                   teamName={team.name}
-                  type={'apothecary'}
-                  title={'Apothecary'}
+                  type={"apothecary"}
+                  title={"Apothecary"}
                   current={Number(team.apothecary)}
                   cost={50_000}
                   treasury={team.treasury}
                   max={1}
                 />
-                : <input type="checkbox" checked={team.apothecary} disabled></input>}
+              ) : (
+                <input
+                  type="checkbox"
+                  checked={team.apothecary}
+                  disabled
+                ></input>
+              )}
             </td>
             <td>{(team.apothecary ? 50_000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
-      {allowHiring &&
-        <ReadyTeam team={team.name} />
-      }
+      {allowHiring && <ReadyTeam team={team.name} />}
     </section>
   );
 }
