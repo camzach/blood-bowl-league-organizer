@@ -1,13 +1,15 @@
-import Button from 'components/button';
-import type { ReactElement } from 'react';
-import { useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-import type { trpc } from 'utils/trpc';
+import Button from "components/button";
+import type { ReactElement } from "react";
+import { useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import type { trpc } from "utils/trpc";
 
-type SPPType = keyof Parameters<typeof trpc['game']['end']['mutate']>[0]['starPlayerPoints'][string];
+type SPPType = keyof Parameters<
+  (typeof trpc)["game"]["end"]["mutate"]
+>[0]["starPlayerPoints"][string];
 type PlayerType = { id: string; name: string | null; number: number };
 type FormValues = {
-  team: 'home' | 'away';
+  team: "home" | "away";
   player: string;
   type: SPPType;
 };
@@ -17,17 +19,23 @@ type Props = {
     player: { name: string | null; id: string },
     type: SPPType
   ) => void;
-} & Record<'home' | 'away', Record<'players' | 'journeymen', PlayerType[]>>;
+} & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
 
-export default function SPPButton({ home, away, onSubmit }: Props): ReactElement {
+export default function SPPButton({
+  home,
+  away,
+  onSubmit,
+}: Props): ReactElement {
   const ref = useRef<HTMLDialogElement>(null);
-  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({ defaultValues: { team: 'home' } });
+  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
+    defaultValues: { team: "home" },
+  });
 
-  const team = watch('team');
-  const { players, journeymen } = team === 'home' ? home : away;
+  const team = watch("team");
+  const { players, journeymen } = team === "home" ? home : away;
 
   useEffect(() => {
-    setValue('player', [...players, ...journeymen][0].id);
+    setValue("player", [...players, ...journeymen][0].id);
   }, [journeymen, players, setValue]);
 
   const openModal = (): void => {
@@ -35,45 +43,63 @@ export default function SPPButton({ home, away, onSubmit }: Props): ReactElement
   };
 
   const onSubmitForm = handleSubmit(({ player, type }) => {
-    const targetPlayer = [...journeymen, ...players].find(p => p.id === player)!;
+    const targetPlayer = [...journeymen, ...players].find(
+      (p) => p.id === player
+    )!;
     onSubmit(targetPlayer, type);
     ref.current?.close();
   });
 
-  return <>
-    <dialog ref={ref}>
-      <label>
-        Team:
-        <select {...register('team')}>
-          <option>home</option>
-          <option>away</option>
-        </select>
-      </label>
-      <br/>
-      <label>
-        Player:
-        <select {...register('player')}>
-          <optgroup label="Rostered">
-            {players.map(p => <option value={p.id} key={p.id}>{p.name ?? p.number}</option>)}
-          </optgroup>
-          <optgroup label="Journeymen">
-            {journeymen.map(p => <option value={p.id} key={p.id}>{p.name ?? p.number}</option>)}
-          </optgroup>
-        </select>
-      </label>
-      <br/>
-      <label>
-        Type of SPP:
-        <select {...register('type')}>
-          <option value="casualties">Casualty</option>
-          <option value="deflections">Deflection</option>
-          <option value="interceptions">Interception</option>
-          <option value="completions">Completion</option>
-          <option value="otherSPP">Misc.</option>
-        </select>
-      </label>
-      <Button onClick={() => { void onSubmitForm(); }}>Done</Button>
-    </dialog>
-    <Button onClick={openModal}>Other SPP</Button>
-  </>;
+  return (
+    <>
+      <dialog ref={ref}>
+        <label>
+          Team:
+          <select {...register("team")}>
+            <option>home</option>
+            <option>away</option>
+          </select>
+        </label>
+        <br />
+        <label>
+          Player:
+          <select {...register("player")}>
+            <optgroup label="Rostered">
+              {players.map((p) => (
+                <option value={p.id} key={p.id}>
+                  {p.name ?? p.number}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Journeymen">
+              {journeymen.map((p) => (
+                <option value={p.id} key={p.id}>
+                  {p.name ?? p.number}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+        </label>
+        <br />
+        <label>
+          Type of SPP:
+          <select {...register("type")}>
+            <option value="casualties">Casualty</option>
+            <option value="deflections">Deflection</option>
+            <option value="interceptions">Interception</option>
+            <option value="completions">Completion</option>
+            <option value="otherSPP">Misc.</option>
+          </select>
+        </label>
+        <Button
+          onClick={() => {
+            void onSubmitForm();
+          }}
+        >
+          Done
+        </Button>
+      </dialog>
+      <Button onClick={openModal}>Other SPP</Button>
+    </>
+  );
 }

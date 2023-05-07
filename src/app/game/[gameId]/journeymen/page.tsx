@@ -1,8 +1,8 @@
-import { Prisma } from '@prisma/client/edge';
-import { notFound, redirect } from 'next/navigation';
-import type { ReactElement } from 'react';
-import { prisma } from 'utils/prisma';
-import Content from './content';
+import { Prisma } from "@prisma/client/edge";
+import { notFound, redirect } from "next/navigation";
+import type { ReactElement } from "react";
+import { prisma } from "utils/prisma";
+import Content from "./content";
 import TeamArgs = Prisma.TeamArgs;
 
 const teamFields = {
@@ -24,7 +24,9 @@ type Props = {
   params: { gameId: string };
 };
 
-export default async function Journeymen({ params: { gameId } }: Props): Promise<ReactElement> {
+export default async function Journeymen({
+  params: { gameId },
+}: Props): Promise<ReactElement> {
   const game = await prisma.game.findUnique({
     where: { id: decodeURIComponent(gameId) },
     select: {
@@ -33,10 +35,9 @@ export default async function Journeymen({ params: { gameId } }: Props): Promise
       state: true,
     },
   });
-  if (!game)
-    return notFound();
+  if (!game) return notFound();
 
-  if (game.state !== 'Journeymen')
+  if (game.state !== "Journeymen")
     redirect(`game/${gameId}/${game.state.toLowerCase()}`);
 
   return (

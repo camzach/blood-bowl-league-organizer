@@ -1,19 +1,21 @@
-import SessionProvider from 'components/session-provider-client';
-import { getServerSession } from 'next-auth';
-import Link from 'components/link';
-import { authOptions } from 'pages/api/auth/[...nextauth]';
-import type { PropsWithChildren, ReactElement } from 'react';
-import PasswordChangeNotif from './password-change-notif';
-import './global.css';
-import type { Metadata } from 'next';
-import Tooltip from 'components/tooltip';
+import SessionProvider from "components/session-provider-client";
+import { getServerSession } from "next-auth";
+import Link from "components/link";
+import { authOptions } from "pages/api/auth/[...nextauth]";
+import type { PropsWithChildren, ReactElement } from "react";
+import PasswordChangeNotif from "./password-change-notif";
+import "./global.css";
+import type { Metadata } from "next";
+import Tooltip from "components/tooltip";
 
 export const metadata: Metadata = {
-  title: { template: '%s | BBLO', absolute: 'BBLO' },
-  description: 'Blood Bowl League Organizer',
+  title: { template: "%s | BBLO", absolute: "BBLO" },
+  description: "Blood Bowl League Organizer",
 };
 
-export default async function RootLayout({ children }: PropsWithChildren): Promise<ReactElement> {
+export default async function RootLayout({
+  children,
+}: PropsWithChildren): Promise<ReactElement> {
   const session = await getServerSession(authOptions);
 
   return (

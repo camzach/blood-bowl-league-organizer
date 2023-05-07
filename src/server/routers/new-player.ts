@@ -1,4 +1,4 @@
-import type { Position, Prisma, Skill } from '@prisma/client/edge';
+import type { Position, Prisma, Skill } from "@prisma/client/edge";
 
 export function newPlayer(
   position: Position & { skills: Skill[] },
@@ -13,7 +13,7 @@ export function newPlayer(
     ST: position.ST,
     AV: position.AV,
     teamValue: position.cost,
-    skills: { connect: position.skills.map(s => ({ name: s.name })) },
+    skills: { connect: position.skills.map((s) => ({ name: s.name })) },
     name: playerName,
     position: { connect: { id: position.id } },
     primary: position.primary,

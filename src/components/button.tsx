@@ -1,7 +1,7 @@
-import classNames from 'classnames';
-import type { ComponentProps } from 'react';
+import classNames from "classnames";
+import type { ComponentProps } from "react";
 
-export default function Button(props: ComponentProps<'button'>) {
+export default function Button(props: ComponentProps<"button">) {
   return (
     <button
       {...props}

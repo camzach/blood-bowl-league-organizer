@@ -1,9 +1,13 @@
-import type { PropsWithChildren, ReactElement } from 'react';
-import { prisma } from 'utils/prisma';
+import type { PropsWithChildren, ReactElement } from "react";
+import { prisma } from "utils/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { gameId: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { gameId: string };
+}) {
   const game = await prisma.game.findUniqueOrThrow({
     where: { id: params.gameId },
     select: { homeTeamName: true, awayTeamName: true },
