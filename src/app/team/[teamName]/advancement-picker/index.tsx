@@ -4,6 +4,7 @@ import { useRef } from "react";
 import type { FetchedTeamType } from "../page";
 import { Popup, advancementCosts } from "./popup";
 import Button from "components/button";
+import Dialog from "components/dialog";
 
 type Props = {
   player: FetchedTeamType["players"][number];
@@ -23,14 +24,14 @@ export default function AdvancementPicker({
 
   return (
     <>
-      <dialog ref={dialogRef}>
+      <Dialog ref={dialogRef}>
         <Popup
           player={player}
           rosterPlayer={rosterPlayer}
           skills={skills}
           onHide={(): void => dialogRef.current?.close()}
         />
-      </dialog>
+      </Dialog>
       <Button
         onClick={(): void => dialogRef.current?.showModal()}
         disabled={!canAdvance}

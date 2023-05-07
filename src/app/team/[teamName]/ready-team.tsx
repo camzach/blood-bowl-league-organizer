@@ -1,9 +1,10 @@
 "use client";
 import Button from "components/button";
+import Dialog from "components/dialog";
 import { Die } from "components/die";
 import { useRouter } from "next/navigation";
 import type { ReactElement, ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -29,7 +30,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
 
   return (
     <>
-      <dialog ref={popup}>
+      <Dialog ref={popup}>
         {((): ReactNode => {
           switch (response) {
             case null:
@@ -53,7 +54,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
               );
           }
         })()}
-      </dialog>
+      </Dialog>
       {isMutating ? (
         "Submitting..."
       ) : (

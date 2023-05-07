@@ -1,4 +1,5 @@
 import Button from "components/button";
+import Dialog from "components/dialog";
 import type { ReactElement } from "react";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -38,7 +39,7 @@ export default function TDButton({
 
   return (
     <>
-      <dialog ref={ref}>
+      <Dialog ref={ref}>
         <label>
           Scored By:
           <select {...register("scoredBy")}>
@@ -67,7 +68,7 @@ export default function TDButton({
         >
           Done
         </Button>
-      </dialog>
+      </Dialog>
       <Button onClick={openModal}>TD {team}</Button>
     </>
   );

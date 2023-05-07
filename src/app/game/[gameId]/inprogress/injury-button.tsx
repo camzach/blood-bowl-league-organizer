@@ -1,4 +1,5 @@
 import Button from "components/button";
+import Dialog from "components/dialog";
 import type { ReactElement } from "react";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -101,7 +102,7 @@ export default function InjuryButton({
 
   return (
     <>
-      <dialog ref={ref}>
+      <Dialog ref={ref}>
         <label>
           Injured Player&apos;s team:
           <select {...register("injuredTeam")}>
@@ -184,7 +185,7 @@ export default function InjuryButton({
         >
           Done
         </Button>
-      </dialog>
+      </Dialog>
       <Button onClick={openModal}>Booboo</Button>
     </>
   );
