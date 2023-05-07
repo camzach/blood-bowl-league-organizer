@@ -18,20 +18,20 @@ export function PlayButton({ gameId }: { gameId: string }): ReactElement {
     return (
       <>
         <span className="text-4xl">
-          <Die result={response.fairweatherFansHome} size={"1.5em"} />+
+          <Die result={response.fairweatherFansHome} />+
           {response.fanFactorHome - response.fairweatherFansHome}=
           {response.fanFactorHome}
         </span>
         <br />
         <span className="text-4xl">
-          <Die result={response.fairweatherFansAway} size={"1.5em"} />+
+          <Die result={response.fairweatherFansAway} />+
           {response.fanFactorAway - response.fairweatherFansAway}=
           {response.fanFactorAway}
         </span>
         <br />
         <span className="text-4xl">
-          <Die result={response.weatherRoll[0]} size={"1.5em"} />
-          <Die result={response.weatherRoll[1]} size={"1.5em"} />
+          <Die result={response.weatherRoll[0]} />
+          <Die result={response.weatherRoll[1]} />
           {"=>"}
           {response.weatherResult}
         </span>

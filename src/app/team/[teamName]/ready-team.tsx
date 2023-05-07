@@ -38,7 +38,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
             default:
               return (
                 <>
-                  <Die result={response.expensiveMistakeRoll} size="2em" />
+                  <Die result={response.expensiveMistakeRoll} />
                   {response.expensiveMistake} - Lost{" "}
                   {response.expensiveMistakesCost} gold!
                   <Button
