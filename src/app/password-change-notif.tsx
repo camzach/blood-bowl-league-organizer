@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "components/button";
+import Dialog from "components/dialog";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
@@ -40,7 +41,7 @@ export default function PasswordChangeNotif({
   };
 
   return (
-    <dialog
+    <Dialog
       ref={ref}
       onCancel={(e): void => {
         e.preventDefault();
@@ -78,6 +79,6 @@ export default function PasswordChangeNotif({
           <br />A problem occurred, please try again
         </>
       )}
-    </dialog>
+    </Dialog>
   );
 }

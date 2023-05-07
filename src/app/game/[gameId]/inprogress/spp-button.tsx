@@ -1,4 +1,5 @@
 import Button from "components/button";
+import Dialog from "components/dialog";
 import type { ReactElement } from "react";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -52,7 +53,7 @@ export default function SPPButton({
 
   return (
     <>
-      <dialog ref={ref}>
+      <Dialog ref={ref}>
         <label>
           Team:
           <select {...register("team")}>
@@ -98,7 +99,7 @@ export default function SPPButton({
         >
           Done
         </Button>
-      </dialog>
+      </Dialog>
       <Button onClick={openModal}>Other SPP</Button>
     </>
   );
