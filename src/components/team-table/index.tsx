@@ -1,7 +1,6 @@
 import React from 'react';
 import { Player } from './player';
 import { cols } from './cols';
-import styles from './styles.module.scss';
 
 export type PlayerType = {
   id: string;
@@ -33,8 +32,8 @@ export function TeamTable<T extends PlayerType>({
   cols: displayCols = [...cols],
 }: TeamTableProps<T>): React.ReactElement {
   return (
-    <table className={styles.table}>
-      <thead>
+    <table className="border-collapse">
+      <thead className="sticky top-1 bg-gray-400">
         <tr>
           {displayCols.map(col => {
             const colname = typeof col === 'string' ? col : col.name;
@@ -42,7 +41,15 @@ export function TeamTable<T extends PlayerType>({
           })}
         </tr>
       </thead>
-      <tbody>
+      <tbody
+        className={`
+        [&>tr:not(:first-child)]:border-t-2 [&>tr:not(:first-child)]:border-t-gray-400
+        [&_td:not(:first-child)]:border-l-2 [&_td:not(:first-child)]:border-l-gray-200
+        [&_td]:p-0.5
+        [&_td]:px-2
+        [&>tr:hover]:bg-orange-200
+      `}
+      >
         {players
           .sort((a, b) => a.number - b.number)
           .map(player => (

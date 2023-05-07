@@ -1,5 +1,6 @@
 'use client';
-import Link from 'next/link';
+import Button from 'components/button';
+import Link from 'components/link';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { trpc } from 'utils/trpc';
@@ -17,6 +18,35 @@ type Props = {
   home: TeamWithChoices;
   away: TeamWithChoices;
 };
+
+function ChoicesList(props: {
+  teamName: string; needed: number;
+  onSelect: (choice: string) => void;
+  value?: string;
+  choices: Array<{ id: string; name: string }>;
+}) {
+  const { teamName, needed, onSelect, value, choices } = props;
+  return <>
+    <h1>
+      {teamName} - Need {needed} Journeymen
+    </h1>
+    {choices.map(choice => (
+      <label key={choice.id}>
+        <input
+          type="radio"
+          name={teamName}
+          value={choice.name}
+          checked={value === choice.name}
+          className="mr-2"
+          onChange={(e): void => {
+            onSelect(e.target.value);
+          }}
+        />
+        {choice.name}
+      </label>
+    ))}
+  </>;
+}
 
 export default function Journeymen({ home, away, gameId }: Props): ReactElement {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
@@ -40,49 +70,25 @@ export default function Journeymen({ home, away, gameId }: Props): ReactElement 
   return (
     <>
       {home.needed > 0 &&
-        <>
-          <h1>
-            {home.name} - Need {home.needed} Journeymen
-          </h1>
-          {home.choices.map(choice => (
-            <label key={choice.id}>
-              <input
-                type="radio"
-                name="home"
-                value={choice.name}
-                checked={homeChoice === choice.name}
-                onChange={(e): void => {
-                  setHomeChoice(e.target.value);
-                }}
-              />
-              {choice.name}
-            </label>
-          ))}
-        </>
+        <ChoicesList
+          teamName={home.name}
+          needed={home.needed}
+          value={homeChoice}
+          choices={home.choices}
+          onSelect={setHomeChoice}
+        />
       }
       {away.needed > 0 &&
-        <>
-          <h1>
-            {away.name} - Need {away.needed} Journeymen
-          </h1>
-          {away.choices.map(choice => (
-            <label key={choice.id}>
-              <input
-                type="radio"
-                name="away"
-                value={choice.name}
-                checked={awayChoice === choice.name}
-                onChange={(e): void => {
-                  setAwayChoice(e.target.value);
-                }}
-              />
-              {choice.name}
-            </label>
-          ))}
-        </>
+        <ChoicesList
+          teamName={away.name}
+          needed={away.needed}
+          value={awayChoice}
+          choices={away.choices}
+          onSelect={setAwayChoice}
+        />
       }
       <br/>
-      <button onClick={submitJourneymen}>Submit!</button>
+      <Button onClick={submitJourneymen}>Submit!</Button>
     </>
   );
 }

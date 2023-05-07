@@ -53,13 +53,8 @@ export default async function TeamPage({ params: { teamName } }: Props): Promise
 
   return (
     <section>
-      <h1>{team.name}</h1>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        fontSize: '1.2em',
-        marginBlock: '1em',
-      }}>
+      <h1 className="text-4xl">{team.name}</h1>
+      <div className="flex flex-col text-lg my-4">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
         <span>Current TV - {calculateTV({
           ...team,

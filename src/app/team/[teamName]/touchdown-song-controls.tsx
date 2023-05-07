@@ -1,4 +1,6 @@
 'use client';
+import classNames from 'classnames';
+import Button from 'components/button';
 import { useState } from 'react';
 import { useController, useForm } from 'react-hook-form';
 import useServerMutation from 'utils/use-server-mutation';
@@ -30,45 +32,49 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
 
   if (isMutating) return <div>Submitting song...</div>;
 
-  const editor = <>
-    <span
-      style={{
-        height: 0,
-        width: 0,
-        border: '5px solid transparent',
-        borderTopColor: !showForm ? 'black' : 'transparent',
-        borderBottomColor: showForm ? 'black' : 'transparent',
-        transform: `translateY(${showForm ? '-10%' : '33%'})`,
-        marginInline: '1ch',
-        display: 'inline-block',
-      }}
-      onClick={() => {
-        setShowForm(o => !o);
-      }}
-    />
-    <form
-      onSubmit={e => {
-        void onSubmit(e);
-      }}
-      style={{ display: showForm ? undefined : 'none' }}
-    >
-      <input {...register('songName', { required: true })} placeholder="Song name" />
-      <input
-        name={fileControl.name}
-        ref={fileControl.ref}
-        onChange={e => {
-          if (!e.target.files) return;
-          fileControl.onChange(e.target.files[0]);
+  const editor = (
+    <>
+      <span
+        className={classNames([
+          'mx-1 inline-block h-full w-0 border-4 border-transparent',
+          !showForm && 'border-t-black',
+          showForm && 'border-b-black -translate-y-1/3',
+        ])}
+        onClick={() => {
+          setShowForm(o => !o);
         }}
-        type="file"
-        accept="audio/*"
       />
-      <button type="submit">Submit</button>
-    </form>
-  </>;
+      <form
+        className={showForm ? undefined : 'hidden'}
+        onSubmit={e => {
+          void onSubmit(e);
+        }}
+      >
+        <input
+          {...register('songName', { required: true })}
+          placeholder="Song name"
+        />
+        <input
+          name={fileControl.name}
+          ref={fileControl.ref}
+          onChange={e => {
+            if (!e.target.files) return;
+            fileControl.onChange(e.target.files[0]);
+          }}
+          type="file"
+          accept="audio/*"
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </>
+  );
 
-  return <div>
-    {currentSong !== undefined ? `Touchdown song: ${currentSong}` : 'No touchdown song selected'}
-    {isEditable && editor}
-  </div>;
+  return (
+    <div>
+      {currentSong !== undefined
+        ? `Touchdown song: ${currentSong}`
+        : 'No touchdown song selected'}
+      {isEditable && editor}
+    </div>
+  );
 }

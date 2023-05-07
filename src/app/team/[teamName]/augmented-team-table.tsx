@@ -51,7 +51,7 @@ export default function AugmentedTeamTable({
     cols[cols.indexOf('#')] = {
       name: '#',
       render: player => (
-        <td key="#" style={{ width: '2ch' }}>
+        <td key="#" className=" w-min">
           <PlayerNumberSelector number={player.number} id={player.id} />
         </td>
       ),

@@ -11,6 +11,7 @@ import SPPButton from './spp-button';
 import TDButton from './touchdown-button';
 import { Fireworks } from 'fireworks-js';
 import { getSession } from 'next-auth/react';
+import Button from 'components/button';
 
 type NameAndId = { id: string; name: string | null };
 type InputType = ProcedureInputs<'game', 'end'>;
@@ -207,13 +208,11 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
       addSPP(options.by, 'casualties');
   };
 
-  return <div style={{ position: 'relative' }}>
-    <canvas ref={fireworksCanvas} style={{
-      position: 'absolute',
-      height: '500px',
-      width: '50dvh',
-      pointerEvents: 'none',
-    }} />
+  return <div className="relative text-center w-full">
+    <canvas
+      ref={fireworksCanvas}
+      className="absolute h-[500px] w-full pointer-events-none"
+    />
     {touchdowns[0]} - {touchdowns[1]}
     <br/>
     <TDButton team={home.name} {...home} onSubmit={(player): void => { onTD('home', player); }} />
@@ -243,7 +242,7 @@ export default function ScoreWidget({ home, away, gameId }: Props): ReactElement
         </>);
       }
       if (submissionResult === 'success') return 'Success! Good game!';
-      return <button onClick={submit}>Done</button>;
+      return <Button onClick={submit}>Done</Button>;
     })()}
     <br/>
     <pre>{JSON.stringify(playerUpdates, null, 2)}</pre>

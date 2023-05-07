@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client/edge';
 import { TeamTable } from 'components/team-table';
 import type { ComponentProps, ReactElement } from 'react';
 import { prisma } from 'utils/prisma';
-import styles from './styles.module.scss';
 import TeamArgs = Prisma.TeamArgs;
 import PlayerFindManyArgs = Prisma.PlayerFindManyArgs;
 import StarPlayerArgs = Prisma.StarPlayerArgs;
@@ -54,8 +53,11 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
   if (!game)
     return notFound();
 
-  return <div className={styles.layout}>
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+  return <div
+    className="grid grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,3fr)] gap-3 w-4/5 mx-auto"
+    style={{ placeItems: 'start center' }}
+  >
+    <div className="flex flex-col w-full">
       <TeamTable
         players={game.home.players}
         cols={cols}
@@ -85,7 +87,7 @@ export default async function InProgress({ params: { gameId } }: Props): Promise
         journeymen: game.away.journeymen.sort((a, b) => a.number - b.number),
       }}
     />
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="flex flex-col w-full">
       <TeamTable
         players={game.away.players}
         cols={cols}

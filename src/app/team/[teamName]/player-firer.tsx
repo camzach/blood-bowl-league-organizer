@@ -1,4 +1,5 @@
 'use client';
+import Button from 'components/button';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { trpc } from 'utils/trpc';
@@ -37,5 +38,5 @@ export default function PlayerFirer({ playerId }: Props): ReactElement {
   if (error)
     return <>Failed to fire player</>;
 
-  return <button type="button" onClick={handleFire}>Fire!</button>;
+  return <Button type="button" onClick={handleFire}>Fire!</Button>;
 }

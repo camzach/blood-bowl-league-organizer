@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { useRef } from 'react';
 import type { FetchedTeamType } from '../page';
 import { Popup, advancementCosts } from './popup';
+import Button from 'components/button';
 
 type Props = {
   player: FetchedTeamType['players'][number];
@@ -24,11 +25,11 @@ export default function AdvancementPicker({ player, rosterPlayer, skills }: Prop
         onHide={(): void => dialogRef.current?.close()}
       />
     </dialog>
-    <button
+    <Button
       onClick={(): void => dialogRef.current?.showModal()}
       disabled={!canAdvance}
     >
       Spend SPP
-    </button>
+    </Button>
   </>;
 }

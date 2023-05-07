@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import type { Position } from '@prisma/client/edge';
 import { trpc } from 'utils/trpc';
 import useServerMutation from 'utils/use-server-mutation';
+import Button from 'components/button';
 
 type Props = {
   positions: Position[];
@@ -82,7 +83,7 @@ export function PlayerHirer({ positions, treasury, freeNumbers, teamName }: Prop
           </option>
         ))}
       </select>
-      <button type="button" onClick={hirePlayer}>HIRE!!!</button>
+      <Button type="button" onClick={hirePlayer}>HIRE!!!</Button>
     </>
   );
 }

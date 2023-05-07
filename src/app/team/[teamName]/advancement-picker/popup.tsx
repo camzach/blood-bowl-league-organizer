@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { trpc } from 'utils/trpc';
 import type { FetchedTeamType } from '../page';
+import Button from 'components/button';
 
 export const advancementCosts = {
   'Random Primary': [3, 4, 6, 8, 10, 15],
@@ -189,7 +190,7 @@ export function Popup({
               </option>
             ))}
           </select>
-          <button type="button" onClick={handleUpgrade}>Spin!</button>
+          <Button type="button" onClick={handleUpgrade}>Spin!</Button>
         </React.Fragment>}
       {type.startsWith('Chosen') && (
         <React.Fragment key={type}>
@@ -204,7 +205,7 @@ export function Popup({
               </optgroup>
             ))}
           </select>
-          <button type="button" onClick={handleUpgrade}>Confirm</button>
+          <Button type="button" onClick={handleUpgrade}>Confirm</Button>
         </React.Fragment>
       )}
       {type === 'Characteristic Improvement' && (
@@ -231,13 +232,13 @@ export function Popup({
                     </select>
                   )}
                   <span>
-                    {idx !== 0 && <button type="button" onClick={handleReorder('up', idx)}>Up</button>}
-                    {idx !== arr.length - 1 && <button type="button" onClick={handleReorder('down', idx)}>Down</button>}
+                    {idx !== 0 && <Button type="button" onClick={handleReorder('up', idx)}>Up</Button>}
+                    {idx !== arr.length - 1 && <Button type="button" onClick={handleReorder('down', idx)}>Down</Button>}
                   </span>
                 </li>
               ))}
           </ol>
-          <button type="button" onClick={handleUpgrade}>Spin!</button>
+          <Button type="button" onClick={handleUpgrade}>Spin!</Button>
         </React.Fragment>
       )}
     </>

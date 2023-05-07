@@ -1,5 +1,6 @@
 'use client';
 
+import Button from 'components/button';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-duplicate-imports
@@ -61,7 +62,7 @@ export default function PasswordChangeNotif({ name: coachName }: Props): ReactEl
       }}
     />
     <br/>
-    {loading ? 'Resetting...' : <button onClick={submitForm} disabled={password !== confirmPassword}>Submit</button>}
+    {loading ? 'Resetting...' : <Button onClick={submitForm} disabled={password !== confirmPassword}>Submit</Button>}
     {!loading && error && <><br/>A problem occurred, please try again</>}
   </dialog>;
 }

@@ -1,5 +1,7 @@
-@import url('../../node_modules/normalize.css/normalize.css');
 @import url('../../node_modules/react-tooltip/dist/react-tooltip.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   margin: 0;
