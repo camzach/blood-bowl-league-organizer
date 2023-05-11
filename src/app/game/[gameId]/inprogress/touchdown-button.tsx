@@ -9,6 +9,7 @@ type NameAndId = { name: string | null; id: string };
 type Props = {
   team: string;
   onSubmit: (player?: NameAndId) => void;
+  className?: string;
 } & Record<
   "players" | "journeymen",
   Array<{ id: string; name: string | null; number: number }>
@@ -23,6 +24,7 @@ export default function TDButton({
   journeymen,
   team,
   onSubmit,
+  className,
 }: Props): ReactElement {
   const { register, handleSubmit } = useForm<FormValues>();
   const ref = useRef<HTMLDialogElement>(null);
@@ -69,7 +71,9 @@ export default function TDButton({
           Done
         </Button>
       </Dialog>
-      <Button onClick={openModal}>TD {team}</Button>
+      <Button onClick={openModal} className={className}>
+        TD {team}
+      </Button>
     </>
   );
 }

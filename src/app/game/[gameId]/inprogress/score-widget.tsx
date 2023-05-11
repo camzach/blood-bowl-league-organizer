@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { MutableRefObject, ReactElement, ReactNode } from "react";
+import { Fragment, MutableRefObject, ReactElement, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { ProcedureInputs } from "utils/trpc";
 import { trpc } from "utils/trpc";
@@ -12,6 +12,7 @@ import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { getSession } from "next-auth/react";
 import Button from "components/button";
+import Dialog from "components/dialog";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = ProcedureInputs<"game", "end">;
@@ -157,43 +158,6 @@ export default function ScoreWidget({
       },
     }));
   };
-  const { startMutation, endMutation, isMutating } = useServerMutation();
-  const [submissionResult, setSubmissionResult] = useState<
-    null | "success" | "failure"
-  >(null);
-
-  const submit = (): void => {
-    const [injuries, starPlayerPoints] = Object.entries(
-      gameState.playerUpdates
-    ).reduce<[InputType["injuries"], InputType["starPlayerPoints"]]>(
-      (prev, curr) => {
-        if (!curr[1]) return prev;
-        const [prevInj, prevSPP] = prev;
-        const [playerId, { injury, starPlayerPoints: currSPP }] = curr;
-        if (injury !== undefined) prevInj.push({ playerId, injury });
-        if (currSPP) prevSPP[playerId] = currSPP;
-        return [prevInj, prevSPP];
-      },
-      [[], {}]
-    );
-    startMutation();
-    const clonedState = {
-      ...structuredClone(gameState),
-      playerUpdates: undefined,
-      injuries,
-      starPlayerPoints,
-    };
-    delete clonedState.playerUpdates;
-    void trpc.game.end
-      .mutate(clonedState)
-      .then(() => {
-        setSubmissionResult("success");
-      })
-      .catch(() => {
-        setSubmissionResult("failure");
-      })
-      .finally(endMutation);
-  };
 
   const fireworksCanvas = useRef<HTMLCanvasElement>(null);
   const fireworks: MutableRefObject<Fireworks | null> = useRef(null);
@@ -255,61 +219,133 @@ export default function ScoreWidget({
   };
 
   return (
-    <div className="relative w-full text-center">
+    <div className="relative flex w-full flex-col text-center">
       <canvas
         ref={fireworksCanvas}
         className="pointer-events-none absolute h-[500px] w-full"
       />
-      {touchdowns[0]} - {touchdowns[1]}
-      <br />
-      <TDButton
-        team={home.name}
-        {...home}
-        onSubmit={(player): void => {
-          onTD("home", player);
-        }}
-      />
-      {home.song && <audio src={`/api/songs/${home.name}`} ref={homeSongRef} />}
-      <TDButton
-        team={away.name}
-        {...away}
-        onSubmit={(player): void => {
-          onTD("away", player);
-        }}
-      />
-      {away.song && <audio src={`/api/songs/${away.name}`} ref={awaySongRef} />}
-      <br />
+      <div className="flex flex-col">
+        <span className="text-lg">Touchdowns</span>
+        <span>
+          {touchdowns[0]} - {touchdowns[1]}
+        </span>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-lg">Casualties</span>
+        <span>
+          {casualties[0]} - {casualties[1]}
+        </span>
+      </div>
+      <div className="flex">
+        {(
+          [
+            [home, "home", homeSongRef],
+            [away, "away", awaySongRef],
+          ] as const
+        ).map(([team, homeOrAway, songRef]) => (
+          <Fragment key={team.name}>
+            <TDButton
+              team={team.name}
+              {...team}
+              onSubmit={(player): void => {
+                onTD(homeOrAway, player);
+              }}
+              className="flex-1"
+            />
+            {team.song && (
+              <audio src={`/api/songs/${team.name}`} ref={songRef} />
+            )}
+          </Fragment>
+        ))}
+      </div>
       <InjuryButton onSubmit={onInjury} home={home} away={away} />
-      <br />
       <SPPButton onSubmit={addSPP} home={home} away={away} />
-      <br />
-      {((): ReactNode => {
-        if (isMutating) return "Submitting...";
-        if (submissionResult === "failure") {
-          return (
-            <>
-              There was an error with your submission.
-              <br />
-              Click{" "}
-              <a
-                href="#"
-                onClick={(): void => {
-                  void navigator.clipboard.writeText(JSON.stringify(gameState));
-                }}
-              >
-                here
-              </a>{" "}
-              to copy your submission parameters.
-            </>
-          );
-        }
-        if (submissionResult === "success") return "Success! Good game!";
-        return <Button onClick={submit}>Done</Button>;
-      })()}
-      <br />
-      <pre className="overflow-auto text-left">
-        {JSON.stringify(playerUpdates, null, 2)}
-      </pre>
+      <SubmitButton gameState={gameState} />
+      <PlayerUpdatesDialog playerUpdates={playerUpdates} />
+    </div>
+  );
+}
+
+type SubmitButtonProps = {
+  gameState: GameState & { game: string };
+};
+function SubmitButton({ gameState }: SubmitButtonProps) {
+  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const [submissionResult, setSubmissionResult] = useState<
+    null | "success" | "failure"
+  >(null);
+
+  const submit = (): void => {
+    const [injuries, starPlayerPoints] = Object.entries(
+      gameState.playerUpdates
+    ).reduce<[InputType["injuries"], InputType["starPlayerPoints"]]>(
+      (prev, curr) => {
+        if (!curr[1]) return prev;
+        const [prevInj, prevSPP] = prev;
+        const [playerId, { injury, starPlayerPoints: currSPP }] = curr;
+        if (injury !== undefined) prevInj.push({ playerId, injury });
+        if (currSPP) prevSPP[playerId] = currSPP;
+        return [prevInj, prevSPP];
+      },
+      [[], {}]
+    );
+    startMutation();
+    const clonedState = {
+      ...structuredClone(gameState),
+      playerUpdates: undefined,
+      injuries,
+      starPlayerPoints,
+    };
+    delete clonedState.playerUpdates;
+    void trpc.game.end
+      .mutate(clonedState)
+      .then(() => {
+        setSubmissionResult("success");
+      })
+      .catch(() => {
+        setSubmissionResult("failure");
+      })
+      .finally(endMutation);
+  };
+
+  if (isMutating) return <span>Submitting...</span>;
+  if (submissionResult === "failure") {
+    return (
+      <>
+        There was an error with your submission.
+        <br />
+        Click{" "}
+        <a
+          href="#"
+          onClick={(): void => {
+            void navigator.clipboard.writeText(JSON.stringify(gameState));
+          }}
+        >
+          here
+        </a>{" "}
+        to copy your submission parameters.
+      </>
+    );
+  }
+  if (submissionResult === "success") return <span>Success! Good game!</span>;
+  return <Button onClick={submit}>Done</Button>;
+}
+
+type PlayerUpdatesDialogProps = {
+  playerUpdates: GameState["playerUpdates"];
+};
+function PlayerUpdatesDialog({ playerUpdates }: PlayerUpdatesDialogProps) {
+  const ref = useRef<HTMLDialogElement>(null);
+  return (
+    <div className="fixed bottom-2 right-2">
+      <Button onClick={() => ref.current?.showModal()}>
+        Show player updates
+      </Button>
+      <Dialog ref={ref}>
+        <pre className="text-left">
+          {JSON.stringify(playerUpdates, null, 2)}
+        </pre>
+      </Dialog>
     </div>
   );
 }
