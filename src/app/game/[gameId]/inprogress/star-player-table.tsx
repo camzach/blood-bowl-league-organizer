@@ -2,6 +2,8 @@
 import type { Skill, StarPlayer } from "@prisma/client/edge";
 import { TeamTable } from "components/team-table";
 import type { ReactElement } from "react";
+import ReactDOMServer from "react-dom/server";
+import { tooltipId } from "components/tooltip";
 
 type Props = {
   stars: Array<StarPlayer & { skills: Skill[] }>;
@@ -34,7 +36,27 @@ export default function StarPlayerTable({ stars }: Props): ReactElement {
             const [ruleName, ruleText] = player.specialRule.split(": ");
             return (
               <td key="specialRule">
-                <dfn title={ruleText}>{ruleName}</dfn>
+                <a
+                  className="whitespace-nowrap [&:nth-of-type(2n)]:text-red-800"
+                  data-tooltip-id={tooltipId}
+                  data-tooltip-html={ReactDOMServer.renderToStaticMarkup(
+                    <div
+                      className={`
+                        max-h-64
+                        max-w-xl
+                        overflow-auto
+                        whitespace-pre-wrap
+                        text-start
+                        font-sans
+                        leading-6
+                      `}
+                    >
+                      {ruleText}
+                    </div>
+                  )}
+                >
+                  {ruleName}
+                </a>
               </td>
             );
           },
