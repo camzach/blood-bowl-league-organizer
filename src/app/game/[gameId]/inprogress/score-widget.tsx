@@ -307,7 +307,9 @@ export default function ScoreWidget({
         return <Button onClick={submit}>Done</Button>;
       })()}
       <br />
-      <pre>{JSON.stringify(playerUpdates, null, 2)}</pre>
+      <pre className="overflow-auto text-left">
+        {JSON.stringify(playerUpdates, null, 2)}
+      </pre>
     </div>
   );
 }
