@@ -73,6 +73,8 @@ export default function ScoreWidget({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const homeSongRef = useRef<HTMLAudioElement>(null);
+  const awaySongRef = useRef<HTMLAudioElement>(null);
   const [gameState, setGameState] = useState<GameState & { game: string }>(
     () => {
       const encodedGameState = searchParams?.get("gameState") ?? "";
@@ -198,7 +200,7 @@ export default function ScoreWidget({
   useEffect(() => {
     if (!fireworksCanvas.current) return;
     fireworks.current = new Fireworks(fireworksCanvas.current);
-  });
+  }, []);
 
   const onTD = (team: "home" | "away", player?: NameAndId): void => {
     setTouchdowns([
@@ -207,18 +209,27 @@ export default function ScoreWidget({
     ]);
 
     const fw = fireworks.current;
-    const scoringTeam = team === "home" ? home.name : away.name;
     fw?.start();
-    const audio = new Audio(`/api/songs/${scoringTeam}`);
-    void audio.play();
-    audio.onended = () => {
-      fw?.stop();
-    };
-    audio.onerror = () => {
-      setTimeout(() => {
+    const audio = team === "home" ? homeSongRef.current : awaySongRef.current;
+    const otherAudio =
+      team === "home" ? awaySongRef.current : homeSongRef.current;
+    if (otherAudio) {
+      otherAudio.pause();
+      otherAudio.currentTime = 0;
+    }
+    if (audio) {
+      void audio.play();
+      audio.onended = () => {
         fw?.stop();
-      }, 5000);
-    };
+      };
+      audio.onerror = () => {
+        setTimeout(() => {
+          fw?.stop();
+        }, 5000);
+      };
+    } else {
+      setTimeout(() => fw?.stop(), 5000);
+    }
     if (player === undefined) return;
     addSPP(player, "touchdowns");
   };
@@ -258,6 +269,7 @@ export default function ScoreWidget({
           onTD("home", player);
         }}
       />
+      {home.song && <audio src={`/api/songs/${home.name}`} ref={homeSongRef} />}
       <TDButton
         team={away.name}
         {...away}
@@ -265,6 +277,7 @@ export default function ScoreWidget({
           onTD("away", player);
         }}
       />
+      {away.song && <audio src={`/api/songs/${away.name}`} ref={awaySongRef} />}
       <br />
       <InjuryButton onSubmit={onInjury} home={home} away={away} />
       <br />
