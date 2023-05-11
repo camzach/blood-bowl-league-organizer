@@ -4,7 +4,7 @@ import Dialog from "components/dialog";
 import { Die } from "components/die";
 import { useRouter } from "next/navigation";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 

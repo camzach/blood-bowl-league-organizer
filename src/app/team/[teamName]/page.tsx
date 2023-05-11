@@ -61,7 +61,7 @@ export default async function TeamPage({
   );
 
   return (
-    <section>
+    <div className="min-w-0">
       <h1 className="text-4xl">{team.name}</h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -234,6 +234,6 @@ export default async function TeamPage({
         </tbody>
       </table>
       {allowHiring && <ReadyTeam team={team.name} />}
-    </section>
+    </div>
   );
 }

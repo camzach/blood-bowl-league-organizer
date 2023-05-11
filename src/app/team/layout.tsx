@@ -8,8 +8,8 @@ export default async function TeamLayout({
   const teams = await prisma.team.findMany({ select: { name: true } });
   return (
     <>
-      <div className="grid grid-cols-[200px_auto]">
-        <ul>
+      <div className="flex p-4">
+        <ul className="min-w-[30%]">
           {teams
             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
             .map((team) => (
@@ -18,7 +18,7 @@ export default async function TeamLayout({
               </li>
             ))}
         </ul>
-        <main className="m-4">{children}</main>
+        {children}
       </div>
     </>
   );
