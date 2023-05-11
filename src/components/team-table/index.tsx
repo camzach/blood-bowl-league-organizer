@@ -36,7 +36,7 @@ export function TeamTable<T extends PlayerType>({
   cols: displayCols = [...cols],
 }: TeamTableProps<T>): React.ReactElement {
   return (
-    <table className="border-collapse">
+    <table className="block border-collapse overflow-x-auto">
       <thead className="sticky top-1 bg-gray-400">
         <tr>
           {displayCols.map((col) => {
