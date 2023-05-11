@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Fragment, MutableRefObject, ReactElement, ReactNode } from "react";
+import { Fragment, MutableRefObject, ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { ProcedureInputs } from "utils/trpc";
 import { trpc } from "utils/trpc";
@@ -182,14 +182,13 @@ export default function ScoreWidget({
       otherAudio.currentTime = 0;
     }
     if (audio) {
-      void audio.play();
-      audio.onended = () => {
-        fw?.stop();
-      };
-      audio.onerror = () => {
+      audio.play().catch(() => {
         setTimeout(() => {
           fw?.stop();
         }, 5000);
+      });
+      audio.onended = () => {
+        fw?.stop();
       };
     } else {
       setTimeout(() => fw?.stop(), 5000);
