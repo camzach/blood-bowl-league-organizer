@@ -1,7 +1,5 @@
-"use client";
 import type { Skill, StarPlayer } from "@prisma/client/edge";
 import { TeamTable } from "components/team-table";
-import type { ReactElement } from "react";
 import ReactDOMServer from "react-dom/server";
 import { tooltipId } from "components/tooltip";
 
@@ -9,7 +7,7 @@ type Props = {
   stars: Array<StarPlayer & { skills: Skill[] }>;
 };
 
-export default function StarPlayerTable({ stars }: Props): ReactElement {
+export default function StarPlayerTable({ stars }: Props) {
   return (
     <TeamTable
       players={stars.map((p, i) => ({
@@ -31,37 +29,41 @@ export default function StarPlayerTable({ stars }: Props): ReactElement {
         "AG",
         "PA",
         {
+          id: "specialRule",
           name: "Special Rule",
-          render(player): ReactElement {
-            const [ruleName, ruleText] = player.specialRule.split(": ");
-            return (
-              <td key="specialRule">
-                <a
-                  className="whitespace-nowrap [&:nth-of-type(2n)]:text-red-800"
-                  data-tooltip-id={tooltipId}
-                  data-tooltip-html={ReactDOMServer.renderToStaticMarkup(
-                    <div
-                      className={`
-                        max-h-64
-                        max-w-xl
-                        overflow-auto
-                        whitespace-pre-wrap
-                        text-start
-                        font-sans
-                        leading-6
-                      `}
-                    >
-                      {ruleText}
-                    </div>
-                  )}
-                >
-                  {ruleName}
-                </a>
-              </td>
-            );
-          },
+          Component: SpecialRuleColumn,
         },
       ]}
     />
+  );
+}
+
+type SpecialRuleColumnProps = {
+  specialRule: string;
+};
+function SpecialRuleColumn({ specialRule }: SpecialRuleColumnProps) {
+  const [ruleName, ruleText] = specialRule.split(": ");
+  return (
+    <a
+      className="whitespace-nowrap [&:nth-of-type(2n)]:text-red-800"
+      data-tooltip-id={tooltipId}
+      data-tooltip-html={ReactDOMServer.renderToStaticMarkup(
+        <div
+          className={`
+            max-h-64
+            max-w-xl
+            overflow-auto
+            whitespace-pre-wrap
+            text-start
+            font-sans
+            leading-6
+          `}
+        >
+          {ruleText}
+        </div>
+      )}
+    >
+      {ruleName}
+    </a>
   );
 }

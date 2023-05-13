@@ -1,3 +1,4 @@
+"use client";
 import type { ReactElement } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";

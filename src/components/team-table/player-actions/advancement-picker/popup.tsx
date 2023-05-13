@@ -1,9 +1,9 @@
 import type { SkillCategory } from "@prisma/client/edge";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { ComponentProps } from "react";
 import { trpc } from "utils/trpc";
-import type { FetchedTeamType } from "../page";
 import Button from "components/button";
+import type AdvancementPicker from ".";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -33,17 +33,11 @@ function getDisabledSkills(skills: string[]): string[] {
 }
 
 type Props = {
-  player: FetchedTeamType["players"][number];
-  rosterPlayer: FetchedTeamType["roster"]["positions"][number];
+  player: ComponentProps<typeof AdvancementPicker>["player"];
   skills: Array<{ name: string; category: string }>;
   onHide: () => void;
 };
-export function Popup({
-  player,
-  rosterPlayer,
-  skills,
-  onHide,
-}: Props): React.ReactElement {
+export function Popup({ player, skills, onHide }: Props): React.ReactElement {
   const router = useRouter();
 
   const disabledSkills = getDisabledSkills([
@@ -76,11 +70,9 @@ export function Popup({
   const getAvailableCategories = React.useCallback(
     (t: keyof typeof advancementCosts): SkillCategory[] | null => {
       if (t === "Characteristic Improvement") return null;
-      return t.endsWith("Primary")
-        ? rosterPlayer.primary
-        : rosterPlayer.secondary;
+      return t.endsWith("Primary") ? player.primary : player.secondary;
     },
-    [rosterPlayer.primary, rosterPlayer.secondary]
+    [player.primary, player.secondary]
   );
   const [type, setType] = React.useState<keyof typeof advancementCosts>(() => {
     const opts = Object.keys(advancementCosts) as Array<
@@ -264,7 +256,7 @@ export function Popup({
                     value={selectedSkill ?? undefined}
                     onChange={handleSkillSelection}
                   >
-                    {rosterPlayer.secondary.map((category) => (
+                    {player.secondary.map((category) => (
                       <optgroup key={category} label={category}>
                         {skills
                           .filter(isSkillSelectable(category))

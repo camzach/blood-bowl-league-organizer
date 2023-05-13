@@ -1,6 +1,6 @@
-import React from "react";
-import { Player } from "./player";
+import React, { ComponentProps } from "react";
 import { cols } from "./cols";
+import Table from "components/table";
 
 export type PlayerType = {
   id: string;
@@ -26,8 +26,10 @@ export type PlayerType = {
 export type TeamTableProps<T extends PlayerType> = {
   players: T[];
   cols?: Array<
-    | (typeof cols)[number]
-    | { name: string; render: (player: T) => React.ReactElement }
+    (
+      | (typeof cols)[number]["id"]
+      | ComponentProps<typeof Table<T>>["columns"]
+    )[number]
   >;
 };
 
@@ -36,34 +38,15 @@ export function TeamTable<T extends PlayerType>({
   cols: displayCols = [...cols],
 }: TeamTableProps<T>): React.ReactElement {
   return (
-    <table className="block border-collapse overflow-x-auto">
-      <thead className="sticky top-1 bg-gray-400">
-        <tr>
-          {displayCols.map((col) => {
-            const colname = typeof col === "string" ? col : col.name;
-            return (
-              <th key={`th-${colname}`} col-name={colname}>
-                {colname}
-              </th>
-            );
-          })}
-        </tr>
-      </thead>
-      <tbody
-        className={`
-        [&>tr:hover]:bg-orange-200 [&>tr:not(:first-child)]:border-t-2
-        [&>tr:not(:first-child)]:border-t-gray-400 [&_td:not(:first-child)]:border-l-2
-        [&_td:not(:first-child)]:border-l-gray-200
-        [&_td]:p-0.5
-        [&_td]:px-2
-      `}
-      >
-        {players
-          .sort((a, b) => a.number - b.number)
-          .map((player) => (
-            <Player key={player.id} cols={displayCols} player={player} />
-          ))}
-      </tbody>
-    </table>
+    <Table
+      rows={players.sort((a, b) => a.number - b.number)}
+      columns={displayCols
+        .map((col) =>
+          typeof col === "string" ? cols.find((c) => c.id === col) : col
+        )
+        .filter(
+          (x): x is ComponentProps<typeof Table<T>>["columns"][number] => !!x
+        )}
+    />
   );
 }
