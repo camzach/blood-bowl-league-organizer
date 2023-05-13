@@ -6,10 +6,10 @@ import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
-  playerId: string;
+  id: string;
 };
 
-export default function PlayerFirer({ playerId }: Props): ReactElement {
+export default function PlayerFirer({ id }: Props): ReactElement {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
@@ -27,7 +27,7 @@ export default function PlayerFirer({ playerId }: Props): ReactElement {
   const handleFire = (): void => {
     startMutation();
     void trpc.player.fire
-      .mutate(playerId)
+      .mutate(id)
       .catch(() => {
         setError(true);
       })
