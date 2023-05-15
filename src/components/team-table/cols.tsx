@@ -19,7 +19,7 @@ export const cols = [
   {
     id: "position",
     name: "Position",
-    Component: ({ position }) => <div>{position.name}</div>,
+    Component: ({ position }) => <>{position.name}</>,
   },
   {
     id: "skills",

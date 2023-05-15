@@ -79,9 +79,9 @@ export function HireablePlayerManager({
     "spp",
     "tv",
     {
-      name: "Seasons",
+      name: "Seasons Played",
       id: "seasons",
-      Component: (p) => <td key="Seasons">{p.seasonsPlayed}</td>,
+      Component: (p) => <>{p.seasonsPlayed}</>,
     },
     {
       name: "Hiring fee",
