@@ -58,7 +58,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
   );
 
   return (
-    <div className="min-w-0">
+    <div>
       <h1 className="text-4xl">{team.name}</h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>

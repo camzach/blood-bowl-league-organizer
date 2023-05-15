@@ -40,7 +40,7 @@ export default async function RootLayout({
           {session?.user.needsNewPassword === true && (
             <PasswordChangeNotif name={session.user.id} />
           )}
-          {children}
+          <main className="p-4">{children}</main>
         </SessionProvider>
         <Tooltip />
       </body>

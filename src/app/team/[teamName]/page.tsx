@@ -36,12 +36,11 @@ export default async function TeamPage({
   params: { teamName },
 }: Props): Promise<ReactElement> {
   const team = await fetchTeam(decodeURIComponent(teamName));
-  const skills = await prisma.skill.findMany({});
 
   if (!team) return notFound();
 
   return (
-    <div className="min-w-0">
+    <div>
       <h1 className="text-4xl">{team.name}</h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
