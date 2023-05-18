@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import type { ReactNode } from "react";
 import { trpc } from "utils/trpc";
 import { prisma } from "utils/prisma";
 import Content from "./content";
@@ -10,7 +9,7 @@ export default async function Inducements({
   params: { gameId },
 }: {
   params: { gameId: string };
-}): Promise<ReactNode> {
+}) {
   const game = await prisma.game.findUnique({
     where: { id: decodeURIComponent(gameId) },
     select: {

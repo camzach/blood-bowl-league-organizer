@@ -1,10 +1,8 @@
 import Link from "next/link";
-import type { PropsWithChildren, ReactElement } from "react";
+import type { PropsWithChildren } from "react";
 import { prisma } from "utils/prisma";
 
-export default async function TeamLayout({
-  children,
-}: PropsWithChildren): Promise<ReactElement> {
+export default async function TeamLayout({ children }: PropsWithChildren) {
   const teams = await prisma.team.findMany({ select: { name: true } });
 
   return (

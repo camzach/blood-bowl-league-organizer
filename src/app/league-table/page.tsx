@@ -1,4 +1,3 @@
-import type { ReactElement } from "react";
 import { trpc } from "utils/trpc";
 import type { Metadata } from "next";
 
@@ -6,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "League Table" };
 
-export default async function Page(): Promise<ReactElement> {
+export default async function Page() {
   const table = await trpc.schedule.leagueTable.query();
   return (
     <table className="table-zebra table">

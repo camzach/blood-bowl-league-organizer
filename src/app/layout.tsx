@@ -2,7 +2,7 @@ import SessionProvider from "components/session-provider-client";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { authOptions } from "pages/api/auth/[...nextauth]";
-import type { PropsWithChildren, ReactElement } from "react";
+import type { PropsWithChildren } from "react";
 import PasswordChangeNotif from "./password-change-notif";
 import "./global.css";
 import type { Metadata } from "next";
@@ -13,9 +13,7 @@ export const metadata: Metadata = {
   description: "Blood Bowl League Organizer",
 };
 
-export default async function RootLayout({
-  children,
-}: PropsWithChildren): Promise<ReactElement> {
+export default async function RootLayout({ children }: PropsWithChildren) {
   const session = await getServerSession(authOptions);
 
   return (

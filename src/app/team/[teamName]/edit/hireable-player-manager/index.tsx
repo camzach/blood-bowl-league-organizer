@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
 import type { FetchedTeamType } from "../page";
 import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
 import HireButton from "./hire-button";
+import { useState, useCallback } from "react";
 
 type Props = {
   players: FetchedTeamType["journeymen" | "redrafts"];
@@ -16,8 +16,8 @@ export function HireablePlayerManager({
   freeNumbers,
   teamName,
 }: // skills,
-Props): React.ReactElement {
-  const [numbers, setNumbers] = React.useState(
+Props) {
+  const [numbers, setNumbers] = useState(
     Object.fromEntries(
       players.map((p) => [
         p.id,
@@ -26,7 +26,7 @@ Props): React.ReactElement {
     )
   );
 
-  const handleNumberChange = React.useCallback(
+  const handleNumberChange = useCallback(
     (id: string) => (n: number) => {
       setNumbers((o) => ({
         ...o,

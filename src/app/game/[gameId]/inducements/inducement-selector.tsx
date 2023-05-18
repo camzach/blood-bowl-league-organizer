@@ -1,5 +1,4 @@
 import { NumberInput } from "components/number-input";
-import type { ReactElement } from "react";
 import type { trpc } from "utils/trpc";
 
 type Props = {
@@ -16,7 +15,7 @@ export default function InducementSelector({
   options,
   choices,
   onUpdate,
-}: Props): ReactElement {
+}: Props) {
   const getCount = (inducement: string, option?: string): number => {
     const key = [inducement, option].filter(Boolean).join("--");
     const value = choices.get(key);

@@ -1,4 +1,4 @@
-import React, { ComponentProps } from "react";
+import { ComponentProps } from "react";
 import { cols } from "./cols";
 import Table from "components/table";
 
@@ -38,7 +38,7 @@ export function TeamTable<T extends PlayerType>({
   players,
   cols: displayCols = [...cols],
   compact,
-}: TeamTableProps<T>): React.ReactElement {
+}: TeamTableProps<T>) {
   return (
     <Table
       className={compact ? "table-compact" : undefined}

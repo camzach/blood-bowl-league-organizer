@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Fragment, MutableRefObject, ReactElement } from "react";
+import { Fragment, MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { ProcedureInputs } from "utils/trpc";
 import { trpc } from "utils/trpc";
@@ -65,11 +65,7 @@ function safeParse(input: string): unknown {
   }
 }
 
-export default function ScoreWidget({
-  home,
-  away,
-  gameId,
-}: Props): ReactElement {
+export default function ScoreWidget({ home, away, gameId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

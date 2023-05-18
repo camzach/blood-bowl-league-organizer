@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactElement } from "react";
 import { Fragment } from "react";
 import { prisma } from "utils/prisma";
 import { GameState } from "@prisma/client/edge";
@@ -7,7 +6,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Schedule" };
 
-export default async function Schedule(): Promise<ReactElement> {
+export default async function Schedule() {
   const games = await prisma.game.findMany({
     select: {
       id: true,

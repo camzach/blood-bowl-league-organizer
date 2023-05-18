@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import type { ReactElement } from "react";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
 
@@ -50,11 +49,7 @@ function ChoicesList(props: {
   );
 }
 
-export default function Journeymen({
-  home,
-  away,
-  gameId,
-}: Props): ReactElement {
+export default function Journeymen({ home, away, gameId }: Props) {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
   const [response, setResponse] = useState<Awaited<

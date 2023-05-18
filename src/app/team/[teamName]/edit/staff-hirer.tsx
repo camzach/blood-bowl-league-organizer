@@ -1,6 +1,5 @@
 "use client";
 import { NumberInput } from "components/number-input";
-import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
@@ -23,7 +22,7 @@ export default function StaffHirer({
   cost,
   max,
   treasury,
-}: Props): ReactElement {
+}: Props) {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 

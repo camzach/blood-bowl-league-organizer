@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { Modal } from "components/modal";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type NameAndId = { name: string | null; id: string };
@@ -24,7 +24,7 @@ export default function TDButton({
   team,
   onSubmit,
   className,
-}: Props): ReactElement {
+}: Props) {
   const { register, handleSubmit } = useForm<FormValues>();
   const [isOpen, setIsOpen] = useState(false);
 

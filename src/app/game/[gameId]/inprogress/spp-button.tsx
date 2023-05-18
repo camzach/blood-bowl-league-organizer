@@ -1,5 +1,5 @@
 import { Modal } from "components/modal";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { trpc } from "utils/trpc";
@@ -21,11 +21,7 @@ type Props = {
   ) => void;
 } & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
 
-export default function SPPButton({
-  home,
-  away,
-  onSubmit,
-}: Props): ReactElement {
+export default function SPPButton({ home, away, onSubmit }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
     defaultValues: { team: "home" },

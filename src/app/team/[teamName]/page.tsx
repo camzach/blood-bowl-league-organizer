@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import type { ReactElement } from "react";
 import { prisma } from "utils/prisma";
 import React from "react";
 import calculateTV from "utils/calculate-tv";
@@ -32,9 +31,7 @@ export type FetchedTeamType = NonNullable<
   Awaited<ReturnType<typeof fetchTeam>>
 >;
 
-export default async function TeamPage({
-  params: { teamName },
-}: Props): Promise<ReactElement> {
+export default async function TeamPage({ params: { teamName } }: Props) {
   const team = await fetchTeam(decodeURIComponent(teamName));
 
   if (!team) return notFound();

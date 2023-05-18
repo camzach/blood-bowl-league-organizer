@@ -1,8 +1,8 @@
 "use client";
 import { Die } from "components/die";
+import { Modal } from "components/modal";
 import { useRouter } from "next/navigation";
-import type { ReactElement, ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -10,9 +10,9 @@ type Props = {
   team: string;
 };
 
-export default function ReadyButton({ team }: Props): ReactElement {
+export default function ReadyButton({ team }: Props) {
   const router = useRouter();
-  const popup = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const { startMutation, endMutation, isMutating } = useServerMutation(false);
   const [response, setResponse] = useState<
     Awaited<ReturnType<typeof trpc.team.ready.mutate>> | null | undefined
@@ -21,19 +21,19 @@ export default function ReadyButton({ team }: Props): ReactElement {
     startMutation();
     void trpc.team.ready.mutate(team).then((res) => {
       setResponse(res);
-      popup.current?.showModal();
+      setIsOpen(true);
       endMutation();
     });
   };
 
   return (
     <>
-      <dialog ref={popup}>
-        {((): ReactNode => {
+      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+        {(() => {
           switch (response) {
             case null:
             case undefined:
-              return "sus";
+              return null;
             default:
               return (
                 <>
@@ -42,7 +42,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
                   {response.expensiveMistakesCost} gold!
                   <button
                     onClick={(): void => {
-                      popup.current?.close();
+                      setIsOpen(false);
                       router.refresh();
                     }}
                   >
@@ -52,7 +52,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
               );
           }
         })()}
-      </dialog>
+      </Modal>
       {isMutating ? (
         "Submitting..."
       ) : (

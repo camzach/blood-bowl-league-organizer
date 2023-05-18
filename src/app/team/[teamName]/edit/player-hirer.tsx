@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import type { Position } from "@prisma/client/edge";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
@@ -16,7 +16,7 @@ export function PlayerHirer({
   treasury,
   freeNumbers,
   teamName,
-}: Props): React.ReactElement {
+}: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
   const { startMutation, endMutation, isMutating } = useServerMutation();
@@ -38,15 +38,15 @@ export function PlayerHirer({
     }
   }, [error, isMutating]);
 
-  const handlePositionSelect = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handlePositionSelect = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
       setPosition(e.target.value);
     },
     []
   );
 
-  const handleNumberSelect = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleNumberSelect = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
       const val = parseInt(e.target.value, 10);
       if (Number.isNaN(val)) return;
       setNumber(val);

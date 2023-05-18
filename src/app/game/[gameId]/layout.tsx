@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactElement } from "react";
+import type { PropsWithChildren } from "react";
 import { prisma } from "utils/prisma";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,6 @@ export async function generateMetadata({
   return { title: `${game.awayTeamName} @ ${game.homeTeamName}` };
 }
 
-export default function Layout({ children }: PropsWithChildren): ReactElement {
+export default function Layout({ children }: PropsWithChildren) {
   return <>{children}</>;
 }

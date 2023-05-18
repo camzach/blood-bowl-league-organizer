@@ -1,5 +1,4 @@
 "use client";
-import type { ReactElement } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -8,10 +7,7 @@ type Props = {
   number: number;
 };
 
-export default function PlayerNumberSelector({
-  id,
-  number,
-}: Props): ReactElement {
+export default function PlayerNumberSelector({ id, number }: Props) {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const handleNumberChange = (newNumber: number): void => {
     startMutation();
