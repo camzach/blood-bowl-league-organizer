@@ -84,6 +84,7 @@ export default async function InProgress({
         {game.starPlayersHome.length > 0 && (
           <>
             <div className="divider">Star Players</div>
+            {/* @ts-expect-error */}
             <StarPlayerTable stars={game.starPlayersHome} />
           </>
         )}

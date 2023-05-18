@@ -1,6 +1,5 @@
 import type { Player, Skill, SkillCategory } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import React, { ComponentProps, useState } from "react";
+import React, { useState } from "react";
 import { trpc } from "utils/trpc";
 import classNames from "classnames";
 import { StatList } from "./stat-list";

@@ -3,7 +3,6 @@ import React from "react";
 import type { FetchedTeamType } from "../page";
 import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
-// import AdvancementPicker from "../player-actions/advancement-picker";
 import HireButton from "./hire-button";
 
 type Props = {
@@ -16,8 +15,8 @@ export function HireablePlayerManager({
   players,
   freeNumbers,
   teamName,
-  skills,
-}: Props): React.ReactElement {
+}: // skills,
+Props): React.ReactElement {
   const [numbers, setNumbers] = React.useState(
     Object.fromEntries(
       players.map((p) => [

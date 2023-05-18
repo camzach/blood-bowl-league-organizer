@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import { Modal } from "components/modal";
 import { ReactElement, useState } from "react";
-import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
 type NameAndId = { name: string | null; id: string };
