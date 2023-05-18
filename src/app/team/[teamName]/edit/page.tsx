@@ -10,9 +10,9 @@ import { TeamState } from "@prisma/client";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
-import { PlayerActions } from "components/team-table/player-actions/action-buttons";
-import PlayerNumberSelector from "components/team-table/player-actions/player-number-selector";
-import PlayerNameEditor from "components/team-table/player-actions/palyer-name-editor";
+import { PlayerActions } from "./player-actions/action-buttons";
+import PlayerNumberSelector from "./player-actions/player-number-selector";
+import PlayerNameEditor from "./player-actions/palyer-name-editor";
 import { getServerSession } from "next-auth";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
@@ -57,8 +57,10 @@ export default async function EditTeam({ params: { teamName } }: Props) {
     (n) => !team.players.some((p) => p.number === n)
   );
 
+  const hireablePlayers = [...team.redrafts, ...team.journeymen];
+
   return (
-    <div>
+    <>
       <h1 className="text-4xl">{team.name}</h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -103,30 +105,30 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           "mng",
           "spp",
           "tv",
-          { id: "Actions", name: "Actions", Component: PlayerActions },
+          {
+            id: "Actions",
+            name: "Actions",
+            Component: (player) => (
+              <PlayerActions player={player} skills={skills} />
+            ),
+          },
         ]}
       />
-      <PlayerHirer
-        positions={team.roster.positions.filter(
-          (pos) =>
-            team.players.filter((p) => p.position.name === pos.name).length <
-            pos.max
-        )}
-        treasury={team.treasury}
-        freeNumbers={freeNumbers}
-        teamName={team.name}
-      />
-      {team.journeymen.length > 0 && (
-        <HireablePlayerManager
-          players={team.journeymen}
+      <div className="my-2">
+        <PlayerHirer
+          positions={team.roster.positions.filter(
+            (pos) =>
+              team.players.filter((p) => p.position.name === pos.name).length <
+              pos.max
+          )}
+          treasury={team.treasury}
           freeNumbers={freeNumbers}
           teamName={team.name}
-          skills={skills}
         />
-      )}
-      {team.redrafts.length > 0 && (
+      </div>
+      {hireablePlayers.length > 0 && (
         <HireablePlayerManager
-          players={team.redrafts}
+          players={hireablePlayers}
           freeNumbers={freeNumbers}
           teamName={team.name}
           skills={skills}
@@ -216,6 +218,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
         </tbody>
       </table>
       <ReadyTeam team={team.name} />
-    </div>
+    </>
   );
 }

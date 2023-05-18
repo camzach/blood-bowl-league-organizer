@@ -1,15 +1,22 @@
 import type { Skill, StarPlayer } from "@prisma/client/edge";
 import { TeamTable } from "components/team-table";
-import ReactDOMServer from "react-dom/server";
 import { tooltipId } from "components/tooltip";
+import { ReactElement } from "react";
+
+async function getMarkup(component: ReactElement) {
+  return (await import("react-dom/server")).default.renderToStaticMarkup(
+    component
+  );
+}
 
 type Props = {
   stars: Array<StarPlayer & { skills: Skill[] }>;
 };
 
-export default function StarPlayerTable({ stars }: Props) {
+export default async function StarPlayerTable({ stars }: Props) {
   return (
     <TeamTable
+      compact
       players={stars.map((p, i) => ({
         ...p,
         id: p.name,
@@ -21,13 +28,13 @@ export default function StarPlayerTable({ stars }: Props) {
         position: { name: "STAR" },
       }))}
       cols={[
-        "Name",
-        "Skills",
-        "MA",
-        "ST",
-        "AV",
-        "AG",
-        "PA",
+        "name",
+        "skills",
+        "ma",
+        "st",
+        "av",
+        "ag",
+        "pa",
         {
           id: "specialRule",
           name: "Special Rule",
@@ -41,13 +48,12 @@ export default function StarPlayerTable({ stars }: Props) {
 type SpecialRuleColumnProps = {
   specialRule: string;
 };
-function SpecialRuleColumn({ specialRule }: SpecialRuleColumnProps) {
+async function SpecialRuleColumn({ specialRule }: SpecialRuleColumnProps) {
   const [ruleName, ruleText] = specialRule.split(": ");
   return (
     <a
-      className="whitespace-nowrap [&:nth-of-type(2n)]:text-red-800"
       data-tooltip-id={tooltipId}
-      data-tooltip-html={ReactDOMServer.renderToStaticMarkup(
+      data-tooltip-html={await getMarkup(
         <div
           className={`
             max-h-64

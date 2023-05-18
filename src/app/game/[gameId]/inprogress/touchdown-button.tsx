@@ -1,6 +1,6 @@
-import Button from "components/button";
-import Dialog from "components/dialog";
-import type { ReactElement } from "react";
+import classNames from "classnames";
+import { Modal } from "components/modal";
+import { ReactElement, useState } from "react";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
@@ -27,24 +27,23 @@ export default function TDButton({
   className,
 }: Props): ReactElement {
   const { register, handleSubmit } = useForm<FormValues>();
-  const ref = useRef<HTMLDialogElement>(null);
-
-  const openModal = (): void => {
-    ref.current?.showModal();
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
   const onFormSubmit = handleSubmit(({ scoredBy }: FormValues): void => {
     const player = [...players, ...journeymen].find((p) => p.id === scoredBy);
     onSubmit(player);
-    ref.current?.close();
+    setIsOpen(false);
   });
 
   return (
     <>
-      <Dialog ref={ref}>
+      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
         <label>
           Scored By:
-          <select {...register("scoredBy")}>
+          <select
+            className="select-outlined select select-sm"
+            {...register("scoredBy")}
+          >
             <optgroup label="Rostered Players">
               {players.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -63,17 +62,21 @@ export default function TDButton({
             )}
           </select>
         </label>
-        <Button
+        <button
+          className="btn"
           onClick={() => {
             void onFormSubmit();
           }}
         >
           Done
-        </Button>
-      </Dialog>
-      <Button onClick={openModal} className={className}>
+        </button>
+      </Modal>
+      <button
+        className={classNames(["btn-sm btn", className])}
+        onClick={() => setIsOpen(true)}
+      >
         TD {team}
-      </Button>
+      </button>
     </>
   );
 }

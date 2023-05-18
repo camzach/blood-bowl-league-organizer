@@ -78,6 +78,7 @@ export default function StaffHirer({
   ) : (
     <input
       type="checkbox"
+      className="checkbox"
       checked={current > 0}
       disabled={current === 0 && treasury < cost}
       onChange={(e): void => {

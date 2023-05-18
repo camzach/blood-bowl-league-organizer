@@ -1,7 +1,5 @@
 "use client";
 
-import Button from "components/button";
-import Dialog from "components/dialog";
 import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
@@ -41,7 +39,8 @@ export default function PasswordChangeNotif({
   };
 
   return (
-    <Dialog
+    <dialog
+      className="modal modal-box"
       ref={ref}
       onCancel={(e): void => {
         e.preventDefault();
@@ -70,15 +69,19 @@ export default function PasswordChangeNotif({
       {loading ? (
         "Resetting..."
       ) : (
-        <Button onClick={submitForm} disabled={password !== confirmPassword}>
+        <button
+          className="btn"
+          onClick={submitForm}
+          disabled={password !== confirmPassword}
+        >
           Submit
-        </Button>
+        </button>
       )}
       {!loading && error && (
         <>
           <br />A problem occurred, please try again
         </>
       )}
-    </Dialog>
+    </dialog>
   );
 }

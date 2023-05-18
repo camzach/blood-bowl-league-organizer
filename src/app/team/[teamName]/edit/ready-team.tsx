@@ -1,6 +1,4 @@
 "use client";
-import Button from "components/button";
-import Dialog from "components/dialog";
 import { Die } from "components/die";
 import { useRouter } from "next/navigation";
 import type { ReactElement, ReactNode } from "react";
@@ -30,7 +28,7 @@ export default function ReadyButton({ team }: Props): ReactElement {
 
   return (
     <>
-      <Dialog ref={popup}>
+      <dialog ref={popup}>
         {((): ReactNode => {
           switch (response) {
             case null:
@@ -42,23 +40,25 @@ export default function ReadyButton({ team }: Props): ReactElement {
                   <Die result={response.expensiveMistakeRoll} />
                   {response.expensiveMistake} - Lost{" "}
                   {response.expensiveMistakesCost} gold!
-                  <Button
+                  <button
                     onClick={(): void => {
                       popup.current?.close();
                       router.refresh();
                     }}
                   >
                     OK
-                  </Button>
+                  </button>
                 </>
               );
           }
         })()}
-      </Dialog>
+      </dialog>
       {isMutating ? (
         "Submitting..."
       ) : (
-        <Button onClick={readyTeam}>Ready for next game</Button>
+        <button className="btn" onClick={readyTeam}>
+          Ready for next game
+        </button>
       )}
     </>
   );

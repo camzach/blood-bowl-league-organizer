@@ -1,7 +1,6 @@
-import Button from "components/button";
-import Dialog from "components/dialog";
-import type { ReactElement } from "react";
-import { useEffect, useRef } from "react";
+import { Modal } from "components/modal";
+import { ReactElement, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { ProcedureInputs } from "utils/trpc";
 
@@ -35,7 +34,7 @@ export default function InjuryButton({
       causingTeam: "neither",
     },
   });
-  const ref = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [injuredTeam, causingTeam] = watch(["injuredTeam", "causingTeam"]);
   const causingPlayers = (() => {
@@ -82,10 +81,6 @@ export default function InjuryButton({
     injuredPlayers.journeymen,
   ]);
 
-  const openModal = (): void => {
-    ref.current?.showModal();
-  };
-
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data.causingTeam, {
       player: [...injuredPlayers.journeymen, ...injuredPlayers.players].find(
@@ -97,78 +92,39 @@ export default function InjuryButton({
         ...(causingPlayers?.players ?? []),
       ].find((p) => p.id === data.causingPlayer),
     });
-    ref.current?.close();
+    setIsOpen(false);
   });
 
   return (
     <>
-      <Dialog ref={ref}>
-        <label>
-          Injured Player&apos;s team:
-          <select {...register("injuredTeam")}>
-            <option>home</option>
-            <option>away</option>
-          </select>
-        </label>
-        <label>
-          Injured Player:
-          <select {...register("injuredPlayer")}>
-            <optgroup label="Rostered Players">
-              {injuredPlayers.players.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name ?? p.number}
-                </option>
-              ))}
-            </optgroup>
-            {injuredPlayers.journeymen.length > 0 && (
-              <optgroup label="Journeymen">
-                {injuredPlayers.journeymen.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name ?? p.number}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-          </select>
-        </label>
-        <br />
-        <label>
-          Type of injury:
-          <select {...register("type")}>
-            <option value="BH">Badly Hurt</option>
-            <option value="MNG">Miss Next Game</option>
-            <option value="NI">Niggling Injury</option>
-            <option value="ST">-1 ST</option>
-            <option value="AV">-1 AV</option>
-            <option value="MA">-1 MA</option>
-            <option value="AG">+1 AG</option>
-            <option value="PA">+1 PA</option>
-            <option value="DEAD">Dead</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          Caused by Team:
-          <select {...register("causingTeam")}>
-            <option>home</option>
-            <option>away</option>
-            <option>neither</option>
-          </select>
-        </label>
-        {causingPlayers && (
+      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+        <div className="form-control">
           <label>
-            Caused By:
-            <select {...register("causingPlayer")}>
+            Injured Player&apos;s team:
+            <select
+              className="select-bordered select select-sm"
+              {...register("injuredTeam")}
+            >
+              <option>home</option>
+              <option>away</option>
+            </select>
+          </label>
+          <label>
+            Injured Player:
+            <select
+              className="select-bordered select select-sm"
+              {...register("injuredPlayer")}
+            >
               <optgroup label="Rostered Players">
-                {causingPlayers.players.map((p) => (
+                {injuredPlayers.players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name ?? p.number}
                   </option>
                 ))}
               </optgroup>
-              {causingPlayers.journeymen.length > 0 && (
+              {injuredPlayers.journeymen.length > 0 && (
                 <optgroup label="Journeymen">
-                  {causingPlayers.journeymen.map((p) => (
+                  {injuredPlayers.journeymen.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name ?? p.number}
                     </option>
@@ -177,16 +133,75 @@ export default function InjuryButton({
               )}
             </select>
           </label>
-        )}
-        <Button
-          onClick={() => {
-            void onFormSubmit();
-          }}
-        >
-          Done
-        </Button>
-      </Dialog>
-      <Button onClick={openModal}>Booboo</Button>
+          <br />
+          <label>
+            Type of injury:
+            <select
+              className="select-bordered select select-sm"
+              {...register("type")}
+            >
+              <option value="BH">Badly Hurt</option>
+              <option value="MNG">Miss Next Game</option>
+              <option value="NI">Niggling Injury</option>
+              <option value="ST">-1 ST</option>
+              <option value="AV">-1 AV</option>
+              <option value="MA">-1 MA</option>
+              <option value="AG">+1 AG</option>
+              <option value="PA">+1 PA</option>
+              <option value="DEAD">Dead</option>
+            </select>
+          </label>
+          <br />
+          <label>
+            Caused by Team:
+            <select
+              className="select-bordered select select-sm"
+              {...register("causingTeam")}
+            >
+              <option>home</option>
+              <option>away</option>
+              <option>neither</option>
+            </select>
+          </label>
+          {causingPlayers && (
+            <label>
+              Caused By:
+              <select
+                className="select-bordered select select-sm"
+                {...register("causingPlayer")}
+              >
+                <optgroup label="Rostered Players">
+                  {causingPlayers.players.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name ?? p.number}
+                    </option>
+                  ))}
+                </optgroup>
+                {causingPlayers.journeymen.length > 0 && (
+                  <optgroup label="Journeymen">
+                    {causingPlayers.journeymen.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name ?? p.number}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </label>
+          )}
+          <button
+            className="btn"
+            onClick={() => {
+              void onFormSubmit();
+            }}
+          >
+            Done
+          </button>
+        </div>
+      </Modal>
+      <button className="btn-sm btn" onClick={() => setIsOpen(true)}>
+        Booboo
+      </button>
     </>
   );
 }

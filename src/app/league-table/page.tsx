@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "League Table" };
 export default async function Page(): Promise<ReactElement> {
   const table = await trpc.schedule.leagueTable.query();
   return (
-    <table className="border-collapse">
-      <thead className="sticky top-1 bg-gray-400">
+    <table className="table-zebra table">
+      <thead>
         <tr>
           <th>Team</th>
           <th>League Points</th>
@@ -23,13 +23,7 @@ export default async function Page(): Promise<ReactElement> {
           <th>Cas Difference</th>
         </tr>
       </thead>
-      <tbody
-        className={`
-        [&>tr:hover]:bg-orange-200 [&>tr:not(:first-child)]:border-t-2
-        [&>tr:not(:first-child)]:border-t-gray-400 [&_td:not(:first-child)]:border-l-2
-        [&_td:not(:first-child)]:border-l-gray-300
-      `}
-      >
+      <tbody>
         {Object.entries(table)
           .sort(([, a], [, b]) => {
             if (a.points !== b.points) return b.points - a.points;

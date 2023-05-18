@@ -37,10 +37,10 @@ export default function InducementSelector({
       <ul>
         {options.stars.map((star) => (
           <li key={star.name}>
-            <label>
+            <label className="label justify-start">
               <input
                 type="checkbox"
-                className="mr-2"
+                className="checkbox checkbox-sm mr-2"
                 disabled={
                   getNestedCount("Star Player") >= 2 &&
                   getCount("Star Player", star.name) === 0
@@ -59,6 +59,7 @@ export default function InducementSelector({
           </li>
         ))}
       </ul>
+      <div className="divider" />
       <ul>
         {options.inducements.map((ind) => (
           <li key={ind.name}>
@@ -68,10 +69,10 @@ export default function InducementSelector({
                 <ul>
                   {ind.options.map((opt) => (
                     <li key={opt.name}>
-                      <label>
-                        {opt.name}
+                      <label className="label justify-start">
                         <input
                           type="checkbox"
+                          className="checkbox mr-2"
                           defaultChecked={false}
                           disabled={
                             getNestedCount(ind.name) >= ind.max &&
@@ -86,6 +87,7 @@ export default function InducementSelector({
                             });
                           }}
                         />
+                        {opt.name}
                       </label>
                     </li>
                   ))}

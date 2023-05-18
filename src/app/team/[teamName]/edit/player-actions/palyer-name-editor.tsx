@@ -25,6 +25,7 @@ export default function PlayerNameEditor({
 
   return (
     <input
+      className="input-bordered input input-sm"
       defaultValue={playerName ?? ""}
       onBlur={(e): void => {
         handleNameChange(e.target.value);

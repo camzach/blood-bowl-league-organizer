@@ -1,6 +1,6 @@
 import SessionProvider from "components/session-provider-client";
 import { getServerSession } from "next-auth";
-import Link from "components/link";
+import Link from "next/link";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 import type { PropsWithChildren, ReactElement } from "react";
 import PasswordChangeNotif from "./password-change-notif";
@@ -19,11 +19,11 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <html>
+    <html data-theme="dark">
       <body>
-        <header className="flex items-center gap-8 bg-gray-300 p-2">
+        <header className="navbar bg-primary text-primary-content">
           <h1 className="m-0 inline-block w-min text-4xl">BBLO</h1>
-          <nav className="contents">
+          <nav className="ml-8 flex gap-8">
             <Link className="text-2xl" href={`/team/${session?.user.teams[0]}`}>
               Teams
             </Link>

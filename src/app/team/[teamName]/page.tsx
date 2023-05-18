@@ -40,7 +40,7 @@ export default async function TeamPage({
   if (!team) return notFound();
 
   return (
-    <div>
+    <>
       <h1 className="text-4xl">{team.name}</h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -96,12 +96,17 @@ export default async function TeamPage({
             <td>Apothecary</td>
             <td>50,000</td>
             <td>
-              <input type="checkbox" checked={team.apothecary} disabled />
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={team.apothecary}
+                disabled
+              />
             </td>
             <td>{(team.apothecary ? 50_000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import React from "react";
 import classNames from "classnames";
-import Button from "components/button";
 
 type Props = {
   value: number;
@@ -43,17 +42,17 @@ export function NumberInput({
       >
         {label}
       </label>
-      <span className="flex w-min [&>*]:min-w-0 [&>*]:flex-1 [&>*]:text-center">
-        <Button
-          className="p-1"
-          type="button"
+      <span className="relative w-28">
+        <button
+          className="btn-square btn-sm btn absolute left-0 top-0 rounded-r-none"
           onClick={handleTick("down")}
           disabled={min !== undefined && value <= min}
         >
           -
-        </Button>
+        </button>
         <input
-          style={{ appearance: "textfield", maxWidth: "4em" }}
+          className="input-bordered input input-sm w-full px-12 text-center"
+          style={{ appearance: "textfield" }}
           id={id}
           aria-label={label}
           value={value}
@@ -63,14 +62,13 @@ export function NumberInput({
           type="number"
           ref={inputRef}
         />
-        <Button
-          className="p-1"
-          type="button"
+        <button
+          className="btn-square btn-sm btn absolute right-0 top-0 rounded-l-none"
           onClick={handleTick("up")}
           disabled={max !== undefined && value >= max}
         >
           +
-        </Button>
+        </button>
       </span>
     </span>
   );

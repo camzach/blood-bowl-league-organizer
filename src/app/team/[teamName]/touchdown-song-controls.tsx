@@ -1,6 +1,5 @@
 "use client";
 import classNames from "classnames";
-import Button from "components/button";
 import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import useServerMutation from "utils/use-server-mutation";
@@ -64,7 +63,9 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
           type="file"
           accept="audio/*"
         />
-        <Button type="submit">Submit</Button>
+        <button className="btn" type="submit">
+          Submit
+        </button>
       </form>
     </>
   );
