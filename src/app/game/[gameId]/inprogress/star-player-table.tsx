@@ -38,6 +38,7 @@ export default async function StarPlayerTable({ stars }: Props) {
         {
           id: "specialRule",
           name: "Special Rule",
+          // @ts-expect-error
           Component: SpecialRuleColumn,
         },
       ]}
