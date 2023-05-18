@@ -84,7 +84,7 @@ export default async function InProgress({
         {game.starPlayersHome.length > 0 && (
           <>
             <div className="divider">Star Players</div>
-            {/* @ts-expect-error */}
+            {/* @ts-expect-error async component */}
             <StarPlayerTable stars={game.starPlayersHome} />
           </>
         )}
@@ -119,6 +119,7 @@ export default async function InProgress({
         {game.starPlayersAway.length > 0 && (
           <>
             <div className="divider">Star Players</div>
+            {/* @ts-expect-error async component */}
             <StarPlayerTable stars={game.starPlayersAway} />
           </>
         )}
