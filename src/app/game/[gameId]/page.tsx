@@ -6,7 +6,7 @@ export default async function Game({
   params: { gameId },
 }: {
   params: { gameId: string };
-}): Promise<ReactNode> {
+}) {
   const game = await prisma.game.findUnique({
     where: { id: decodeURIComponent(gameId) },
     include: { MVPs: true },
@@ -14,7 +14,7 @@ export default async function Game({
   if (!game) return notFound();
 
   if (game.state !== "Complete")
-    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+    return redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
 
   const [homeMVP, awayMVP] = [game.homeTeamName, game.awayTeamName].map(
     (team) =>
@@ -25,14 +25,7 @@ export default async function Game({
 
   return (
     <div className="grid w-full place-items-center">
-      <table
-        className={`
-      border-collapse 
-      [&_:where(td,th:not(:first-child))]:border-2 
-      [&_:where(td,th:not(:first-child))]:border-gray-500
-      [&_:where(td,th:not(:first-child))]:p-1
-    `}
-      >
+      <table className="bable-zebra table">
         <thead>
           <tr>
             <th className="border-0" />
