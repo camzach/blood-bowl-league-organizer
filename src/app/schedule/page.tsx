@@ -1,8 +1,7 @@
-import Link from "components/link";
+import Link from "next/link";
 import type { ReactElement } from "react";
 import { Fragment } from "react";
 import { prisma } from "utils/prisma";
-import cx from "classnames";
 import { GameState } from "@prisma/client/edge";
 import type { Metadata } from "next";
 
@@ -31,7 +30,7 @@ export default async function Schedule(): Promise<ReactElement> {
   );
 
   return (
-    <table className="border-collapse [&_td]:px-8">
+    <table className="table-zebra table">
       <thead>
         <tr>
           <th>Round</th>
@@ -46,10 +45,7 @@ export default async function Schedule(): Promise<ReactElement> {
         {rounds.map((round, roundIdx) => (
           <Fragment key={roundIdx}>
             {round.map((game, gameIdx) => (
-              <tr
-                key={game.id}
-                className={cx(gameIdx === 0 && "border-t-2 border-gray-400")}
-              >
+              <tr key={game.id}>
                 {gameIdx === 0 && (
                   <td rowSpan={round.length}>{roundIdx + 1}</td>
                 )}
@@ -62,7 +58,7 @@ export default async function Schedule(): Promise<ReactElement> {
                   {game.casualtiesHome} - {game.casualtiesAway}
                 </td>
                 <td>
-                  <Link href={`/game/${game.id}`}>
+                  <Link className="link" href={`/game/${game.id}`}>
                     {game.state === GameState.Complete ? "View Result" : "Play"}
                   </Link>
                 </td>

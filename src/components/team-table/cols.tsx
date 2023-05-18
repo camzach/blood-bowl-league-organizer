@@ -25,14 +25,14 @@ export const cols = [
     id: "skills",
     name: "Skills",
     Component: ({ skills }) => (
-      <>
+      <div className="whitespace-pre-wrap">
         {skills.map((skill, idx) => (
           <Fragment key={skill.name}>
             <Skill skill={skill} />
             {idx < skills.length - 1 ? ", " : ""}
           </Fragment>
         ))}
-      </>
+      </div>
     ),
   },
   {

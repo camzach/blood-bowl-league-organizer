@@ -1,5 +1,4 @@
 "use client";
-import Button from "components/button";
 import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "utils/trpc";
@@ -44,8 +43,11 @@ export default function PlayerFirer({
   if (error) return <>Failed to hire. Please try again</>;
 
   return (
-    <Button type="button" onClick={handleHire}>
+    <button
+      className="btn-bordered btn-primary btn-sm btn"
+      onClick={handleHire}
+    >
       Hire!
-    </Button>
+    </button>
   );
 }

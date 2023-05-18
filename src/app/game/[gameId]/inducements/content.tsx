@@ -1,10 +1,9 @@
 "use client";
-import Link from "components/link";
+import Link from "next/link";
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
 import InducementSelector from "./inducement-selector";
-import Button from "components/button";
 
 type InducementsResponseType = Awaited<
   ReturnType<typeof trpc.inducements.list.query>
@@ -88,7 +87,9 @@ export default function Content(props: Props): ReactElement {
     return (
       <>
         Now let&apos;s{" "}
-        <Link href={`/game/${props.gameId}/inprogress`}>Play!</Link>
+        <Link className="link" href={`/game/${props.gameId}/inprogress`}>
+          Play!
+        </Link>
       </>
     );
 
@@ -157,7 +158,9 @@ export default function Content(props: Props): ReactElement {
           }}
         />
       </div>
-      <Button onClick={submit}>Done :)</Button>
+      <button className="btn" onClick={submit}>
+        Done :)
+      </button>
       <div>
         <InducementSelector
           options={awayInducements}

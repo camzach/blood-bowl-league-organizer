@@ -1,7 +1,6 @@
-import Button from "components/button";
-import Dialog from "components/dialog";
-import type { ReactElement } from "react";
-import { useEffect, useRef } from "react";
+import { Modal } from "components/modal";
+import { ReactElement, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { trpc } from "utils/trpc";
 
@@ -27,7 +26,7 @@ export default function SPPButton({
   away,
   onSubmit,
 }: Props): ReactElement {
-  const ref = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
     defaultValues: { team: "home" },
   });
@@ -39,24 +38,20 @@ export default function SPPButton({
     setValue("player", [...players, ...journeymen][0].id);
   }, [journeymen, players, setValue]);
 
-  const openModal = (): void => {
-    ref.current?.showModal();
-  };
-
   const onSubmitForm = handleSubmit(({ player, type }) => {
     const targetPlayer = [...journeymen, ...players].find(
       (p) => p.id === player
     )!;
     onSubmit(targetPlayer, type);
-    ref.current?.close();
+    setIsOpen(false);
   });
 
   return (
     <>
-      <Dialog ref={ref}>
+      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
         <label>
           Team:
-          <select {...register("team")}>
+          <select className="select" {...register("team")}>
             <option>home</option>
             <option>away</option>
           </select>
@@ -64,7 +59,7 @@ export default function SPPButton({
         <br />
         <label>
           Player:
-          <select {...register("player")}>
+          <select className="select" {...register("player")}>
             <optgroup label="Rostered">
               {players.map((p) => (
                 <option value={p.id} key={p.id}>
@@ -84,7 +79,7 @@ export default function SPPButton({
         <br />
         <label>
           Type of SPP:
-          <select {...register("type")}>
+          <select className="select" {...register("type")}>
             <option value="casualties">Casualty</option>
             <option value="deflections">Deflection</option>
             <option value="interceptions">Interception</option>
@@ -92,15 +87,18 @@ export default function SPPButton({
             <option value="otherSPP">Misc.</option>
           </select>
         </label>
-        <Button
+        <button
+          className="btn"
           onClick={() => {
             void onSubmitForm();
           }}
         >
           Done
-        </Button>
-      </Dialog>
-      <Button onClick={openModal}>Other SPP</Button>
+        </button>
+      </Modal>
+      <button className="btn-sm btn" onClick={() => setIsOpen(true)}>
+        Other SPP
+      </button>
     </>
   );
 }

@@ -150,8 +150,11 @@ export const playerRouter = router({
           : null;
 
       if (skill !== null) {
-        const category = "subtype" in update ? update.subtype : "secondary";
-        if (!player[category].includes(skill.category))
+        const validCategories =
+          "subtype" in update
+            ? player[update.subtype]
+            : [...player.primary, ...player.secondary];
+        if (!validCategories.includes(skill.category))
           throw new Error("Skill not from a valid category");
         if (player.skills.some((s) => s.name === skill.name))
           throw new Error("Player already has this skill");

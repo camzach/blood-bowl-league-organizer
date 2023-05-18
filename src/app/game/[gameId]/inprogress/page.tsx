@@ -28,16 +28,26 @@ const teamSelect = {
 } satisfies TeamArgs;
 const starPlayerSelect = { include: { skills: true } } satisfies StarPlayerArgs;
 const cols = [
-  "#",
-  "Name",
-  "Position",
-  "Skills",
-  "MA",
-  "ST",
-  "AV",
-  "AG",
-  "PA",
-  "NI",
+  "number",
+  "name",
+  "position",
+  "skills",
+  "ma",
+  "st",
+  "av",
+  "ag",
+  "pa",
+  "ni",
+] satisfies ComponentProps<typeof TeamTable>["cols"];
+const journeymanCols = [
+  "number",
+  "position",
+  "skills",
+  "ma",
+  "st",
+  "av",
+  "ag",
+  "pa",
 ] satisfies ComponentProps<typeof TeamTable>["cols"];
 
 export default async function InProgress({
@@ -60,12 +70,22 @@ export default async function InProgress({
       style={{ placeItems: "start center" }}
     >
       <div className="flex w-full flex-col">
-        <TeamTable players={game.home.players} cols={cols} />
+        <TeamTable compact players={game.home.players} cols={cols} />
         {game.home.journeymen.length > 0 && (
-          <TeamTable players={game.home.journeymen} cols={cols} />
+          <>
+            <div className="divider">Journeymen</div>
+            <TeamTable
+              compact
+              players={game.home.journeymen}
+              cols={journeymanCols}
+            />
+          </>
         )}
         {game.starPlayersHome.length > 0 && (
-          <StarPlayerTable stars={game.starPlayersHome} />
+          <>
+            <div className="divider">Star Players</div>
+            <StarPlayerTable stars={game.starPlayersHome} />
+          </>
         )}
       </div>
       <ScoreWidget
@@ -84,12 +104,22 @@ export default async function InProgress({
         }}
       />
       <div className="flex w-full flex-col">
-        <TeamTable players={game.away.players} cols={cols} />
+        <TeamTable compact players={game.away.players} cols={cols} />
         {game.away.journeymen.length > 0 && (
-          <TeamTable players={game.away.journeymen} cols={cols} />
+          <>
+            <div className="divider">Journeymen</div>
+            <TeamTable
+              compact
+              players={game.away.journeymen}
+              cols={journeymanCols}
+            />
+          </>
         )}
         {game.starPlayersAway.length > 0 && (
-          <StarPlayerTable stars={game.starPlayersAway} />
+          <>
+            <div className="divider">Star Players</div>
+            <StarPlayerTable stars={game.starPlayersAway} />
+          </>
         )}
       </div>
     </div>

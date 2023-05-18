@@ -3,8 +3,7 @@ import type { ReactElement } from "react";
 import { useState } from "react";
 import { Die } from "components/die";
 import { trpc } from "utils/trpc";
-import Link from "components/link";
-import Button from "components/button";
+import Link from "next/link";
 
 export function PlayButton({ gameId }: { gameId: string }): ReactElement {
   const [response, setResponse] = useState<Awaited<
@@ -36,10 +35,17 @@ export function PlayButton({ gameId }: { gameId: string }): ReactElement {
           {response.weatherResult}
         </span>
         <br />
-        Now go to <Link href={`/game/${gameId}/journeymen`}>Journeymen</Link>
+        Now go to{" "}
+        <Link className="link" href={`/game/${gameId}/journeymen`}>
+          Journeymen
+        </Link>
       </>
     );
   }
 
-  return <Button onClick={startGame}>Play!!!</Button>;
+  return (
+    <button className="btn" onClick={startGame}>
+      Play!!!
+    </button>
+  );
 }

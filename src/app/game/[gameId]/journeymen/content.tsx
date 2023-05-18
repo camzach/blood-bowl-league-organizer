@@ -1,6 +1,5 @@
 "use client";
-import Button from "components/button";
-import Link from "components/link";
+import Link from "next/link";
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
@@ -75,7 +74,10 @@ export default function Journeymen({
   if (response !== null) {
     return (
       <>
-        Now go to <Link href={`/game/${gameId}/inducements`}>Inducements</Link>
+        Now go to{" "}
+        <Link className="link" href={`/game/${gameId}/inducements`}>
+          Inducements
+        </Link>
       </>
     );
   }
@@ -101,7 +103,9 @@ export default function Journeymen({
         />
       )}
       <br />
-      <Button onClick={submitJourneymen}>Submit!</Button>
+      <button className="btn" onClick={submitJourneymen}>
+        Submit!
+      </button>
     </>
   );
 }

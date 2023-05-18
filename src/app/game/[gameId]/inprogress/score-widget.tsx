@@ -11,8 +11,7 @@ import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { getSession } from "next-auth/react";
-import Button from "components/button";
-import Dialog from "components/dialog";
+import { Modal } from "components/modal";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = ProcedureInputs<"game", "end">;
@@ -89,7 +88,7 @@ export default function ScoreWidget({
   );
 
   useEffect(() => {
-    const newParams = new URLSearchParams(searchParams ?? "");
+    const newParams = new URLSearchParams(searchParams?.toString() ?? "");
     newParams.set("gameState", btoa(JSON.stringify(gameState)));
     router.replace(`${pathname}?${newParams.toString()}`);
   }, [gameState, pathname, router, searchParams]);
@@ -327,24 +326,28 @@ function SubmitButton({ gameState }: SubmitButtonProps) {
     );
   }
   if (submissionResult === "success") return <span>Success! Good game!</span>;
-  return <Button onClick={submit}>Done</Button>;
+  return (
+    <button className="btn" onClick={submit}>
+      Done
+    </button>
+  );
 }
 
 type PlayerUpdatesDialogProps = {
   playerUpdates: GameState["playerUpdates"];
 };
 function PlayerUpdatesDialog({ playerUpdates }: PlayerUpdatesDialogProps) {
-  const ref = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="fixed bottom-2 right-2">
-      <Button onClick={() => ref.current?.showModal()}>
+      <button className="btn" onClick={() => setIsOpen(true)}>
         Show player updates
-      </Button>
-      <Dialog ref={ref}>
+      </button>
+      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
         <pre className="text-left">
           {JSON.stringify(playerUpdates, null, 2)}
         </pre>
-      </Dialog>
+      </Modal>
     </div>
   );
 }

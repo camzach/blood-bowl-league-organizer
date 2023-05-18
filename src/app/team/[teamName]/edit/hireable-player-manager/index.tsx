@@ -3,7 +3,7 @@ import React from "react";
 import type { FetchedTeamType } from "../page";
 import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
-import AdvancementPicker from "../../../../../components/team-table/player-actions/advancement-picker";
+// import AdvancementPicker from "../player-actions/advancement-picker";
 import HireButton from "./hire-button";
 
 type Props = {
@@ -69,13 +69,13 @@ export function HireablePlayerManager({
     "av",
     "ni",
     "mng",
-    {
-      name: "Spend SPP",
-      id: "spendSPP",
-      Component: (player) => (
-        <AdvancementPicker player={player} skills={skills} />
-      ),
-    },
+    // {
+    //   name: "Spend SPP",
+    //   id: "spendSPP",
+    //   Component: (player) => (
+    //     <AdvancementPicker player={player} skills={skills} />
+    //   ),
+    // },
     "spp",
     "tv",
     {
@@ -106,6 +106,7 @@ const NumberPicker = ({
   onNumberChange,
 }: NumberPickerProps) => (
   <select
+    className="select-bordered select select-sm"
     value={currentNumber}
     onChange={(e) => onNumberChange(+e.target.value)}
   >

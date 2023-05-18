@@ -24,6 +24,7 @@ export default function PlayerNumberSelector({
 
   return (
     <select
+      className="select-bordered select select-sm"
       value={number}
       onChange={(e): void => {
         handleNumberChange(parseInt(e.target.value, 10));

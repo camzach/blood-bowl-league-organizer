@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import type { Position } from "@prisma/client/edge";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
-import Button from "components/button";
 
 type Props = {
   positions: Position[];
@@ -73,22 +72,30 @@ export function PlayerHirer({
   if (error) return <>An error occurred. Try again.</>;
 
   return (
-    <>
-      <select value={position} onChange={handlePositionSelect}>
+    <div className="input-group">
+      <select
+        className="select-bordered select"
+        value={position}
+        onChange={handlePositionSelect}
+      >
         {positions.map((p) => (
           <option disabled={p.cost > treasury} key={p.name} value={p.name}>
             {p.name} - {p.cost}
           </option>
         ))}
       </select>
-      <select value={number} onChange={handleNumberSelect}>
+      <select
+        className="select-bordered select"
+        value={number}
+        onChange={handleNumberSelect}
+      >
         {freeNumbers.map((n) => (
           <option key={n}>{n}</option>
         ))}
       </select>
-      <Button type="button" onClick={hirePlayer}>
+      <button className="btn-primary btn" onClick={hirePlayer}>
         HIRE!!!
-      </Button>
-    </>
+      </button>
+    </div>
   );
 }

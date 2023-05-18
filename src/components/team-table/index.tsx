@@ -31,14 +31,17 @@ export type TeamTableProps<T extends PlayerType> = {
       | ComponentProps<typeof Table<T>>["columns"]
     )[number]
   >;
+  compact?: boolean;
 };
 
 export function TeamTable<T extends PlayerType>({
   players,
   cols: displayCols = [...cols],
+  compact,
 }: TeamTableProps<T>): React.ReactElement {
   return (
     <Table
+      className={compact ? "table-compact" : undefined}
       rows={players.sort((a, b) => a.number - b.number)}
       columns={displayCols
         .map((col) =>
