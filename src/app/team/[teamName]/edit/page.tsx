@@ -46,8 +46,10 @@ export type FetchedTeamType = NonNullable<
 
 export default async function EditTeam({ params: { teamName } }: Props) {
   const session = await getServerSession(authOptions);
-  if (!session?.user.teams.includes(teamName))
+  if (!session?.user.teams.includes(decodeURIComponent(teamName))) {
+    console.log(session);
     return redirect(`/team/${teamName}`);
+  }
   const team = await fetchTeam(decodeURIComponent(teamName));
   const skills = await prisma.skill.findMany({});
 
