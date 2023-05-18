@@ -1,12 +1,11 @@
-import type { CSSProperties, ReactElement } from "react";
+import type { CSSProperties } from "react";
 import styles from "./styles.module.scss";
-
 
 type Props = {
   result: number;
 };
 
-export function Die({ result }: Props): ReactElement {
+export function Die({ result }: Props) {
   return (
     <div
       className={styles.scene}

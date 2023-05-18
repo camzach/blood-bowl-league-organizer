@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import type { ReactElement } from "react";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
 import InducementSelector from "./inducement-selector";
@@ -20,7 +19,7 @@ type Props = {
   gameId: string;
 };
 
-export default function Content(props: Props): ReactElement {
+export default function Content(props: Props) {
   const [homeInducements, awayInducements] = props.inducements;
   const [homePettyCash, awayPettyCash] = props.pettyCash;
   const [homeTreasury, awayTreasury] = props.treasury;

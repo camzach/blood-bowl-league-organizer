@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import type { ReactNode } from "react";
 import { prisma } from "utils/prisma";
 
 export default async function Game({

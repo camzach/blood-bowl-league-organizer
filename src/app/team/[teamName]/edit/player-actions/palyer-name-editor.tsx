@@ -1,5 +1,4 @@
 "use client";
-import type { ReactElement } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -8,10 +7,7 @@ type Props = {
   name: string | null;
 };
 
-export default function PlayerNameEditor({
-  name: playerName,
-  id,
-}: Props): ReactElement {
+export default function PlayerNameEditor({ name: playerName, id }: Props) {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const handleNameChange = (newName: string): void => {
     if (newName === playerName || newName === "") return;

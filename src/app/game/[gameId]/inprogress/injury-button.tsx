@@ -1,5 +1,5 @@
 import { Modal } from "components/modal";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { ProcedureInputs } from "utils/trpc";
@@ -23,11 +23,7 @@ type FormValues = {
   type: InjuryType;
 };
 
-export default function InjuryButton({
-  home,
-  away,
-  onSubmit,
-}: Props): ReactElement {
+export default function InjuryButton({ home, away, onSubmit }: Props) {
   const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
     defaultValues: {
       injuredTeam: "home",

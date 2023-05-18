@@ -1,11 +1,10 @@
 "use client";
-import type { ReactElement } from "react";
 import { useState } from "react";
 import { Die } from "components/die";
 import { trpc } from "utils/trpc";
 import Link from "next/link";
 
-export function PlayButton({ gameId }: { gameId: string }): ReactElement {
+export function PlayButton({ gameId }: { gameId: string }) {
   const [response, setResponse] = useState<Awaited<
     ReturnType<typeof trpc.game.start.mutate>
   > | null>(null);

@@ -1,6 +1,4 @@
 "use client";
-
-import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
 
@@ -8,9 +6,7 @@ type Props = {
   name: string;
 };
 
-export default function PasswordChangeNotif({
-  name: coachName,
-}: Props): ReactElement {
+export default function PasswordChangeNotif({ name: coachName }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     ref.current?.showModal();

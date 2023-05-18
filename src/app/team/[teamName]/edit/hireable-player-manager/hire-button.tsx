@@ -1,5 +1,4 @@
 "use client";
-import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
@@ -10,11 +9,7 @@ type Props = {
   team: string;
 };
 
-export default function PlayerFirer({
-  player,
-  number,
-  team,
-}: Props): ReactElement {
+export default function PlayerFirer({ player, number, team }: Props) {
   const { startMutation, endMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 

@@ -1,5 +1,5 @@
-import React from "react";
 import classNames from "classnames";
+import { useRef, ChangeEvent, useCallback, useId } from "react";
 
 type Props = {
   value: number;
@@ -16,9 +16,9 @@ export function NumberInput({
   min,
   max,
   onChange,
-}: Props): React.ReactElement {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+}: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     onChange(
       Math.min(
         Math.max(min ?? -Infinity, e.target.valueAsNumber),
@@ -26,14 +26,14 @@ export function NumberInput({
       )
     );
   };
-  const handleTick = React.useCallback(
+  const handleTick = useCallback(
     (dir: "up" | "down") => () => {
       if (dir === "up") onChange(Math.min(value + 1, max ?? Infinity));
       else onChange(Math.max(value - 1, min ?? -Infinity));
     },
     [value, min, max, onChange]
   );
-  const id = React.useId();
+  const id = useId();
   return (
     <span className="inline-flex flex-col">
       <label
@@ -44,7 +44,7 @@ export function NumberInput({
       </label>
       <span className="relative w-28">
         <button
-          className="btn-square btn-sm btn absolute left-0 top-0 rounded-r-none"
+          className="btn-sm btn-square btn absolute left-0 top-0 rounded-r-none"
           onClick={handleTick("down")}
           disabled={min !== undefined && value <= min}
         >
@@ -63,7 +63,7 @@ export function NumberInput({
           ref={inputRef}
         />
         <button
-          className="btn-square btn-sm btn absolute right-0 top-0 rounded-l-none"
+          className="btn-sm btn-square btn absolute right-0 top-0 rounded-l-none"
           onClick={handleTick("up")}
           disabled={max !== undefined && value >= max}
         >

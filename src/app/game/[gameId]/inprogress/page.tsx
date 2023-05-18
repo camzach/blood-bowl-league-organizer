@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client/edge";
 import { TeamTable } from "components/team-table";
-import type { ComponentProps, ReactElement } from "react";
+import type { ComponentProps } from "react";
 import { prisma } from "utils/prisma";
 import TeamArgs = Prisma.TeamArgs;
 import PlayerFindManyArgs = Prisma.PlayerFindManyArgs;
@@ -50,9 +50,7 @@ const journeymanCols = [
   "pa",
 ] satisfies ComponentProps<typeof TeamTable>["cols"];
 
-export default async function InProgress({
-  params: { gameId },
-}: Props): Promise<ReactElement> {
+export default async function InProgress({ params: { gameId } }: Props) {
   const game = await prisma.game.findUnique({
     where: { id: decodeURIComponent(gameId) },
     select: {
