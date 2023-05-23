@@ -52,7 +52,7 @@ export const cols = [
     Component: ({ PA }) => <>{PA ?? "—"}</>,
   },
   {
-    id: "AG",
+    id: "ag",
     name: "AG",
     Component: ({ AG }) => <>{AG}</>,
   },
