@@ -264,7 +264,7 @@ type SubmitButtonProps = {
   gameState: GameState & { game: string };
 };
 function SubmitButton({ gameState }: SubmitButtonProps) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const [submissionResult, setSubmissionResult] = useState<
     null | "success" | "failure"
   >(null);
@@ -283,23 +283,23 @@ function SubmitButton({ gameState }: SubmitButtonProps) {
       },
       [[], {}]
     );
-    startMutation();
-    const clonedState = {
-      ...structuredClone(gameState),
-      playerUpdates: undefined,
-      injuries,
-      starPlayerPoints,
-    };
-    delete clonedState.playerUpdates;
-    void trpc.game.end
-      .mutate(clonedState)
-      .then(() => {
-        setSubmissionResult("success");
-      })
-      .catch(() => {
-        setSubmissionResult("failure");
-      })
-      .finally(endMutation);
+    startMutation(() => {
+      const clonedState = {
+        ...structuredClone(gameState),
+        playerUpdates: undefined,
+        injuries,
+        starPlayerPoints,
+      };
+      delete clonedState.playerUpdates;
+      return trpc.game.end
+        .mutate(clonedState)
+        .then(() => {
+          setSubmissionResult("success");
+        })
+        .catch(() => {
+          setSubmissionResult("failure");
+        });
+    });
   };
 
   if (isMutating) return <span>Submitting...</span>;

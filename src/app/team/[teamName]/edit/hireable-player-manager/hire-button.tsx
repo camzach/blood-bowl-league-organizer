@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function PlayerFirer({ player, number, team }: Props) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -25,13 +25,13 @@ export default function PlayerFirer({ player, number, team }: Props) {
   }, [error, isMutating]);
 
   const handleHire = (): void => {
-    startMutation();
-    void trpc.team.hireExistingPlayer
-      .mutate({ player, number, team })
-      .catch(() => {
-        setError(true);
-      })
-      .finally(endMutation);
+    startMutation(() => {
+      return trpc.team.hireExistingPlayer
+        .mutate({ player, number, team })
+        .catch(() => {
+          setError(true);
+        });
+    });
   };
   if (isMutating) return <>Hiring...</>;
 

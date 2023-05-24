@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import { PlayerActions } from "./player-actions/action-buttons";
 import PlayerNumberSelector from "./player-actions/player-number-selector";
-import PlayerNameEditor from "./player-actions/palyer-name-editor";
+import PlayerNameEditor from "./player-actions/player-name-editor";
 import { getServerSession } from "next-auth";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 

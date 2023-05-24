@@ -13,17 +13,17 @@ type Props = {
 export default function ReadyButton({ team }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const { startMutation, endMutation, isMutating } = useServerMutation(false);
+  const { startMutation, isMutating } = useServerMutation(false);
   const [response, setResponse] = useState<
     Awaited<ReturnType<typeof trpc.team.ready.mutate>> | null | undefined
   >(undefined);
   const readyTeam = (): void => {
-    startMutation();
-    void trpc.team.ready.mutate(team).then((res) => {
-      setResponse(res);
-      setIsOpen(true);
-      endMutation();
-    });
+    startMutation(() =>
+      trpc.team.ready.mutate(team).then((res) => {
+        setResponse(res);
+        setIsOpen(true);
+      })
+    );
   };
 
   return (

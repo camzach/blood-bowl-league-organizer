@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
-import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
+import { fire } from "actions/player";
 
 type Props = {
   id: string;
 };
 
 export default function PlayerFirer({ id }: Props) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -23,13 +23,13 @@ export default function PlayerFirer({ id }: Props) {
   }, [error, isMutating]);
 
   const handleFire = (): void => {
-    startMutation();
-    void trpc.player.fire
-      .mutate(id)
-      .catch(() => {
+    startMutation(async () => {
+      try {
+        return fire({ playerId: id });
+      } catch {
         setError(true);
-      })
-      .finally(endMutation);
+      }
+    });
   };
 
   if (isMutating) return <>Firing...</>;

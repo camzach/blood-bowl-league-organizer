@@ -1,6 +1,6 @@
 "use client";
-import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
+import { update } from "actions/player";
 
 type Props = {
   id: string;
@@ -8,13 +8,10 @@ type Props = {
 };
 
 export default function PlayerNameEditor({ name: playerName, id }: Props) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const handleNameChange = (newName: string): void => {
     if (newName === playerName || newName === "") return;
-    startMutation();
-    void trpc.player.update
-      .mutate({ player: id, name: newName })
-      .then(endMutation);
+    startMutation(() => update({ player: id, name: newName }));
   };
 
   if (isMutating) return <>Updating...</>;
