@@ -1,5 +1,5 @@
 "use client";
-import { trpc } from "utils/trpc";
+import { update } from "actions/player";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
@@ -8,12 +8,9 @@ type Props = {
 };
 
 export default function PlayerNumberSelector({ id, number }: Props) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const handleNumberChange = (newNumber: number): void => {
-    startMutation();
-    void trpc.player.update
-      .mutate({ player: id, number: newNumber })
-      .then(endMutation);
+    startMutation(() => update({ player: id, number: newNumber }));
   };
 
   if (isMutating) return <>Updating...</>;

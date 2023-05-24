@@ -23,7 +23,7 @@ export default function StaffHirer({
   max,
   treasury,
 }: Props) {
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
   // Rather than using the normal max, calculate a temporary max based on your treasury
@@ -42,24 +42,23 @@ export default function StaffHirer({
   }, [error, isMutating]);
 
   const hireStaff = (val: number): void => {
-    startMutation();
-    const action =
-      val > current
-        ? trpc.team.hireStaff.mutate({
-            team: teamName,
-            type,
-            quantity: val - current,
-          })
-        : trpc.team.fireStaff.mutate({
-            team: teamName,
-            type,
-            quantity: current - val,
-          });
-    void action
-      .catch(() => {
+    startMutation(() => {
+      const action =
+        val > current
+          ? trpc.team.hireStaff.mutate({
+              team: teamName,
+              type,
+              quantity: val - current,
+            })
+          : trpc.team.fireStaff.mutate({
+              team: teamName,
+              type,
+              quantity: current - val,
+            });
+      return action.catch(() => {
         setError(true);
-      })
-      .finally(endMutation);
+      });
+    });
   };
 
   if (isMutating) return <>Mutating...</>;

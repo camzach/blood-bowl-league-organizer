@@ -11,7 +11,7 @@ type FormValues = { songName: string; file: File };
 export default function SongControls({ team, currentSong, isEditable }: Props) {
   const [showForm, setShowForm] = useState(false);
 
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const { register, handleSubmit, control } = useForm<FormValues>();
   const { field: fileControl } = useController({ control, name: "file" });
   const onSubmit = handleSubmit((data: FormValues) => {
@@ -19,13 +19,12 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     Object.entries(data).forEach(([k, v]) => {
       formData.set(k, v);
     });
-    startMutation();
-    setShowForm(false);
-    void fetch(`/api/songs/${team}`, {
-      method: "POST",
-      body: formData,
-    }).then(() => {
-      endMutation();
+    startMutation(() => {
+      setShowForm(false);
+      return fetch(`/api/songs/${team}`, {
+        method: "POST",
+        body: formData,
+      });
     });
   });
 

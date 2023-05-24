@@ -1,9 +1,9 @@
 import type { Player, Skill, SkillCategory } from "@prisma/client";
-import React, { useState } from "react";
-import { trpc } from "utils/trpc";
+import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
 import useServerMutation from "utils/use-server-mutation";
+import { improve } from "actions/player";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -35,35 +35,29 @@ type Props = {
 };
 export function Popup({ player, skills, onHide }: Props) {
   const [tab, setTab] = useState<SkillCategory | "stat">(player.primary[0]);
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
 
   const purchaseSkill = (skill: string) => () => {
     if (tab === "stat") return;
-    startMutation();
-    trpc.player.improve
-      .mutate({
+    startMutation(async () => {
+      await improve({
         player: player.id,
-        update: {
-          type: "chosen",
-          subtype: player.primary.includes(tab) ? "primary" : "secondary",
-          skill,
-        },
-      })
-      .then(endMutation);
+        type: "chosen",
+        subtype: player.primary.includes(tab) ? "primary" : "secondary",
+        skill,
+      });
+    });
   };
   const purchaseRandom = () => {
     if (tab === "stat") return;
-    startMutation();
-    trpc.player.improve
-      .mutate({
+    startMutation(async () => {
+      await improve({
         player: player.id,
-        update: {
-          type: "random",
-          subtype: player.primary.includes(tab) ? "primary" : "secondary",
-          category: tab,
-        },
-      })
-      .then(endMutation);
+        type: "random",
+        subtype: player.primary.includes(tab) ? "primary" : "secondary",
+        category: tab,
+      });
+    });
   };
 
   const skillsByCategory = skills.reduce<Record<SkillCategory, Skill[]>>(

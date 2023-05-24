@@ -1,24 +1,17 @@
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 
-export default function useServerMutation(refresh = true): {
-  startMutation: () => void;
-  endMutation: () => void;
-  isMutating: boolean;
-} {
+export default function useServerMutation(refresh = true) {
   const router = useRouter();
   const [isTransitioning, startTransition] = useTransition();
-  const [isUpdating, setIsUpdating] = useState(false);
-  const isMutating = isTransitioning || isUpdating;
-  const startMutation = (): void => {
-    setIsUpdating(true);
-  };
-  const endMutation = (): void => {
-    setIsUpdating(false);
-    startTransition(() => {
+  const startMutation = (
+    transitionFunction: (() => void) | (() => Promise<void>)
+  ): void => {
+    startTransition(async () => {
+      await transitionFunction();
       if (refresh) router.refresh();
     });
   };
 
-  return { startMutation, endMutation, isMutating };
+  return { startMutation, isMutating: isTransitioning };
 }

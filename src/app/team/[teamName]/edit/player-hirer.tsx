@@ -19,7 +19,7 @@ export function PlayerHirer({
 }: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -55,16 +55,14 @@ export function PlayerHirer({
   );
 
   const hirePlayer = (): void => {
-    startMutation();
-    void trpc.team.hirePlayer
-      .mutate({ team: teamName, position, number })
-      .then(() => {
+    startMutation(async () => {
+      try {
+        await trpc.team.hirePlayer.mutate({ team: teamName, position, number });
         setNumber(freeNumbers.find((n) => n !== number) ?? freeNumbers[0]);
-      })
-      .catch(() => {
+      } catch {
         setError(true);
-      })
-      .finally(endMutation);
+      }
+    });
   };
 
   if (isMutating) return <>Hiring...</>;

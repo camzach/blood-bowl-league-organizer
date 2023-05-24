@@ -1,6 +1,6 @@
 import { Skill, SkillCategory } from "@prisma/client";
+import { improve } from "actions/player";
 import { useState } from "react";
-import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
 type Stat = "MA" | "AV" | "PA" | "AG" | "ST";
@@ -33,7 +33,7 @@ type Props = {
 export function StatList({ playerId, skills }: Props) {
   const [chosenStats, setChosenStats] = useState<Stat[]>([]);
   const [skill, setSkill] = useState("");
-  const { startMutation, endMutation, isMutating } = useServerMutation();
+  const { startMutation, isMutating } = useServerMutation();
 
   const remainingItems = stats.filter((i) => !chosenStats.includes(i));
 
@@ -56,17 +56,14 @@ export function StatList({ playerId, skills }: Props) {
 
   const commit = () => {
     if (!isNonempty(chosenStats)) return;
-    startMutation();
-    trpc.player.improve
-      .mutate({
+    startMutation(() =>
+      improve({
         player: playerId,
-        update: {
-          type: "characteristic",
-          preferences: chosenStats,
-          skill,
-        },
+        type: "characteristic",
+        preferences: chosenStats,
+        skill,
       })
-      .then(endMutation);
+    );
   };
 
   if (isMutating) return <>Updating...</>;
