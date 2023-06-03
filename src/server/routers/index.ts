@@ -4,7 +4,6 @@ import { inducementRouter } from "./inducement";
 import { scheduleRouter } from "./schedule-generator";
 import { teamRouter } from "./team";
 import { skillRouter } from "./skill";
-import { coachRouter } from "./coach";
 
 export const appRouter = router({
   team: teamRouter,
@@ -12,7 +11,6 @@ export const appRouter = router({
   schedule: scheduleRouter,
   inducements: inducementRouter,
   skill: skillRouter,
-  coach: coachRouter,
 });
 
 // Export type definition of API

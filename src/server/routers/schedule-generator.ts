@@ -1,4 +1,4 @@
-import { GameState } from "@prisma/client/edge";
+import { GameState } from "@prisma/client";
 import { publicProcedure, router } from "server/trpc";
 
 type PairingsType = Array<{

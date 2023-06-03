@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client/edge";
+import { Prisma } from "@prisma/client";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "utils/prisma";
 import Content from "./content";

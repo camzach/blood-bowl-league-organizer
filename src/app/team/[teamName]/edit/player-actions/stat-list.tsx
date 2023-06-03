@@ -72,7 +72,7 @@ export function StatList({ playerId, skills }: Props) {
     <>
       <div className="form-control">
         <span className="text-lg">Stat preferences:</span>
-        <table className="table-zebra table-compact my-2 table w-fit">
+        <table className="table-zebra my-2 table w-fit">
           <thead>
             <tr>
               <th></th>
@@ -88,42 +88,44 @@ export function StatList({ playerId, skills }: Props) {
                 <td>{stat}</td>
                 <td>{probs[stat] * 100}%</td>
                 <td>
-                  <button
-                    className="btn-xs btn-circle btn"
-                    disabled={i === 0}
-                    onClick={() =>
-                      setChosenStats((o) => {
-                        const newArr = [...o];
-                        newArr.splice(i, 1);
-                        newArr.splice(i - 1, 0, stat);
-                        return newArr;
-                      })
-                    }
-                  >
-                    ↑
-                  </button>
-                  <button
-                    className="btn-xs btn-circle btn"
-                    disabled={i === chosenStats.length - 1}
-                    onClick={() =>
-                      setChosenStats((o) => {
-                        const newArr = [...o];
-                        newArr.splice(i, 1);
-                        newArr.splice(i + 1, 0, stat);
-                        return newArr;
-                      })
-                    }
-                  >
-                    ↓
-                  </button>
-                  <button
-                    className="btn-xs btn-circle btn"
-                    onClick={() =>
-                      setChosenStats((o) => o.filter((el) => el !== stat))
-                    }
-                  >
-                    ✕
-                  </button>
+                  <div className="join">
+                    <button
+                      className="join-item btn-primary btn-xs btn"
+                      disabled={i === 0}
+                      onClick={() =>
+                        setChosenStats((o) => {
+                          const newArr = [...o];
+                          newArr.splice(i, 1);
+                          newArr.splice(i - 1, 0, stat);
+                          return newArr;
+                        })
+                      }
+                    >
+                      ↑
+                    </button>
+                    <button
+                      className="join-item btn-primary btn-xs btn"
+                      disabled={i === chosenStats.length - 1}
+                      onClick={() =>
+                        setChosenStats((o) => {
+                          const newArr = [...o];
+                          newArr.splice(i, 1);
+                          newArr.splice(i + 1, 0, stat);
+                          return newArr;
+                        })
+                      }
+                    >
+                      ↓
+                    </button>
+                    <button
+                      className="join-item btn-secondary btn-xs btn"
+                      onClick={() =>
+                        setChosenStats((o) => o.filter((el) => el !== stat))
+                      }
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

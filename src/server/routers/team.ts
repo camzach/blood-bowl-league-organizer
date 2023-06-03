@@ -1,4 +1,4 @@
-import { Prisma, TeamState } from "@prisma/client/edge";
+import { Prisma, TeamState } from "@prisma/client";
 import { z } from "zod";
 import { publicProcedure, router } from "server/trpc";
 import { newPlayer } from "./new-player";
