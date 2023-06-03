@@ -2,7 +2,7 @@ import type {
   Inducement,
   InducementOption,
   PrismaClient,
-} from "@prisma/client/edge";
+} from "@prisma/client";
 
 const twoForOnePairs = [
   ["Grak", "Crumbleberry"],

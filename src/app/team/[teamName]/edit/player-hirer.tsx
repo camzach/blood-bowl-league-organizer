@@ -1,6 +1,6 @@
 "use client";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import type { Position } from "@prisma/client/edge";
+import type { Position } from "@prisma/client";
 import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -70,9 +70,9 @@ export function PlayerHirer({
   if (error) return <>An error occurred. Try again.</>;
 
   return (
-    <div className="input-group">
+    <div className="join">
       <select
-        className="select-bordered select"
+        className="join-item select-bordered select"
         value={position}
         onChange={handlePositionSelect}
       >
@@ -83,7 +83,7 @@ export function PlayerHirer({
         ))}
       </select>
       <select
-        className="select-bordered select"
+        className="join-item select-bordered select"
         value={number}
         onChange={handleNumberSelect}
       >
@@ -91,7 +91,7 @@ export function PlayerHirer({
           <option key={n}>{n}</option>
         ))}
       </select>
-      <button className="btn-primary btn" onClick={hirePlayer}>
+      <button className="join-item btn-primary btn" onClick={hirePlayer}>
         HIRE!!!
       </button>
     </div>

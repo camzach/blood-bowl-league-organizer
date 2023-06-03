@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import { prisma } from "utils/prisma";
-import { GameState } from "@prisma/client/edge";
+import { GameState } from "@prisma/client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Schedule" };

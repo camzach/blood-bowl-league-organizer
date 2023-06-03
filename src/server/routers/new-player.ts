@@ -1,4 +1,4 @@
-import type { Position, Prisma, Skill } from "@prisma/client/edge";
+import type { Position, Prisma, Skill } from "@prisma/client";
 
 export function newPlayer(
   position: Position & { skills: Skill[] },

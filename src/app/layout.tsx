@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 import type { PropsWithChildren } from "react";
-import PasswordChangeNotif from "./password-change-notif";
+import PasswordChangeNotif from "./password-changer";
 import "./global.css";
 import type { Metadata } from "next";
 import Tooltip from "components/tooltip";
