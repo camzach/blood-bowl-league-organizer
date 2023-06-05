@@ -1,3 +1,4 @@
+"use server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "utils/prisma";
 import { GameState, TeamState, Weather } from "@prisma/client";
@@ -386,12 +387,12 @@ export const end = zact(
     starPlayerPoints: z.record(
       z.string(),
       z.object({
-        touchdowns: z.number().int().default(0),
-        casualties: z.number().int().default(0),
-        deflections: z.number().int().default(0),
-        interceptions: z.number().int().default(0),
-        completions: z.number().int().default(0),
-        otherSPP: z.number().int().default(0),
+        touchdowns: z.number().int().optional().default(0),
+        casualties: z.number().int().optional().default(0),
+        deflections: z.number().int().optional().default(0),
+        interceptions: z.number().int().optional().default(0),
+        completions: z.number().int().optional().default(0),
+        otherSPP: z.number().int().optional().default(0),
       })
     ),
     touchdowns: z.tuple([z.number().int(), z.number().int()]),

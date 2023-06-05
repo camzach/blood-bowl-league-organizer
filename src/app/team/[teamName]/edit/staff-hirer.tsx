@@ -1,12 +1,15 @@
 "use client";
 import { NumberInput } from "components/number-input";
 import { useEffect, useState } from "react";
-import { trpc } from "utils/trpc";
+import {
+  hireStaff as hireStaffAction,
+  fireStaff as fireStaffAction,
+} from "./actions";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
   title: string;
-  type: Parameters<typeof trpc.team.hireStaff.mutate>[0]["type"];
+  type: Parameters<typeof hireStaffAction>[0]["type"];
   current: number;
   cost: number;
   teamName: string;
@@ -45,12 +48,12 @@ export default function StaffHirer({
     startMutation(() => {
       const action =
         val > current
-          ? trpc.team.hireStaff.mutate({
+          ? hireStaffAction({
               team: teamName,
               type,
               quantity: val - current,
             })
-          : trpc.team.fireStaff.mutate({
+          : fireStaffAction({
               team: teamName,
               type,
               quantity: current - val,

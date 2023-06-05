@@ -2,8 +2,6 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Fragment, MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { ProcedureInputs } from "utils/trpc";
-import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
 import { z } from "zod";
 import InjuryButton from "./injury-button";
@@ -12,9 +10,10 @@ import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { getSession } from "next-auth/react";
 import { Modal } from "components/modal";
+import { end } from "../actions";
 
 type NameAndId = { id: string; name: string | null };
-type InputType = ProcedureInputs<"game", "end">;
+type InputType = Parameters<typeof end>[0];
 
 type Props = {
   gameId: string;
@@ -278,7 +277,7 @@ function SubmitButton({ gameState }: SubmitButtonProps) {
         const [prevInj, prevSPP] = prev;
         const [playerId, { injury, starPlayerPoints: currSPP }] = curr;
         if (injury !== undefined) prevInj.push({ playerId, injury });
-        if (currSPP) prevSPP[playerId] = currSPP;
+        if (currSPP) prevSPP[playerId] = { ...prevSPP[playerId], ...currSPP };
         return [prevInj, prevSPP];
       },
       [[], {}]
@@ -291,8 +290,7 @@ function SubmitButton({ gameState }: SubmitButtonProps) {
         starPlayerPoints,
       };
       delete clonedState.playerUpdates;
-      return trpc.game.end
-        .mutate(clonedState)
+      return end(clonedState)
         .then(() => {
           setSubmissionResult("success");
         })

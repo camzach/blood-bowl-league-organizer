@@ -2,9 +2,9 @@ import { Modal } from "components/modal";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import type { ProcedureInputs } from "utils/trpc";
+import type { end } from "../actions";
 
-type InjuryType = ProcedureInputs<"game", "end">["injuries"][number]["injury"];
+type InjuryType = Parameters<typeof end>[0]["injuries"][number]["injury"];
 type PlayerType = { id: string; name: string | null; number: number };
 
 type NameAndId = { name: string | null; id: string };

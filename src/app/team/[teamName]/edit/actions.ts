@@ -1,3 +1,4 @@
+"use server";
 import { Prisma, TeamState } from "@prisma/client";
 import { z } from "zod";
 import { newPlayer } from "server/routers/new-player";

@@ -3,7 +3,7 @@ import { Die } from "components/die";
 import { Modal } from "components/modal";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { trpc } from "utils/trpc";
+import { ready } from "./actions";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
@@ -15,11 +15,11 @@ export default function ReadyButton({ team }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const { startMutation, isMutating } = useServerMutation(false);
   const [response, setResponse] = useState<
-    Awaited<ReturnType<typeof trpc.team.ready.mutate>> | null | undefined
+    Awaited<ReturnType<typeof ready>> | null | undefined
   >(undefined);
   const readyTeam = (): void => {
     startMutation(() =>
-      trpc.team.ready.mutate(team).then((res) => {
+      ready(team).then((res) => {
         setResponse(res);
         setIsOpen(true);
       })

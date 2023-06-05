@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
+import { selectJourneymen } from "../actions";
 
 type TeamWithChoices = {
   name: string;
@@ -53,17 +54,15 @@ export default function Journeymen({ home, away, gameId }: Props) {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
   const [response, setResponse] = useState<Awaited<
-    ReturnType<typeof trpc.game.selectJourneymen.mutate>
+    ReturnType<typeof selectJourneymen>
   > | null>(null);
 
   const submitJourneymen = (): void => {
-    void trpc.game.selectJourneymen
-      .mutate({
-        game: gameId,
-        home: homeChoice,
-        away: awayChoice,
-      })
-      .then(setResponse);
+    void selectJourneymen({
+      game: gameId,
+      home: homeChoice,
+      away: awayChoice,
+    }).then(setResponse);
   };
 
   if (response !== null) {

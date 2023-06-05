@@ -1,15 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
-import { trpc } from "utils/trpc";
 import useServerMutation from "utils/use-server-mutation";
+import { hireExistingPlayer } from "../actions";
 
 type Props = {
   player: string;
   number: number;
   team: string;
+  from: "redrafts" | "journeymen";
 };
 
-export default function PlayerFirer({ player, number, team }: Props) {
+export default function PlayerFirer({ player, number, team, from }: Props) {
   const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
@@ -26,11 +27,9 @@ export default function PlayerFirer({ player, number, team }: Props) {
 
   const handleHire = (): void => {
     startMutation(() => {
-      return trpc.team.hireExistingPlayer
-        .mutate({ player, number, team })
-        .catch(() => {
-          setError(true);
-        });
+      return hireExistingPlayer({ player, number, team, from }).catch(() => {
+        setError(true);
+      });
     });
   };
   if (isMutating) return <>Hiring...</>;
