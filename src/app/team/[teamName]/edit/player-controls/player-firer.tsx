@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import useServerMutation from "utils/use-server-mutation";
-import { fire } from "actions/player";
+import { fire } from "app/team/[teamName]/edit/actions";
 
 type Props = {
   id: string;
