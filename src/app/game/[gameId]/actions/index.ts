@@ -7,13 +7,7 @@ import type { Session } from "next-auth";
 import { newPlayer } from "server/routers/new-player";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { zact } from "zact/server";
-import { getServerSession } from "utils/server-action-getsession";
-
-async function getSessionOrThrow() {
-  const session = await getServerSession();
-  if (!session) throw new Error("Not authenticated");
-  return session;
-}
+import { getSessionOrThrow } from "utils/server-action-getsession";
 
 function ensureAuthenticationForTeams(
   session: Session | null,

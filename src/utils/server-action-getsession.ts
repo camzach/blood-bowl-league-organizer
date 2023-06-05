@@ -18,3 +18,9 @@ export const getServerSession = async () => {
   const session = await originalGetServerSession(req, res, authOptions);
   return session;
 };
+
+export async function getSessionOrThrow() {
+  const session = await getServerSession();
+  if (!session) throw new Error("Not authenticated");
+  return session;
+}
