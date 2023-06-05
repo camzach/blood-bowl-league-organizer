@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "League Table" };
 export default async function Page() {
   const table = await trpc.schedule.leagueTable.query();
   return (
-    <table className="table-zebra table">
+    <table className="table-zebra mx-auto table w-3/5">
       <thead>
         <tr>
           <th>Team</th>

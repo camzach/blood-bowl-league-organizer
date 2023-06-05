@@ -24,7 +24,7 @@ export default async function Game({
 
   return (
     <div className="grid w-full place-items-center">
-      <table className="bable-zebra table">
+      <table className="table w-1/4 bg-base-300">
         <thead>
           <tr>
             <th className="border-0" />
