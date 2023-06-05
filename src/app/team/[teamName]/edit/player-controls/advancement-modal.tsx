@@ -3,7 +3,7 @@ import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
 import useServerMutation from "utils/use-server-mutation";
-import { improve } from "actions/player";
+import { improve } from "app/team/[teamName]/edit/actions";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],

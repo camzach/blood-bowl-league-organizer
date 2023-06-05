@@ -1,6 +1,6 @@
 "use client";
 import useServerMutation from "utils/use-server-mutation";
-import { update } from "actions/player";
+import { update } from "app/team/[teamName]/edit/actions";
 
 type Props = {
   id: string;

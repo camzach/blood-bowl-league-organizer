@@ -10,9 +10,9 @@ import { TeamState } from "@prisma/client";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
-import { PlayerActions } from "./player-actions/action-buttons";
-import PlayerNumberSelector from "./player-actions/player-number-selector";
-import PlayerNameEditor from "./player-actions/player-name-editor";
+import { PlayerActions } from "./player-controls/action-buttons";
+import PlayerNumberSelector from "./player-controls/player-number-selector";
+import PlayerNameEditor from "./player-controls/player-name-editor";
 import { getServerSession } from "next-auth";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
