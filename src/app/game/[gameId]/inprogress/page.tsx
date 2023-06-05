@@ -82,7 +82,6 @@ export default async function InProgress({ params: { gameId } }: Props) {
         {game.starPlayersHome.length > 0 && (
           <>
             <div className="divider">Star Players</div>
-            {/* @ts-expect-error async component */}
             <StarPlayerTable stars={game.starPlayersHome} />
           </>
         )}
@@ -117,7 +116,6 @@ export default async function InProgress({ params: { gameId } }: Props) {
         {game.starPlayersAway.length > 0 && (
           <>
             <div className="divider">Star Players</div>
-            {/* @ts-expect-error async component */}
             <StarPlayerTable stars={game.starPlayersAway} />
           </>
         )}

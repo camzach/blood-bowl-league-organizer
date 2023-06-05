@@ -10,13 +10,15 @@ type Props = {
   freeNumbers: number[];
   teamName: string;
   skills: Array<{ name: string; category: string }>;
+  from: "journeymen" | "redrafts";
 };
 export function HireablePlayerManager({
+  // skills,
   players,
   freeNumbers,
+  from,
   teamName,
-}: // skills,
-Props) {
+}: Props) {
   const [numbers, setNumbers] = useState(
     Object.fromEntries(
       players.map((p) => [
@@ -56,6 +58,7 @@ Props) {
           player={player.id}
           team={teamName}
           number={numbers[player.id]}
+          from={from}
         />
       ),
     },

@@ -28,7 +28,6 @@ export const cols = [
       <div className="whitespace-pre-wrap">
         {skills.map((skill, idx) => (
           <Fragment key={skill.name}>
-            {/* @ts-expect-error async component */}
             <Skill skill={skill} />
             {idx < skills.length - 1 ? ", " : ""}
           </Fragment>

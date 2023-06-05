@@ -1,7 +1,7 @@
 "use client";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import type { Position } from "@prisma/client";
-import { trpc } from "utils/trpc";
+import { hirePlayer as hirePlayerAction } from "./actions";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
@@ -57,7 +57,7 @@ export function PlayerHirer({
   const hirePlayer = (): void => {
     startMutation(async () => {
       try {
-        await trpc.team.hirePlayer.mutate({ team: teamName, position, number });
+        await hirePlayerAction({ team: teamName, position, number });
         setNumber(freeNumbers.find((n) => n !== number) ?? freeNumbers[0]);
       } catch {
         setError(true);

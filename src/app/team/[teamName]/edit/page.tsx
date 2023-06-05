@@ -59,8 +59,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
     (n) => !team.players.some((p) => p.number === n)
   );
 
-  const hireablePlayers = [...team.redrafts, ...team.journeymen];
-
   return (
     <>
       <h1 className="text-4xl">{team.name}</h1>
@@ -128,12 +126,22 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           teamName={team.name}
         />
       </div>
-      {hireablePlayers.length > 0 && (
+      {team.journeymen.length > 0 && (
         <HireablePlayerManager
-          players={hireablePlayers}
+          players={team.journeymen}
           freeNumbers={freeNumbers}
           teamName={team.name}
           skills={skills}
+          from="journeymen"
+        />
+      )}
+      {team.redrafts.length > 0 && (
+        <HireablePlayerManager
+          players={team.redrafts}
+          freeNumbers={freeNumbers}
+          teamName={team.name}
+          skills={skills}
+          from="redrafts"
         />
       )}
       <table>

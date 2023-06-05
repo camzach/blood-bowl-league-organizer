@@ -3,14 +3,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { trpc } from "utils/trpc";
 import InducementSelector from "./inducement-selector";
+import { purchaseInducements } from "../actions";
 
 type InducementsResponseType = Awaited<
   ReturnType<typeof trpc.inducements.list.query>
 >;
 
-type SelectInducementsParams = Parameters<
-  typeof trpc.game.purchaseInducements.mutate
->[0]["home" | "away"];
+type SelectInducementsParams = Parameters<typeof purchaseInducements>[0][
+  | "home"
+  | "away"];
 
 type Props = {
   inducements: [InducementsResponseType, InducementsResponseType];
@@ -30,7 +31,7 @@ export default function Content(props: Props) {
   });
 
   const [result, setResult] = useState<Awaited<
-    ReturnType<typeof trpc.game.purchaseInducements.mutate>
+    ReturnType<typeof purchaseInducements>
   > | null>(null);
 
   const submit = (): void => {
@@ -47,13 +48,11 @@ export default function Content(props: Props) {
           };
         })
         .filter(({ quantity }) => quantity > 0);
-    void trpc.game.purchaseInducements
-      .mutate({
-        game: props.gameId,
-        home: flattenChoices(choices.home),
-        away: flattenChoices(choices.away),
-      })
-      .then(setResult);
+    void purchaseInducements({
+      game: props.gameId,
+      home: flattenChoices(choices.home),
+      away: flattenChoices(choices.away),
+    }).then(setResult);
   };
 
   const handleChoicesUpdate = (options: {

@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
 import { Die } from "components/die";
-import { trpc } from "utils/trpc";
 import Link from "next/link";
+import { start } from "../actions";
 
 export function PlayButton({ gameId }: { gameId: string }) {
   const [response, setResponse] = useState<Awaited<
-    ReturnType<typeof trpc.game.start.mutate>
+    ReturnType<typeof start>
   > | null>(null);
   const startGame = (): void => {
-    void trpc.game.start.mutate(gameId).then(setResponse);
+    void start({ id: gameId }).then(setResponse);
   };
 
   if (response) {

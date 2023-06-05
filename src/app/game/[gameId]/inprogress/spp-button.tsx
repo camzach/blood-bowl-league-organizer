@@ -2,11 +2,9 @@ import { Modal } from "components/modal";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import type { trpc } from "utils/trpc";
+import type { end } from "../actions";
 
-type SPPType = keyof Parameters<
-  (typeof trpc)["game"]["end"]["mutate"]
->[0]["starPlayerPoints"][string];
+type SPPType = keyof Parameters<typeof end>[0]["starPlayerPoints"][string];
 type PlayerType = { id: string; name: string | null; number: number };
 type FormValues = {
   team: "home" | "away";
