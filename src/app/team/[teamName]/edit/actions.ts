@@ -1,295 +1,396 @@
-"use server";
-import type { Prisma } from "@prisma/client";
-import { SkillCategory, TeamState } from "@prisma/client";
+import { Prisma, TeamState } from "@prisma/client";
 import { z } from "zod";
-import { zfd } from "zod-form-data";
+import { newPlayer } from "server/routers/new-player";
 import { zact } from "zact/server";
 import { prisma } from "utils/prisma";
-import { getServerSession } from "utils/server-action-getsession";
+import { getSessionOrThrow } from "utils/server-action-getsession";
 
-function upperFirst<T extends string>(str: T): Capitalize<T> {
-  return `${str.charAt(0).toUpperCase()}${str.slice(1)}` as Capitalize<T>;
-}
-
-export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
-  async ({ playerId }) => {
-    const session = await getServerSession();
-    const player = await prisma.player.findFirstOrThrow({
-      where: { id: playerId },
-      select: {
-        playerTeamName: true,
-        playerTeam: { select: { state: true, name: true } },
-        teamValue: true,
-        id: true,
-      },
-    });
-    if (player.playerTeam === null)
-      throw new Error("Player is not on any team");
-    if (!session) throw new Error("Not authenticated");
-    if (!session.user.teams.includes(player.playerTeam.name))
-      throw new Error("User does not have permission to modify this team");
-    if (player.playerTeam.state === TeamState.Draft) {
-      return prisma.team.update({
-        where: { name: player.playerTeam.name },
-        data: {
-          players: { delete: { id: player.id } },
-          treasury: { increment: player.teamValue },
-        },
-      });
-    }
-    if (player.playerTeam.state === TeamState.PostGame) {
-      return prisma.player.update({
-        where: { id: player.id },
-        data: { playerTeam: { disconnect: true } },
-      });
-    }
-    throw new Error("Team not in Draft or PostGame state");
-  }
-);
-
-export const update = zact(
-  zfd.formData({
-    player: zfd.text(),
-    number: zfd.numeric(z.number().min(1).max(16)).optional(),
-    name: zfd.text(z.string().min(1)).optional(),
-  })
+export const create = zact(
+  z.object({ name: z.string().min(1), roster: z.string() })
 )(async (input) => {
-  const session = await getServerSession();
-  if (!session) throw new Error("Not authenticated");
-
-  const player = await prisma.player.findUniqueOrThrow({
-    where: { id: input.player },
-    include: {
-      playerTeam: { select: { state: true, name: true } },
-      skills: true,
-    },
-  });
-
-  if (player.playerTeam === null) throw new Error("Player is not on any team");
-
-  if (!session.user.teams.includes(player.playerTeam.name))
-    throw new Error("User does not have permission to modify this team");
-  if (
-    !([TeamState.PostGame, TeamState.Draft] as TeamState[]).includes(
-      player.playerTeam.state
-    )
-  )
-    throw new Error("Team is not modifiable");
-
-  const mutations = [
-    prisma.player.update({
-      where: { id: player.id },
-      data: { number: input.number, name: input.name },
-    }),
-  ];
-  if (input.number !== undefined) {
-    const otherPlayer = await prisma.player.findFirst({
-      where: {
-        number: input.number,
-        playerTeamName: player.playerTeamName,
+  const { name: teamName, roster } = input;
+  const team = await prisma.team
+    .create({
+      data: {
+        name: teamName,
+        roster: { connect: { name: roster } },
       },
+    })
+    .catch((err) => {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (err.code) {
+          case "P2002":
+            throw new Error("A team with this name already exists!");
+          case "P2025":
+            throw new Error("Unknown roster");
+        }
+      }
     });
-    if (otherPlayer) {
-      mutations.push(
-        prisma.player.update({
-          where: { id: otherPlayer.id },
-          data: { number: player.number },
-        })
-      );
-    }
-  }
-  return prisma.$transaction(mutations);
+  return team;
 });
 
-export const improve = zact(
-  zfd.formData(
-    z.intersection(
-      z.object({ player: zfd.text() }),
-      z.discriminatedUnion("type", [
-        z.object({
-          type: z.literal("chosen"),
-          subtype: z.literal("primary").or(z.literal("secondary")),
-          skill: z.string(),
-        }),
-        z.object({
-          type: z.literal("random"),
-          subtype: z.literal("primary").or(z.literal("secondary")),
-          category: z.enum(
-            Object.values(SkillCategory) as [SkillCategory, ...SkillCategory[]]
-          ),
-        }),
-        z.object({
-          type: z.literal("characteristic"),
-          preferences: z
-            .array(z.enum(["MA", "AG", "ST", "PA", "AV"]))
-            .nonempty(),
-          skill: z.string(),
-        }),
-      ])
-    )
-  )
+export const hirePlayer = zact(
+  z.object({
+    team: z.string(),
+    position: z.string(),
+    number: z.number().min(1).max(16),
+    name: z.string().optional(),
+  })
 )(async (input) => {
-  const session = await getServerSession();
-  if (!session) throw new Error("Not authenticated");
+  const session = await getSessionOrThrow();
+  if (!session.user.teams.includes(input.team))
+    throw new Error("User does not have permission to modify this team");
 
-  const player = await prisma.player.findUniqueOrThrow({
-    where: { id: input.player },
-    include: {
-      playerTeam: { select: { state: true, name: true } },
-      skills: true,
+  return prisma.$transaction(async (tx) => {
+    const position = await tx.position.findFirstOrThrow({
+      where: {
+        name: input.position,
+        Roster: { Team: { some: { name: input.team } } },
+      },
+      include: { skills: true },
+    });
+
+    const team = await tx.team.update({
+      where: { name: input.team },
+      data: {
+        treasury: { decrement: position.cost },
+        players: { create: newPlayer(position, input.number, input.name) },
+      },
+      include: {
+        players: { select: { id: true, positionId: true, number: true } },
+      },
+    });
+
+    if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
+      throw new Error("Team cannot hire new players right now");
+
+    if (team.players.length >= 16) throw new Error("Team roster already full");
+    if (
+      team.players.filter((p) => p.positionId === position.id).length >
+      position.max
+    )
+      throw new Error("Maximum positionals already rostered");
+    if (team.players.filter((p) => p.number === input.number).length > 1)
+      throw new Error("Player with this number already exists");
+    if (team.treasury < 0) throw new Error("Cannot afford player");
+  });
+});
+
+export const hireStaff = zact(
+  z.object({
+    team: z.string(),
+    type: z.enum([
+      "apothecary",
+      "assistantCoaches",
+      "cheerleaders",
+      "rerolls",
+      "dedicatedFans",
+    ]),
+    quantity: z.number().int().gt(0).default(1),
+  })
+)(async (input) => {
+  const session = await getSessionOrThrow();
+  if (!session.user.teams.includes(input.team))
+    throw new Error("User does not have permission to modify this team");
+
+  const team = await prisma.team.findUniqueOrThrow({
+    where: { name: input.team },
+    select: {
+      roster: { select: { specialRules: true, rerollCost: true } },
+      state: true,
     },
   });
 
-  if (player.playerTeam === null) throw new Error("Player is not on any team");
-  if (!session.user.teams.includes(player.playerTeam.name))
-    throw new Error("User does not have permission to modify this team");
-  if (player.playerTeam.state !== TeamState.PostGame)
-    throw new Error("Team is not in PostGame state");
-
-  const skill =
-    "skill" in input
-      ? await prisma.skill.findUniqueOrThrow({
-          where: { name: input.skill },
-        })
-      : null;
-
-  if (skill !== null) {
-    const validCategories =
-      "subtype" in input
-        ? player[input.subtype]
-        : [...player.primary, ...player.secondary];
-    if (!validCategories.includes(skill.category))
-      throw new Error("Skill not from a valid category");
-    if (player.skills.some((s) => s.name === skill.name))
-      throw new Error("Player already has this skill");
-  }
-
-  const tvCostTable = {
-    randomPrimary: 10_000,
-    chosenPrimary: 20_000,
-    randomSecondary: 20_000,
-    chosenSecondary: 40_000,
-    AV: 10_000,
-    MA: 20_000,
-    PA: 20_000,
-    AG: 40_000,
-    ST: 80_000,
-  };
-
-  const playerUpdate: Prisma.PlayerUpdateInput = {
-    totalImprovements: { increment: 1 },
-  };
-  let characteristicChoice:
-    | (typeof input & { type: "characteristic" })["preferences"][number]
-    | "chosenSecondary"
-    | null = null;
-  if (input.type === "chosen" && skill !== null) {
-    playerUpdate.skills = { connect: { name: skill.name } };
-    playerUpdate.teamValue = {
-      increment: tvCostTable[`${input.type}${upperFirst(input.subtype)}`],
+  return prisma.$transaction(async (tx) => {
+    const baseRerollCost = team.roster.rerollCost;
+    const costMap = {
+      apothecary: 50_000,
+      assistantCoaches: 10_000,
+      cheerleaders: 10_000,
+      rerolls: team.state === "Draft" ? baseRerollCost : baseRerollCost * 2,
+      dedicatedFans: 10_000,
     };
-  } else if (input.type === "random") {
-    if (!player[input.subtype].includes(input.category))
-      throw new Error("Invalid skill category");
-    const skills = await prisma.skill.findMany({
-      where: {
-        category: input.category,
-        name: { notIn: player.skills.map((s) => s.name) },
+    const cost = costMap[input.type] * input.quantity;
+
+    const updatedTeam = await tx.team.update({
+      where: { name: input.team },
+      data: {
+        [input.type]:
+          input.type === "apothecary" ? true : { increment: input.quantity },
+        treasury: { decrement: cost },
       },
+      include: { roster: { select: { specialRules: true } } },
     });
-    const rolledSkill = skills[Math.floor(Math.random() * skills.length)];
-    playerUpdate.skills = { connect: { name: rolledSkill.name } };
-    playerUpdate.teamValue = {
-      increment: tvCostTable[`${input.type}${upperFirst(input.subtype)}`],
-    };
-  } else if (input.type === "characteristic" && skill !== null) {
-    const rollTable: Array<Array<"MA" | "AV" | "PA" | "AG" | "ST">> = [
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV"],
-      ["MA", "AV", "PA"],
-      ["MA", "AV", "PA"],
-      ["MA", "AV", "PA"],
-      ["MA", "AV", "PA"],
-      ["MA", "AV", "PA"],
-      ["MA", "AV", "PA"],
-      ["PA", "AG"],
-      ["AG", "ST"],
-      ["MA", "AV", "PA", "AG", "ST"],
-    ];
-
-    const availableOptions = rollTable[Math.floor(Math.random() * 16)];
-    characteristicChoice =
-      input.preferences.find((pref) => availableOptions.includes(pref)) ??
-      "chosenSecondary";
-
-    playerUpdate.teamValue = {
-      increment: tvCostTable[characteristicChoice],
-    };
-
-    if (characteristicChoice !== "chosenSecondary") {
-      if (
-        characteristicChoice === "MA" ||
-        characteristicChoice === "AV" ||
-        characteristicChoice === "ST"
+    if (
+      updatedTeam.state !== TeamState.Draft &&
+      updatedTeam.state !== TeamState.PostGame
+    )
+      throw new Error("Team cannot hire staff right now");
+    if (
+      input.type === "apothecary" &&
+      !updatedTeam.roster.specialRules.some(
+        (rule) => rule.name === "Apothecary Allowed"
       )
-        playerUpdate[characteristicChoice] = { increment: 1 };
-      else
-        playerUpdate[characteristicChoice] =
-          player[characteristicChoice] === null ? 6 : { decrement: 1 };
+    )
+      throw new Error("Apothecary not allowed for this team");
+    if (input.type === "dedicatedFans" && updatedTeam.state !== TeamState.Draft)
+      throw new Error("Cannot purchase deidcated fans after draft");
 
-      playerUpdate[`${characteristicChoice}Improvements`] = {
-        increment: 1,
-      };
-    } else {
-      playerUpdate.skills = { connect: { name: skill.name } };
-    }
-  }
+    if (updatedTeam.treasury < 0)
+      throw new Error("Not enough money in treasury");
+
+    const maxMap = {
+      apothecary: 1,
+      assistantCoaches: 6,
+      cheerleaders: 12,
+      rerolls: 8,
+      dedicatedFans: 6,
+    };
+    if (Number(updatedTeam[input.type]) > maxMap[input.type])
+      throw new Error("Maximum exceeded");
+
+    return updatedTeam;
+  });
+});
+
+export const hireExistingPlayer = zact(
+  z.object({
+    team: z.string(),
+    player: z.string(),
+    number: z.number().min(1).max(16),
+    from: z.enum(["journeymen", "redrafts"]).default("journeymen"),
+  })
+)(async (input) => {
+  const session = await getSessionOrThrow();
+  if (!session.user.teams.includes(input.team))
+    throw new Error("User does not have permission to modify this team");
+
+  const hiredPlayerQuery = {
+    select: {
+      id: true,
+      position: { select: { id: true, max: true } },
+      teamValue: true,
+      seasonsPlayed: true,
+    },
+  };
 
   return prisma.$transaction(async (tx) => {
-    const sppCostTable = {
-      randomPrimary: [3, 4, 6, 8, 10, 15],
-      chosenPrimary: [6, 8, 12, 16, 20, 30],
-      randomSecondary: [6, 8, 12, 16, 20, 30],
-      chosenSecondary: [12, 14, 18, 22, 26, 40],
-      characteristic: [18, 20, 24, 28, 32, 50],
-    };
-    const sppCost =
-      input.type === "characteristic"
-        ? sppCostTable[input.type][player.totalImprovements]
-        : sppCostTable[`${input.type}${upperFirst(input.subtype)}`][
-            player.totalImprovements
-          ];
-    playerUpdate.starPlayerPoints = { decrement: sppCost };
-    const updatedPlayer = await tx.player.update({
-      where: { id: player.id },
-      data: playerUpdate,
+    const team = await tx.team.findUniqueOrThrow({
+      where: { name: input.team },
+      select: {
+        journeymen: hiredPlayerQuery,
+        redrafts: hiredPlayerQuery,
+      },
     });
 
-    if (updatedPlayer.totalImprovements > 6)
-      throw new Error("Player cannot be improved further");
-    if (updatedPlayer.starPlayerPoints < 0)
-      throw new Error("Player does not have enough SPP");
+    const player = team[input.from].find((p) => p.id === input.player);
+    if (!player) throw new Error("Invalid Player ID");
 
-    const statMinMax = {
-      MA: [1, 9],
-      ST: [1, 8],
-      AG: [1, 6],
-      PA: [1, 6],
-      AV: [3, 11],
-    };
-    const stats = Object.keys(statMinMax) as Array<keyof typeof statMinMax>;
-    for (const stat of stats) {
-      if (
-        (updatedPlayer[stat] ?? 1) < statMinMax[stat][0] ||
-        (updatedPlayer[stat] ?? 1) > statMinMax[stat][1] ||
-        updatedPlayer[`${stat}Improvements`] > 2
-      )
-        throw new Error("Stat cannot be improved further");
-    }
+    const cost = player.teamValue + player.seasonsPlayed * 20_000;
+
+    const updatedTeam = await tx.team.update({
+      where: { name: input.team },
+      data: {
+        [input.from]: { disconnect: { id: player.id } },
+        players: { connect: { id: player.id } },
+        treasury: { decrement: cost },
+      },
+      include: { players: true },
+    });
+
+    if (updatedTeam.players.length > 16)
+      throw new Error("Team cannor hire any more players");
+    if (
+      updatedTeam.players.filter((p) => p.positionId === player.position.id)
+        .length > player.position.max
+    )
+      throw new Error("Cannot hire any more players of this position");
+    if (updatedTeam.players.filter((p) => p.number === input.number).length > 1)
+      throw new Error("Team already has a player with this number");
+    if (updatedTeam.treasury < 0)
+      throw new Error("Team cannot afford this player");
+
+    const updatedPlayer = await tx.player.update({
+      where: { id: player.id },
+      data: { number: input.number },
+    });
+
+    return [updatedTeam, updatedPlayer];
   });
+});
+
+export const fireStaff = zact(
+  z.object({
+    team: z.string(),
+    type: z.enum([
+      "apothecary",
+      "assistantCoaches",
+      "cheerleaders",
+      "rerolls",
+      "dedicatedFans",
+    ]),
+    quantity: z.number().int().gt(0).default(1),
+  })
+)(async (input) => {
+  const session = await getSessionOrThrow();
+  if (!session.user.teams.includes(input.team))
+    throw new Error("User does not have permission to modify this team");
+
+  return prisma.$transaction(async (tx) => {
+    const team = await tx.team.findUniqueOrThrow({
+      where: { name: input.team },
+      select: {
+        state: true,
+        name: true,
+        roster: { select: { rerollCost: true } },
+      },
+    });
+
+    const costMap = {
+      apothecary: 50_000,
+      assistantCoaches: 10_000,
+      cheerleaders: 10_000,
+      rerolls: team.roster.rerollCost,
+      dedicatedFans: 10_000,
+    };
+
+    const updatedTeam = await tx.team.update({
+      where: { name: team.name },
+      data: {
+        [input.type]:
+          input.type === "apothecary" ? false : { decrement: input.quantity },
+        treasury:
+          team.state === TeamState.Draft
+            ? { increment: costMap[input.type] * input.quantity }
+            : undefined,
+      },
+    });
+
+    if (
+      updatedTeam.state !== TeamState.Draft &&
+      updatedTeam.state !== TeamState.PostGame
+    )
+      throw new Error("Team cannot fire staff right now");
+    if (Number(updatedTeam[input.type]) < 0)
+      throw new Error("Not enough staff to fire");
+    if (input.type === "dedicatedFans" && updatedTeam.state !== TeamState.Draft)
+      throw new Error("Cannot purchase deidcated fans after draft");
+    if (updatedTeam.dedicatedFans > 6)
+      throw new Error("Cannot have more than 6 dedicated fans");
+
+    return updatedTeam;
+  });
+});
+
+export const ready = zact(z.string())(async (input) => {
+  const session = await getSessionOrThrow();
+  if (!session.user.teams.includes(input))
+    throw new Error("User does not have permission to modify this team");
+  const team = await prisma.team.findUniqueOrThrow({
+    where: { name: input },
+    select: {
+      name: true,
+      state: true,
+      treasury: true,
+      _count: { select: { players: true } },
+    },
+  });
+  if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
+    throw new Error("Team not in Draft or PostGame state");
+  if (team.state === TeamState.Draft && team._count.players < 11)
+    throw new Error("11 players required to draft a team");
+
+  const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
+    "Crisis Averted": () => 0,
+    "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
+    "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
+    Catastrophe: (g) =>
+      g -
+      (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) * 10_000,
+  };
+  const expensiveMistakesTable = [
+    [
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+    ],
+    [
+      "Minor Incident",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+    ],
+    [
+      "Minor Incident",
+      "Minor Incident",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+    ],
+    [
+      "Major Incident",
+      "Minor Incident",
+      "Minor Incident",
+      "Crisis Averted",
+      "Crisis Averted",
+      "Crisis Averted",
+    ],
+    [
+      "Major Incident",
+      "Major Incident",
+      "Minor Incident",
+      "Minor Incident",
+      "Crisis Averted",
+      "Crisis Averted",
+    ],
+    [
+      "Catastrophe",
+      "Major Incident",
+      "Major Incident",
+      "Minor Incident",
+      "Minor Incident",
+      "Crisis Averted",
+    ],
+    [
+      "Catastrophe",
+      "Catastrophe",
+      "Major Incident",
+      "Major Incident",
+      "Major Incident",
+      "Major Incident",
+    ],
+  ] as const;
+  const expensiveMistakeRoll = Math.floor(Math.random() * 6);
+  const expensiveMistake =
+    team.state === TeamState.Draft
+      ? null
+      : expensiveMistakesTable[
+          Math.min(Math.floor(team.treasury / 100_000), 6)
+        ][expensiveMistakeRoll];
+  const expensiveMistakesCost =
+    expensiveMistake !== null
+      ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
+      : 0;
+  return prisma.team
+    .update({
+      where: { name: team.name },
+      data: {
+        state: "Ready",
+        treasury: { decrement: expensiveMistakesCost },
+        journeymen: { set: [] },
+        redrafts: { set: [] },
+      },
+    })
+    .then(() => ({
+      expensiveMistake,
+      expensiveMistakesCost,
+      // Roll should appear to the user as 1-6 instead of 0-5
+      expensiveMistakeRoll: expensiveMistakeRoll + 1,
+    }));
 });

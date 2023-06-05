@@ -1,5 +1,5 @@
 import { Skill, SkillCategory } from "@prisma/client";
-import { improve } from "app/team/[teamName]/edit/actions";
+import { improve } from "./actions";
 import { useState } from "react";
 import useServerMutation from "utils/use-server-mutation";
 
