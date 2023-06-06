@@ -5,6 +5,7 @@ import calculateTV from "utils/calculate-tv";
 import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
+import EditButton from "./edit-button";
 
 type Props = { params: { teamName: string } };
 
@@ -38,7 +39,10 @@ export default async function TeamPage({ params: { teamName } }: Props) {
 
   return (
     <>
-      <h1 className="text-4xl">{team.name}</h1>
+      <h1 className="text-4xl">
+        {team.name}
+        <EditButton teamName={teamName} />
+      </h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
         <span>
