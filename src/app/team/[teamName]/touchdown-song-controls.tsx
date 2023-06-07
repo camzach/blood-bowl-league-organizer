@@ -35,15 +35,15 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
       <span
         className={classNames([
           "mx-1 inline-block h-full w-0 border-4 border-transparent",
-          !showForm && "border-t-black",
-          showForm && "-translate-y-1/3 border-b-black",
+          !showForm && "border-l-current",
+          showForm && "-translate-y-1/3 border-r-current",
         ])}
         onClick={() => {
           setShowForm((o) => !o);
         }}
       />
       <form
-        className={showForm ? undefined : "hidden"}
+        className={showForm ? "join join-vertical" : "hidden"}
         onSubmit={(e) => {
           void onSubmit(e);
         }}
@@ -51,6 +51,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
         <input
           {...register("songName", { required: true })}
           placeholder="Song name"
+          className="join-item input-bordered input"
         />
         <input
           name={fileControl.name}
@@ -61,8 +62,9 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
           }}
           type="file"
           accept="audio/*"
+          className="join-item file-input-bordered file-input"
         />
-        <button className="btn" type="submit">
+        <button className="join-item btn" type="submit">
           Submit
         </button>
       </form>
