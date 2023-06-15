@@ -207,7 +207,6 @@ enum Weather {
 
 model Game {
   id                    String             @id @unique @default(uuid()) @db.Uuid
-  round                 Int
   home                  Team               @relation("homeTeam", fields: [homeTeamName], references: [name], map: "ScheduledGame_home__fkey")
   away                  Team               @relation("awayTeam", fields: [awayTeamName], references: [name], map: "ScheduledGame_away__fkey")
   homeTeamName          String
@@ -231,6 +230,60 @@ model Game {
   fanFactorAway         Int                @default(0)
   MVPs                  Player[]
   weather               Weather?
+  RoundRobinRound       RoundRobinRound?   @relation(fields: [roundRobinRoundId], references: [id])
+  roundRobinRoundId     String?            @db.Uuid
+  BracketGame           BracketGame?
+}
+
+model Season {
+  name       String      @id @unique
+  RoundRobin RoundRobin?
+  Bracket    Bracket?
+}
+
+model RoundRobin {
+  id         String            @id @unique @default(uuid()) @db.Uuid
+  rounds     RoundRobinRound[]
+  Season     Season            @relation(fields: [seasonName], references: [name])
+  seasonName String            @unique
+}
+
+model RoundRobinRound {
+  id           String     @id @unique @default(uuid()) @db.Uuid
+  RoundRobin   RoundRobin @relation(fields: [roundRobinId], references: [id])
+  roundRobinId String     @db.Uuid
+  number       Int
+  games        Game[]
+
+  @@unique([roundRobinId, number])
+}
+
+model Bracket {
+  id         String         @id @unique @default(uuid()) @db.Uuid
+  Round      BracketRound[]
+  Season     Season         @relation(fields: [seasonName], references: [name])
+  seasonName String         @unique
+}
+
+model BracketRound {
+  id          String        @id @unique @default(uuid()) @db.Uuid
+  number      Int
+  bracket     Bracket       @relation(fields: [bracketId], references: [id])
+  bracketId   String        @db.Uuid
+  BracketGame BracketGame[]
+
+  @@unique([bracketId, number])
+}
+
+model BracketGame {
+  id      String       @id @unique @default(uuid()) @db.Uuid()
+  round   BracketRound @relation(fields: [roundId], references: [id])
+  roundId String       @db.Uuid
+  seed    Int
+  game    Game?        @relation(fields: [gameId], references: [id])
+  gameId  String?      @unique @db.Uuid
+
+  @@unique([seed, roundId])
 }
 
 model Song {

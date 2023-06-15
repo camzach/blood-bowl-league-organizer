@@ -20,7 +20,6 @@ export default function PasswordChangeNotif({ name: coachName }: Props) {
   const { register, handleSubmit, formState } = useForm<FormValues>();
 
   const submitForm = (input: FormValues): void => {
-    console.log(input);
     setLoading(true);
     setError(false);
     changePassword({ coachName, newPassword: input.newPassword })

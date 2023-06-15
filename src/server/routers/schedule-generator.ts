@@ -1,11 +1,7 @@
-import { GameState } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { publicProcedure, router } from "server/trpc";
 
-type PairingsType = Array<{
-  homeTeamName: string;
-  awayTeamName: string;
-  round: number;
-}>;
+type PairingsType = Prisma.GameCreateManyInput[];
 
 function generateSchedule(teams: string[]): PairingsType {
   const localTeams: Array<string | null> = [...teams];
@@ -36,7 +32,6 @@ function generateSchedule(teams: string[]): PairingsType {
       pairings.push({
         homeTeamName: pairing[0],
         awayTeamName: pairing[1],
-        round,
       });
     }
 
@@ -143,103 +138,4 @@ export const scheduleRouter = router({
     const pairings = generateSchedule(teams);
     return ctx.prisma.game.createMany({ data: pairings });
   }),
-
-  leagueTable: publicProcedure.query(
-    async ({
-      ctx,
-    }): Promise<
-      Record<
-        string,
-        {
-          points: number;
-          wins: number;
-          losses: number;
-          draws: number;
-          td: number;
-          cas: number;
-          tdDiff: number;
-          casDiff: number;
-        }
-      >
-    > => {
-      const { prisma } = ctx;
-      const teams = await prisma.team.findMany({
-        select: {
-          name: true,
-          Coaches: { select: { name: true } },
-        },
-      });
-      const games = await prisma.game.findMany({
-        where: { state: GameState.Complete },
-      });
-      const leagueTable = games.reduce(
-        (prev, game) => {
-          const next = { ...prev };
-
-          // Win / Loss / Draw
-          if (game.touchdownsHome > game.touchdownsAway) {
-            next[game.homeTeamName].points += 3;
-            next[game.homeTeamName].wins += 1;
-            next[game.awayTeamName].losses += 1;
-          }
-          if (game.touchdownsHome < game.touchdownsAway) {
-            next[game.awayTeamName].points += 3;
-            next[game.awayTeamName].wins += 1;
-            next[game.homeTeamName].losses += 1;
-          }
-          if (game.touchdownsHome === game.touchdownsAway) {
-            next[game.homeTeamName].points += 1;
-            next[game.awayTeamName].points += 1;
-            next[game.homeTeamName].draws += 1;
-            next[game.awayTeamName].draws += 1;
-          }
-
-          // Casualties
-          if (game.casualtiesHome >= 3) next[game.homeTeamName].points += 1;
-          if (game.casualtiesAway >= 3) next[game.awayTeamName].points += 1;
-
-          // Perfect Defense
-          if (game.touchdownsHome === 0) next[game.awayTeamName].points += 1;
-          if (game.touchdownsAway === 0) next[game.homeTeamName].points += 1;
-
-          // Major Win
-          if (game.touchdownsHome >= 3) next[game.homeTeamName].points += 1;
-          if (game.touchdownsAway >= 3) next[game.awayTeamName].points += 1;
-
-          // Stats
-          next[game.homeTeamName].td += game.touchdownsHome;
-          next[game.awayTeamName].td += game.touchdownsAway;
-          next[game.homeTeamName].cas += game.casualtiesHome;
-          next[game.awayTeamName].cas += game.casualtiesAway;
-          next[game.homeTeamName].tdDiff +=
-            game.touchdownsHome - game.touchdownsAway;
-          next[game.awayTeamName].tdDiff +=
-            game.touchdownsAway - game.touchdownsHome;
-          next[game.homeTeamName].casDiff +=
-            game.casualtiesHome - game.casualtiesAway;
-          next[game.awayTeamName].casDiff +=
-            game.casualtiesAway - game.casualtiesHome;
-
-          return next;
-        },
-        Object.fromEntries(
-          teams.map((team) => [
-            team.name,
-            {
-              points: 0,
-              wins: 0,
-              losses: 0,
-              draws: 0,
-              td: 0,
-              cas: 0,
-              tdDiff: 0,
-              casDiff: 0,
-            },
-          ])
-        )
-      );
-
-      return leagueTable;
-    }
-  ),
 });
