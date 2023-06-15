@@ -7,6 +7,9 @@ import PasswordChangeNotif from "./password-changer";
 import "./global.css";
 import type { Metadata } from "next";
 import Tooltip from "components/tooltip";
+import { cookies } from "next/headers";
+import { prisma } from "utils/prisma";
+import SeasonPicker from "./season-picker";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -15,6 +18,9 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const session = await getServerSession(authOptions);
+  const seasons = await prisma.season.findMany({ select: { name: true } });
+
+  const season = cookies().get("season")?.value ?? seasons[0].name;
 
   return (
     <html data-theme="dark">
@@ -25,13 +31,28 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <Link className="text-2xl" href={`/team/${session?.user.teams[0]}`}>
               Teams
             </Link>
-            <Link className="text-2xl" href="/schedule">
+            <Link
+              className="text-2xl"
+              href={`/${encodeURIComponent(season)}/schedule`}
+            >
               Schedule
             </Link>
-            <Link className="text-2xl" href="/league-table">
+            <Link
+              className="text-2xl"
+              href={`/${encodeURIComponent(season)}/league-table`}
+            >
               League Table
             </Link>
+            <Link
+              className="text-2xl"
+              href={`/${encodeURIComponent(season)}/playoffs`}
+            >
+              Playoffs
+            </Link>
           </nav>
+          <span className="ml-auto">
+            <SeasonPicker seasons={seasons.map((s) => s.name)} />
+          </span>
         </header>
         <SessionProvider session={session}>
           {!session && <Link href="/api/auth/signin">Sign In</Link>}

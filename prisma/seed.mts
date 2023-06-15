@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import { readFileSync } from "fs";
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  // log: ["query", "info", "warn", "error"],
+  // errorFormat: "pretty",
+});
 
 const loadJSON = (path: string): unknown =>
   JSON.parse(readFileSync(new URL(path, import.meta.url)).toString());
@@ -61,20 +64,18 @@ async function main(): Promise<void> {
     data: rules.map((rule) => ({ name: rule })),
     skipDuplicates: true,
   });
-  await Promise.all(
-    rosters.map((roster) =>
-      prisma.roster.create({
-        data: {
-          name: roster.name,
-          rerollCost: roster.rerollCost,
-          tier: roster.tier,
-          specialRules: {
-            connect: roster.specialRules.map((rule) => ({ name: rule })),
-          },
+  for (const roster of rosters) {
+    await prisma.roster.create({
+      data: {
+        name: roster.name,
+        rerollCost: roster.rerollCost,
+        tier: roster.tier,
+        specialRules: {
+          connect: roster.specialRules.map((rule) => ({ name: rule })),
         },
-      })
-    )
-  );
+      },
+    });
+  }
 
   const existingSkills = new Set(skills.map((s) => s.name));
   rosters.forEach((roster) => {
@@ -86,28 +87,26 @@ async function main(): Promise<void> {
     });
   });
 
-  await Promise.all(
-    rosters.flatMap((roster) =>
-      roster.players.map(async (position) =>
-        prisma.position.create({
-          data: {
-            name: position.position,
-            rosterName: roster.name,
-            MA: position.MA,
-            AG: position.AG,
-            AV: position.AV,
-            ST: position.ST,
-            PA: position.PA,
-            primary: position.primary,
-            secondary: position.secondary,
-            max: position.max,
-            cost: position.cost,
-            skills: { connect: position.skills.map((s) => ({ name: s })) },
-          },
-        })
-      )
-    )
-  );
+  for (const roster of rosters) {
+    for (const position of roster.players) {
+      await prisma.position.create({
+        data: {
+          name: position.position,
+          rosterName: roster.name,
+          MA: position.MA,
+          AG: position.AG,
+          AV: position.AV,
+          ST: position.ST,
+          PA: position.PA,
+          primary: position.primary,
+          secondary: position.secondary,
+          max: position.max,
+          cost: position.cost,
+          skills: { connect: position.skills.map((s) => ({ name: s })) },
+        },
+      });
+    }
+  }
 
   type JSONStarPlayerType = {
     name: string;
@@ -130,17 +129,15 @@ async function main(): Promise<void> {
       throw new Error("Some non-existent skills found in a star player");
     }
   });
-  await Promise.all(
-    starPlayers.map((star) =>
-      prisma.starPlayer.create({
-        data: {
-          ...star,
-          playsFor: { connect: star.playsFor.map((r) => ({ name: r })) },
-          skills: { connect: star.skills },
-        },
-      })
-    )
-  );
+  for (const star of starPlayers) {
+    await prisma.starPlayer.create({
+      data: {
+        ...star,
+        playsFor: { connect: star.playsFor.map((r) => ({ name: r })) },
+        skills: { connect: star.skills },
+      },
+    });
+  }
 
   type JSONInducementType = {
     max: number;

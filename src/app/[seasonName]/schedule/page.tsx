@@ -6,27 +6,39 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Schedule" };
 
-export default async function Schedule() {
-  const games = await prisma.game.findMany({
+type Props = {
+  params: { seasonName: string };
+};
+
+export default async function Schedule({ params: { seasonName } }: Props) {
+  const season = await prisma.season.findUniqueOrThrow({
+    where: { name: decodeURIComponent(seasonName) },
     select: {
-      id: true,
-      round: true,
-      homeTeamName: true,
-      awayTeamName: true,
-      touchdownsHome: true,
-      touchdownsAway: true,
-      casualtiesHome: true,
-      casualtiesAway: true,
-      state: true,
+      RoundRobin: {
+        select: {
+          rounds: {
+            select: {
+              number: true,
+              games: {
+                select: {
+                  id: true,
+                  homeTeamName: true,
+                  awayTeamName: true,
+                  touchdownsHome: true,
+                  touchdownsAway: true,
+                  casualtiesHome: true,
+                  casualtiesAway: true,
+                  state: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
-  const rounds = games.reduce<Array<Array<(typeof games)[number]>>>(
-    (acc, curr) => {
-      acc[curr.round] = acc[curr.round] ? [...acc[curr.round], curr] : [curr];
-      return acc;
-    },
-    []
-  );
+
+  if (!season.RoundRobin) return <>Season is not yet initialized</>;
 
   return (
     <table className="table-zebra table">
@@ -41,12 +53,12 @@ export default async function Schedule() {
         </tr>
       </thead>
       <tbody>
-        {rounds.map((round, roundIdx) => (
-          <Fragment key={roundIdx}>
-            {round.map((game, gameIdx) => (
+        {season.RoundRobin?.rounds.map((round) => (
+          <Fragment key={round.number}>
+            {round.games.map((game, gameIdx) => (
               <tr key={game.id}>
                 {gameIdx === 0 && (
-                  <td rowSpan={round.length}>{roundIdx + 1}</td>
+                  <td rowSpan={round.games.length}>{round.number}</td>
                 )}
                 <td>{game.homeTeamName}</td>
                 <td>{game.awayTeamName}</td>
