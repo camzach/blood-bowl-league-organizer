@@ -72,7 +72,7 @@ export function PlayerHirer({
   return (
     <div className="join">
       <select
-        className="join-item select-bordered select"
+        className="select-bordered select join-item"
         value={position}
         onChange={handlePositionSelect}
       >
@@ -83,7 +83,7 @@ export function PlayerHirer({
         ))}
       </select>
       <select
-        className="join-item select-bordered select"
+        className="select-bordered select join-item"
         value={number}
         onChange={handleNumberSelect}
       >
@@ -91,7 +91,7 @@ export function PlayerHirer({
           <option key={n}>{n}</option>
         ))}
       </select>
-      <button className="join-item btn-primary btn" onClick={hirePlayer}>
+      <button className="btn-primary join-item btn" onClick={hirePlayer}>
         HIRE!!!
       </button>
     </div>

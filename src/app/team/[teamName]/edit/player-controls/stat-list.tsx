@@ -90,7 +90,7 @@ export function StatList({ playerId, skills }: Props) {
                 <td>
                   <div className="join">
                     <button
-                      className="join-item btn-primary btn-xs btn"
+                      className="btn-primary btn-xs join-item btn"
                       disabled={i === 0}
                       onClick={() =>
                         setChosenStats((o) => {
@@ -104,7 +104,7 @@ export function StatList({ playerId, skills }: Props) {
                       ↑
                     </button>
                     <button
-                      className="join-item btn-primary btn-xs btn"
+                      className="btn-primary btn-xs join-item btn"
                       disabled={i === chosenStats.length - 1}
                       onClick={() =>
                         setChosenStats((o) => {
@@ -118,7 +118,7 @@ export function StatList({ playerId, skills }: Props) {
                       ↓
                     </button>
                     <button
-                      className="join-item btn-secondary btn-xs btn"
+                      className="btn-secondary btn-xs join-item btn"
                       onClick={() =>
                         setChosenStats((o) => o.filter((el) => el !== stat))
                       }

@@ -6,6 +6,11 @@ import { zfd } from "zod-form-data";
 import { zact } from "zact/server";
 import { prisma } from "utils/prisma";
 import { getServerSession } from "utils/server-action-getsession";
+import {
+  getPlayerSkills,
+  getPlayerStats,
+  getPlayerTotalImprovements,
+} from "utils/get-computed-player-fields";
 
 function upperFirst<T extends string>(str: T): Capitalize<T> {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}` as Capitalize<T>;
@@ -57,13 +62,17 @@ export const update = zact(
   const session = await getServerSession();
   if (!session) throw new Error("Not authenticated");
 
-  const player = await prisma.player.findUniqueOrThrow({
+  const fetchedPlayer = await prisma.player.findUniqueOrThrow({
     where: { id: input.player },
     include: {
       playerTeam: { select: { state: true, name: true } },
-      skills: true,
+      learnedSkills: true,
+      position: {
+        include: { skills: true },
+      },
     },
   });
+  const player = { ...fetchedPlayer, skills: getPlayerSkills(fetchedPlayer) };
 
   if (player.playerTeam === null) throw new Error("Player is not on any team");
 
@@ -132,13 +141,21 @@ export const improve = zact(
   const session = await getServerSession();
   if (!session) throw new Error("Not authenticated");
 
-  const player = await prisma.player.findUniqueOrThrow({
+  const fetchedPlayer = await prisma.player.findUniqueOrThrow({
     where: { id: input.player },
     include: {
       playerTeam: { select: { state: true, name: true } },
-      skills: true,
+      learnedSkills: true,
+      position: {
+        include: { skills: true },
+      },
     },
   });
+  const player = {
+    ...fetchedPlayer,
+    skills: getPlayerSkills(fetchedPlayer),
+    totalImprovements: getPlayerTotalImprovements(fetchedPlayer),
+  };
 
   if (player.playerTeam === null) throw new Error("Player is not on any team");
   if (!session.user.teams.includes(player.playerTeam.name))
@@ -176,15 +193,13 @@ export const improve = zact(
     ST: 80_000,
   };
 
-  const playerUpdate: Prisma.PlayerUpdateInput = {
-    totalImprovements: { increment: 1 },
-  };
+  const playerUpdate: Prisma.PlayerUpdateInput = {};
   let characteristicChoice:
     | (typeof input & { type: "characteristic" })["preferences"][number]
     | "chosenSecondary"
     | null = null;
   if (input.type === "chosen" && skill !== null) {
-    playerUpdate.skills = { connect: { name: skill.name } };
+    playerUpdate.learnedSkills = { connect: { name: skill.name } };
     playerUpdate.teamValue = {
       increment: tvCostTable[`${input.type}${upperFirst(input.subtype)}`],
     };
@@ -198,7 +213,7 @@ export const improve = zact(
       },
     });
     const rolledSkill = skills[Math.floor(Math.random() * skills.length)];
-    playerUpdate.skills = { connect: { name: rolledSkill.name } };
+    playerUpdate.learnedSkills = { connect: { name: rolledSkill.name } };
     playerUpdate.teamValue = {
       increment: tvCostTable[`${input.type}${upperFirst(input.subtype)}`],
     };
@@ -232,21 +247,11 @@ export const improve = zact(
     };
 
     if (characteristicChoice !== "chosenSecondary") {
-      if (
-        characteristicChoice === "MA" ||
-        characteristicChoice === "AV" ||
-        characteristicChoice === "ST"
-      )
-        playerUpdate[characteristicChoice] = { increment: 1 };
-      else
-        playerUpdate[characteristicChoice] =
-          player[characteristicChoice] === null ? 6 : { decrement: 1 };
-
       playerUpdate[`${characteristicChoice}Improvements`] = {
         increment: 1,
       };
     } else {
-      playerUpdate.skills = { connect: { name: skill.name } };
+      playerUpdate.learnedSkills = { connect: { name: skill.name } };
     }
   }
 
@@ -267,10 +272,11 @@ export const improve = zact(
     playerUpdate.starPlayerPoints = { decrement: sppCost };
     const updatedPlayer = await tx.player.update({
       where: { id: player.id },
+      include: { learnedSkills: true, position: true },
       data: playerUpdate,
     });
 
-    if (updatedPlayer.totalImprovements > 6)
+    if (getPlayerTotalImprovements(updatedPlayer) > 6)
       throw new Error("Player cannot be improved further");
     if (updatedPlayer.starPlayerPoints < 0)
       throw new Error("Player does not have enough SPP");
@@ -283,10 +289,11 @@ export const improve = zact(
       AV: [3, 11],
     };
     const stats = Object.keys(statMinMax) as Array<keyof typeof statMinMax>;
+    const updatedStats = getPlayerStats(updatedPlayer);
     for (const stat of stats) {
       if (
-        (updatedPlayer[stat] ?? 1) < statMinMax[stat][0] ||
-        (updatedPlayer[stat] ?? 1) > statMinMax[stat][1] ||
+        (updatedStats[stat] ?? 1) < statMinMax[stat][0] ||
+        (updatedStats[stat] ?? 1) > statMinMax[stat][1] ||
         updatedPlayer[`${stat}Improvements`] > 2
       )
         throw new Error("Stat cannot be improved further");

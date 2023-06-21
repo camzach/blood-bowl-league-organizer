@@ -1,9 +1,11 @@
 "use client";
-import type { FetchedTeamType } from "../page";
 import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
 import HireButton from "./hire-button";
 import { useState, useCallback } from "react";
+import { fetchTeam } from "../../fetch-team";
+
+type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
 
 type Props = {
   players: FetchedTeamType["journeymen" | "redrafts"];
@@ -38,7 +40,7 @@ export function HireablePlayerManager({
     []
   );
 
-  const cols: TeamTableProps<FetchedTeamType["journeymen"][number]>["cols"] = [
+  const cols: TeamTableProps<(typeof players)[number]>["cols"] = [
     {
       name: "#",
       id: "#",
