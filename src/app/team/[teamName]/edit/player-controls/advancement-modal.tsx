@@ -29,7 +29,7 @@ const skillConflicts: Partial<Record<string, string[]>> = {
 };
 
 type Props = {
-  player: Player & { skills: Skill[] };
+  player: Player & { skills: Skill[], totalImprovements: number };
   skills: Skill[];
   onHide: () => void;
 };

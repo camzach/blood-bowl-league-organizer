@@ -9,6 +9,7 @@ import { newPlayer } from "server/routers/new-player";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { zact } from "zact/server";
 import { getSessionOrThrow } from "utils/server-action-getsession";
+import { getPlayerStats } from "utils/get-computed-player-fields";
 
 function ensureAuthenticationForTeams(
   session: Session | null,
@@ -195,7 +196,7 @@ export const selectJourneymen = zact(
         data: {
           journeymen: {
             create: Array.from(Array(11 - homePlayers), (_, i) =>
-              newPlayer(homeChoice, 99 - i)
+              ({ ...newPlayer(homeChoice, 99 - i), learnedSkills: { connect: { name: 'Loner (4+)' } } })
             ),
           },
         },
@@ -210,7 +211,7 @@ export const selectJourneymen = zact(
         data: {
           journeymen: {
             create: Array.from(Array(11 - awayPlayers), (_, i) =>
-              newPlayer(awayChoice, 99 - i)
+              ({...newPlayer(awayChoice, 99 - i), learnedSkills: { connect: { name: 'Loner (4+)'}}})
             ),
           },
         },
@@ -400,10 +401,13 @@ export const end = zact(
   })
 )(async (input) => {
   const session = await getSessionOrThrow();
+  const playerFields = {
+    include: { position: true },
+  } satisfies Prisma.Team$playersArgs;
   const teamFields = {
     name: true,
-    players: true,
-    journeymen: true,
+    players: playerFields,
+    journeymen: playerFields,
     dedicatedFans: true,
   } satisfies Prisma.TeamSelect;
   const game = await prisma.game.findUniqueOrThrow({
@@ -452,8 +456,12 @@ export const end = zact(
     ])
   );
   for (const injury of input.injuries) {
-    const player = players.find((p) => p.id === injury.playerId);
-    if (!player) throw new Error("Player not found");
+    const fetchedPlayer = players.find((p) => p.id === injury.playerId);
+    if (!fetchedPlayer) throw new Error("Player not found");
+    const player = {
+      ...fetchedPlayer,
+      ...getPlayerStats(fetchedPlayer),
+    };
 
     const mappedUpdate = updateMap[injury.playerId].data;
     mappedUpdate.missNextGame = true;
@@ -464,12 +472,12 @@ export const end = zact(
     ) {
       if (player[injury.injury] - 1 < statMinMax[injury.injury][0])
         throw new Error("Invalid injury, stat cannot be reduced any more");
-      mappedUpdate[injury.injury] = { decrement: 1 };
+      mappedUpdate[`${injury.injury}Injuries`] = { decrement: 1 };
     }
     if (injury.injury === "PA" || injury.injury === "AG") {
       if ((player[injury.injury] ?? 0) + 1 > statMinMax[injury.injury][1])
         throw new Error("Invalid injury, stat cannot be increased any more");
-      mappedUpdate[injury.injury] = { increment: 1 };
+      mappedUpdate[`${injury.injury}Injuries`] = { increment: 1 };
     }
     if (injury.injury === "NI")
       mappedUpdate.nigglingInjuries = { increment: 1 };

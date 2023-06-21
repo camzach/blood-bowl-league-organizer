@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint && tsc --noEmit",
     "vercel-build": "prisma generate --data-proxy && prisma migrate deploy && next build",
     "prepare": "husky install"
   },

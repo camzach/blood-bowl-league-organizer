@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Modal } from "components/modal";
 
 type Props = {
-  player: Player & { skills: Skill[] };
+  player: Player & { skills: Skill[], totalImprovements: number };
   skills: Skill[];
 };
 
