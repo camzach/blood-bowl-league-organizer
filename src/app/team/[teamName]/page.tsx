@@ -1,36 +1,17 @@
 import { notFound } from "next/navigation";
-import { prisma } from "utils/prisma";
 import React from "react";
 import calculateTV from "utils/calculate-tv";
 import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
+import { fetchTeam } from "./fetch-team";
 
 type Props = { params: { teamName: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
   return { title: decodeURIComponent(params.teamName) };
 }
-
-async function fetchTeam(teamName: string) {
-  return prisma.team.findUnique({
-    where: { name: teamName },
-    include: {
-      roster: { include: { positions: true } },
-      players: {
-        include: { skills: { include: { faq: true } }, position: true },
-      },
-      redrafts: {
-        include: { skills: { include: { faq: true } }, position: true },
-      },
-      touchdownSong: { select: { name: true } },
-    },
-  });
-}
-export type FetchedTeamType = NonNullable<
-  Awaited<ReturnType<typeof fetchTeam>>
->;
 
 export default async function TeamPage({ params: { teamName } }: Props) {
   const team = await fetchTeam(decodeURIComponent(teamName));

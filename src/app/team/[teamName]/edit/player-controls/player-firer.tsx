@@ -38,7 +38,7 @@ export default function PlayerFirer({ id }: Props) {
 
   return (
     <button
-      className="btn-outline btn-secondary btn-sm btn"
+      className="btn-secondary btn-outline btn-sm btn"
       onClick={handleFire}
     >
       Fire!

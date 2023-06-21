@@ -32,17 +32,16 @@ model Player {
   nigglingInjuries   Int             @default(0)
   missNextGame       Boolean         @default(false)
   dead               Boolean         @default(false)
-  AG                 Int
-  MA                 Int
-  PA                 Int?
-  ST                 Int
-  AV                 Int
   AGImprovements     Int             @default(0)
   MAImprovements     Int             @default(0)
   PAImprovements     Int             @default(0)
   STImprovements     Int             @default(0)
   AVImprovements     Int             @default(0)
-  totalImprovements  Int             @default(0)
+  AGInjuries         Int             @default(0)
+  MAInjuries         Int             @default(0)
+  PAInjuries         Int             @default(0)
+  STInjuries         Int             @default(0)
+  AVInjuries         Int             @default(0)
   starPlayerPoints   Int             @default(0)
   touchdowns         Int             @default(0)
   completions        Int             @default(0)
@@ -53,7 +52,7 @@ model Player {
   teamValue          Int
   primary            SkillCategory[]
   secondary          SkillCategory[]
-  skills             Skill[]
+  learnedSkills      Skill[]
   position           Position        @relation(fields: [positionId], references: [id])
   positionId         String          @db.Uuid
   seasonsPlayed      Int             @default(0)

@@ -15,34 +15,13 @@ import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import { getServerSession } from "next-auth";
 import { authOptions } from "pages/api/auth/[...nextauth]";
+import { fetchTeam } from "../fetch-team";
 
 type Props = { params: { teamName: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
   return { title: decodeURIComponent(params.teamName) };
 }
-
-async function fetchTeam(teamName: string) {
-  return prisma.team.findUnique({
-    where: { name: teamName },
-    include: {
-      roster: { include: { positions: true } },
-      players: {
-        include: { skills: { include: { faq: true } }, position: true },
-      },
-      journeymen: {
-        include: { skills: { include: { faq: true } }, position: true },
-      },
-      redrafts: {
-        include: { skills: { include: { faq: true } }, position: true },
-      },
-      touchdownSong: { select: { name: true } },
-    },
-  });
-}
-export type FetchedTeamType = NonNullable<
-  Awaited<ReturnType<typeof fetchTeam>>
->;
 
 export default async function EditTeam({ params: { teamName } }: Props) {
   const session = await getServerSession(authOptions);

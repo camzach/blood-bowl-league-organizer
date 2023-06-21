@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { trpc } from "utils/trpc";
 import { selectJourneymen } from "../actions";
 
 type TeamWithChoices = {
