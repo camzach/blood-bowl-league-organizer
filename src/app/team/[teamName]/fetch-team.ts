@@ -2,6 +2,7 @@ import { prisma } from "utils/prisma";
 import {
   getPlayerSkills,
   getPlayerStats,
+  getPlayerTotalImprovements,
 } from "utils/get-computed-player-fields";
 
 export async function fetchTeam(teamName: string) {
@@ -36,16 +37,19 @@ export async function fetchTeam(teamName: string) {
     players: team.players.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
+      totalImprovements: getPlayerTotalImprovements(p),
       ...getPlayerStats(p),
     })),
     journeymen: team.journeymen.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
+      totalImprovements: getPlayerTotalImprovements(p),
       ...getPlayerStats(p),
     })),
     redrafts: team.redrafts.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
+      totalImprovements: getPlayerTotalImprovements(p),
       ...getPlayerStats(p),
     })),
   };

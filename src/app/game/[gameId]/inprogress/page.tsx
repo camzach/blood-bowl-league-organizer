@@ -8,6 +8,10 @@ import StarPlayerArgs = Prisma.StarPlayerArgs;
 import ScoreWidget from "./score-widget";
 import { notFound } from "next/navigation";
 import StarPlayerTable from "./star-player-table";
+import {
+  getPlayerStats,
+  getPlayerSkills,
+} from "utils/get-computed-player-fields";
 
 type Props = {
   params: { gameId: string };
@@ -15,7 +19,10 @@ type Props = {
 
 const playerSelect = {
   where: { missNextGame: false },
-  include: { skills: { include: { faq: true } }, position: true },
+  include: {
+    learnedSkills: { include: { faq: true } },
+    position: { include: { skills: true } },
+  },
 } satisfies PlayerFindManyArgs;
 
 const teamSelect = {
@@ -68,13 +75,25 @@ export default async function InProgress({ params: { gameId } }: Props) {
       style={{ placeItems: "start center" }}
     >
       <div className="flex w-full flex-col">
-        <TeamTable compact players={game.home.players} cols={cols} />
+        <TeamTable
+          compact
+          players={game.home.players.map((player) => ({
+            ...player,
+            ...getPlayerStats(player),
+            skills: getPlayerSkills(player),
+          }))}
+          cols={cols}
+        />
         {game.home.journeymen.length > 0 && (
           <>
             <div className="divider">Journeymen</div>
             <TeamTable
               compact
-              players={game.home.journeymen}
+              players={game.home.journeymen.map((player) => ({
+                ...player,
+                ...getPlayerStats(player),
+                skills: getPlayerSkills(player),
+              }))}
               cols={journeymanCols}
             />
           </>
@@ -102,13 +121,25 @@ export default async function InProgress({ params: { gameId } }: Props) {
         }}
       />
       <div className="flex w-full flex-col">
-        <TeamTable compact players={game.away.players} cols={cols} />
+        <TeamTable
+          compact
+          players={game.away.players.map((player) => ({
+            ...player,
+            ...getPlayerStats(player),
+            skills: getPlayerSkills(player),
+          }))}
+          cols={cols}
+        />
         {game.away.journeymen.length > 0 && (
           <>
             <div className="divider">Journeymen</div>
             <TeamTable
               compact
-              players={game.away.journeymen}
+              players={game.away.journeymen.map((player) => ({
+                ...player,
+                ...getPlayerStats(player),
+                skills: getPlayerSkills(player),
+              }))}
               cols={journeymanCols}
             />
           </>
