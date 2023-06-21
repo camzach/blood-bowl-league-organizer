@@ -199,6 +199,11 @@ export const hireExistingPlayer = zact(
       include: { players: true },
     });
 
+    await tx.player.update({
+      where: { id: player.id },
+      data: { learnedSkills: { disconnect: { name: "Loner (4+)" } } },
+    });
+
     if (updatedTeam.players.length > 16)
       throw new Error("Team cannor hire any more players");
     if (
