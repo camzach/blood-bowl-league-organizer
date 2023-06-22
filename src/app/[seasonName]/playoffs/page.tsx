@@ -61,8 +61,8 @@ export default async function Playoffs({ params: { seasonName } }: Props) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: `repeat(${bracket.Round.length * 2 - 1}, auto)`,
-        gridTemplateRows: `repeat(${2 ** (bracket.Round.length - 2)}, auto)`,
+        gridTemplateColumns: `repeat(${bracket.Round.length * 2 - 1}, 1fr)`,
+        gridTemplateRows: `repeat(${2 ** (bracket.Round.length - 2)}, 1fr)`,
         gridTemplateAreas: buildGrid(bracket.Round.length),
         gap: "0.5rem",
       }}
