@@ -11,9 +11,9 @@ export function getPlayerStats(player: Player & { position: Position }) {
   return {
     AG: player.position.AG + player.AGInjuries - player.AGImprovements,
     PA,
-    ST: player.position.ST - player.PAInjuries + player.STImprovements,
-    AV: player.position.AV - player.PAInjuries + player.AVImprovements,
-    MA: player.position.MA - player.PAInjuries + player.MAImprovements,
+    ST: player.position.ST - player.STInjuries + player.STImprovements,
+    AV: player.position.AV - player.AVInjuries + player.AVImprovements,
+    MA: player.position.MA - player.MAInjuries + player.MAImprovements,
   };
 }
 
