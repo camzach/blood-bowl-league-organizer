@@ -68,6 +68,10 @@
       {
         "q": "If a player has both the Jump Up skill and the Stab trait, can they use the Jump Up skill to allow them to make a Block action from Prone on a 2 + and then replace this Block action with a Stab Special action? (p.75 & 86)",
         "a": "Yes."
+      },
+      {
+        "q": "If, during a Blitz kick-off event, a player with the Animal Savagery trait knocks down a player on their team as part of the Animal Savagery trait, will that cause the Blitz kick-off event to immediately end? (p.41 & p.81)",
+        "a": "No."
       }
     ]
   },
@@ -244,6 +248,10 @@
       {
         "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
         "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
       }
     ]
   },
@@ -268,6 +276,14 @@
       {
         "q": "If a player with the Foul Appearance skill is chosen as the target of a Blitz action, when do they roll to see if the action is wasted? (p.78)",
         "a": "As soon as the Blitz action is declared. This will mean that, if they fail, they will lose their entire action and will be unable to make either the Move action or Block action as part of the Blitz action.]"
+      },
+      {
+        "q": "If a player with the Foul Appearance skill is chosen as the target of a Foul action, does the player that declared them as the target of a Foul action have to make the roll for Foul Appearance? (p.78)",
+        "a": "No, as Foul Appearance only triggers when the player is chosen as the target of either a Block action or a Special action."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
       }
     ]
   },
@@ -323,7 +339,13 @@
     "name": "Cannoneer",
     "rules": "When this player performs a Long Pass action or a Long Bomb Pass action, you may apply an additional +1 modifier to the Passing Ability test.",
     "category": "P",
-    "purchasable": true
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Does the Cannoneer skill still apply when a player makes a Hail Mary Pass? (p.79)",
+        "a": "Yes."
+      }
+    ]
   },
   {
     "name": "Cloud Burster",
@@ -340,6 +362,14 @@
       {
         "q": "When a player with the Dump-off skill is nominated as the target of a Blitz action, when do they make their Quick Pass action? (p.79)",
         "a": "As soon as they are nominated as the target of the Blitz action."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      },
+      {
+        "q": "Can a player with both the Dump-off and the Pass skills use the Pass skill when making a Pass action as part of the Dump-off skill? (p.79)",
+        "a": "Yes."
       }
     ]
   },
@@ -395,7 +425,13 @@
     "name": "Pass",
     "rules": "This player may re-roll a failed Passing Ability test when performing a Pass action.",
     "category": "P",
-    "purchasable": true
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with both the Dump-off and the Pass skills use the Pass skill when making a Pass action as part of the Dump-off skill? (p.79)",
+        "a": "Yes."
+      }
+    ]
   },
   {
     "name": "Running Pass",
@@ -486,6 +522,10 @@
       {
         "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
         "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
       }
     ]
   },
@@ -502,6 +542,10 @@
       {
         "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
         "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
       }
     ]
   },
@@ -572,6 +616,10 @@
       {
         "q": "Will a Prone player that fails its roll for Animal Savagery still lash out against a team-mate?",
         "a": "Yes."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
       }
     ]
   },
@@ -670,12 +718,16 @@
       {
         "q": "If a player with the Ball & Chain trait performs a Block action against a team-mate as a result of the Ball & Chain Move Special action, which coach chooses the result of the Block action? (p.82)",
         "a": "The coach of the player performing the Block action."
+      },
+      {
+        "q": "If a player with the Ball & Chain trait moves into a square occupied by a Prone or Stunned player, does the resulting Armour roll benefit from the Mighty Blow (+X) skill if applicable? (p.82)",
+        "a": "No, as in this instance a Block action wasn’t made."
       }
     ]
   },
   {
     "name": "Bombardier",
-    "rules": "When activated and if they are Standing, this player can perform a \"Throw Bomb\" Special action. This Special action is neither a Pass action nor a Throw Team-mate action, so does not prevent another player performing one of those actions during the same team turn. However, only a single player with this Trait may perform this Special action each team turn.\nA Bomb can be thrown and caught, and the throw interfered with, just like a ball, using the rules for Pass action as described on page 48, with the following exceptions:\nA player may not stand up or move before performing a Throw Bomb action.\nBombs do not bounce and can come to rest on the ground in an occupied square. Should a player fail to catch a Bomb, it will come to rest on the ground in the square that player occupies.\nIf a Bomb is fumbled, it will explode immediately in the square occupied by the player attempting to throw it.\nIf a Bomb comes to rest on the ground in an empty square or is caught by an opposite player, no Turnover is caused.\nA player that is in possession of the ball can still catch a Bomb.\nAny Skills that can be used when performing a Pass action can also be used when performing a Throw Bomb Special action, with the exception of On the Ball.\nIf a Bomb is caught by a player on either team, roll a D6:\n\nOn a roll of 4+, the Bomb explodes immediately, as described below.\nOn a roll of 1-3, that player must throw the Bomb again immediately. This throw takes place out of the normal sequence of play.\nShould a Bomb ever leave the pitch, it explodes in the crowd with no effect (on the game) before the crowd can throw it back.\n\nWhen a Bomb comes to rest on the ground, in either an occupied square, in a square occupied by a player that failed to catch the Bomb or in a square occupid by a Prone or Stunned player, it will explode immediately:\nIf the Bomb explodes in an occupied square, that player is automatically hit by the explosion.\nRoll a D6 for each player (from either team) that occupies a square adjacet to the one in which the Bomb exploded:\nOn a roll of 4+, the player has been hit by the explosion.\nOn a roll of 1-3, the player manages to avoid the explosion.\nAny Standing players hit by the explosion are Placed Prone.\nAn Armour roll (and possibly an Injury roll as well) is made against any player hit by the explosion, even if they were already Prone or Stunned.\nYou may apply a +1 modifier to either the Armour roll or Injury roll. This modifier may be applied after the roll been made.",
+    "rules": "When activated and if they are Standing, this player can perform a \"Throw Bomb\" Special action. This Special action is neither a Pass action nor a Throw Team-mate action, so does not prevent another player performing one of those actions during the same team turn. However, only a single player with this Trait may perform this Special action each team turn.\nA Bomb can be thrown and caught, and the throw interfered with, just like a ball, using the rules for Pass action as described on page 48, with the following exceptions:\nA player may not stand up or move before performing a Throw Bomb action.\nBombs do not bounce and can come to rest on the ground in an occupied square. Should a player fail to catch a Bomb, it will come to rest on the ground in the square that player occupies.\nIf a Bomb is fumbled, it will explode immediately in the square occupied by the player attempting to throw it.\nIf a Bomb comes to rest on the ground in an empty square or is caught by an opposite player, no Turnover is caused.\nA player that is in possession of the ball can still catch a Bomb.\nAny Skills that can be used when performing a Pass action can also be used when performing a Throw Bomb Special action, with the exception of On the Ball.\nIf a Bomb is caught by a player on either team, roll a D6:\n\nOn a roll of 4+, the Bomb explodes immediately, as described below.\nOn a roll of 1-3, that player must throw the Bomb again immediately. This throw takes place out of the normal sequence of play.\nShould a Bomb ever leave the pitch, it explodes in the crowd with no effect (on the game) before the crowd can throw it back.\n\nWhen a Bomb comes to rest on the ground, in either an occupied square, in a square occupied by a player that failed to catch the Bomb or in a square occupid by a Prone or Stunned player, it will explode immediately:\nIf the Bomb explodes in an occupied square, that player is automatically hit by the explosion.\nRoll a D6 for each player (from either team) that occupies a square adjacet to the one in which the Bomb exploded:\nOn a roll of 4+, the player has been hit by the explosion.\nOn a roll of 1-3, the player manages to avoid the explosion.\nAny Standing players hit by the explosion are Placed Prone.\nAn Armour roll (and possibly an Injury roll as well) is made against any player hit by the explosion, even if they were already Prone or Stunned.\nIf the player performing the Throw Bomb Special action is hit by their bomb and Placed Prone, either as the result of a Fumbled throw or by being hit by the explosion, then a Turnover is caused.",
     "category": "T",
     "purchasable": false,
     "faq": [
@@ -706,6 +758,10 @@
       {
         "q": "If a player making a Throw Bomb Special action fumbles the Bomb, does this cause a Turnover? (p.83)",
         "a": "No."
+      },
+      {
+        "q": "Can a player with both the Bombardier trait and the Dump- off skill use the Dump-off skill to perform a Throw Bomb Special action when they are chosen as the target of a Block Action? (p.79 & 83)",
+        "a": "No."
       }
     ]
   },
@@ -713,11 +769,17 @@
     "name": "Bone Head",
     "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6:\nOn a roll of 1, this player forgets what they are doing and their activation ends immediately. Additionally, this player loses their Tackle Zone until they are next activated.\nOn a roll of 2+, this player continues their activation as normal and completes their declared action.\nIf you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
     "category": "T",
-    "purchasable": false
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
   },
   {
     "name": "Chainsaw",
-    "rules": "Instead of performing a Block action (on its own or as part of a Blitz action), this player may perform a \"Chainsaw Attack\" Special action. Exactly as described for a Block action, nominate a single Standing player to be the target of the Chainsaw Attack Special action, There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Chainsaw Attack Special action, roll a D6:\nOn a roll of 2+, the nominated target is hit by Chainsaw!\nOn a roll of 1, the Chainsaw will violently 'kick-back' and hit the player wielding it.\nIn either case, an Armour roll is made against the player hit by the Chainsaw, adding +3 to the result.\nIf the armour of the player hit is broken, they become Prone and an Injury roll is made against them. This Injury roll cannot be modified in any way.\nIf the armour of the player hit is not broken, this Trait has no effect\nThis player can only use the Chainsaw once per turn (i.e., Chainsaw cannot be used with Frenzy or Multipe Block) and if used as part of a Blitz action, this player cannot continue moving after using it.\nIf this player Fails Over or is Knocked Down, the opposing coach may add +3 to the Armour roll made against the player.\nIf an opposition player performs a Block action targeting this player and a Player Down! or a POW! result is applied, +3 is added to the Armour roll. If a Both Down result is applied, +3 is added to both Armour rolls.\nFinally, this player may use their Chainsaw when they perform a Foul action. Roll a D6 for kick-back as described above. Once again, an Armour roll is made against the player hit by the Chainsaw. adding +3 to the score.",
+    "rules": "Instead of performing a Block action (on its own or as part of a Blitz action), this player may perform a \"Chainsaw Attack\" Special action. Exactly as described for a Block action, nominate a single Standing player to be the target of the Chainsaw Attack Special action, There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Chainsaw Attack Special action, roll a D6:\nOn a roll of 2+, the nominated target is hit by Chainsaw!\nOn a roll of 1, the Chainsaw will violently 'kick-back' and hit the player wielding it. This will result in a Turnover.\nIn either case, an Armour roll is made against the player hit by the Chainsaw, adding +3 to the result.\nIf the armour of the player hit is broken, they become Prone and an Injury roll is made against them. This Injury roll cannot be modified in any way.\nIf the armour of the player hit is not broken, this Trait has no effect\nThis player can only use the Chainsaw once per turn (i.e., Chainsaw cannot be used with Frenzy or Multipe Block) and if used as part of a Blitz action, this player cannot continue moving after using it.\nIf this player Fails Over or is Knocked Down, the opposing coach may add +3 to the Armour roll made against the player.\nIf an opposition player performs a Block action targeting this player and a Player Down! or a POW! result is applied, +3 is added to the Armour roll. If a Both Down result is applied, +3 is added to both Armour rolls.\nFinally, this player may use their Chainsaw when they perform a Foul action. Roll a D6 for kick-back as described above. Once again, an Armour roll is made against the player hit by the Chainsaw. adding +3 to the score.",
     "category": "T",
     "purchasable": false,
     "faq": [
@@ -855,7 +917,13 @@
     "name": "Really Stupid",
     "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6, applying a +2 modifier to the dice roll if this player is currently adjacent to one or more Standing team-mates that do not have this Trait:\nOn a roll of 1-3, this player forgets what they are doing and their activation ends immediately. Additionally, this player loses their Tackle Zone until they are next activated.\nOn a roll of 4+, this player continues their activation as normal and completes their declared action.\nNote that if you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
     "category": "T",
-    "purchasable": false
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
   },
   {
     "name": "Regeneration",
@@ -975,7 +1043,13 @@
     "name": "Unchannelled Fury",
     "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6, applying a +2 modifier to the dice roll if you declared the player would perform a Block or Blitz action (or a Special action granted by a Skill or Trait that can be performed instead of a Block action)\nOn a roll of 1-3, this player rages incoherently at others but achieves little else. Their activation ends immediately.\nOn a roll of 4+, this player continues their activation as normal and completes their declared action.\nIf you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
     "category": "T",
-    "purchasable": false
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
   },
   {
     "name": "Drunkard",
