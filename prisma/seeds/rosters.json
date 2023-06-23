@@ -2663,11 +2663,11 @@
       "Lustrian Superleague",
       "Apothecary Allowed"
     ],
-    "rerollCost": 50000,
+    "rerollCost": 60000,
     "tier": 1,
     "players": [
       {
-        "position": "Tribal Linewoman",
+        "position": "Eagle Warrior Linewoman",
         "max": 16,
         "cost": 50000,
         "MA": 6,
@@ -2687,9 +2687,9 @@
         ]
       },
       {
-        "position": "Eagle Warrior Thrower",
+        "position": "Python Warrior Thrower",
         "max": 2,
-        "cost": 75000,
+        "cost": 80000,
         "MA": 6,
         "ST": 3,
         "AG": 3,
@@ -2697,7 +2697,9 @@
         "AV": 8,
         "skills": [
           "Dodge",
-          "Pass"
+          "On the Ball",
+          "Pass",
+          "Safe Pass"
         ],
         "primary": [
           "G",
@@ -2709,17 +2711,18 @@
         ]
       },
       {
-        "position": "Piranha Warrior Catcher",
+        "position": "Piranha Warrior Blitzer",
         "max": 2,
-        "cost": 75000,
-        "MA": 6,
+        "cost": 90000,
+        "MA": 7,
         "ST": 3,
         "AG": 3,
         "PA": 5,
         "AV": 8,
         "skills": [
-          "Catch",
-          "Dodge"
+          "Dodge",
+          "Hit and Run",
+          "Jump Up"
         ],
         "primary": [
           "A",
@@ -2730,16 +2733,16 @@
         ]
       },
       {
-        "position": "Koka Kalim Blitzer",
-        "max": 4,
-        "cost": 90000,
+        "position": "Jaguar Warrior Blocker",
+        "max": 2,
+        "cost": 110000,
         "MA": 6,
-        "ST": 3,
+        "ST": 4,
         "AG": 3,
         "PA": 5,
-        "AV": 8,
+        "AV": 9,
         "skills": [
-          "Block",
+          "Defensive",
           "Dodge"
         ],
         "primary": [
