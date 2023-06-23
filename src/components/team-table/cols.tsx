@@ -48,17 +48,17 @@ export const cols = [
   {
     id: "pa",
     name: "PA",
-    Component: ({ PA }) => <>{PA ?? "—"}</>,
+    Component: ({ PA }) => <>{PA !== null ? `${PA}+` : "—"}</>,
   },
   {
     id: "ag",
     name: "AG",
-    Component: ({ AG }) => <>{AG}</>,
+    Component: ({ AG }) => <>{`${AG}+`}</>,
   },
   {
     id: "av",
     name: "AV",
-    Component: ({ AV }) => <>{AV}</>,
+    Component: ({ AV }) => <>{`${AV}+`}</>,
   },
   {
     id: "ni",
