@@ -107,7 +107,6 @@ export function getPlayerSppAndTv(player: {
                 : sppCostTable.chosenPrimary[curr.order];
             prev.teamValue += tvCostTable.chosenPrimary;
           } else if (skillCategory === "secondary") {
-            prev.starPlayerPoints -= sppCostTable.chosenSecondary[curr.order];
             prev.starPlayerPoints -=
               curr.type === "FallbackSkill"
                 ? sppCostTable.characteristic[curr.order]
