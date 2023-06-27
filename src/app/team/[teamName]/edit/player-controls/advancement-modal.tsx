@@ -1,9 +1,9 @@
-import type { Player, Skill, SkillCategory } from "@prisma/client";
+import type { Player, Position, Skill, SkillCategory } from "@prisma/client";
 import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
 import useServerMutation from "utils/use-server-mutation";
-import { improve } from "./actions";
+import { learnSkill } from "./actions";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -29,21 +29,26 @@ const skillConflicts: Partial<Record<string, string[]>> = {
 };
 
 type Props = {
-  player: Player & { skills: Skill[], totalImprovements: number };
+  player: Player & {
+    skills: Skill[];
+    totalImprovements: number;
+    position: Position;
+  };
   skills: Skill[];
   onHide: () => void;
 };
 export function Popup({ player, skills, onHide }: Props) {
-  const [tab, setTab] = useState<SkillCategory | "stat">(player.primary[0]);
+  const [tab, setTab] = useState<SkillCategory | "stat">(
+    player.position.primary[0]
+  );
   const { startMutation, isMutating } = useServerMutation();
 
   const purchaseSkill = (skill: string) => () => {
     if (tab === "stat") return;
     startMutation(async () => {
-      await improve({
+      await learnSkill({
         player: player.id,
         type: "chosen",
-        subtype: player.primary.includes(tab) ? "primary" : "secondary",
         skill,
       });
     });
@@ -51,10 +56,9 @@ export function Popup({ player, skills, onHide }: Props) {
   const purchaseRandom = () => {
     if (tab === "stat") return;
     startMutation(async () => {
-      await improve({
+      await learnSkill({
         player: player.id,
         type: "random",
-        subtype: player.primary.includes(tab) ? "primary" : "secondary",
         category: tab,
       });
     });
@@ -74,7 +78,7 @@ export function Popup({ player, skills, onHide }: Props) {
 
   const statIncreaseSkills = {
     primary: Object.fromEntries(
-      player.primary.map((category) => [
+      player.position.primary.map((category) => [
         category,
         skillsByCategory[category].filter(
           (s) =>
@@ -84,7 +88,7 @@ export function Popup({ player, skills, onHide }: Props) {
       ])
     ),
     secondary: Object.fromEntries(
-      player.secondary.map((category) => [
+      player.position.secondary.map((category) => [
         category,
         skillsByCategory[category].filter(
           (s) =>
@@ -100,7 +104,7 @@ export function Popup({ player, skills, onHide }: Props) {
   return (
     <>
       <div className="tabs">
-        {player.primary.map((category) => (
+        {player.position.primary.map((category) => (
           <div
             key={category}
             className={classNames([
@@ -114,7 +118,7 @@ export function Popup({ player, skills, onHide }: Props) {
             } SPP`}
           </div>
         ))}
-        {player.secondary.map((category) => (
+        {player.position.secondary.map((category) => (
           <div
             key={category}
             className={classNames([
@@ -164,7 +168,9 @@ export function Popup({ player, skills, onHide }: Props) {
             {`Random - ${
               advancementCosts[
                 `Random ${
-                  player.primary.includes(tab) ? "Primary" : "Secondary"
+                  player.position.primary.includes(tab)
+                    ? "Primary"
+                    : "Secondary"
                 }`
               ][player.totalImprovements]
             } SPP`}

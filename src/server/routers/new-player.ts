@@ -7,10 +7,7 @@ export function newPlayer(
 ): Prisma.PlayerCreateInput {
   return {
     number,
-    teamValue: position.cost,
     name: playerName,
     position: { connect: { id: position.id } },
-    primary: position.primary,
-    secondary: position.secondary,
   };
 }
