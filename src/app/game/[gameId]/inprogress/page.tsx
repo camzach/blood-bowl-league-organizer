@@ -11,6 +11,7 @@ import StarPlayerTable from "./star-player-table";
 import {
   getPlayerStats,
   getPlayerSkills,
+  getPlayerSppAndTv,
 } from "utils/get-computed-player-fields";
 
 type Props = {
@@ -20,8 +21,10 @@ type Props = {
 const playerSelect = {
   where: { missNextGame: false },
   include: {
-    learnedSkills: { include: { faq: true } },
-    position: { include: { skills: true } },
+    improvements: { include: { skill: true } },
+    position: {
+      include: { skills: true, Roster: { include: { specialRules: true } } },
+    },
   },
 } satisfies PlayerFindManyArgs;
 
@@ -80,6 +83,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
           players={game.home.players.map((player) => ({
             ...player,
             ...getPlayerStats(player),
+            ...getPlayerSppAndTv(player),
             skills: getPlayerSkills(player),
           }))}
           cols={cols}
@@ -92,6 +96,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
               players={game.home.journeymen.map((player) => ({
                 ...player,
                 ...getPlayerStats(player),
+                ...getPlayerSppAndTv(player),
                 skills: getPlayerSkills(player),
               }))}
               cols={journeymanCols}
@@ -126,6 +131,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
           players={game.away.players.map((player) => ({
             ...player,
             ...getPlayerStats(player),
+            ...getPlayerSppAndTv(player),
             skills: getPlayerSkills(player),
           }))}
           cols={cols}
@@ -138,6 +144,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
               players={game.away.journeymen.map((player) => ({
                 ...player,
                 ...getPlayerStats(player),
+                ...getPlayerSppAndTv(player),
                 skills: getPlayerSkills(player),
               }))}
               cols={journeymanCols}

@@ -1,33 +1,31 @@
 import { prisma } from "utils/prisma";
 import {
   getPlayerSkills,
+  getPlayerSppAndTv,
   getPlayerStats,
-  getPlayerTotalImprovements,
 } from "utils/get-computed-player-fields";
+import { Prisma } from "@prisma/client";
+
+const playerSelect = {
+  include: {
+    improvements: { include: { skill: true } },
+    position: {
+      include: {
+        skills: true,
+        Roster: { select: { specialRules: true } },
+      },
+    },
+  },
+} satisfies Prisma.PlayerArgs;
 
 export async function fetchTeam(teamName: string) {
   const team = await prisma.team.findUnique({
     where: { name: teamName },
     include: {
       roster: { include: { positions: true } },
-      players: {
-        include: {
-          learnedSkills: { include: { faq: true } },
-          position: { include: { skills: true } },
-        },
-      },
-      redrafts: {
-        include: {
-          learnedSkills: { include: { faq: true } },
-          position: { include: { skills: true } },
-        },
-      },
-      journeymen: {
-        include: {
-          learnedSkills: { include: { faq: true } },
-          position: { include: { skills: true } },
-        },
-      },
+      players: playerSelect,
+      redrafts: playerSelect,
+      journeymen: playerSelect,
       touchdownSong: { select: { name: true } },
     },
   });
@@ -37,20 +35,23 @@ export async function fetchTeam(teamName: string) {
     players: team.players.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
-      totalImprovements: getPlayerTotalImprovements(p),
+      totalImprovements: p.improvements.length,
       ...getPlayerStats(p),
+      ...getPlayerSppAndTv(p),
     })),
     journeymen: team.journeymen.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
-      totalImprovements: getPlayerTotalImprovements(p),
+      totalImprovements: p.improvements.length,
       ...getPlayerStats(p),
+      ...getPlayerSppAndTv(p),
     })),
     redrafts: team.redrafts.map((p) => ({
       ...p,
       skills: getPlayerSkills(p),
-      totalImprovements: getPlayerTotalImprovements(p),
+      totalImprovements: p.improvements.length,
       ...getPlayerStats(p),
+      ...getPlayerSppAndTv(p),
     })),
   };
 }

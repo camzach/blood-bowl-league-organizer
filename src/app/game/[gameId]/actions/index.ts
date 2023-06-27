@@ -132,12 +132,15 @@ export const selectJourneymen = zact(
     assistantCoaches: true,
     cheerleaders: true,
     rerolls: true,
-    roster: { select: { name: true, rerollCost: true } },
+    roster: { select: { name: true, rerollCost: true, specialRules: true } },
     players: {
       where: { missNextGame: false },
-      select: { teamValue: true },
+      include: {
+        improvements: { include: { skill: true } },
+        position: { include: { Roster: { include: { specialRules: true } } } },
+      },
     },
-  } as const;
+  } satisfies Prisma.TeamSelect;
   const game = await prisma.game.findUniqueOrThrow({
     where: { id: input.game },
     select: {
@@ -195,9 +198,10 @@ export const selectJourneymen = zact(
         where: { name: game.home.name },
         data: {
           journeymen: {
-            create: Array.from(Array(11 - homePlayers), (_, i) =>
-              ({ ...newPlayer(homeChoice, 99 - i), learnedSkills: { connect: { name: 'Loner (4+)' } } })
-            ),
+            create: Array.from(Array(11 - homePlayers), (_, i) => ({
+              ...newPlayer(homeChoice, 99 - i),
+              learnedSkills: { connect: { name: "Loner (4+)" } },
+            })),
           },
         },
       })
@@ -210,9 +214,10 @@ export const selectJourneymen = zact(
         where: { name: game.away.name },
         data: {
           journeymen: {
-            create: Array.from(Array(11 - awayPlayers), (_, i) =>
-              ({...newPlayer(awayChoice, 99 - i), learnedSkills: { connect: { name: 'Loner (4+)'}}})
-            ),
+            create: Array.from(Array(11 - awayPlayers), (_, i) => ({
+              ...newPlayer(awayChoice, 99 - i),
+              learnedSkills: { connect: { name: "Loner (4+)" } },
+            })),
           },
         },
       })
@@ -402,7 +407,7 @@ export const end = zact(
 )(async (input) => {
   const session = await getSessionOrThrow();
   const playerFields = {
-    include: { position: true },
+    include: { position: true, improvements: true },
   } satisfies Prisma.Team$playersArgs;
   const teamFields = {
     name: true,
@@ -527,34 +532,17 @@ export const end = zact(
       mappedUpdate.completions,
       points.completions
     );
-    mappedUpdate.starPlayerPoints = incrementUpdateField(
-      mappedUpdate.starPlayerPoints,
-      points.completions +
-        points.deflections +
-        2 * points.casualties +
-        2 * points.interceptions +
-        3 * points.touchdowns +
-        points.otherSPP
-    );
   }
 
   const mvpHome =
     mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id;
   const mvpHomeUpdate = updateMap[mvpHome].data;
   mvpHomeUpdate.MVPs = { increment: 1 };
-  mvpHomeUpdate.starPlayerPoints = incrementUpdateField(
-    mvpHomeUpdate.starPlayerPoints,
-    4
-  );
 
   const mvpAway =
     mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id;
   const mvpAwayUpdate = updateMap[mvpAway].data;
   mvpAwayUpdate.MVPs = { increment: 1 };
-  mvpAwayUpdate.starPlayerPoints = incrementUpdateField(
-    mvpAwayUpdate.starPlayerPoints,
-    4
-  );
 
   const fansUpdate = (
     won: boolean,

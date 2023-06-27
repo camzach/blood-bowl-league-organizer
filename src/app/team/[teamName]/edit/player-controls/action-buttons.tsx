@@ -1,12 +1,17 @@
 "use client";
-import { Player, Skill } from "@prisma/client";
+import { Player, Position, Skill } from "@prisma/client";
 import PlayerFirer from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
 import { Modal } from "components/modal";
 
 type Props = {
-  player: Player & { skills: Skill[], totalImprovements: number };
+  player: Player & {
+    skills: Skill[];
+    totalImprovements: number;
+    starPlayerPoints: number;
+    position: Position;
+  };
   skills: Skill[];
 };
 

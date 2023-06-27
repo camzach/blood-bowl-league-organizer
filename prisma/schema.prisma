@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["filteredRelationCount", "jsonProtocol"]
+  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -20,43 +20,56 @@ model Coach {
 }
 
 model Player {
-  id                 String          @id @unique @default(uuid()) @db.Uuid
+  id                 String        @id @unique @default(uuid()) @db.Uuid
   name               String?
   number             Int
-  playerTeam         Team?           @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
-  journeymanTeam     Team?           @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
-  redraftTeam        Team?           @relation("redrafts", map: "Player_redrafts__fkey", fields: [redraftTeamName], references: [name])
+  playerTeam         Team?         @relation("players", map: "Player_team__fkey", fields: [playerTeamName], references: [name])
+  journeymanTeam     Team?         @relation("journeymen", map: "Player_journeyman__fkey", fields: [journeymanTeamName], references: [name])
+  redraftTeam        Team?         @relation("redrafts", map: "Player_redrafts__fkey", fields: [redraftTeamName], references: [name])
   playerTeamName     String?
   journeymanTeamName String?
   redraftTeamName    String?
-  nigglingInjuries   Int             @default(0)
-  missNextGame       Boolean         @default(false)
-  dead               Boolean         @default(false)
-  AGImprovements     Int             @default(0)
-  MAImprovements     Int             @default(0)
-  PAImprovements     Int             @default(0)
-  STImprovements     Int             @default(0)
-  AVImprovements     Int             @default(0)
-  AGInjuries         Int             @default(0)
-  MAInjuries         Int             @default(0)
-  PAInjuries         Int             @default(0)
-  STInjuries         Int             @default(0)
-  AVInjuries         Int             @default(0)
-  starPlayerPoints   Int             @default(0)
-  touchdowns         Int             @default(0)
-  completions        Int             @default(0)
-  deflections        Int             @default(0)
-  interceptions      Int             @default(0)
-  casualties         Int             @default(0)
-  MVPs               Int             @default(0)
-  teamValue          Int
-  primary            SkillCategory[]
-  secondary          SkillCategory[]
-  learnedSkills      Skill[]
-  position           Position        @relation(fields: [positionId], references: [id])
-  positionId         String          @db.Uuid
-  seasonsPlayed      Int             @default(0)
+  nigglingInjuries   Int           @default(0)
+  missNextGame       Boolean       @default(false)
+  dead               Boolean       @default(false)
+  AGInjuries         Int           @default(0)
+  MAInjuries         Int           @default(0)
+  PAInjuries         Int           @default(0)
+  STInjuries         Int           @default(0)
+  AVInjuries         Int           @default(0)
+  touchdowns         Int           @default(0)
+  completions        Int           @default(0)
+  deflections        Int           @default(0)
+  interceptions      Int           @default(0)
+  casualties         Int           @default(0)
+  MVPs               Int           @default(0)
+  position           Position      @relation(fields: [positionId], references: [id])
+  positionId         String        @db.Uuid
+  seasonsPlayed      Int           @default(0)
   MVPGames           Game[]
+  improvements       Improvement[]
+}
+
+enum ImprovementType {
+  ST
+  MA
+  AG
+  PA
+  AV
+  ChosenSkill
+  RandomSkill
+  FallbackSkill
+}
+
+model Improvement {
+  type      ImprovementType
+  player    Player          @relation(fields: [playerId], references: [id])
+  playerId  String          @db.Uuid
+  order     Int
+  skill     Skill?          @relation(fields: [skillName], references: [name])
+  skillName String?
+
+  @@id([playerId, order])
 }
 
 enum TeamState {
@@ -136,9 +149,9 @@ model Skill {
   rules       String
   category    SkillCategory
   faq         Faq[]
-  players     Player[]
   positions   Position[]
   starPlayers StarPlayer[]
+  Improvement Improvement[]
 }
 
 model Faq {

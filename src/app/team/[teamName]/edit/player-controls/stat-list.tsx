@@ -1,5 +1,5 @@
 import { Skill, SkillCategory } from "@prisma/client";
-import { improve } from "./actions";
+import { increaseCharacteristic } from "./actions";
 import { useState } from "react";
 import useServerMutation from "utils/use-server-mutation";
 
@@ -57,9 +57,8 @@ export function StatList({ playerId, skills }: Props) {
   const commit = () => {
     if (!isNonempty(chosenStats)) return;
     startMutation(() =>
-      improve({
+      increaseCharacteristic({
         player: playerId,
-        type: "characteristic",
         preferences: chosenStats,
         skill,
       })
