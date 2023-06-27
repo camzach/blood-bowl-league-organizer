@@ -477,10 +477,10 @@ export const end = zact(
     ) {
       if (player[injury.injury] - 1 < statMinMax[injury.injury][0])
         throw new Error("Invalid injury, stat cannot be reduced any more");
-      mappedUpdate[`${injury.injury}Injuries`] = { decrement: 1 };
+      mappedUpdate[`${injury.injury}Injuries`] = { increment: 1 };
     }
     if (injury.injury === "PA" || injury.injury === "AG") {
-      if ((player[injury.injury] ?? 0) + 1 > statMinMax[injury.injury][1])
+      if ((player[injury.injury] ?? 6) + 1 > statMinMax[injury.injury][1])
         throw new Error("Invalid injury, stat cannot be increased any more");
       mappedUpdate[`${injury.injury}Injuries`] = { increment: 1 };
     }
