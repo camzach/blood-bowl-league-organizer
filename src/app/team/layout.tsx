@@ -1,10 +1,9 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import { prisma } from "utils/prisma";
+import drizzle from "utils/drizzle"
 
 export default async function TeamLayout({ children }: PropsWithChildren) {
-  const teams = await prisma.team.findMany({ select: { name: true } });
-
+  const teams = await drizzle.query.team.findMany({ columns: { name: true } });
   return (
     <>
       <div className="flex gap-4">

@@ -1,21 +1,17 @@
 import type { AuthOptions } from "next-auth";
 import nextAuth from "next-auth";
 import credentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "../../../utils/prisma";
+import drizzle from "../../../utils/drizzle";
 import { compare } from "bcryptjs";
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      teams: string[];
-      needsNewPassword: boolean;
     };
   }
   interface User {
     id: string;
-    teams: string[];
-    needsNewPassword: boolean;
   }
 }
 
@@ -23,8 +19,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     user: {
       id: string;
-      teams: string[];
-      needsNewPassword: boolean;
     };
   }
 }
@@ -56,9 +50,11 @@ export const authOptions: AuthOptions = {
           password: string;
         };
 
-        const user = await prisma.coach.findFirst({
-          where: { name: { equals: username, mode: "insensitive" } },
-          include: { teams: { select: { name: true } } },
+        const user = await drizzle.query.coach.findFirst({
+          where: (coach, { eq }) => eq(coach.name, username),
+          with: {
+            coachToTeam: { with: { team: { columns: { name: true } } } },
+          },
         });
 
         if (!user) throw new Error("CredentialsSignin");
@@ -68,8 +64,6 @@ export const authOptions: AuthOptions = {
         if (!isValid) throw new Error("CredentialsSignin");
         const userObj = {
           id: user.name,
-          teams: user.teams.map((t) => t.name),
-          needsNewPassword: user.needsNewPassword,
         };
         return userObj;
       },

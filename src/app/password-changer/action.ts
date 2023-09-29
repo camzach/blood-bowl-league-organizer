@@ -2,8 +2,10 @@
 import { hash } from "bcryptjs";
 import { zact } from "zact/server";
 import { zfd } from "zod-form-data";
-import { prisma } from "utils/prisma";
+import drizzle from "utils/drizzle";
 import { getServerSession } from "utils/server-action-getsession";
+import { coach } from "db/schema";
+import { eq } from "drizzle-orm";
 
 export const changePassword = zact(
   zfd.formData({ coachName: zfd.text(), newPassword: zfd.text() })
@@ -11,9 +13,8 @@ export const changePassword = zact(
   const session = await getServerSession();
   if (session?.user.id !== coachName) throw new Error("Not authorized");
   return hash(newPassword, 10).then((newHash) =>
-    prisma.coach.update({
-      where: { name: coachName },
-      data: { passwordHash: newHash, needsNewPassword: false },
-    })
+    drizzle.update(coach).set({
+      password_hash: newHash,
+    }).where(eq(coach.name, coachName))
   );
 });
