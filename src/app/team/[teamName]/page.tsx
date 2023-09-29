@@ -5,7 +5,14 @@ import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
-import { fetchTeam } from "./fetch-team";
+import drizzle from "utils/drizzle";
+import { eq, sql } from "drizzle-orm";
+import { team as dbTeam, specialRule } from "db/schema";
+import {
+  getPlayerSkills,
+  getPlayerSppAndTv,
+  getPlayerStats,
+} from "utils/get-computed-player-fields";
 
 type Props = { params: { teamName: string } };
 
@@ -14,9 +21,62 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function TeamPage({ params: { teamName } }: Props) {
-  const team = await fetchTeam(decodeURIComponent(teamName));
+  const fetchedTeam = await drizzle.query.team.findFirst({
+    where: eq(dbTeam.name, decodeURIComponent(teamName)),
+    with: {
+      roster: true,
+      players: {
+        with: {
+          improvements: { with: { skill: true } },
+          position: {
+            with: {
+              skillToPosition: { with: { skill: true } },
+              skillCategories: true,
+              rosterSlot: {
+                with: {
+                  roster: {
+                    with: {
+                      specialRuleToRoster: { with: { specialRule: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
 
-  if (!team) return notFound();
+  if (!fetchedTeam) return notFound();
+  const team = {
+    ...fetchedTeam,
+    players: fetchedTeam.players.map((p) => {
+      const position = {
+        ...p.position,
+        skills: p.position.skillToPosition.map((stp) => stp.skill),
+        primary: p.position.skillCategories
+          .filter((c) => c.type === "primary")
+          .map((c) => c.skillCategoryName),
+        secondary: p.position.skillCategories
+          .filter((c) => c.type === "secondary")
+          .map((c) => c.skillCategoryName),
+        roster: {
+          ...p.position.rosterSlot.roster,
+          specialRules: p.position.rosterSlot.roster.specialRuleToRoster.map(
+            (sr) => sr.specialRule
+          ),
+        },
+      };
+      return {
+        ...p,
+        ...getPlayerStats(p),
+        ...getPlayerSppAndTv({ ...p, position }),
+        position,
+        skills: getPlayerSkills({ ...p, position }),
+      };
+    }),
+  };
 
   return (
     <>
@@ -25,6 +85,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
         <EditButton teamName={team.name} />
       </h1>
       <div className="my-4 flex flex-col text-lg">
+        <span>TV - unknown</span>
         <span>TV - {calculateTV(team).toLocaleString()}</span>
         <span>
           Current TV -{" "}
@@ -39,7 +100,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
       Dedicated Fans -- {team.dedicatedFans}
       <SongControls
         team={team.name}
-        currentSong={team.touchdownSong?.name}
+        currentSong={team.touchdownSong ?? undefined}
         isEditable={false}
       />
       <TeamTable players={team.players} />
@@ -49,15 +110,16 @@ export default async function TeamPage({ params: { teamName } }: Props) {
             <th />
             <th>Cost</th>
             <th>Count</th>
-            <th>Total</th>
+            <th>Team Value</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Rerolls</td>
             <td>
-              {team.roster.rerollCost.toLocaleString()} /{" "}
-              {(team.roster.rerollCost * 2).toLocaleString()}
+              {team.state === "draft"
+                ? team.roster.rerollCost.toLocaleString()
+                : (team.roster.rerollCost * 2).toLocaleString()}
             </td>
             <td>{team.rerolls}</td>
             <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>
