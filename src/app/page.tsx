@@ -1,10 +1,15 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "pages/api/auth/[...nextauth]";
+import { auth } from "@clerk/nextjs";
+import { coachToTeam } from "db/schema";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
+import drizzle from "utils/drizzle";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
-
+  const { userId } = auth();
+  // const myTeam = await drizzle.query.coachToTeam.findFirst({
+  //   where: eq(coachToTeam.coachName, userId),
+  // });
+  console.log(userId);
   return (
     <>
       <ul>
@@ -14,7 +19,7 @@ export default async function Home() {
           </Link>
         </li>
         <li>
-          <Link className="link" href={`/team/${session?.user.teams[0]}`}>
+          <Link className="link" href={`/team/`}>
             View your team
           </Link>
         </li>
