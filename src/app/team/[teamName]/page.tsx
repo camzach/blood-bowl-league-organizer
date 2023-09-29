@@ -6,13 +6,14 @@ import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
 import drizzle from "utils/drizzle";
-import { eq, sql } from "drizzle-orm";
-import { team as dbTeam, specialRule } from "db/schema";
+import { eq } from "drizzle-orm";
+import { coachToTeam, team as dbTeam } from "db/schema";
 import {
   getPlayerSkills,
   getPlayerSppAndTv,
   getPlayerStats,
 } from "utils/get-computed-player-fields";
+import { RedirectToSignIn, auth } from "@clerk/nextjs";
 
 type Props = { params: { teamName: string } };
 
@@ -21,6 +22,9 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function TeamPage({ params: { teamName } }: Props) {
+  const { userId } = auth();
+  if (!userId) return <RedirectToSignIn />;
+
   const fetchedTeam = await drizzle.query.team.findFirst({
     where: eq(dbTeam.name, decodeURIComponent(teamName)),
     with: {
@@ -47,8 +51,12 @@ export default async function TeamPage({ params: { teamName } }: Props) {
       },
     },
   });
-
   if (!fetchedTeam) return notFound();
+
+  const editableTeams = await drizzle.query.coachToTeam.findMany({
+    where: eq(coachToTeam.coachId, userId),
+  });
+
   const team = {
     ...fetchedTeam,
     players: fetchedTeam.players.map((p) => {
@@ -82,7 +90,9 @@ export default async function TeamPage({ params: { teamName } }: Props) {
     <>
       <h1 className="text-4xl">
         {team.name}
-        <EditButton teamName={team.name} />
+        {editableTeams.some((entry) => entry.teamName === team.name) && (
+          <EditButton teamName={team.name} />
+        )}
       </h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - unknown</span>

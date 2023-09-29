@@ -1,20 +1,10 @@
-import {
-  improvement,
-  player,
-  position,
-  roster,
-  skill,
-  skillCategory,
-  specialRule,
-} from "db/schema";
+import { improvement, player, position, skill, specialRule } from "db/schema";
 
 type Player = typeof player.$inferSelect;
 type Position = typeof position.$inferSelect;
 type Improvement = typeof improvement.$inferSelect;
 type Skill = typeof skill.$inferSelect;
-type SkillCategory = typeof skillCategory.$inferSelect;
 type SpecialRule = typeof specialRule.$inferSelect;
-type Roster = typeof roster;
 
 export function getPlayerStats(
   player: Pick<

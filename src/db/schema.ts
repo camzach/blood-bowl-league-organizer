@@ -8,7 +8,6 @@ import {
   boolean,
   primaryKey,
   text,
-  foreignKey,
 } from "drizzle-orm/mysql-core";
 
 export const teamState = mysqlEnum("team_state", [
@@ -51,14 +50,6 @@ export const membershipType = mysqlEnum("membership_type", [
   "journeyman",
   "retired",
 ]);
-
-export const coach = mysqlTable("coach", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-});
-export const coachRelations = relations(coach, ({ many }) => ({
-  coachToTeam: many(coachToTeam),
-}));
 
 export const team = mysqlTable("team", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
@@ -163,20 +154,14 @@ export const song = mysqlTable("song", {
 export const coachToTeam = mysqlTable(
   "coach_to_team",
   {
-    coachName: varchar("coach_name", { length: 255 })
-      .notNull()
-      .references(() => coach.name),
+    coachId: varchar("coach_id", { length: 255 }).notNull(),
     teamName: varchar("team_name", { length: 255 })
       .notNull()
       .references(() => team.name),
   },
-  (table) => ({ pk: primaryKey(table.coachName, table.teamName) })
+  (table) => ({ pk: primaryKey(table.coachId, table.teamName) })
 );
 export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
-  coach: one(coach, {
-    fields: [coachToTeam.coachName],
-    references: [coach.name],
-  }),
   team: one(team, {
     fields: [coachToTeam.teamName],
     references: [team.name],
