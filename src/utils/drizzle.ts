@@ -9,4 +9,8 @@ if (conn_string === undefined) {
 
 const connectionPool = createPool(conn_string);
 
-export default drizzle(connectionPool, { schema, mode: "default" });
+export default drizzle(connectionPool, {
+  schema,
+  mode: "default",
+  logger: false,
+});
