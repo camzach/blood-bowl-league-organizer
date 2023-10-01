@@ -6,14 +6,17 @@ import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
 import drizzle from "utils/drizzle";
-import { eq } from "drizzle-orm";
-import { coachToTeam, team as dbTeam } from "db/schema";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import {
-  getPlayerSkills,
-  getPlayerSppAndTv,
-  getPlayerStats,
-} from "utils/get-computed-player-fields";
+  coachToTeam,
+  position,
+  rosterSlot,
+  team as dbTeam,
+  roster,
+} from "db/schema";
 import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import fetchTeam from "./fetch-team";
+import { alias } from "drizzle-orm/mysql-core";
 
 type Props = { params: { teamName: string } };
 
@@ -25,66 +28,13 @@ export default async function TeamPage({ params: { teamName } }: Props) {
   const { userId } = auth();
   if (!userId) return <RedirectToSignIn />;
 
-  const fetchedTeam = await drizzle.query.team.findFirst({
-    where: eq(dbTeam.name, decodeURIComponent(teamName)),
-    with: {
-      roster: true,
-      players: {
-        with: {
-          improvements: { with: { skill: true } },
-          position: {
-            with: {
-              skillToPosition: { with: { skill: true } },
-              skillCategories: true,
-              rosterSlot: {
-                with: {
-                  roster: {
-                    with: {
-                      specialRuleToRoster: { with: { specialRule: true } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-  if (!fetchedTeam) return notFound();
+  const team = await fetchTeam(decodeURIComponent(teamName));
+
+  if (!team) return notFound();
 
   const editableTeams = await drizzle.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, userId),
   });
-
-  const team = {
-    ...fetchedTeam,
-    players: fetchedTeam.players.map((p) => {
-      const position = {
-        ...p.position,
-        skills: p.position.skillToPosition.map((stp) => stp.skill),
-        primary: p.position.skillCategories
-          .filter((c) => c.type === "primary")
-          .map((c) => c.skillCategoryName),
-        secondary: p.position.skillCategories
-          .filter((c) => c.type === "secondary")
-          .map((c) => c.skillCategoryName),
-        roster: {
-          ...p.position.rosterSlot.roster,
-          specialRules: p.position.rosterSlot.roster.specialRuleToRoster.map(
-            (sr) => sr.specialRule
-          ),
-        },
-      };
-      return {
-        ...p,
-        ...getPlayerStats(p),
-        ...getPlayerSppAndTv({ ...p, position }),
-        position,
-        skills: getPlayerSkills({ ...p, position }),
-      };
-    }),
-  };
 
   return (
     <>

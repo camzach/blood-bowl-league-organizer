@@ -1,21 +1,22 @@
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "utils/prisma";
 import React from "react";
-import { HireablePlayerManager } from "./hireable-player-manager";
+// import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
 import calculateTV from "utils/calculate-tv";
-import ReadyTeam from "./ready-team";
-import { TeamState } from "@prisma/client";
+// import ReadyTeam from "./ready-team";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
-import { PlayerActions } from "./player-controls/action-buttons";
-import PlayerNumberSelector from "./player-controls/player-number-selector";
-import PlayerNameEditor from "./player-controls/player-name-editor";
-import { getServerSession } from "next-auth";
-import { authOptions } from "pages/api/auth/[...nextauth]";
-import { fetchTeam } from "../fetch-team";
+// import { PlayerActions } from "./player-controls/action-buttons";
+// import PlayerNumberSelector from "./player-controls/player-number-selector";
+// import PlayerNameEditor from "./player-controls/player-name-editor";
+import fetchTeam from "../fetch-team";
+import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import drizzle from "utils/drizzle";
+import { coachToTeam, rosterSlot } from "db/schema";
+import { eq } from "drizzle-orm";
+import { fireStaff, hirePlayer, hireStaff } from "./actions";
 
 type Props = { params: { teamName: string } };
 
@@ -24,14 +25,30 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function EditTeam({ params: { teamName } }: Props) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user.teams.includes(decodeURIComponent(teamName))) {
-    return redirect(`/team/${teamName}`);
+  const { userId } = auth();
+
+  if (!userId) return <RedirectToSignIn />;
+  const editableTeams = await drizzle.query.coachToTeam.findMany({
+    where: eq(coachToTeam.coachId, userId),
+  });
+  if (
+    !editableTeams.some(
+      (entry) =>
+        entry.teamName === decodeURIComponent(teamName) &&
+        entry.coachId === userId
+    )
+  ) {
+    return redirect(`/teams/${teamName}`);
   }
   const team = await fetchTeam(decodeURIComponent(teamName));
-  const skills = await prisma.skill.findMany({});
+  const skills = await drizzle.query.skill.findMany({});
 
   if (!team) return notFound();
+
+  const rosterSlots = await drizzle.query.rosterSlot.findMany({
+    where: eq(rosterSlot.rosterName, team.rosterName),
+    with: { position: true },
+  });
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(
     (n) => !team.players.some((p) => p.number === n)
@@ -61,17 +78,19 @@ export default async function EditTeam({ params: { teamName } }: Props) {
         teamName={team.name}
         treasury={team.treasury}
         max={6}
+        hireStaffAction={hireStaff}
+        fireStaffAction={fireStaff}
       />
       <SongControls
         team={team.name}
-        currentSong={team.touchdownSong?.name}
+        currentSong={team.touchdownSong ?? undefined}
         isEditable={true}
       />
       <TeamTable
         players={team.players}
         cols={[
-          { id: "#", name: "#", Component: PlayerNumberSelector },
-          { id: "name", name: "Name", Component: PlayerNameEditor },
+          // { id: "#", name: "#", Component: PlayerNumberSelector },
+          // { id: "name", name: "Name", Component: PlayerNameEditor },
           "position",
           "skills",
           "ma",
@@ -83,28 +102,32 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           "mng",
           "spp",
           "tv",
-          {
-            id: "Actions",
-            name: "Actions",
-            Component: (player) => (
-              <PlayerActions player={player} skills={skills} />
-            ),
-          },
+          // {
+          //   id: "Actions",
+          //   name: "Actions",
+          //   Component: (player) => (
+          //     <PlayerActions player={player} skills={skills} />
+          //   ),
+          // },
         ]}
       />
       <div className="my-2">
         <PlayerHirer
-          positions={team.roster.positions.filter(
-            (pos) =>
-              team.players.filter((p) => p.position.name === pos.name).length <
-              pos.max
-          )}
+          positions={rosterSlots
+            .filter(
+              (slot) =>
+                team.players.filter((p) =>
+                  slot.position.some((pos) => pos.id === p.position.id)
+                ).length < slot.max
+            )
+            .flatMap((slot) => slot.position)}
           treasury={team.treasury}
           freeNumbers={freeNumbers}
           teamName={team.name}
+          hirePlayerAction={hirePlayer}
         />
       </div>
-      {team.journeymen.length > 0 && (
+      {/* {team.journeymen.length > 0 && (
         <HireablePlayerManager
           players={team.journeymen}
           freeNumbers={freeNumbers}
@@ -121,7 +144,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           skills={skills}
           from="redrafts"
         />
-      )}
+      )} */}
       <table>
         <thead>
           <tr>
@@ -146,11 +169,13 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 treasury={team.treasury}
                 current={team.rerolls}
                 cost={
-                  team.state === TeamState.Draft
+                  team.state === "draft"
                     ? team.roster.rerollCost
                     : team.roster.rerollCost * 2
                 }
                 max={6}
+                hireStaffAction={hireStaff}
+                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>
@@ -167,6 +192,8 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 current={team.assistantCoaches}
                 cost={10_000}
                 max={10}
+                hireStaffAction={hireStaff}
+                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.assistantCoaches * 10000).toLocaleString()}</td>
@@ -183,6 +210,8 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 current={team.cheerleaders}
                 cost={10_000}
                 max={10}
+                hireStaffAction={hireStaff}
+                fireStaffAction={fireStaff}
               />
             </td>
             <td>{team.cheerleaders * 10000}</td>
@@ -199,13 +228,15 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 cost={50_000}
                 treasury={team.treasury}
                 max={1}
+                hireStaffAction={hireStaff}
+                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.apothecary ? 50_000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
-      <ReadyTeam team={team.name} />
+      {/* <ReadyTeam team={team.name} /> */}
     </>
   );
 }

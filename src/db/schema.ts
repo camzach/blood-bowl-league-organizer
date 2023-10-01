@@ -228,11 +228,12 @@ export const rosterSlot = mysqlTable(
     rosterIndex: index("roster_slot_idx").on(table.rosterName),
   })
 );
-export const rosterSlotRelations = relations(rosterSlot, ({ one }) => ({
+export const rosterSlotRelations = relations(rosterSlot, ({ one, many }) => ({
   roster: one(roster, {
     fields: [rosterSlot.rosterName],
     references: [roster.name],
   }),
+  position: many(position),
 }));
 
 export const position = mysqlTable("position", {
