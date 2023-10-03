@@ -8,9 +8,9 @@ import calculateTV from "utils/calculate-tv";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
-// import { PlayerActions } from "./player-controls/action-buttons";
-// import PlayerNumberSelector from "./player-controls/player-number-selector";
-// import PlayerNameEditor from "./player-controls/player-name-editor";
+import { PlayerActions } from "./player-controls/action-buttons";
+import PlayerNumberSelector from "./player-controls/player-number-selector";
+import PlayerNameEditor from "./player-controls/player-name-editor";
 import fetchTeam from "../fetch-team";
 import { RedirectToSignIn, auth } from "@clerk/nextjs";
 import drizzle from "utils/drizzle";
@@ -89,8 +89,8 @@ export default async function EditTeam({ params: { teamName } }: Props) {
       <TeamTable
         players={team.players}
         cols={[
-          // { id: "#", name: "#", Component: PlayerNumberSelector },
-          // { id: "name", name: "Name", Component: PlayerNameEditor },
+          { id: "#", name: "#", Component: PlayerNumberSelector },
+          { id: "name", name: "Name", Component: PlayerNameEditor },
           "position",
           "skills",
           "ma",
@@ -100,15 +100,15 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           "av",
           "ni",
           "mng",
-          "spp",
+          team.state === "improving" ? "Spend SPP" : "spp",
           "tv",
-          // {
-          //   id: "Actions",
-          //   name: "Actions",
-          //   Component: (player) => (
-          //     <PlayerActions player={player} skills={skills} />
-          //   ),
-          // },
+          {
+            id: "Actions",
+            name: "Actions",
+            Component: (player) => (
+              <PlayerActions player={player} skills={skills} />
+            ),
+          },
         ]}
       />
       <div className="my-2">

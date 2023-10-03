@@ -12,7 +12,6 @@ import {
 import { auth } from "@clerk/nextjs";
 import { and, eq, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
-import { MySqlTransaction } from "drizzle-orm/mysql-core";
 
 async function getUserTeams(tx?: typeof drizzle) {
   const { userId } = auth();
@@ -23,7 +22,7 @@ async function getUserTeams(tx?: typeof drizzle) {
   });
 }
 
-async function canEditTeam(team: string, tx?: typeof drizzle) {
+export async function canEditTeam(team: string, tx?: typeof drizzle) {
   const editableTeams = await getUserTeams(tx);
   return editableTeams.some((e) => e.teamName === team);
 }

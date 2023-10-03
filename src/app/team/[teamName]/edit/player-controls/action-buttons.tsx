@@ -1,18 +1,14 @@
 "use client";
-import { Player, Position, Skill } from "@prisma/client";
 import PlayerFirer from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
 import { Modal } from "components/modal";
+import { skill } from "db/schema";
+import type fetchTeam from "../../fetch-team";
 
 type Props = {
-  player: Player & {
-    skills: Skill[];
-    totalImprovements: number;
-    starPlayerPoints: number;
-    position: Position;
-  };
-  skills: Skill[];
+  player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
+  skills: Array<typeof skill.$inferSelect>;
 };
 
 export function PlayerActions({ player, skills }: Props) {

@@ -6,17 +6,10 @@ import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
 import drizzle from "utils/drizzle";
-import { and, eq, inArray, sql } from "drizzle-orm";
-import {
-  coachToTeam,
-  position,
-  rosterSlot,
-  team as dbTeam,
-  roster,
-} from "db/schema";
+import { eq } from "drizzle-orm";
+import { coachToTeam } from "db/schema";
 import { RedirectToSignIn, auth } from "@clerk/nextjs";
 import fetchTeam from "./fetch-team";
-import { alias } from "drizzle-orm/mysql-core";
 
 type Props = { params: { teamName: string } };
 
@@ -40,9 +33,10 @@ export default async function TeamPage({ params: { teamName } }: Props) {
     <>
       <h1 className="text-4xl">
         {team.name}
-        {editableTeams.some((entry) => entry.teamName === team.name) && (
-          <EditButton teamName={team.name} />
-        )}
+        {editableTeams.some((entry) => entry.teamName === team.name) &&
+          (team.state === "draft" ||
+            team.state === "hiring" ||
+            team.state === "improving") && <EditButton teamName={team.name} />}
       </h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - unknown</span>

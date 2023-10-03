@@ -1,17 +1,17 @@
-import { Skill, SkillCategory } from "@prisma/client";
+import { SkillCategory, skill } from "db/schema";
 import { increaseCharacteristic } from "./actions";
 import { useState } from "react";
 import useServerMutation from "utils/use-server-mutation";
 
-type Stat = "MA" | "AV" | "PA" | "AG" | "ST";
-const stats: Stat[] = ["MA", "AV", "PA", "AG", "ST"];
+type Stat = "ma" | "av" | "pa" | "ag" | "st";
+const stats: Stat[] = ["ma", "av", "pa", "ag", "st"];
 
 const results: Array<[number, Array<(typeof stats)[number]>]> = [
-  [7 / 16, ["MA", "AV"]],
-  [6 / 16, ["MA", "AV", "PA"]],
-  [1 / 16, ["AG", "PA"]],
-  [1 / 16, ["ST", "AG"]],
-  [1 / 16, ["MA", "AV", "PA", "AG", "ST"]],
+  [7 / 16, ["ma", "av"]],
+  [6 / 16, ["ma", "av", "pa"]],
+  [1 / 16, ["ag", "pa"]],
+  [1 / 16, ["st", "ag"]],
+  [1 / 16, ["ma", "av", "pa", "ag", "st"]],
 ];
 
 function isNonempty<T>(array: T[]): array is [T, ...T[]] {
@@ -22,10 +22,10 @@ type Props = {
   playerId: string;
   skills: {
     primary: {
-      [key in SkillCategory]?: Skill[];
+      [key in SkillCategory]?: Array<typeof skill.$inferSelect>;
     };
     secondary: {
-      [key in SkillCategory]?: Skill[];
+      [key in SkillCategory]?: Array<typeof skill.$inferSelect>;
     };
   };
 };
@@ -45,11 +45,11 @@ export function StatList({ playerId, skills }: Props) {
     .reduce<Record<(typeof stats)[number] | "skill", number>>(
       (prev, [prob, item]) => ({ ...prev, [item]: prev[item] + prob }),
       {
-        MA: 0,
-        ST: 0,
-        AG: 0,
-        AV: 0,
-        PA: 0,
+        ma: 0,
+        st: 0,
+        ag: 0,
+        av: 0,
+        pa: 0,
         skill: 0,
       }
     );

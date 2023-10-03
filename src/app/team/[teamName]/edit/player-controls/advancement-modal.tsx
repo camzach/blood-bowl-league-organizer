@@ -1,9 +1,9 @@
-import type { Player, Position, Skill, SkillCategory } from "@prisma/client";
 import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
 import useServerMutation from "utils/use-server-mutation";
 import { learnSkill } from "./actions";
+import { skillCategory, type skill, type SkillCategory } from "db/schema";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -29,12 +29,16 @@ const skillConflicts: Partial<Record<string, string[]>> = {
 };
 
 type Props = {
-  player: Player & {
-    skills: Skill[];
+  player: {
+    id: string;
+    skills: Array<{ name: string }>;
     totalImprovements: number;
-    position: Position;
+    position: {
+      primary: Array<SkillCategory>;
+      secondary: Array<SkillCategory>;
+    };
   };
-  skills: Skill[];
+  skills: Array<typeof skill.$inferSelect>;
   onHide: () => void;
 };
 export function Popup({ player, skills, onHide }: Props) {
@@ -64,12 +68,21 @@ export function Popup({ player, skills, onHide }: Props) {
     });
   };
 
-  const skillsByCategory = skills.reduce<Record<SkillCategory, Skill[]>>(
+  const skillsByCategory = skills.reduce<
+    Record<SkillCategory, Array<typeof skill.$inferSelect>>
+  >(
     (prev, current) => ({
       ...prev,
       [current.category]: [...prev[current.category], current],
     }),
-    { S: [], A: [], M: [], G: [], P: [], T: [] }
+    {
+      general: [],
+      agility: [],
+      mutation: [],
+      passing: [],
+      strength: [],
+      trait: [],
+    }
   );
 
   const disabledSkills = player.skills.flatMap(
