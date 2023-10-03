@@ -1,13 +1,14 @@
 "use client";
-import { update } from "./actions";
+import type { update } from "../actions";
 import useServerMutation from "utils/use-server-mutation";
 
 type Props = {
   id: string;
   number: number;
+  update: typeof update;
 };
 
-export default function PlayerNumberSelector({ id, number }: Props) {
+export default function PlayerNumberSelector({ id, number, update }: Props) {
   const { startMutation, isMutating } = useServerMutation();
   const handleNumberChange = (newNumber: number): void => {
     startMutation(() => update({ player: id, number: newNumber }));

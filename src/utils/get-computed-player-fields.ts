@@ -1,10 +1,21 @@
-import { improvement, player, position, skill, specialRule } from "db/schema";
+import {
+  SkillCategory,
+  improvement,
+  player,
+  position,
+  roster,
+  skill,
+  specialRule,
+  specialRuleToRoster,
+} from "db/schema";
 
 type Player = typeof player.$inferSelect;
 type Position = typeof position.$inferSelect;
 type Improvement = typeof improvement.$inferSelect;
 type Skill = typeof skill.$inferSelect;
 type SpecialRule = typeof specialRule.$inferSelect;
+type Roster = typeof roster.$inferSelect;
+type SpecialRuleToRoster = typeof specialRuleToRoster.$inferSelect;
 
 export function getPlayerStats(
   player: Pick<
@@ -45,11 +56,11 @@ export function getPlayerStats(
 }
 
 export function getPlayerSkills(player: {
-  position: { skills: Skill[] };
+  position: { skillToPosition: Array<{ skill: Skill }> };
   improvements: { skill: Skill | null }[];
 }) {
   return [
-    ...player.position.skills,
+    ...player.position.skillToPosition.map((e) => e.skill),
     ...player.improvements
       .flatMap(({ skill }) => (skill ? [skill] : []))
       .filter(Boolean),
@@ -68,10 +79,12 @@ export function getPlayerSppAndTv(
     | "mvps"
   > & {
     improvements: (Improvement & { skill: Skill | null })[];
-    position: Pick<Position, "cost"> & {
-      primary: string[];
-      secondary: string[];
-      roster: { specialRules: SpecialRule[] };
+    position: Pick<Position, "cost" | "primary" | "secondary"> & {
+      rosterSlot: {
+        roster: Pick<Roster, never> & {
+          specialRuleToRoster: SpecialRuleToRoster[];
+        };
+      };
     };
   }
 ) {
@@ -97,9 +110,9 @@ export function getPlayerSppAndTv(
     (prev, curr) => {
       let skillCategory = null;
       if (curr.skill) {
-        if (player.position.primary.includes(curr.skill.categoryName))
+        if (player.position.primary.includes(curr.skill.category))
           skillCategory = "primary";
-        if (player.position.secondary.includes(curr.skill.categoryName))
+        if (player.position.secondary.includes(curr.skill.category))
           skillCategory = "secondary";
       }
       switch (curr.type) {
@@ -142,8 +155,8 @@ export function getPlayerSppAndTv(
         player.casualties * 2 +
         player.touchdowns * 3 +
         player.mvps * 4,
-      teamValue: player.position.roster.specialRules.some(
-        (rule) => rule.name === "Low Cost Linemen"
+      teamValue: player.position.rosterSlot.roster.specialRuleToRoster.some(
+        (rule) => rule.specialRuleName === "Low Cost Linemen"
       )
         ? 0
         : player.position.cost,

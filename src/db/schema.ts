@@ -8,33 +8,34 @@ import {
   boolean,
   primaryKey,
   text,
+  customType,
 } from "drizzle-orm/mysql-core";
 
-export const teamState = mysqlEnum("team_state", [
+export const teamStates = [
   "draft",
   "ready",
   "playing",
   "hiring",
   "improving",
-]);
+] as const;
 
-export const gameState = mysqlEnum("game_state", [
+export const gameStates = [
   "scheduled",
   "journeymen",
   "inducements",
   "in_progress",
   "complete",
-]);
+] as const;
 
-export const weather = mysqlEnum("weather", [
+export const weather = [
   "blizzard",
   "pouring_rain",
   "perfect",
   "very_sunny",
   "sweltering_heat",
-]);
+] as const;
 
-export const improvementType = mysqlEnum("improvement_type", [
+export const improvementType = [
   "st",
   "ma",
   "ag",
@@ -43,18 +44,60 @@ export const improvementType = mysqlEnum("improvement_type", [
   "chosen_skill",
   "random_skill",
   "fallback_skill",
-]);
+] as const;
 
-export const membershipType = mysqlEnum("membership_type", [
-  "player",
-  "journeyman",
-  "retired",
-]);
+export const membershipType = ["player", "journeyman", "retired"] as const;
+
+export const skillCategory = [
+  "general",
+  "agility",
+  "mutation",
+  "passing",
+  "strength",
+  "trait",
+] as const;
+export type SkillCategory = (typeof skillCategory)[number];
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never;
+type UnionToOvlds<U> = UnionToIntersection<
+  U extends any ? (f: U) => void : never
+>;
+
+type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
+
+type UnionConcat<
+  U extends string,
+  Sep extends string
+> = PopUnion<U> extends infer SELF
+  ? SELF extends string
+    ? Exclude<U, SELF> extends never
+      ? SELF
+      :
+          | `${UnionConcat<Exclude<U, SELF>, Sep>}${Sep}${SELF}`
+          | UnionConcat<Exclude<U, SELF>, Sep>
+          | SELF
+    : never
+  : never;
+
+const skillCategorySet = customType<{
+  data: Array<(typeof skillCategory)[number]>;
+  driverData: UnionConcat<(typeof skillCategory)[number], ",">;
+}>({
+  dataType: () => `SET(${skillCategory.map((c) => `'${c}'`).join(",")})`,
+  toDriver: (input) =>
+    input.join(",") as UnionConcat<(typeof skillCategory)[number], ",">,
+  fromDriver: (output) =>
+    output.split(",") as Array<(typeof skillCategory)[number]>,
+});
 
 export const team = mysqlTable("team", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   treasury: int("treasury").notNull().default(1_000_000),
-  state: teamState.notNull().default("draft"),
+  state: mysqlEnum("state", teamStates).notNull().default("draft"),
   rosterName: varchar("roster_name", { length: 255 })
     .notNull()
     .references(() => roster.name),
@@ -102,10 +145,12 @@ export const player = mysqlTable("player", {
   positionId: varchar("position_id", { length: 25 })
     .notNull()
     .references(() => position.id),
-  teamName: varchar("team_name", { length: 255 })
-    .notNull()
-    .references(() => team.name),
-  membershipType,
+  // The following two fields should be either BOTH null, or BOTH not null
+  // CONSTRAINT player_team_membership_nullity CHECK
+  //   ((team_name IS NULL AND membership_type IS NULL) OR
+  //    (team_name IS NOT NULL AND membership_type IS NOT NULL))
+  teamName: varchar("team_name", { length: 255 }).references(() => team.name),
+  membershipType: mysqlEnum("membership_type", membershipType),
 });
 export const playerRelations = relations(player, ({ one, many }) => ({
   position: one(position, {
@@ -122,7 +167,7 @@ export const playerRelations = relations(player, ({ one, many }) => ({
 export const improvement = mysqlTable(
   "improvement",
   {
-    type: improvementType.notNull(),
+    type: mysqlEnum("type", improvementType).notNull(),
     playerId: varchar("player_id", { length: 255 })
       .notNull()
       .references(() => player.id),
@@ -175,7 +220,6 @@ export const roster = mysqlTable("roster", {
 });
 export const rosterRelations = relations(roster, ({ many }) => ({
   rosterSlots: many(rosterSlot),
-  positions: many(position),
   specialRuleToRoster: many(specialRuleToRoster),
 }));
 
@@ -245,54 +289,24 @@ export const position = mysqlTable("position", {
   ag: int("ag").notNull(),
   pa: int("pa"),
   av: int("av").notNull(),
+  primary: skillCategorySet("primary").notNull(),
+  secondary: skillCategorySet("secondary").notNull(),
   rosterSlotId: varchar("roster_slot_id", { length: 255 })
     .notNull()
     .references(() => rosterSlot.id),
 });
 export const positionRelations = relations(position, ({ many, one }) => ({
   skillToPosition: many(skillToPosition),
-  skillCategories: many(skillCategoryToPosition),
   rosterSlot: one(rosterSlot, {
     fields: [position.rosterSlotId],
     references: [rosterSlot.id],
   }),
 }));
 
-export const skillCategoryToPosition = mysqlTable(
-  "skill_cat_pos",
-  {
-    skillCategoryName: varchar("skill_category_name", { length: 255 })
-      .notNull()
-      .references(() => skillCategory.name),
-    positionId: varchar("position_id", { length: 25 })
-      .notNull()
-      .references(() => position.id),
-    type: mysqlEnum("type", ["primary", "secondary"]).notNull(),
-  },
-  (table) => ({
-    pk: primaryKey(table.skillCategoryName, table.positionId),
-  })
-);
-export const skillCategoryToPositionRelations = relations(
-  skillCategoryToPosition,
-  ({ one }) => ({
-    skillCategory: one(skillCategory, {
-      fields: [skillCategoryToPosition.skillCategoryName],
-      references: [skillCategory.name],
-    }),
-    position: one(position, {
-      fields: [skillCategoryToPosition.positionId],
-      references: [position.id],
-    }),
-  })
-);
-
 export const skill = mysqlTable("skill", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   rules: text("rules").notNull(),
-  categoryName: varchar("category_name", { length: 255 })
-    .notNull()
-    .references(() => skillCategory.name),
+  category: mysqlEnum("category", skillCategory).notNull(),
 });
 
 export const skillToPosition = mysqlTable("skill_to_position", {
@@ -317,13 +331,6 @@ export const skillToPositionRelations = relations(
   })
 );
 
-export const skillCategory = mysqlTable("skill_category", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-});
-export const skillCategoryRelations = relations(skillCategory, ({ many }) => ({
-  skillCategoryToPosition: many(skillCategoryToPosition),
-}));
-
 export const faq = mysqlTable("faq", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   q: text("q").notNull(),
@@ -341,7 +348,7 @@ export const faqToSkill = mysqlTable("faq_to_skill", {
 
 export const game = mysqlTable("game", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  state: gameState.notNull().default("scheduled"),
+  state: mysqlEnum("state", gameStates).notNull().default("scheduled"),
   awayDetailsId: varchar("away_details_id", { length: 255 })
     .notNull()
     .references(() => gameDetails.id),
