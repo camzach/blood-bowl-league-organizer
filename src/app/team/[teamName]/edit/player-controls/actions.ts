@@ -18,10 +18,6 @@ import {
 } from "db/schema";
 import { canEditTeam } from "../actions";
 
-function upperFirst<T extends string>(str: T): Capitalize<T> {
-  return `${str.charAt(0).toUpperCase()}${str.slice(1)}` as Capitalize<T>;
-}
-
 export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
   async ({ playerId }) => {
     return drizzle.transaction(async (tx) => {
@@ -40,7 +36,7 @@ export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
       if (player.team === null) throw new Error("Player is not on any team");
       if (player.membershipType !== "player")
         throw new Error("Player is not fireable");
-      if (!canEditTeam(player.team.name))
+      if (!(await canEditTeam(player.team.name, tx)))
         throw new Error("User does not have permission to modify this team");
 
       if (player.team.state === "draft") {
@@ -93,7 +89,7 @@ export const update = zact(
     if (player.team === null || player.membershipType !== "player")
       throw new Error("Player is not on any team");
 
-    if (!canEditTeam(player.team.name))
+    if (!(await canEditTeam(player.team.name, tx)))
       throw new Error("User does not have permission to modify this team");
 
     if (player.team.state !== "draft" && player.team.state !== "hiring")
@@ -166,7 +162,7 @@ export const learnSkill = zact(
 
     if (player.team === null) throw new Error("Player is not on any team");
 
-    if (!canEditTeam(player.team.name)) {
+    if (!(await canEditTeam(player.team.name, tx))) {
       throw new Error("User does not have permission to modify this team");
     }
     if (player.team.state !== "improving")

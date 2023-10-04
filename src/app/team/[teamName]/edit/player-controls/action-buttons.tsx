@@ -1,5 +1,5 @@
 "use client";
-import PlayerFirer from "./player-firer";
+import HireFireButton from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
 import { Modal } from "components/modal";
@@ -9,26 +9,32 @@ import type fetchTeam from "../../fetch-team";
 type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
   skills: Array<typeof skill.$inferSelect>;
+  state: "hiring" | "improving" | "draft";
 };
 
-export function PlayerActions({ player, skills }: Props) {
+export function PlayerActions({ player, skills, state }: Props) {
   const [isOpen, setOpen] = useState(false);
-  const canAdvance = Object.values(advancementCosts).some(
-    (list) => list[player.totalImprovements] <= player.starPlayerPoints
-  );
+  const canAdvance =
+    Object.values(advancementCosts).some(
+      (list) => list[player.totalImprovements] <= player.starPlayerPoints
+    ) && player.totalImprovements < 6;
 
   return (
     <>
-      <div className="btn-group btn-group-vertical">
+      {state === "improving" ? (
         <button
-          className="btn-accent btn-sm btn"
+          className="btn btn-accent btn-sm"
           onClick={() => setOpen(true)}
           disabled={!canAdvance}
         >
           Spend SPP
         </button>
-        <PlayerFirer {...player} />
-      </div>
+      ) : (
+        <HireFireButton
+          id={player.id}
+          mode={player.membershipType === "player" ? "fire" : "hire"}
+        />
+      )}
       {canAdvance && (
         <Modal isOpen={isOpen} onRequestClose={() => setOpen(false)}>
           <div className="whitespace-pre-wrap">
