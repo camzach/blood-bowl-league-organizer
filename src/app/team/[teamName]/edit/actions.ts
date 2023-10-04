@@ -7,11 +7,12 @@ import {
   team as dbTeam,
   position as dbPosition,
   rosterSlot,
-  player,
+  player as dbPlayer,
 } from "db/schema";
 import { auth } from "@clerk/nextjs";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
+import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
 
 async function getUserTeams(tx?: typeof drizzle) {
   const { userId } = auth();
@@ -62,7 +63,7 @@ export const hirePlayer = zact(
   })
 )(async (input) => {
   return drizzle.transaction(async (tx) => {
-    if (!(await canEditTeam(input.team)))
+    if (!(await canEditTeam(input.team, tx)))
       throw new Error("User does not have permission to modify this team");
 
     const positionQuery = await drizzle
@@ -88,7 +89,7 @@ export const hirePlayer = zact(
       .set({ treasury: sql`${dbTeam.treasury} - ${position.cost}` })
       .where(eq(dbTeam.name, input.team));
 
-    await tx.insert(player).values({
+    await tx.insert(dbPlayer).values({
       id: nanoid(),
       name: input.name,
       number: input.number,
@@ -103,7 +104,7 @@ export const hirePlayer = zact(
       with: {
         players: {
           columns: { number: true },
-          where: eq(player.membershipType, "player"),
+          where: eq(dbPlayer.membershipType, "player"),
           with: {
             position: {
               columns: {},
@@ -149,10 +150,9 @@ export const hireStaff = zact(
     quantity: z.number().int().gt(0).default(1),
   })
 )(async (input) => {
-  if (!(await canEditTeam(input.team)))
-    throw new Error("User does not have permission to modify this team");
-
   return drizzle.transaction(async (tx) => {
+    if (!(await canEditTeam(input.team, tx)))
+      throw new Error("User does not have permission to modify this team");
     const team = await drizzle.query.team.findFirst({
       where: eq(dbTeam.name, input.team),
       with: {
@@ -225,71 +225,75 @@ export const hireStaff = zact(
   });
 });
 
-// export const hireExistingPlayer = zact(
-//   z.object({
-//     team: z.string(),
-//     player: z.string(),
-//     number: z.number().min(1).max(16),
-//     from: z.enum(["journeymen", "redrafts"]).default("journeymen"),
-//   })
-// )(async (input) => {
-//   const session = await getSessionOrThrow();
-//   if (!session.user.teams.includes(input.team))
-//     throw new Error("User does not have permission to modify this team");
+export const hireExistingPlayer = zact(
+  z.object({
+    player: z.string(),
+    number: z.number().min(1).max(16),
+  })
+)(async (input) => {
+  return drizzle.transaction(async (tx) => {
+    const player = await tx.query.player.findFirst({
+      where: and(
+        eq(dbPlayer.id, input.player),
+        not(eq(dbPlayer.membershipType, "player"))
+      ),
+      with: {
+        team: true,
+        improvements: { with: { skill: true } },
+        position: {
+          with: {
+            rosterSlot: {
+              with: { roster: { with: { specialRuleToRoster: true } } },
+            },
+          },
+        },
+      },
+    });
+    if (!player) throw new Error("Player not found");
+    if (!player.team) throw new Error("Player not available for any team");
 
-//   const hiredPlayerQuery = {
-//     select: {
-//       id: true,
-//       position: { select: { id: true, max: true } },
-//       teamValue: true,
-//       seasonsPlayed: true,
-//     },
-//   };
+    if (!(await canEditTeam(player.team.name, tx)))
+      throw new Error("User does not have permission to modify this team");
 
-//   return prisma.$transaction(async (tx) => {
-//     const team = await tx.team.findUniqueOrThrow({
-//       where: { name: input.team },
-//       select: {
-//         journeymen: hiredPlayerQuery,
-//         redrafts: hiredPlayerQuery,
-//       },
-//     });
+    const { teamValue } = getPlayerSppAndTv(player);
+    const cost = teamValue + player.seasonsPlayed * 20_000;
 
-//     const player = team[input.from].find((p) => p.id === input.player);
-//     if (!player) throw new Error("Invalid Player ID");
+    await tx
+      .update(dbTeam)
+      .set({
+        treasury: sql`${dbTeam.treasury} - ${cost}`,
+      })
+      .where(eq(dbTeam.name, player.team.name));
+    await tx
+      .update(dbPlayer)
+      .set({ membershipType: "player", number: input.number })
+      .where(eq(dbPlayer.id, player.id));
 
-//     const cost = player.teamValue + player.seasonsPlayed * 20_000;
+    const updatedTeam = await tx.query.team.findFirst({
+      where: eq(dbTeam.name, player.team.name),
+      with: {
+        players: {
+          where: eq(dbPlayer.membershipType, "player"),
+          with: { position: { with: { rosterSlot: true } } },
+        },
+      },
+    });
+    if (!updatedTeam) throw new Error("Failed to select after update");
 
-//     const updatedTeam = await tx.team.update({
-//       where: { name: input.team },
-//       data: {
-//         [input.from]: { disconnect: { id: player.id } },
-//         players: { connect: { id: player.id } },
-//         treasury: { decrement: cost },
-//       },
-//       include: { players: true },
-//     });
-
-//     if (updatedTeam.players.length > 16)
-//       throw new Error("Team cannor hire any more players");
-//     if (
-//       updatedTeam.players.filter((p) => p.positionId === player.position.id)
-//         .length > player.position.max
-//     )
-//       throw new Error("Cannot hire any more players of this position");
-//     if (updatedTeam.players.filter((p) => p.number === input.number).length > 1)
-//       throw new Error("Team already has a player with this number");
-//     if (updatedTeam.treasury < 0)
-//       throw new Error("Team cannot afford this player");
-
-//     const updatedPlayer = await tx.player.update({
-//       where: { id: player.id },
-//       data: { number: input.number },
-//     });
-
-//     return [updatedTeam, updatedPlayer];
-//   });
-// });
+    if (updatedTeam.players.length > 16)
+      throw new Error("Team cannot hire any more players");
+    if (
+      updatedTeam.players.filter(
+        (p) => p.position.rosterSlotId === player.position.rosterSlotId
+      ).length > player.position.rosterSlot.max
+    )
+      throw new Error("Cannot hire any more players of this position");
+    if (updatedTeam.players.filter((p) => p.number === input.number).length > 1)
+      throw new Error("Team already has a player with this number");
+    if (updatedTeam.treasury < 0)
+      throw new Error("Team cannot afford this player");
+  });
+});
 
 export const fireStaff = zact(
   z.object({
@@ -305,7 +309,7 @@ export const fireStaff = zact(
   })
 )(async (input) => {
   return drizzle.transaction(async (tx) => {
-    if (!canEditTeam(input.team, tx))
+    if (!(await canEditTeam(input.team, tx)))
       throw new Error("User does not have permission to modify this team");
     const team = await tx.query.team.findFirst({
       where: eq(dbTeam.name, input.team),

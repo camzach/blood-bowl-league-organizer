@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import React from "react";
-// import { HireablePlayerManager } from "./hireable-player-manager";
+import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
 import calculateTV from "utils/calculate-tv";
@@ -45,6 +45,10 @@ export default async function EditTeam({ params: { teamName } }: Props) {
 
   if (!team) return notFound();
 
+  const state = team.state;
+  if (state === "ready" || state === "playing")
+    return redirect(`/team/${team.name}`);
+
   const rosterSlots = await drizzle.query.rosterSlot.findMany({
     where: eq(rosterSlot.rosterName, team.rosterName),
     with: { position: true },
@@ -87,7 +91,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
         isEditable={true}
       />
       <TeamTable
-        players={team.players}
+        players={team.players.filter((p) => p.membershipType === "player")}
         cols={[
           { id: "#", name: "#", Component: PlayerNumberSelector },
           { id: "name", name: "Name", Component: PlayerNameEditor },
@@ -100,13 +104,13 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           "av",
           "ni",
           "mng",
-          team.state === "improving" ? "Spend SPP" : "spp",
+          "spp",
           "tv",
           {
             id: "Actions",
             name: "Actions",
             Component: (player) => (
-              <PlayerActions player={player} skills={skills} />
+              <PlayerActions player={player} skills={skills} state={state} />
             ),
           },
         ]}
@@ -127,24 +131,12 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           hirePlayerAction={hirePlayer}
         />
       </div>
-      {/* {team.journeymen.length > 0 && (
-        <HireablePlayerManager
-          players={team.journeymen}
-          freeNumbers={freeNumbers}
-          teamName={team.name}
-          skills={skills}
-          from="journeymen"
-        />
-      )}
-      {team.redrafts.length > 0 && (
-        <HireablePlayerManager
-          players={team.redrafts}
-          freeNumbers={freeNumbers}
-          teamName={team.name}
-          skills={skills}
-          from="redrafts"
-        />
-      )} */}
+      <HireablePlayerManager
+        players={team.players.filter((p) => p.membershipType !== "player")}
+        freeNumbers={freeNumbers}
+        skills={skills}
+        state={state}
+      />
       <table>
         <thead>
           <tr>

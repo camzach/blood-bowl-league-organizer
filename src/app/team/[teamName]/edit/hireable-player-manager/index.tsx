@@ -1,25 +1,24 @@
 "use client";
 import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
-import HireButton from "./hire-button";
 import { useState, useCallback } from "react";
-import { fetchTeam } from "../../fetch-team";
+import fetchTeam from "../../fetch-team";
+import { PlayerActions } from "../player-controls/action-buttons";
+import { skill } from "db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
 
 type Props = {
-  players: FetchedTeamType["journeymen" | "redrafts"];
+  players: FetchedTeamType["players"];
   freeNumbers: number[];
-  teamName: string;
-  skills: Array<{ name: string; category: string }>;
-  from: "journeymen" | "redrafts";
+  skills: Array<typeof skill.$inferSelect>;
+  state: "draft" | "hiring" | "improving";
 };
 export function HireablePlayerManager({
-  // skills,
+  skills,
+  state,
   players,
   freeNumbers,
-  from,
-  teamName,
 }: Props) {
   const [numbers, setNumbers] = useState(
     Object.fromEntries(
@@ -52,18 +51,6 @@ export function HireablePlayerManager({
         />
       ),
     },
-    {
-      name: "Hire!",
-      id: "hire",
-      Component: (player: FetchedTeamType["journeymen"][number]) => (
-        <HireButton
-          player={player.id}
-          team={teamName}
-          number={numbers[player.id]}
-          from={from}
-        />
-      ),
-    },
     "position",
     "skills",
     "ma",
@@ -73,13 +60,6 @@ export function HireablePlayerManager({
     "av",
     "ni",
     "mng",
-    // {
-    //   name: "Spend SPP",
-    //   id: "spendSPP",
-    //   Component: (player) => (
-    //     <AdvancementPicker player={player} skills={skills} />
-    //   ),
-    // },
     "spp",
     "tv",
     {
@@ -92,6 +72,13 @@ export function HireablePlayerManager({
       id: "hiringFee",
       Component: (p) => (
         <>{`${(p.teamValue + 20_000 * p.seasonsPlayed) / 1000}k`}</>
+      ),
+    },
+    {
+      name: "Actions",
+      id: "act",
+      Component: (player) => (
+        <PlayerActions player={player} skills={skills} state={state} />
       ),
     },
   ];
@@ -110,7 +97,7 @@ const NumberPicker = ({
   onNumberChange,
 }: NumberPickerProps) => (
   <select
-    className="select-bordered select select-sm"
+    className="select select-bordered select-sm"
     value={currentNumber}
     onChange={(e) => onNumberChange(+e.target.value)}
   >
