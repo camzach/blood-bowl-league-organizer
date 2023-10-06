@@ -351,11 +351,23 @@ export const game = mysqlTable("game", {
   state: mysqlEnum("state", gameStates).notNull().default("scheduled"),
   awayDetailsId: varchar("away_details_id", { length: 255 })
     .notNull()
+    .unique()
     .references(() => gameDetails.id),
   homeDetailsId: varchar("home_details_id", { length: 255 })
     .notNull()
+    .unique()
     .references(() => gameDetails.id),
 });
+export const gameRelations = relations(game, ({ one }) => ({
+  homeDetails: one(gameDetails, {
+    fields: [game.homeDetailsId],
+    references: [gameDetails.id],
+  }),
+  awayDetails: one(gameDetails, {
+    fields: [game.awayDetailsId],
+    references: [gameDetails.id],
+  }),
+}));
 
 export const gameDetails = mysqlTable("game_details", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -370,6 +382,10 @@ export const gameDetails = mysqlTable("game_details", {
 export const season = mysqlTable("season", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
 });
+export const seasonRelations = relations(season, ({ many }) => ({
+  roundRobinGames: many(roundRobinGame),
+  bracketGames: many(bracketGame),
+}));
 
 export const roundRobinGame = mysqlTable(
   "round_robin_game",
@@ -386,6 +402,16 @@ export const roundRobinGame = mysqlTable(
     pk: primaryKey(table.seasonName, table.gameId),
   })
 );
+export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
+  season: one(season, {
+    fields: [roundRobinGame.seasonName],
+    references: [season.name],
+  }),
+  game: one(game, {
+    fields: [roundRobinGame.gameId],
+    references: [game.id],
+  }),
+}));
 
 export const bracketGame = mysqlTable(
   "bracket_game",
@@ -397,9 +423,20 @@ export const bracketGame = mysqlTable(
     seed: int("seed").notNull(),
     gameId: varchar("game_id", { length: 255 })
       .notNull()
+      .unique()
       .references(() => game.id),
   },
   (table) => ({
     pk: primaryKey(table.seasonName, table.round, table.seed),
   })
 );
+export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
+  season: one(season, {
+    fields: [bracketGame.seasonName],
+    references: [season.name],
+  }),
+  game: one(game, {
+    fields: [bracketGame.gameId],
+    references: [game.id],
+  }),
+}));

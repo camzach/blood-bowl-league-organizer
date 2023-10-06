@@ -1,22 +1,12 @@
+import { bracketGame } from "db/schema";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { prisma } from "utils/prisma";
+import drizzle from "utils/drizzle";
 
 async function getPlayoffsBracket(seasonName: string) {
-  return prisma.bracket.findUniqueOrThrow({
-    where: { seasonName },
-    include: {
-      Round: {
-        include: {
-          BracketGame: {
-            include: {
-              game: {
-                select: { homeTeamName: true, awayTeamName: true, id: true },
-              },
-            },
-          },
-        },
-      },
-    },
+  return drizzle.query.bracketGame.findMany({
+    where: eq(bracketGame.seasonName, seasonName),
+    with: { game: { with: { homeDetails: true, awayDetails: true } } },
   });
 }
 
@@ -50,36 +40,41 @@ function buildGrid(numRounds: number) {
     .join("\n");
 }
 
-type Props = {
-  params: { seasonName: string };
-};
-
-export default async function Playoffs({ params: { seasonName } }: Props) {
-  const bracket = await getPlayoffsBracket(decodeURIComponent(seasonName));
-
+export default async function Playoffs() {
+  const games = await getPlayoffsBracket(process.env.ACTIVE_SEASON ?? "");
+  const rounds = games.reduce<(typeof games)[]>((prev, curr) => {
+    if (!(curr.round - 1 in prev)) {
+      prev[curr.round - 1] = [curr];
+    } else {
+      prev[curr.round - 1].push(curr);
+    }
+    return prev;
+  }, []);
+  console.log(rounds.length);
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: `repeat(${bracket.Round.length * 2 - 1}, 1fr)`,
-        gridTemplateRows: `repeat(${2 ** (bracket.Round.length - 2)}, 1fr)`,
-        gridTemplateAreas: buildGrid(bracket.Round.length),
+        gridTemplateColumns: `repeat(${(rounds.length - 1) * 2 + 1}, 1fr)`,
+        gridTemplateRows: `repeat(${2 ** (rounds.length - 2)}, 1fr)`,
+        gridTemplateAreas: buildGrid(rounds.length),
         gap: "0.5rem",
       }}
     >
-      {bracket.Round.flatMap((round) =>
-        round.BracketGame.map((game) => {
+      {rounds.flatMap((round) =>
+        round.map((game) => {
           return (
             <div
-              key={`${round.id}/${game.id}`}
+              key={`${game.round}/${game.seed}`}
               className="grid place-items-center rounded-md border border-accent bg-base-300 leading-10 text-base-content"
               style={{
-                gridArea: `g-${round.number}-${game.seed}`,
+                gridArea: `g-${game.round}-${game.seed}`,
               }}
             >
               {game.game ? (
                 <Link className="link" href={`/game/${game.game.id}`}>
-                  {game.game.awayTeamName} @ {game.game.homeTeamName}
+                  {game.game.awayDetails.teamName} @{" "}
+                  {game.game.homeDetails.teamName}
                 </Link>
               ) : (
                 <>TBD</>
