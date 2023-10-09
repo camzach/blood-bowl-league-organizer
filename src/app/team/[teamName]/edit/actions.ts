@@ -1,5 +1,5 @@
 "use server";
-import { array, z } from "zod";
+import { z } from "zod";
 import { zact } from "zact/server";
 import { db } from "utils/drizzle";
 import {
@@ -370,115 +370,127 @@ export const fireStaff = zact(
   });
 });
 
-// export const ready = zact(z.string())(async (input) => {
-//   const session = await getSessionOrThrow();
-//   if (!session.user.teams.includes(input))
-//     throw new Error("User does not have permission to modify this team");
-//   const team = await prisma.team.findUniqueOrThrow({
-//     where: { name: input },
-//     select: {
-//       name: true,
-//       state: true,
-//       treasury: true,
-//       _count: { select: { players: true } },
-//     },
-//   });
-//   if (team.state !== TeamState.Draft && team.state !== TeamState.PostGame)
-//     throw new Error("Team not in Draft or PostGame state");
-//   if (team.state === TeamState.Draft && team._count.players < 11)
-//     throw new Error("11 players required to draft a team");
+export const ready = zact(z.string())(async (input) => {
+  return db.transaction(async (tx) => {
+    if (!canEditTeam(input, tx))
+      throw new Error("User does not have permission to modify this team");
+    const team = await tx.query.team.findFirst({
+      where: eq(dbTeam.name, input),
+      columns: {
+        name: true,
+        state: true,
+        treasury: true,
+      },
+      with: { players: { where: eq(dbPlayer.membershipType, "player") } },
+    });
+    if (!team) throw new Error("Team not found");
+    if (team.state !== "draft" && team.state !== "hiring")
+      throw new Error("Team not in Draft or PostGame state");
+    if (team.state === "draft" && team.players.length < 11)
+      throw new Error("11 players required to draft a team");
 
-//   const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
-//     "Crisis Averted": () => 0,
-//     "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
-//     "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
-//     Catastrophe: (g) =>
-//       g -
-//       (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) * 10_000,
-//   };
-//   const expensiveMistakesTable = [
-//     [
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Minor Incident",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Minor Incident",
-//       "Minor Incident",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Major Incident",
-//       "Minor Incident",
-//       "Minor Incident",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Major Incident",
-//       "Major Incident",
-//       "Minor Incident",
-//       "Minor Incident",
-//       "Crisis Averted",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Catastrophe",
-//       "Major Incident",
-//       "Major Incident",
-//       "Minor Incident",
-//       "Minor Incident",
-//       "Crisis Averted",
-//     ],
-//     [
-//       "Catastrophe",
-//       "Catastrophe",
-//       "Major Incident",
-//       "Major Incident",
-//       "Major Incident",
-//       "Major Incident",
-//     ],
-//   ] as const;
-//   const expensiveMistakeRoll = Math.floor(Math.random() * 6);
-//   const expensiveMistake =
-//     team.state === TeamState.Draft
-//       ? null
-//       : expensiveMistakesTable[
-//           Math.min(Math.floor(team.treasury / 100_000), 6)
-//         ][expensiveMistakeRoll];
-//   const expensiveMistakesCost =
-//     expensiveMistake !== null
-//       ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
-//       : 0;
-//   return prisma.team
-//     .update({
-//       where: { name: team.name },
-//       data: {
-//         state: "Ready",
-//         treasury: { decrement: expensiveMistakesCost },
-//         journeymen: { set: [] },
-//         redrafts: { set: [] },
-//       },
-//     })
-//     .then(() => ({
-//       expensiveMistake,
-//       expensiveMistakesCost,
-//       // Roll should appear to the user as 1-6 instead of 0-5
-//       expensiveMistakeRoll: expensiveMistakeRoll + 1,
-//     }));
-// });
+    const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
+      "Crisis Averted": () => 0,
+      "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
+      "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
+      Catastrophe: (g) =>
+        g -
+        (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) *
+          10_000,
+    };
+    const expensiveMistakesTable = [
+      [
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+      ],
+      [
+        "Minor Incident",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+      ],
+      [
+        "Minor Incident",
+        "Minor Incident",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+      ],
+      [
+        "Major Incident",
+        "Minor Incident",
+        "Minor Incident",
+        "Crisis Averted",
+        "Crisis Averted",
+        "Crisis Averted",
+      ],
+      [
+        "Major Incident",
+        "Major Incident",
+        "Minor Incident",
+        "Minor Incident",
+        "Crisis Averted",
+        "Crisis Averted",
+      ],
+      [
+        "Catastrophe",
+        "Major Incident",
+        "Major Incident",
+        "Minor Incident",
+        "Minor Incident",
+        "Crisis Averted",
+      ],
+      [
+        "Catastrophe",
+        "Catastrophe",
+        "Major Incident",
+        "Major Incident",
+        "Major Incident",
+        "Major Incident",
+      ],
+    ] as const;
+    const expensiveMistakeRoll = Math.floor(Math.random() * 6);
+    const expensiveMistake =
+      team.state === "draft"
+        ? null
+        : expensiveMistakesTable[
+            Math.min(Math.floor(team.treasury / 100_000), 6)
+          ][expensiveMistakeRoll];
+    const expensiveMistakesCost =
+      expensiveMistake !== null
+        ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
+        : 0;
+    await Promise.all([
+      tx
+        .update(dbTeam)
+        .set({
+          state: "ready",
+          treasury: sql`${dbTeam.treasury} - ${expensiveMistakesCost}`,
+        })
+        .where(eq(dbTeam.name, input)),
+      tx
+        .update(dbPlayer)
+        .set({ membershipType: null, teamName: null })
+        .where(
+          and(
+            eq(dbTeam.name, input),
+            eq(dbPlayer.teamName, input),
+            eq(dbPlayer.membershipType, "journeyman")
+          )
+        ),
+    ]);
+    return {
+      expensiveMistake,
+      expensiveMistakesCost,
+      // Roll should appear to the user as 1-6 instead of 0-5
+      expensiveMistakeRoll: expensiveMistakeRoll + 1,
+    };
+  });
+});
