@@ -19,7 +19,7 @@ export const teamStates = [
   "hiring",
   "improving",
 ] as const;
-const teamState = pgEnum("team_state", teamStates);
+export const teamState = pgEnum("team_state", teamStates);
 
 export const gameStates = [
   "scheduled",
@@ -28,7 +28,7 @@ export const gameStates = [
   "in_progress",
   "complete",
 ] as const;
-const gameState = pgEnum("game_state", gameStates);
+export const gameState = pgEnum("game_state", gameStates);
 
 export const weatherOpts = [
   "blizzard",
@@ -37,7 +37,7 @@ export const weatherOpts = [
   "very_sunny",
   "sweltering_heat",
 ] as const;
-const weather = pgEnum("weather", weatherOpts);
+export const weather = pgEnum("weather", weatherOpts);
 
 export const improvementTypes = [
   "st",
@@ -49,10 +49,10 @@ export const improvementTypes = [
   "random_skill",
   "fallback_skill",
 ] as const;
-const improvementType = pgEnum("improvement_type", improvementTypes);
+export const improvementType = pgEnum("improvement_type", improvementTypes);
 
 export const membershipTypes = ["player", "journeyman", "retired"] as const;
-const membershipType = pgEnum("membership_type", membershipTypes);
+export const membershipType = pgEnum("membership_type", membershipTypes);
 
 export const skillCategories = [
   "general",
@@ -63,38 +63,19 @@ export const skillCategories = [
   "trait",
 ] as const;
 export type SkillCategory = (typeof skillCategory.enumValues)[number];
-const skillCategory = pgEnum("skill_category", skillCategories);
-
-type intersection<U> = (U extends U ? (k: U) => void : never) extends (
-  k: infer I
-) => void
-  ? I
-  : never;
-type UnionToOvlds<U> = intersection<U extends U ? (f: U) => void : never>;
-
-type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
-
-type UnionConcat<
-  U extends string,
-  Sep extends string
-> = PopUnion<U> extends infer SELF
-  ? SELF extends string
-    ? Exclude<U, SELF> extends never
-      ? SELF
-      :
-          | `${UnionConcat<Exclude<U, SELF>, Sep>}${Sep}${SELF}`
-          | UnionConcat<Exclude<U, SELF>, Sep>
-          | SELF
-    : never
-  : never;
+export const skillCategory = pgEnum("skill_category", skillCategories);
 
 const skillCategorySet = customType<{
   data: Array<SkillCategory>;
-  driverData: UnionConcat<SkillCategory, ",">;
+  driverData: number;
 }>({
-  dataType: () => `set(${skillCategories.map((c) => `'${c}'`).join(",")})`,
-  toDriver: (input) => input.join(",") as UnionConcat<SkillCategory, ",">,
-  fromDriver: (output) => output.split(",") as Array<SkillCategory>,
+  dataType: () => `smallint`,
+  toDriver: (input) =>
+    input.reduce(
+      (prev, curr) => prev | (1 << skillCategories.indexOf(curr)),
+      0
+    ),
+  fromDriver: (output) => skillCategories.filter((_, i) => output & (1 << i)),
 });
 
 export const team = pgTable("team", {

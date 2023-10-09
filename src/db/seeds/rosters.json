@@ -2401,7 +2401,9 @@
         "AG": 2,
         "PA": 4,
         "AV": 8,
-        "skills": ["Bloodlust (2+)", "Hypnotic Gaze", "Regeneration"]
+        "skills": ["Bloodlust (2+)", "Hypnotic Gaze", "Regeneration"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
       },
       {
         "position": "Vampire Blitzer",
