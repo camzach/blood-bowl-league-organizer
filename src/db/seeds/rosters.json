@@ -2371,35 +2371,87 @@
   },
   {
     "name": "Vampire",
-    "specialRules": ["Sylvanian Spotlight", "Apothecary Allowed"],
+    "specialRules": [
+      "Sylvanian Spotlight",
+      "Vampire Lord",
+      "Apothecary Allowed"
+    ],
     "rerollCost": 70000,
     "tier": 2,
     "players": [
       {
         "position": "Thrall Lineman",
-        "max": 12,
+        "max": 16,
         "cost": 40000,
         "MA": 6,
         "ST": 3,
         "AG": 3,
-        "PA": 5,
+        "PA": 4,
         "AV": 8,
         "skills": [],
         "primary": ["general"],
         "secondary": ["agility", "strength"]
       },
       {
+        "position": "Vampire Runner",
+        "max": 2,
+        "cost": 100000,
+        "MA": 8,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Bloodlust (2+)", "Hypnotic Gaze", "Regeneration"]
+      },
+      {
         "position": "Vampire Blitzer",
-        "max": 6,
+        "max": 2,
         "cost": 110000,
         "MA": 6,
         "ST": 4,
         "AG": 2,
-        "PA": 3,
+        "PA": 5,
         "AV": 9,
-        "skills": ["Animal Savagery", "Hypnotic Gaze", "Regeneration"],
+        "skills": [
+          "Bloodlust (3+)",
+          "Hypnotic Gaze",
+          "Juggernaut",
+          "Regeneration"
+        ],
         "primary": ["agility", "general", "strength"],
-        "secondary": ["passing", "strength"]
+        "secondary": ["passing"]
+      },
+      {
+        "position": "Vampire Thrower",
+        "max": 2,
+        "cost": 110000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 2,
+        "PA": 2,
+        "AV": 9,
+        "skills": ["Bloodlust (2+)", "Hypnotic Gaze", "Pass", "Regeneration"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Vargheist",
+        "max": 1,
+        "cost": 150000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 10,
+        "skills": [
+          "Bloodlust (3+)",
+          "Claws",
+          "Frenzy",
+          "Loner (4+)",
+          "Regeneration"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
       }
     ]
   }
