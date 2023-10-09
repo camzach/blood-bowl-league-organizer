@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { StatList } from "./stat-list";
 import useServerMutation from "utils/use-server-mutation";
 import { learnSkill } from "./actions";
-import { skillCategory, type skill, type SkillCategory } from "db/schema";
+import type { skill, SkillCategory } from "db/schema";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -121,7 +121,7 @@ export function Popup({ player, skills, onHide }: Props) {
           <div
             key={category}
             className={classNames([
-              "tab-lifted tab",
+              "tab tab-lifted",
               tab === category && "tab-active",
             ])}
             onClick={() => setTab(category)}
@@ -135,7 +135,7 @@ export function Popup({ player, skills, onHide }: Props) {
           <div
             key={category}
             className={classNames([
-              "tab-lifted tab",
+              "tab tab-lifted",
               tab === category && "tab-active",
             ])}
             onClick={() => setTab(category)}
@@ -177,7 +177,7 @@ export function Popup({ player, skills, onHide }: Props) {
               </button>
             ))}
           </div>
-          <button className="btn-secondary btn" onClick={purchaseRandom}>
+          <button className="btn btn-secondary" onClick={purchaseRandom}>
             {`Random - ${
               advancementCosts[
                 `Random ${
