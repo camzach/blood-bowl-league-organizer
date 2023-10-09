@@ -18,6 +18,9 @@ import skillSeed from "./seeds/skills.json" assert { type: "json" };
 import inducementSeed from "./seeds/inducements.json" assert { type: "json" };
 import starPlayerSeed from "./seeds/starPlayers.json" assert { type: "json" };
 import { db } from "../utils/drizzle";
+import { config } from "dotenv";
+
+config();
 
 const skills: (typeof skill.$inferInsert)[] = [];
 const specialRules: Set<string> = new Set();
@@ -150,7 +153,10 @@ const starPlayerInsert = db
   .insert(starPlayer)
   .values(starPlayers)
   .then(() => console.log("star players inserted"));
-const starPlayerSkillsInsert = starPlayerInsert.then(() =>
+const starPlayerSkillsInsert = Promise.all([
+  starPlayerInsert,
+  skillInsert,
+]).then(() =>
   db
     .insert(skillToStarPlayer)
     .values(skillsToStarPlayers)
