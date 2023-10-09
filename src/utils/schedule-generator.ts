@@ -1,6 +1,3 @@
-// import { Prisma } from "@prisma/client";
-// import { publicProcedure, router } from "server/trpc";
-
 type PairingsType = [string, string][];
 
 export function generateSchedule(teams: string[]): PairingsType {
