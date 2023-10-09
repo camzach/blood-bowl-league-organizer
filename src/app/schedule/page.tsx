@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Fragment } from "react";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { roundRobinGame } from "db/schema";
@@ -8,7 +8,7 @@ import { roundRobinGame } from "db/schema";
 export const metadata: Metadata = { title: "Schedule" };
 
 export default async function Schedule() {
-  const games = await drizzle.query.roundRobinGame.findMany({
+  const games = await db.query.roundRobinGame.findMany({
     where: eq(roundRobinGame.seasonName, process.env.ACTIVE_SEASON ?? ""),
     with: {
       game: { with: { homeDetails: true, awayDetails: true } },
@@ -41,7 +41,9 @@ export default async function Schedule() {
           <Fragment key={roundIdx}>
             {round.map(({ game }, gameIdx) => (
               <tr key={game.id}>
-                {gameIdx === 0 && <td rowSpan={round.length}>{roundIdx}</td>}
+                {gameIdx === 0 && (
+                  <td rowSpan={round.length}>{roundIdx + 1}</td>
+                )}
                 <td>{game.homeDetails.teamName}</td>
                 <td>{game.awayDetails.teamName}</td>
                 <td>

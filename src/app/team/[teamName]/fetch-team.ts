@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { team as dbTeam } from "db/schema";
 import {
   getPlayerStats,
@@ -8,7 +8,7 @@ import {
 } from "utils/get-computed-player-fields";
 
 export default async function fetchTeam(name: string) {
-  const fetchedTeam = await drizzle.query.team.findFirst({
+  const fetchedTeam = await db.query.team.findFirst({
     where: eq(dbTeam.name, name),
     with: {
       roster: true,

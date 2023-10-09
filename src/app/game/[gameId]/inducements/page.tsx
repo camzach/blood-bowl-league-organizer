@@ -1,42 +1,108 @@
 import { notFound, redirect } from "next/navigation";
-import { trpc } from "utils/trpc";
-import { prisma } from "utils/prisma";
 import Content from "./content";
+import { db } from "utils/drizzle";
+import {
+  game as dbGame,
+  inducement,
+  specialRuleToStarPlayer,
+  starPlayer,
+} from "db/schema";
+import { eq, getTableColumns, inArray, isNotNull, or } from "drizzle-orm";
+import { purchaseInducements } from "../actions";
 
-type InducementsResponseType = ReturnType<typeof trpc.inducements.list.query>;
+function getChoicesForSpecialRules(rules: string[]) {
+  const inducements = db
+    .select()
+    .from(inducement)
+    .where(
+      or(
+        isNotNull(inducement.price),
+        inArray(inducement.specialPriceRule, rules)
+      )
+    )
+    .then((res) =>
+      res.map((i) => ({
+        ...i,
+        price: (i.specialPriceRule !== null &&
+        rules.includes(i.specialPriceRule)
+          ? i.specialPrice
+          : i.price) as number,
+      }))
+    );
+  const stars = db
+    .selectDistinct(getTableColumns(starPlayer))
+    .from(starPlayer)
+    .leftJoin(
+      specialRuleToStarPlayer,
+      eq(starPlayer.name, specialRuleToStarPlayer.starPlayerName)
+    )
+    .where(inArray(specialRuleToStarPlayer.specialRuleName, rules))
+    .orderBy(starPlayer.name);
+  return Promise.all([inducements, stars]).then(([inducements, stars]) => ({
+    inducements,
+    stars,
+  }));
+}
 
 export default async function Inducements({
   params: { gameId },
 }: {
   params: { gameId: string };
 }) {
-  const game = await prisma.game.findUnique({
-    where: { id: decodeURIComponent(gameId) },
-    select: {
+  const game = await db.query.game.findFirst({
+    where: eq(dbGame.id, decodeURIComponent(gameId)),
+    columns: {
       state: true,
-      home: { select: { treasury: true, name: true } },
-      away: { select: { treasury: true, name: true } },
-      pettyCashHome: true,
-      pettyCashAway: true,
+    },
+    with: {
+      homeDetails: {
+        with: {
+          team: {
+            columns: { treasury: true, name: true },
+            with: { roster: { with: { specialRuleToRoster: true } } },
+          },
+        },
+      },
+      awayDetails: {
+        with: {
+          team: {
+            columns: { treasury: true, name: true },
+            with: { roster: { with: { specialRuleToRoster: true } } },
+          },
+        },
+      },
     },
   });
   if (!game) return notFound();
 
-  if (game.state !== "Inducements")
-    redirect(`game/${gameId}/${game.state.toLowerCase()}`);
+  if (game.state !== "inducements")
+    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
 
-  const inducements = await Promise.all(
-    [game.home.name, game.away.name].map(async (team) =>
-      trpc.inducements.list.query({ team })
-    ) as [InducementsResponseType, InducementsResponseType]
+  const homeOptions = await getChoicesForSpecialRules(
+    game.homeDetails.team.roster.specialRuleToRoster.map(
+      (r) => r.specialRuleName
+    )
+  );
+  const awayOptions = await getChoicesForSpecialRules(
+    game.awayDetails.team.roster.specialRuleToRoster.map(
+      (r) => r.specialRuleName
+    )
   );
 
   return (
     <Content
-      inducements={inducements}
-      pettyCash={[game.pettyCashHome, game.pettyCashAway]}
-      treasury={[game.home.treasury, game.away.treasury]}
+      inducements={[homeOptions.inducements, awayOptions.inducements]}
+      stars={[homeOptions.stars, awayOptions.stars]}
+      pettyCash={[
+        game.homeDetails.pettyCashAwarded,
+        game.awayDetails.pettyCashAwarded,
+      ]}
+      treasury={[
+        game.homeDetails.team.treasury,
+        game.awayDetails.team.treasury,
+      ]}
       gameId={gameId}
+      purchaseInducements={purchaseInducements}
     />
   );
 }

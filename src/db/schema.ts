@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { Many, relations } from "drizzle-orm";
 import {
   int,
   mysqlEnum,
@@ -9,6 +9,7 @@ import {
   primaryKey,
   text,
   customType,
+  foreignKey,
 } from "drizzle-orm/mysql-core";
 
 export const teamStates = [
@@ -58,13 +59,13 @@ export const skillCategory = [
 ] as const;
 export type SkillCategory = (typeof skillCategory)[number];
 
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (
   k: infer I
 ) => void
   ? I
   : never;
 type UnionToOvlds<U> = UnionToIntersection<
-  U extends any ? (f: U) => void : never
+  U extends U ? (f: U) => void : never
 >;
 
 type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
@@ -87,7 +88,7 @@ const skillCategorySet = customType<{
   data: Array<(typeof skillCategory)[number]>;
   driverData: UnionConcat<(typeof skillCategory)[number], ",">;
 }>({
-  dataType: () => `SET(${skillCategory.map((c) => `'${c}'`).join(",")})`,
+  dataType: () => `set(${skillCategory.map((c) => `'${c}'`).join(",")})`,
   toDriver: (input) =>
     input.join(",") as UnionConcat<(typeof skillCategory)[number], ",">,
   fromDriver: (output) =>
@@ -141,6 +142,7 @@ export const player = mysqlTable("player", {
   interceptions: int("interceptions").notNull().default(0),
   casualties: int("casualties").notNull().default(0),
   mvps: int("mvps").notNull().default(0),
+  otherSPP: int("other_spp").notNull().default(0),
   seasonsPlayed: int("seasons_played").notNull().default(0),
   positionId: varchar("position_id", { length: 25 })
     .notNull()
@@ -357,6 +359,7 @@ export const game = mysqlTable("game", {
     .notNull()
     .unique()
     .references(() => gameDetails.id),
+  weather: mysqlEnum("weather", weather),
 });
 export const gameRelations = relations(game, ({ one }) => ({
   homeDetails: one(gameDetails, {
@@ -377,7 +380,21 @@ export const gameDetails = mysqlTable("game_details", {
   touchdowns: int("touchdowns").notNull().default(0),
   casualties: int("casualties").notNull().default(0),
   pettyCashAwarded: int("petty_cash_awarded").notNull().default(0),
+  journeymenRequired: int("journeymen_required"),
+  fanFactor: int("fan_factor").notNull().default(0),
+  mvpId: varchar("mvp_id", { length: 255 }).references(() => player.id),
 });
+export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
+  team: one(team, {
+    fields: [gameDetails.teamName],
+    references: [team.name],
+  }),
+  gameDetailsToStarPlayer: many(gameDetailsToStarPlayer),
+  mvp: one(player, {
+    fields: [gameDetails.mvpId],
+    references: [player.id],
+  }),
+}));
 
 export const season = mysqlTable("season", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
@@ -440,3 +457,134 @@ export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
     references: [game.id],
   }),
 }));
+
+export const inducement = mysqlTable("inducement", {
+  name: varchar("name", { length: 255 }).notNull().primaryKey(),
+  max: int("max").notNull(),
+  price: int("price"),
+  // The following two fields should be either BOTH null, or BOTH not null
+  // CONSTRAINT player_team_membership_nullity CHECK
+  //   ((special_price IS NULL AND special_price_rule IS NULL) OR
+  //    (special_price IS NOT NULL AND special_price_rule IS NOT NULL))
+  specialPrice: int("special_price"),
+  specialPriceRule: varchar("special_price_rule", { length: 255 }).references(
+    () => specialRule.name
+  ),
+});
+
+export const starPlayer = mysqlTable(
+  "star_player",
+  {
+    name: varchar("name", { length: 255 }).notNull().primaryKey(),
+    hiringFee: int("hiring_fee").notNull(),
+    ma: int("ma").notNull(),
+    st: int("st").notNull(),
+    ag: int("ag").notNull(),
+    pa: int("pa"),
+    av: int("av").notNull(),
+    partnerName: varchar("partner_name", { length: 255 }),
+    specialAbility: text("special_ability").notNull(),
+  },
+  (table) => ({
+    partner: foreignKey({
+      columns: [table.partnerName],
+      foreignColumns: [table.name],
+    }),
+  })
+);
+export const starPlayerRelations = relations(starPlayer, ({ one, many }) => ({
+  skillToStarPlayer: many(skillToStarPlayer),
+  specialRuleToStarPlayer: many(specialRuleToStarPlayer),
+  partner: one(starPlayer, {
+    fields: [starPlayer.partnerName],
+    references: [starPlayer.name],
+  }),
+}));
+
+export const skillToStarPlayer = mysqlTable("skill_to_star_player", {
+  skillName: varchar("skill_name", { length: 255 })
+    .notNull()
+    .references(() => skill.name),
+  starPlayerName: varchar("star_player_name", { length: 255 })
+    .notNull()
+    .references(() => starPlayer.name),
+});
+export const skillToStarPlayerRelations = relations(
+  skillToStarPlayer,
+  ({ one }) => ({
+    skill: one(skill, {
+      fields: [skillToStarPlayer.skillName],
+      references: [skill.name],
+    }),
+    starPlayer: one(starPlayer, {
+      fields: [skillToStarPlayer.starPlayerName],
+      references: [starPlayer.name],
+    }),
+  })
+);
+
+export const specialRuleToStarPlayer = mysqlTable("sr_to_sp", {
+  starPlayerName: varchar("star_player_name", { length: 255 })
+    .notNull()
+    .references(() => starPlayer.name),
+  specialRuleName: varchar("special_rule_name", { length: 255 })
+    .notNull()
+    .references(() => specialRule.name),
+});
+export const specialRuleToStarPlayerRelations = relations(
+  specialRuleToStarPlayer,
+  ({ one }) => ({
+    specialRule: one(specialRule, {
+      fields: [specialRuleToStarPlayer.specialRuleName],
+      references: [specialRule.name],
+    }),
+    starPlayer: one(starPlayer, {
+      fields: [specialRuleToStarPlayer.starPlayerName],
+      references: [starPlayer.name],
+    }),
+  })
+);
+
+export const gameDetailsToStarPlayer = mysqlTable(
+  "game_details_to_star_player",
+  {
+    gameDetailsId: varchar("game_details_id", { length: 255 })
+      .notNull()
+      .references(() => gameDetails.id),
+    starPlayerName: varchar("star_player_name", { length: 255 })
+      .notNull()
+      .references(() => starPlayer.name),
+  },
+  (table) => ({
+    pk: primaryKey(table.gameDetailsId, table.starPlayerName),
+  })
+);
+export const gameDetailsToStarPlayerRelations = relations(
+  gameDetailsToStarPlayer,
+  ({ one }) => ({
+    gameDetails: one(gameDetails, {
+      fields: [gameDetailsToStarPlayer.gameDetailsId],
+      references: [gameDetails.id],
+    }),
+    starPlayer: one(starPlayer, {
+      fields: [gameDetailsToStarPlayer.starPlayerName],
+      references: [starPlayer.name],
+    }),
+  })
+);
+
+export const gameDetailsToInducement = mysqlTable(
+  "game_details_to_inducement",
+  {
+    gameDetailsId: varchar("game_details_id", { length: 255 })
+      .notNull()
+      .references(() => gameDetails.id),
+    inducementName: varchar("inducement_name", { length: 255 })
+      .notNull()
+      .references(() => inducement.name),
+    count: int("count").notNull().default(1),
+  },
+  (table) => ({
+    pk: primaryKey(table.gameDetailsId, table.inducementName),
+  })
+);

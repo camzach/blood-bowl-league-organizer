@@ -4,7 +4,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { end } from "../actions";
 
-type SPPType = keyof Parameters<typeof end>[0]["starPlayerPoints"][string];
+type SPPType = keyof Required<
+  Parameters<typeof end>[0]["playerUpdates"][string]
+>["starPlayerPoints"];
 type PlayerType = { id: string; name: string | null; number: number };
 type FormValues = {
   team: "home" | "away";
@@ -90,7 +92,7 @@ export default function SPPButton({ home, away, onSubmit }: Props) {
           Done
         </button>
       </Modal>
-      <button className="btn-sm btn" onClick={() => setIsOpen(true)}>
+      <button className="btn btn-sm" onClick={() => setIsOpen(true)}>
         Other SPP
       </button>
     </>

@@ -1,0 +1,14 @@
+[
+{"max":4,"name":"Temp Agency Cheerleader","price":20000},
+{"max":3,"name":"Part-time Assistant Coach","price":20000},
+{"max":2,"name":"Bloodweiser Keg","price":50000},
+{"max":2,"name":"Wandering Apothecary","price":null,"specialPriceRule":"Apothecary Allowed","specialPrice":100000},
+{"max":8,"name":"Extra Team Training","price":100000},
+{"max":1,"name":"Weather Mage","price":30000},
+{"max":5,"name":"Special Play","price":100000},
+{"max":1,"name":"Riotous Rookies","price":null,"specialPriceRule":"Low Cost Linemen", "specialPrice":100000},
+{"max":1,"name":"Plague Doctor","price":null,"specialPriceRule":"Favoured of Nurgle", "specialPrice":100000},
+{"max":3,"name":"Bribe","price":100000,"specialPriceRule":"Bribery and Corruption", "specialPrice": 50000},
+{"max":1,"name":"Halfling Master Chef","price":300000,"specialPriceRule":"Halfling Thimble Cup", "specialPrice": 100000},
+{"max":1,"name":"Mortuary Assistant","price":null,"specialPriceRule":"Sylvanian Spotlight", "specialPrice": 100000}
+]

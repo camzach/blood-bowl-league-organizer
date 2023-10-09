@@ -1,120 +1,151 @@
 "use server";
-import type { Prisma } from "@prisma/client";
-import { prisma } from "utils/prisma";
-import { GameState, TeamState, Weather } from "@prisma/client";
 import { z } from "zod";
-import calculateTV from "utils/calculate-tv";
-import type { Session } from "next-auth";
-import { newPlayer } from "server/routers/new-player";
-import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { zact } from "zact/server";
-import { getSessionOrThrow } from "utils/server-action-getsession";
+import { db } from "utils/drizzle";
+import { and, eq, not, gte, inArray, sql } from "drizzle-orm";
+import {
+  game as dbGame,
+  player,
+  rosterSlot,
+  team as dbTeam,
+  weather,
+  gameDetails,
+  improvement,
+  team,
+  gameDetailsToStarPlayer,
+  gameDetailsToInducement,
+} from "db/schema";
+import { canEditTeam } from "app/team/[teamName]/edit/actions";
+import calculateTV from "utils/calculate-tv";
+import { nanoid } from "nanoid";
+import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { getPlayerStats } from "utils/get-computed-player-fields";
-
-function ensureAuthenticationForTeams(
-  session: Session | null,
-  teams: string[]
-): void {
-  if (!session) throw new Error("Not authenticated");
-  if (!teams.some((t) => session.user.teams.includes(t)))
-    throw new Error("User does not have permission to update this game");
-}
+import { d6 } from "utils/d6";
 
 export const start = zact(z.object({ id: z.string() }))(async ({ id }) => {
-  const session = await getSessionOrThrow();
-  const startGameTeamFields = {
-    select: {
-      players: { where: { missNextGame: false } },
-      roster: {
-        select: {
-          positions: {
-            where: { max: { gte: 12 } },
-            select: { name: true },
+  return db.transaction(async (tx) => {
+    const teamDetailsOptions = {
+      with: {
+        team: {
+          with: {
+            players: {
+              where: eq(player.missNextGame, false),
+            },
+            roster: {
+              with: {
+                rosterSlots: {
+                  where: gte(rosterSlot.max, 12),
+                  with: { position: true },
+                },
+              },
+            },
           },
         },
       },
-      dedicatedFans: true,
-      name: true,
-      state: true,
-    },
-  } as const;
-  const game = await prisma.game.findUniqueOrThrow({
-    where: { id },
-    select: {
-      id: true,
-      state: true,
-      home: startGameTeamFields,
-      away: startGameTeamFields,
-    },
-  });
+    } as const;
+    const game = await tx.query.game.findFirst({
+      where: eq(dbGame.id, id),
+      with: {
+        homeDetails: teamDetailsOptions,
+        awayDetails: teamDetailsOptions,
+      },
+    });
+    if (!game) throw new Error("Could not ifnd game");
 
-  ensureAuthenticationForTeams(session, [game.home.name, game.away.name]);
+    if (
+      !canEditTeam([game.homeDetails.teamName, game.awayDetails.teamName], tx)
+    )
+      throw new Error("User does not have permission for this game");
 
-  if (
-    game.home.state !== TeamState.Ready ||
-    game.away.state !== TeamState.Ready
-  )
-    throw new Error("Teams are not ready to start a game");
+    if (
+      game.homeDetails.team.state !== "ready" ||
+      game.awayDetails.team.state !== "ready"
+    )
+      throw new Error("Teams are not ready to start a game");
 
-  if (game.state !== GameState.Scheduled)
-    throw new Error("Game has already been started");
+    if (game.state !== "scheduled")
+      throw new Error("Game has already been started");
 
-  const weatherTable = [
-    null as never,
-    null as never,
-    Weather.SwelteringHeat,
-    Weather.VerySunny,
-    ...Array.from(Array(7), () => Weather.Perfect),
-    Weather.PouringRain,
-    Weather.Blizzard,
-  ];
+    const weatherTable = [
+      null as never,
+      null as never,
+      "sweltering_heat",
+      "very_sunny",
+      ...Array.from(Array(7), () => "perfect" as const),
+      "pouring_rain",
+      "blizzard",
+    ] satisfies Array<(typeof weather)[number]>;
 
-  const fairweatherFansHome = Math.ceil(Math.random() * 3);
-  const fanFactorHome = game.home.dedicatedFans + fairweatherFansHome;
-  const fairweatherFansAway = Math.ceil(Math.random() * 3);
-  const fanFactorAway = game.away.dedicatedFans + fairweatherFansAway;
-  const weatherRoll = [
-    Math.floor(Math.random() * 6) + 1,
-    Math.floor(Math.random() * 6) + 1,
-  ];
-  const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
+    const fairweatherFansHome = Math.ceil(Math.random() * 3);
+    const fanFactorHome =
+      game.homeDetails.team.dedicatedFans + fairweatherFansHome;
+    const fairweatherFansAway = Math.ceil(Math.random() * 3);
+    const fanFactorAway =
+      game.awayDetails.team.dedicatedFans + fairweatherFansAway;
+    const weatherRoll = [d6(), d6()];
+    const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
 
-  const homeJourneymen = {
-    count: Math.max(0, 11 - game.home.players.length),
-    players: game.home.roster.positions.map((pos) => pos.name),
-  };
-  const awayJourneymen = {
-    count: Math.max(0, 11 - game.away.players.length),
-    players: game.away.roster.positions.map((pos) => pos.name),
-  };
+    const homeJourneymen = {
+      count: Math.max(0, 11 - game.homeDetails.team.players.length),
+      players: game.homeDetails.team.roster.rosterSlots.flatMap((slot) =>
+        slot.position.map((pos) => pos.name)
+      ),
+    };
+    const awayJourneymen = {
+      count: Math.max(0, 11 - game.awayDetails.team.players.length),
+      players: game.awayDetails.team.roster.rosterSlots.flatMap((slot) =>
+        slot.position.map((pos) => pos.name)
+      ),
+    };
 
-  const result = {
-    fairweatherFansHome,
-    fanFactorHome,
-    fairweatherFansAway,
-    fanFactorAway,
-    weatherRoll,
-    weatherResult,
-    homeJourneymen,
-    awayJourneymen,
-  };
-
-  const teamUpdates = prisma.team.updateMany({
-    where: { name: { in: [game.home.name, game.away.name] } },
-    data: { state: TeamState.Playing },
-  });
-  const gameUpdate = prisma.game.update({
-    where: { id: game.id },
-    data: {
-      state: GameState.Journeymen,
-      journeymenHome: homeJourneymen.count,
-      journeymenAway: awayJourneymen.count,
-      weather: weatherResult,
+    const result = {
+      fairweatherFansHome,
       fanFactorHome,
+      fairweatherFansAway,
       fanFactorAway,
-    },
+      weatherRoll,
+      weatherResult,
+      homeJourneymen,
+      awayJourneymen,
+    };
+
+    const teamUpdate = tx
+      .update(dbTeam)
+      .set({
+        state: "playing",
+      })
+      .where(
+        inArray(dbTeam.name, [
+          game.homeDetails.team.name,
+          game.awayDetails.team.name,
+        ])
+      );
+    const gameUpdate = tx
+      .update(dbGame)
+      .set({
+        state: "journeymen",
+        weather: weatherResult,
+      })
+      .where(eq(dbGame.id, game.id));
+    const homeDetailsUpdate = tx
+      .update(gameDetails)
+      .set({
+        journeymenRequired: homeJourneymen.count,
+      })
+      .where(eq(gameDetails.id, game.homeDetails.id));
+    const awayDetailsUpdate = tx
+      .update(gameDetails)
+      .set({
+        journeymenRequired: awayJourneymen.count,
+      })
+      .where(eq(gameDetails.id, game.awayDetails.id));
+    return Promise.all([
+      teamUpdate,
+      gameUpdate,
+      homeDetailsUpdate,
+      awayDetailsUpdate,
+    ]).then(() => result);
   });
-  return prisma.$transaction([teamUpdates, gameUpdate]).then(() => result);
 });
 
 export const selectJourneymen = zact(
@@ -124,131 +155,169 @@ export const selectJourneymen = zact(
     game: z.string(),
   })
 )(async (input) => {
-  const session = await getSessionOrThrow();
-
-  const teamFields = {
-    name: true,
-    apothecary: true,
-    assistantCoaches: true,
-    cheerleaders: true,
-    rerolls: true,
-    roster: { select: { name: true, rerollCost: true, specialRules: true } },
-    players: {
-      where: { missNextGame: false },
-      include: {
-        improvements: { include: { skill: true } },
-        position: { include: { Roster: { include: { specialRules: true } } } },
+  return db.transaction(async (tx) => {
+    const teamFields = {
+      columns: {
+        name: true,
+        apothecary: true,
+        assistantCoaches: true,
+        cheerleaders: true,
+        rerolls: true,
       },
-    },
-  } satisfies Prisma.TeamSelect;
-  const game = await prisma.game.findUniqueOrThrow({
-    where: { id: input.game },
-    select: {
-      id: true,
-      state: true,
-      home: { select: teamFields },
-      away: { select: teamFields },
-    },
+      with: {
+        roster: {
+          columns: { name: true, rerollCost: true },
+          with: {
+            specialRuleToRoster: true,
+            rosterSlots: {
+              where: gte(rosterSlot.max, 12),
+              with: { position: true },
+            },
+          },
+        },
+        players: {
+          where: and(
+            eq(player.missNextGame, false),
+            eq(player.membershipType, "player")
+          ),
+          with: {
+            improvements: { with: { skill: true } },
+            position: {
+              with: {
+                rosterSlot: {
+                  with: { roster: { with: { specialRuleToRoster: true } } },
+                },
+              },
+            },
+          },
+        },
+      },
+    } satisfies Parameters<typeof tx.query.team.findFirst>[0];
+    const game = await tx.query.game.findFirst({
+      where: eq(dbGame.id, input.game),
+      columns: {
+        id: true,
+        state: true,
+      },
+      with: {
+        homeDetails: { with: { team: teamFields } },
+        awayDetails: { with: { team: teamFields } },
+      },
+    });
+    if (!game) throw new Error("Failed to find game");
+
+    if (!canEditTeam([game.homeDetails.team.name, game.awayDetails.team.name]))
+      throw new Error("User does not have permission to modify this game");
+
+    if (game.state !== "journeymen")
+      throw new Error("Game not awaiting journeymen choice");
+
+    const homeChoice =
+      input.home !== undefined
+        ? game.homeDetails.team.roster.rosterSlots
+            .flatMap((slot) => slot.position)
+            .find((pos) => pos.id === input.home)
+        : undefined;
+    const awayChoice =
+      input.away !== undefined
+        ? game.awayDetails.team.roster.rosterSlots
+            .flatMap((slot) => slot.position)
+            .find((pos) => pos.id === input.away)
+        : undefined;
+
+    const homePlayers = game.homeDetails.team.players.length;
+    const awayPlayers = game.awayDetails.team.players.length;
+    if (homePlayers < 11 && !homeChoice)
+      throw new Error("Missing journeymen selection for home team");
+    else if (homePlayers >= 11 && homeChoice)
+      throw new Error("Home team will not take any journeymen");
+    if (awayPlayers < 11 && !awayChoice)
+      throw new Error("Missing journeymen selection for away team");
+    else if (awayPlayers >= 11 && awayChoice)
+      throw new Error("Away team will not take any journeymen");
+
+    let homeTV = calculateTV(game.homeDetails.team);
+    let awayTV = calculateTV(game.awayDetails.team);
+
+    const newPlayers: Array<typeof player.$inferInsert> = [];
+    if (homeChoice) {
+      homeTV += homeChoice.cost * (11 - homePlayers);
+      newPlayers.push(
+        ...Array.from(Array(11 - homePlayers), (_, i) => ({
+          id: nanoid(),
+          number: 99 - i,
+          positionId: homeChoice.id,
+          membershipType: "journeyman" as const,
+          teamName: game.homeDetails.teamName,
+        }))
+      );
+    }
+    if (awayChoice) {
+      awayTV += awayChoice.cost * (11 - awayPlayers);
+      newPlayers.push(
+        ...Array.from(Array(11 - awayPlayers), (_, i) => ({
+          id: nanoid(),
+          number: 99 - i,
+          positionId: awayChoice.id,
+          membershipType: "journeyman" as const,
+          teamName: game.awayDetails.teamName,
+        }))
+      );
+    }
+
+    const pettyCashHome = Math.max(0, awayTV - homeTV);
+    const pettyCashAway = Math.max(0, homeTV - awayTV);
+
+    await Promise.all([
+      tx
+        .update(dbGame)
+        .set({
+          state: "inducements",
+        })
+        .where(eq(dbGame.id, input.game)),
+      tx
+        .update(gameDetails)
+        .set({
+          pettyCashAwarded: pettyCashHome,
+        })
+        .where(eq(gameDetails.id, game.homeDetails.id)),
+      tx
+        .update(gameDetails)
+        .set({
+          pettyCashAwarded: pettyCashAway,
+        })
+        .where(eq(gameDetails.id, game.awayDetails.id)),
+      tx
+        .insert(player)
+        .values(newPlayers)
+        .then(() =>
+          tx.insert(improvement).values(
+            newPlayers.map((p) => ({
+              playerId: p.id,
+              type: "chosen_skill" as const,
+              order: -1,
+              skillName: "Loner (4+)",
+            }))
+          )
+        ),
+    ]);
+
+    return {
+      pettyCashHome,
+      pettyCashAway,
+    };
   });
-  ensureAuthenticationForTeams(session, [game.home.name, game.away.name]);
-  const makePositionQuery = (positionName: string, rosterName: string) =>
-    ({
-      where: {
-        name: positionName,
-        rosterName,
-        max: { gte: 12 },
-      },
-      include: { skills: true },
-    } as const);
-  const homeChoice =
-    input.home !== undefined
-      ? await prisma.position.findFirstOrThrow(
-          makePositionQuery(input.home, game.home.roster.name)
-        )
-      : undefined;
-  const awayChoice =
-    input.away !== undefined
-      ? await prisma.position.findFirstOrThrow(
-          makePositionQuery(input.away, game.away.roster.name)
-        )
-      : undefined;
-
-  if (game.state !== GameState.Journeymen)
-    throw new Error("Game not awaiting journeymen choice");
-
-  const homePlayers = game.home.players.length;
-  const awayPlayers = game.away.players.length;
-  if (homePlayers < 11 && !homeChoice)
-    throw new Error("Missing journeymen selection for home team");
-  else if (homePlayers >= 11 && homeChoice)
-    throw new Error("Home team will not take any journeymen");
-  if (awayPlayers < 11 && !awayChoice)
-    throw new Error("Missing journeymen selection for away team");
-  else if (awayPlayers >= 11 && awayChoice)
-    throw new Error("Away team will not take any journeymen");
-
-  let homeTV = calculateTV(game.home);
-  let awayTV = calculateTV(game.away);
-
-  const promises: Array<Prisma.PrismaPromise<unknown>> = [];
-  if (homeChoice) {
-    homeTV += homeChoice.cost * (11 - homePlayers);
-    promises.push(
-      prisma.team.update({
-        where: { name: game.home.name },
-        data: {
-          journeymen: {
-            create: Array.from(Array(11 - homePlayers), (_, i) => ({
-              ...newPlayer(homeChoice, 99 - i),
-              learnedSkills: { connect: { name: "Loner (4+)" } },
-            })),
-          },
-        },
-      })
-    );
-  }
-  if (awayChoice) {
-    awayTV += awayChoice.cost * (11 - awayPlayers);
-    promises.push(
-      prisma.team.update({
-        where: { name: game.away.name },
-        data: {
-          journeymen: {
-            create: Array.from(Array(11 - awayPlayers), (_, i) => ({
-              ...newPlayer(awayChoice, 99 - i),
-              learnedSkills: { connect: { name: "Loner (4+)" } },
-            })),
-          },
-        },
-      })
-    );
-  }
-
-  const pettyCashHome = Math.max(0, awayTV - homeTV);
-  const pettyCashAway = Math.max(0, homeTV - awayTV);
-  promises.push(
-    prisma.game.update({
-      where: { id: game.id },
-      data: {
-        state: GameState.Inducements,
-        pettyCashHome,
-        pettyCashAway,
-      },
-    })
-  );
-  return prisma.$transaction(promises).then(() => ({
-    pettyCashHome,
-    pettyCashAway,
-  }));
 });
 
-const inducementChoicesSchema = z.array(
-  z.object({
-    name: z.string(),
-    option: z.string().optional(),
-    quantity: z.number().int().gt(0).default(1),
-  })
-);
+const inducementChoicesSchema = z.object({
+  stars: z.array(z.string()).max(2),
+  inducements: z.array(
+    z.object({
+      name: z.string(),
+      quantity: z.number().int().gt(0).default(1),
+    })
+  ),
+});
 export const purchaseInducements = zact(
   z.object({
     game: z.string(),
@@ -256,351 +325,353 @@ export const purchaseInducements = zact(
     away: inducementChoicesSchema,
   })
 )(async (input) => {
-  const session = await getSessionOrThrow();
-  const teamFields = {
-    name: true,
-    treasury: true,
-    roster: { select: { specialRules: true } },
-    players: { where: { missNextGame: false } },
-  } as const;
-  const game = await prisma.game.findUniqueOrThrow({
-    where: { id: input.game },
-    select: {
-      id: true,
-      state: true,
-      pettyCashHome: true,
-      pettyCashAway: true,
-      home: { select: teamFields },
-      away: { select: teamFields },
-    },
-  });
-
-  ensureAuthenticationForTeams(session, [game.home.name, game.away.name]);
-  if (game.state !== GameState.Inducements)
-    throw new Error("Game not awaiting inducements");
-  const [homeInducementCost, awayInducementCost] = await Promise.all(
-    (["home", "away"] as const).map(async (t) =>
-      calculateInducementCosts(
-        input[t],
-        game[t].roster.specialRules.map((r) => r.name),
-        game[t].players.length,
-        prisma
-      )
+  return db.transaction(async (tx) => {
+    const detailsFields = {
+      columns: {
+        id: true,
+        pettyCashAwarded: true,
+      },
+      with: {
+        team: {
+          columns: {
+            name: true,
+            treasury: true,
+          },
+          with: {
+            roster: { with: { specialRuleToRoster: true } },
+            players: {
+              where: and(
+                eq(player.missNextGame, false),
+                not(eq(player.membershipType, "retired"))
+              ),
+            },
+          },
+        },
+      },
+    } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
+    const game = await tx.query.game.findFirst({
+      where: eq(dbGame.id, input.game),
+      columns: {
+        id: true,
+        state: true,
+      },
+      with: {
+        homeDetails: detailsFields,
+        awayDetails: detailsFields,
+      },
+    });
+    if (!game) throw new Error("Game does not exist");
+    if (
+      !canEditTeam([game.homeDetails.team.name, game.awayDetails.team.name], tx)
     )
-  );
-  const { pettyCashHome, pettyCashAway } = game;
-  const extraPettyCash = { home: 0, away: 0 };
-  let treasuryCostHome = homeInducementCost - pettyCashHome;
-  let treasuryCostAway = awayInducementCost - pettyCashAway;
-  if (pettyCashHome > 0) {
-    extraPettyCash.home += treasuryCostAway;
-    treasuryCostHome -= extraPettyCash.home;
-  } else if (pettyCashAway > 0) {
-    extraPettyCash.away += treasuryCostHome;
-    treasuryCostAway -= extraPettyCash.away;
-  }
-  treasuryCostHome = Math.max(0, treasuryCostHome);
-  treasuryCostAway = Math.max(0, treasuryCostAway);
-  if (
-    (pettyCashHome === 0 && treasuryCostAway > 0) ||
-    (pettyCashAway === 0 && treasuryCostHome > 0) ||
-    treasuryCostHome > game.home.treasury ||
-    treasuryCostAway > game.away.treasury
-  )
-    throw new Error("Inducements are too expensive");
+      throw new Error("User does not have permission for this game");
+    if (game.state !== "inducements")
+      throw new Error("Game not awaiting inducements");
 
-  const homeUpdate = prisma.team.update({
-    where: { name: game.home.name },
-    data: { treasury: { decrement: treasuryCostHome } },
-  });
-  const awayUpdate = prisma.team.update({
-    where: { name: game.away.name },
-    data: { treasury: { decrement: treasuryCostAway } },
-  });
-  const gameStateUpdate = prisma.game.update({
-    where: { id: game.id },
-    data: {
-      state: GameState.InProgress,
-      pettyCashHome: { increment: extraPettyCash.home },
-      pettyCashAway: { increment: extraPettyCash.away },
-      inducementsHome: input.home
-        .filter((ind) => ind.option === undefined && ind.name !== "Star Player")
-        .reduce<Record<string, number>>((prev, current) => {
-          const next = { ...prev };
-          next[current.name] = current.quantity;
-          return next;
-        }, {}),
-      inducementsAway: input.away
-        .filter((ind) => ind.option === undefined && ind.name !== "Star Player")
-        .reduce<Record<string, number>>((prev, current) => {
-          const next = { ...prev };
-          next[current.name] = current.quantity;
-          return next;
-        }, {}),
-      inducementOptionsHome: {
-        connect: input.home
-          .filter(
-            (ind) => ind.option !== undefined && ind.name !== "Star Player"
-          )
-          .flatMap(
-            (ind) =>
-              Array(ind.quantity).fill({ name: ind.option }) as Array<{
-                name: string;
-              }>
+    const [homeInducementCost, awayInducementCost] = await Promise.all(
+      (["home", "away"] as const).map(async (t) =>
+        calculateInducementCosts(
+          input[t].inducements,
+          input[t].stars,
+          game[`${t}Details`].team.roster.specialRuleToRoster.map(
+            (r) => r.specialRuleName
           ),
-      },
-      inducementOptionsAway: {
-        connect: input.away
-          .filter(
-            (ind) => ind.option !== undefined && ind.name !== "Star Player"
+          game[`${t}Details`].team.players.length,
+          tx
+        )
+      )
+    );
+
+    const extraPettyCash = { home: 0, away: 0 };
+    let treasuryCostHome =
+      homeInducementCost - game.homeDetails.pettyCashAwarded;
+    let treasuryCostAway =
+      awayInducementCost - game.awayDetails.pettyCashAwarded;
+    if (game.homeDetails.pettyCashAwarded > 0) {
+      extraPettyCash.home += treasuryCostAway;
+      treasuryCostHome -= extraPettyCash.home;
+    } else if (game.awayDetails.pettyCashAwarded > 0) {
+      extraPettyCash.away += treasuryCostHome;
+      treasuryCostAway -= extraPettyCash.away;
+    }
+    treasuryCostHome = Math.max(0, treasuryCostHome);
+    treasuryCostAway = Math.max(0, treasuryCostAway);
+    if (
+      (game.homeDetails.pettyCashAwarded === 0 && treasuryCostAway > 0) ||
+      (game.awayDetails.pettyCashAwarded === 0 && treasuryCostHome > 0) ||
+      treasuryCostHome > game.homeDetails.team.treasury ||
+      treasuryCostAway > game.awayDetails.team.treasury
+    )
+      throw new Error("Inducements are too expensive");
+
+    await Promise.all([
+      tx
+        .update(team)
+        .set({
+          treasury: sql`${team.treasury} - ${treasuryCostHome}`,
+        })
+        .where(eq(team.name, game.homeDetails.team.name)),
+      tx
+        .update(team)
+        .set({
+          treasury: sql`${team.treasury} - ${treasuryCostAway}`,
+        })
+        .where(eq(team.name, game.awayDetails.team.name)),
+      tx
+        .update(dbGame)
+        .set({
+          state: "in_progress",
+        })
+        .where(eq(dbGame.id, input.game)),
+      (input.home.stars.length > 0 || input.away.stars.length > 0) &&
+        tx.insert(gameDetailsToStarPlayer).values(
+          (["home", "away"] as const).flatMap((t) =>
+            input[t].stars.map((s) => ({
+              starPlayerName: s,
+              gameDetailsId: game[`${t}Details`].id,
+            }))
           )
-          .flatMap(
-            (ind) =>
-              Array(ind.quantity).fill({ name: ind.option }) as Array<{
-                name: string;
-              }>
-          ),
-      },
-      starPlayersHome: {
-        connect: input.home
-          .filter((ind) => ind.name === "Star Player")
-          .map((ind) => ({ name: ind.option })),
-      },
-      starPlayersAway: {
-        connect: input.away
-          .filter((ind) => ind.name === "Star Player")
-          .map((ind) => ({ name: ind.option })),
-      },
-    },
-  });
-  return prisma
-    .$transaction([homeUpdate, awayUpdate, gameStateUpdate])
-    .then(() => ({
+        ),
+      (input.home.inducements.some((i) => (i.quantity ?? 1) > 0) ||
+        input.away.inducements.some((i) => (i.quantity ?? 1) > 0)) &&
+        tx.insert(gameDetailsToInducement).values(
+          (["home", "away"] as const).flatMap((t) =>
+            input[t].inducements.map((i) => ({
+              inducementName: i.name,
+              count: i.quantity,
+              gameDetailsId: game[`${t}Details`].id,
+            }))
+          )
+        ),
+    ]);
+
+    return {
       treasuryCostHome,
       treasuryCostAway,
-    }));
+    };
+  });
 });
 
 export const end = zact(
   z.object({
     game: z.string(),
-    injuries: z.array(
-      z.object({
-        playerId: z.string(),
-        injury: z.enum(["MNG", "NI", "MA", "AG", "PA", "ST", "AV", "DEAD"]),
-      })
-    ),
-    starPlayerPoints: z.record(
+    playerUpdates: z.record(
       z.string(),
       z.object({
-        touchdowns: z.number().int().optional().default(0),
-        casualties: z.number().int().optional().default(0),
-        deflections: z.number().int().optional().default(0),
-        interceptions: z.number().int().optional().default(0),
-        completions: z.number().int().optional().default(0),
-        otherSPP: z.number().int().optional().default(0),
+        injury: z
+          .enum(["mng", "ni", "ma", "ag", "pa", "st", "av", "dead"])
+          .optional(),
+        starPlayerPoints: z
+          .object({
+            touchdowns: z.number().int().optional(),
+            casualties: z.number().int().optional(),
+            deflections: z.number().int().optional(),
+            interceptions: z.number().int().optional(),
+            completions: z.number().int().optional(),
+            otherSPP: z.number().int().optional(),
+          })
+          .optional(),
       })
     ),
     touchdowns: z.tuple([z.number().int(), z.number().int()]),
     casualties: z.tuple([z.number().int(), z.number().int()]),
   })
 )(async (input) => {
-  const session = await getSessionOrThrow();
-  const playerFields = {
-    include: { position: true, improvements: true },
-  } satisfies Prisma.Team$playersArgs;
-  const teamFields = {
-    name: true,
-    players: playerFields,
-    journeymen: playerFields,
-    dedicatedFans: true,
-  } satisfies Prisma.TeamSelect;
-  const game = await prisma.game.findUniqueOrThrow({
-    where: { id: input.game },
-    select: {
-      id: true,
-      state: true,
-      home: { select: teamFields },
-      away: { select: teamFields },
-      fanFactorHome: true,
-      fanFactorAway: true,
-    },
-  });
-  ensureAuthenticationForTeams(session, [game.home.name, game.away.name]);
-
-  const statMinMax = {
-    MA: [1, 9],
-    ST: [1, 8],
-    AG: [1, 6],
-    PA: [1, 6],
-    AV: [3, 11],
-  };
-
-  if (game.state !== GameState.InProgress)
-    throw new Error("Game not in progress");
-
-  const players = [
-    ...game.home.players,
-    ...game.home.journeymen,
-    ...game.away.players,
-    ...game.away.journeymen,
-  ];
-  let mvpChoicesHome = [
-    ...game.home.players.filter((p) => !p.missNextGame),
-    ...game.home.journeymen,
-  ];
-  let mvpChoicesAway = [
-    ...game.away.players.filter((p) => !p.missNextGame),
-    ...game.away.journeymen,
-  ];
-
-  const updateMap: Record<string, Prisma.PlayerUpdateArgs> = Object.fromEntries(
-    players.map(({ id }) => [
-      id,
-      { where: { id }, data: { missNextGame: false } },
-    ])
-  );
-  for (const injury of input.injuries) {
-    const fetchedPlayer = players.find((p) => p.id === injury.playerId);
-    if (!fetchedPlayer) throw new Error("Player not found");
-    const player = {
-      ...fetchedPlayer,
-      ...getPlayerStats(fetchedPlayer),
-    };
-
-    const mappedUpdate = updateMap[injury.playerId].data;
-    mappedUpdate.missNextGame = true;
-    if (
-      injury.injury === "MA" ||
-      injury.injury === "ST" ||
-      injury.injury === "AV"
-    ) {
-      if (player[injury.injury] - 1 < statMinMax[injury.injury][0])
-        throw new Error("Invalid injury, stat cannot be reduced any more");
-      mappedUpdate[`${injury.injury}Injuries`] = { increment: 1 };
-    }
-    if (injury.injury === "PA" || injury.injury === "AG") {
-      if ((player[injury.injury] ?? 6) + 1 > statMinMax[injury.injury][1])
-        throw new Error("Invalid injury, stat cannot be increased any more");
-      mappedUpdate[`${injury.injury}Injuries`] = { increment: 1 };
-    }
-    if (injury.injury === "NI")
-      mappedUpdate.nigglingInjuries = { increment: 1 };
-    if (injury.injury === "DEAD") {
-      mappedUpdate.playerTeam = { disconnect: true };
-      mappedUpdate.journeymanTeam = { disconnect: true };
-      mappedUpdate.dead = true;
-      mvpChoicesAway = mvpChoicesAway.filter((p) => p.id !== player.id);
-      mvpChoicesHome = mvpChoicesHome.filter((p) => p.id !== player.id);
-    }
-  }
-
-  function incrementUpdateField(
-    updateData: Prisma.IntFieldUpdateOperationsInput | number | undefined,
-    amount: number
-  ): Prisma.IntFieldUpdateOperationsInput | number {
-    if (updateData === undefined) return { increment: amount };
-    if (typeof updateData === "number") return updateData + amount;
-    if (updateData.increment === undefined) return { increment: amount };
-    return { increment: updateData.increment + amount };
-  }
-
-  for (const [id, points] of Object.entries(input.starPlayerPoints)) {
-    const player = players.find((p) => p.id === id);
-    if (!player) throw new Error("Player not found");
-
-    if (!(id in updateMap)) updateMap[id] = { where: { id }, data: {} };
-    const mappedUpdate = updateMap[id].data;
-
-    mappedUpdate.casualties = incrementUpdateField(
-      mappedUpdate.casualties,
-      points.casualties
-    );
-    mappedUpdate.deflections = incrementUpdateField(
-      mappedUpdate.deflections,
-      points.deflections
-    );
-    mappedUpdate.interceptions = incrementUpdateField(
-      mappedUpdate.interceptions,
-      points.interceptions
-    );
-    mappedUpdate.touchdowns = incrementUpdateField(
-      mappedUpdate.touchdowns,
-      points.touchdowns
-    );
-    mappedUpdate.completions = incrementUpdateField(
-      mappedUpdate.completions,
-      points.completions
-    );
-  }
-
-  const mvpHome =
-    mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id;
-  const mvpHomeUpdate = updateMap[mvpHome].data;
-  mvpHomeUpdate.MVPs = { increment: 1 };
-
-  const mvpAway =
-    mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id;
-  const mvpAwayUpdate = updateMap[mvpAway].data;
-  mvpAwayUpdate.MVPs = { increment: 1 };
-
-  const fansUpdate = (
-    won: boolean,
-    fans: number
-  ): Prisma.TeamUpdateInput["dedicatedFans"] => {
-    const roll = Math.floor(Math.random() * 6) + 1;
-    if (won) return { increment: roll >= fans && fans < 6 ? 1 : 0 };
-    return { decrement: roll < fans && fans > 1 ? 1 : 0 };
-  };
-  const [homeFansUpdate, awayFansUpdate] =
-    input.touchdowns[0] === input.touchdowns[1]
-      ? [undefined, undefined]
-      : [
-          fansUpdate(
-            input.touchdowns[0] > input.touchdowns[1],
-            game.home.dedicatedFans
-          ),
-          fansUpdate(
-            input.touchdowns[1] > input.touchdowns[0],
-            game.away.dedicatedFans
-          ),
-        ];
-
-  const [homeWinnings, awayWinnings] = [
-    input.touchdowns[0],
-    input.touchdowns[1],
-  ].map(
-    (score) => (score + (game.fanFactorHome + game.fanFactorAway) / 2) * 10_000
-  );
-
-  return prisma
-    .$transaction([
-      ...Object.values(updateMap).map((update) => prisma.player.update(update)),
-      prisma.game.update({
-        where: { id: game.id },
-        data: {
-          state: GameState.Complete,
-          touchdownsHome: input.touchdowns[0],
-          touchdownsAway: input.touchdowns[1],
-          casualtiesHome: input.casualties[0],
-          casualtiesAway: input.casualties[1],
-          MVPs: { connect: [{ id: mvpHome }, { id: mvpAway }] },
-          home: {
-            update: {
-              state: TeamState.PostGame,
-              dedicatedFans: homeFansUpdate,
-              treasury: { increment: homeWinnings },
-            },
-          },
-          away: {
-            update: {
-              state: TeamState.PostGame,
-              dedicatedFans: awayFansUpdate,
-              treasury: { increment: awayWinnings },
+  return db.transaction(async (tx) => {
+    const detailsFields = {
+      with: {
+        team: {
+          with: {
+            players: {
+              with: {
+                position: true,
+                improvements: true,
+              },
             },
           },
         },
-      }),
-    ])
-    .then(() => updateMap);
+      },
+    } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
+    const game = await tx.query.game.findFirst({
+      where: eq(dbGame.id, input.game),
+      columns: {
+        id: true,
+        state: true,
+      },
+      with: {
+        homeDetails: detailsFields,
+        awayDetails: detailsFields,
+      },
+    });
+    if (!game) throw new Error("Game not found");
+
+    if (!canEditTeam([game.homeDetails.teamName, game.awayDetails.teamName]))
+      throw new Error("User does not have permission for this game");
+
+    const statMinMax = {
+      ma: [1, 9],
+      st: [1, 8],
+      ag: [1, 6],
+      pa: [1, 6],
+      av: [3, 11],
+    };
+
+    if (game.state !== "in_progress") throw new Error("Game not in progress");
+
+    const players = [
+      ...game.homeDetails.team.players,
+      ...game.awayDetails.team.players,
+    ];
+    let mvpChoicesHome = [
+      ...game.homeDetails.team.players.filter((p) => !p.missNextGame),
+    ];
+    let mvpChoicesAway = [
+      ...game.awayDetails.team.players.filter((p) => !p.missNextGame),
+    ];
+    const updateMap: Record<
+      string,
+      Parameters<ReturnType<typeof tx.update<typeof player>>["set"]>[0]
+    > = Object.fromEntries(
+      players.map(({ id }) => [id, { missNextGame: false }])
+    );
+    for (const [playerId, update] of Object.entries(input.playerUpdates)) {
+      const fetchedPlayer = players.find((p) => p.id === playerId);
+      if (!fetchedPlayer) throw new Error("Player not found");
+      const player = {
+        ...fetchedPlayer,
+        ...getPlayerStats(fetchedPlayer),
+      };
+
+      const mappedUpdate = updateMap[playerId];
+      if (update.injury !== undefined) {
+        mappedUpdate.missNextGame = true;
+        if (
+          update.injury === "ma" ||
+          update.injury === "st" ||
+          update.injury === "av"
+        ) {
+          if (player[update.injury] - 1 < statMinMax[update.injury][0])
+            throw new Error("Invalid injury, stat cannot be reduced any more");
+          mappedUpdate[`${update.injury}Injuries`] = sql`${
+            player[`${update.injury}Injuries`]
+          } + 1`;
+        }
+        if (update.injury === "pa" || update.injury === "ag") {
+          if ((player[update.injury] ?? 6) + 1 > statMinMax[update.injury][1])
+            throw new Error(
+              "Invalid injury, stat cannot be increased any more"
+            );
+          mappedUpdate[`${update.injury}Injuries`] = sql`${
+            player[`${update.injury}Injuries`]
+          } + 1`;
+        }
+        if (update.injury === "ni")
+          mappedUpdate.nigglingInjuries = sql`${player.nigglingInjuries} + 1`;
+        if (update.injury === "dead") {
+          mappedUpdate.teamName = null;
+          mappedUpdate.membershipType = null;
+          mappedUpdate.dead = true;
+          mvpChoicesAway = mvpChoicesAway.filter((p) => p.id !== player.id);
+          mvpChoicesHome = mvpChoicesHome.filter((p) => p.id !== player.id);
+        }
+      }
+      if (update.starPlayerPoints !== undefined) {
+        for (const [_type, amount] of Object.entries(update.starPlayerPoints)) {
+          const type = _type as keyof typeof update.starPlayerPoints;
+          mappedUpdate[
+            type as keyof typeof update.starPlayerPoints
+          ] = sql`${player[type]} + ${amount}`;
+        }
+      }
+    }
+
+    const mvpHome =
+      mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id;
+    updateMap[mvpHome].mvps = sql`${player.mvps} + 1`;
+
+    const mvpAway =
+      mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id;
+    updateMap[mvpAway].mvps = sql`${player.mvps} + 1`;
+
+    const fansUpdate = (won: boolean, currentFans: number) => {
+      if (won && d6() > currentFans) return sql`${team.dedicatedFans} + 1`;
+      if (!won && d6() < currentFans) return sql`${team.dedicatedFans} - 1`;
+    };
+
+    const [homeFansUpdate, awayFansUpdate] =
+      input.touchdowns[0] === input.touchdowns[1]
+        ? [undefined, undefined]
+        : [
+            fansUpdate(
+              input.touchdowns[0] > input.touchdowns[1],
+              game.homeDetails.team.dedicatedFans
+            ),
+            fansUpdate(
+              input.touchdowns[1] > input.touchdowns[0],
+              game.awayDetails.team.dedicatedFans
+            ),
+          ];
+
+    const [homeWinnings, awayWinnings] = [
+      input.touchdowns[0],
+      input.touchdowns[1],
+    ].map(
+      (score) =>
+        (score +
+          (game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
+        10_000
+    );
+
+    const playerUpdates = Object.keys(updateMap).map((p) =>
+      tx.update(player).set(updateMap[p]).where(eq(player.id, p))
+    );
+    const gameUpdate = tx
+      .update(dbGame)
+      .set({
+        state: "complete",
+      })
+      .where(eq(dbGame.id, game.id));
+    const homeDetailsUpdate = tx
+      .update(gameDetails)
+      .set({
+        casualties: input.casualties[0],
+        touchdowns: input.touchdowns[0],
+        mvpId: mvpHome,
+      })
+      .where(eq(gameDetails.id, game.homeDetails.id));
+    const awayDetailsUpdate = tx
+      .update(gameDetails)
+      .set({
+        casualties: input.casualties[1],
+        touchdowns: input.touchdowns[1],
+        mvpId: mvpAway,
+      })
+      .where(eq(gameDetails.id, game.awayDetails.id));
+
+    const homeTeamUpdate = tx
+      .update(team)
+      .set({
+        state: "improving",
+        dedicatedFans: homeFansUpdate,
+        treasury: sql`${team.treasury} + ${homeWinnings}`,
+      })
+      .where(eq(team.name, game.homeDetails.teamName));
+    const awayTeamUpdate = tx
+      .update(team)
+      .set({
+        state: "improving",
+        dedicatedFans: awayFansUpdate,
+        treasury: sql`${team.treasury} + ${awayWinnings}`,
+      })
+      .where(eq(team.name, game.awayDetails.teamName));
+
+    return Promise.all([
+      playerUpdates,
+      gameUpdate,
+      homeDetailsUpdate,
+      awayDetailsUpdate,
+      homeTeamUpdate,
+      awayTeamUpdate,
+    ]);
+  });
 });

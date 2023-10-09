@@ -1,11 +1,11 @@
-import { Prisma } from "@prisma/client";
-import { publicProcedure, router } from "server/trpc";
+// import { Prisma } from "@prisma/client";
+// import { publicProcedure, router } from "server/trpc";
 
-type PairingsType = Prisma.GameCreateManyInput[];
+type PairingsType = [string, string][];
 
-function generateSchedule(teams: string[]): PairingsType {
+export function generateSchedule(teams: string[]): PairingsType {
   const localTeams: Array<string | null> = [...teams];
-  const pairings: PairingsType = [];
+  const pairings: [string, string][] = [];
   const homeAwayCounts = Object.fromEntries(
     localTeams.map((team) => [team, [0, 0]])
   ) as Record<string, [number, number]>;
@@ -24,15 +24,17 @@ function generateSchedule(teams: string[]): PairingsType {
     const secondHalf = newTeamIndices.slice(half, teamCount).reverse();
 
     for (let i = 0; i < firstHalf.length; i++) {
-      const pairing = [localTeams[firstHalf[i]], localTeams[secondHalf[i]]];
-      if (pairing[0] === null || pairing[1] === null) continue;
-      if (round % 2 === 0) pairing.reverse();
-      homeAwayCounts[pairing[0]][0] += 1;
-      homeAwayCounts[pairing[1]][1] += 1;
-      pairings.push({
-        homeTeamName: pairing[0],
-        awayTeamName: pairing[1],
-      });
+      let home = localTeams[firstHalf[i]];
+      let away = localTeams[secondHalf[i]];
+      if (home === null || away === null) continue;
+      if (round % 2 === 0) {
+        const tmp = home;
+        home = away;
+        away = tmp;
+      }
+      homeAwayCounts[home][0] += 1;
+      homeAwayCounts[away][1] += 1;
+      pairings.push([home, away]);
     }
 
     // Rotating the array
@@ -46,13 +48,12 @@ function generateSchedule(teams: string[]): PairingsType {
     );
 
   const switchHomeAway = (game: (typeof pairings)[number]): void => {
-    const { homeTeamName, awayTeamName } = game;
-    game.homeTeamName = awayTeamName;
-    game.awayTeamName = homeTeamName;
-    homeAwayCounts[homeTeamName][0] -= 1;
-    homeAwayCounts[homeTeamName][1] += 1;
-    homeAwayCounts[awayTeamName][0] += 1;
-    homeAwayCounts[awayTeamName][1] -= 1;
+    const [home, away] = game;
+    game.reverse();
+    homeAwayCounts[home][0] -= 1;
+    homeAwayCounts[home][1] += 1;
+    homeAwayCounts[away][0] += 1;
+    homeAwayCounts[away][1] -= 1;
   };
 
   function rebalance(): void {
@@ -66,7 +67,7 @@ function generateSchedule(teams: string[]): PairingsType {
           ([_, [home, away]]) => away - home > 0
         ) ?? ([] as never[]);
       const gameToFix = pairings.find(
-        (g) => g.homeTeamName === tooManyHome && g.awayTeamName === tooManyAway
+        ([home, away]) => home === tooManyHome && away === tooManyAway
       );
       if (gameToFix) {
         switchHomeAway(gameToFix);
@@ -76,12 +77,10 @@ function generateSchedule(teams: string[]): PairingsType {
       let gameB = null;
       for (const intermediary of localTeams) {
         gameA = pairings.find(
-          (p) =>
-            p.homeTeamName === tooManyHome && p.awayTeamName === intermediary
+          ([home, away]) => home === tooManyHome && away === intermediary
         );
         gameB = pairings.find(
-          (p) =>
-            p.awayTeamName === tooManyAway && p.homeTeamName === intermediary
+          ([home, away]) => away === tooManyAway && home === intermediary
         );
         if (!gameA || !gameB) {
           gameA = null;
@@ -90,35 +89,43 @@ function generateSchedule(teams: string[]): PairingsType {
           break;
         }
       }
-      if (!gameA || !gameB) throw new Error("Schedule generator failed");
-      switchHomeAway(gameA);
-      switchHomeAway(gameB);
+      // gameA and gameB will always be found
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      switchHomeAway(gameA!);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      switchHomeAway(gameB!);
     } else {
+      // This will always find a pairing
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const [tooManyHome] = Object.entries(homeAwayCounts).find(
         ([_, [home, away]]) => home - away > 1
-      ) ?? [null];
+      )!;
       if (tooManyHome !== null) {
         const game =
+          // This will always find a pairing
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           pairings.find(
-            (g) =>
-              g.homeTeamName === tooManyHome &&
-              homeAwayCounts[g.awayTeamName][1] >
-                homeAwayCounts[g.awayTeamName][0]
-          ) ?? (null as never);
+            ([home, away]) =>
+              home === tooManyHome &&
+              homeAwayCounts[away][1] > homeAwayCounts[away][0]
+          )!;
         switchHomeAway(game);
         return;
       }
       const [tooManyAway] =
+        // This will always find a pairing
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         Object.entries(homeAwayCounts).find(
           ([_, [home, away]]) => away - home > 1
-        ) ?? ([] as never[]);
+        )!;
       const game =
+        // This will always find a pairing
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         pairings.find(
-          (g) =>
-            g.homeTeamName === tooManyAway &&
-            homeAwayCounts[g.awayTeamName][1] >
-              homeAwayCounts[g.awayTeamName][0]
-        ) ?? (null as never);
+          ([home, away]) =>
+            home === tooManyAway &&
+            homeAwayCounts[away][1] > homeAwayCounts[away][0]
+        )!;
       switchHomeAway(game);
     }
   }
@@ -128,14 +135,14 @@ function generateSchedule(teams: string[]): PairingsType {
   return pairings;
 }
 
-export const scheduleRouter = router({
-  generate: publicProcedure.mutation(async ({ ctx }) => {
-    const games = await ctx.prisma.game.count();
-    if (games > 0) throw new Error("Schedule already generated");
-    const teams = (
-      await ctx.prisma.team.findMany({ select: { name: true } })
-    ).map((t) => t.name);
-    const pairings = generateSchedule(teams);
-    return ctx.prisma.game.createMany({ data: pairings });
-  }),
-});
+// export const scheduleRouter = router({
+//   generate: publicProcedure.mutation(async ({ ctx }) => {
+//     const games = await ctx.prisma.game.count();
+//     if (games > 0) throw new Error("Schedule already generated");
+//     const teams = (
+//       await ctx.prisma.team.findMany({ select: { name: true } })
+//     ).map((t) => t.name);
+//     const pairings = generateSchedule(teams);
+//     return ctx.prisma.game.createMany({ data: pairings });
+//   }),
+// });

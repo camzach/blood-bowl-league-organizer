@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { selectJourneymen } from "../actions";
+import type { selectJourneymen as selectJourneymenAction } from "../actions";
 
 type TeamWithChoices = {
   name: string;
@@ -15,6 +15,7 @@ type Props = {
   gameId: string;
   home: TeamWithChoices;
   away: TeamWithChoices;
+  selectJourneymen: typeof selectJourneymenAction;
 };
 
 function ChoicesList(props: {
@@ -35,8 +36,8 @@ function ChoicesList(props: {
           <input
             type="radio"
             name={teamName}
-            value={choice.name}
-            checked={value === choice.name}
+            value={choice.id}
+            checked={value === choice.id}
             className="mr-2"
             onChange={(e): void => {
               onSelect(e.target.value);
@@ -49,7 +50,12 @@ function ChoicesList(props: {
   );
 }
 
-export default function Journeymen({ home, away, gameId }: Props) {
+export default function Journeymen({
+  home,
+  away,
+  gameId,
+  selectJourneymen,
+}: Props) {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
   const [response, setResponse] = useState<Awaited<

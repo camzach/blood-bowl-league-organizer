@@ -1,7 +1,7 @@
 "use server";
-import { z } from "zod";
+import { array, z } from "zod";
 import { zact } from "zact/server";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import {
   coachToTeam,
   team as dbTeam,
@@ -10,21 +10,23 @@ import {
   player as dbPlayer,
 } from "db/schema";
 import { auth } from "@clerk/nextjs";
-import { and, eq, not, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
 
-async function getUserTeams(tx?: typeof drizzle) {
+async function getUserTeams(tx?: typeof db) {
   const { userId } = auth();
   if (!userId) throw new Error("Not authenticated");
 
-  return (tx ?? drizzle).query.coachToTeam.findMany({
+  return (tx ?? db).query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, userId),
   });
 }
 
-export async function canEditTeam(team: string, tx?: typeof drizzle) {
+export async function canEditTeam(team: string | string[], tx?: typeof db) {
   const editableTeams = await getUserTeams(tx);
+  if (Array.isArray(team))
+    return team.some((t) => editableTeams.some((e) => e.teamName === t));
   return editableTeams.some((e) => e.teamName === team);
 }
 
@@ -35,7 +37,7 @@ export const create = zact(
   if (!userId) throw new Error("Not authenticated");
   const { name: teamName, roster } = input;
   try {
-    return drizzle.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       const insertedTeam = await tx.insert(dbTeam).values({
         name: teamName,
         rosterName: roster,
@@ -62,13 +64,13 @@ export const hirePlayer = zact(
     name: z.string().optional(),
   })
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     if (!(await canEditTeam(input.team, tx)))
       throw new Error("User does not have permission to modify this team");
 
-    const positionQuery = await drizzle
+    const positionQuery = await db
       .select({
-        ...(dbPosition as typeof dbPosition._.columns),
+        ...getTableColumns(dbPosition),
         rosterSlotMax: rosterSlot.max,
       })
       .from(dbPosition)
@@ -150,10 +152,10 @@ export const hireStaff = zact(
     quantity: z.number().int().gt(0).default(1),
   })
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     if (!(await canEditTeam(input.team, tx)))
       throw new Error("User does not have permission to modify this team");
-    const team = await drizzle.query.team.findFirst({
+    const team = await db.query.team.findFirst({
       where: eq(dbTeam.name, input.team),
       with: {
         roster: {
@@ -231,7 +233,7 @@ export const hireExistingPlayer = zact(
     number: z.number().min(1).max(16),
   })
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
       where: and(
         eq(dbPlayer.id, input.player),
@@ -308,7 +310,7 @@ export const fireStaff = zact(
     quantity: z.number().int().gt(0).default(1),
   })
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     if (!(await canEditTeam(input.team, tx)))
       throw new Error("User does not have permission to modify this team");
     const team = await tx.query.team.findFirst({
