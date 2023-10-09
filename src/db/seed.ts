@@ -18,7 +18,6 @@ import skillSeed from "./seeds/skills.json" assert { type: "json" };
 import inducementSeed from "./seeds/inducements.json" assert { type: "json" };
 import starPlayerSeed from "./seeds/starPlayers.json" assert { type: "json" };
 import { db } from "../utils/drizzle";
-import { sql } from "drizzle-orm";
 
 const skills: (typeof skill.$inferInsert)[] = [];
 const specialRules: Set<string> = new Set();
@@ -106,9 +105,9 @@ for (const s of starPlayerSeed) {
     av: s.AV,
     specialAbility: s.specialRule,
   });
-  for (const sk of s.skills) {
+  for (const skillName of s.skills) {
     skillsToStarPlayers.push({
-      skillName: sk.name,
+      skillName,
       starPlayerName: s.name,
     });
   }
