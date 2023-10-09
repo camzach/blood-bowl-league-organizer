@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import {
-  int,
-  mysqlEnum,
-  mysqlTable,
+  integer,
+  pgEnum,
+  pgTable,
   index,
   varchar,
   boolean,
@@ -10,7 +10,7 @@ import {
   text,
   customType,
   foreignKey,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 
 export const teamStates = [
   "draft",
@@ -19,6 +19,7 @@ export const teamStates = [
   "hiring",
   "improving",
 ] as const;
+const teamState = pgEnum("team_state", teamStates);
 
 export const gameStates = [
   "scheduled",
@@ -27,16 +28,18 @@ export const gameStates = [
   "in_progress",
   "complete",
 ] as const;
+const gameState = pgEnum("game_state", gameStates);
 
-export const weather = [
+export const weatherOpts = [
   "blizzard",
   "pouring_rain",
   "perfect",
   "very_sunny",
   "sweltering_heat",
 ] as const;
+const weather = pgEnum("weather", weatherOpts);
 
-export const improvementType = [
+export const improvementTypes = [
   "st",
   "ma",
   "ag",
@@ -46,10 +49,12 @@ export const improvementType = [
   "random_skill",
   "fallback_skill",
 ] as const;
+const improvementType = pgEnum("improvement_type", improvementTypes);
 
-export const membershipType = ["player", "journeyman", "retired"] as const;
+export const membershipTypes = ["player", "journeyman", "retired"] as const;
+const membershipType = pgEnum("membership_type", membershipTypes);
 
-export const skillCategory = [
+export const skillCategories = [
   "general",
   "agility",
   "mutation",
@@ -57,16 +62,15 @@ export const skillCategory = [
   "strength",
   "trait",
 ] as const;
-export type SkillCategory = (typeof skillCategory)[number];
+export type SkillCategory = (typeof skillCategory.enumValues)[number];
+const skillCategory = pgEnum("skill_category", skillCategories);
 
-type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (
+type intersection<U> = (U extends U ? (k: U) => void : never) extends (
   k: infer I
 ) => void
   ? I
   : never;
-type UnionToOvlds<U> = UnionToIntersection<
-  U extends U ? (f: U) => void : never
->;
+type UnionToOvlds<U> = intersection<U extends U ? (f: U) => void : never>;
 
 type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
 
@@ -85,28 +89,26 @@ type UnionConcat<
   : never;
 
 const skillCategorySet = customType<{
-  data: Array<(typeof skillCategory)[number]>;
-  driverData: UnionConcat<(typeof skillCategory)[number], ",">;
+  data: Array<SkillCategory>;
+  driverData: UnionConcat<SkillCategory, ",">;
 }>({
-  dataType: () => `set(${skillCategory.map((c) => `'${c}'`).join(",")})`,
-  toDriver: (input) =>
-    input.join(",") as UnionConcat<(typeof skillCategory)[number], ",">,
-  fromDriver: (output) =>
-    output.split(",") as Array<(typeof skillCategory)[number]>,
+  dataType: () => `set(${skillCategories.map((c) => `'${c}'`).join(",")})`,
+  toDriver: (input) => input.join(",") as UnionConcat<SkillCategory, ",">,
+  fromDriver: (output) => output.split(",") as Array<SkillCategory>,
 });
 
-export const team = mysqlTable("team", {
+export const team = pgTable("team", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  treasury: int("treasury").notNull().default(1_000_000),
-  state: mysqlEnum("state", teamStates).notNull().default("draft"),
+  treasury: integer("treasury").notNull().default(1_000_000),
+  state: teamState("state").notNull().default("draft"),
   rosterName: varchar("roster_name", { length: 255 })
     .notNull()
     .references(() => roster.name),
-  rerolls: int("rerolls").notNull().default(0),
-  cheerleaders: int("cheerleaders").notNull().default(0),
-  assistantCoaches: int("assistant_coaches").notNull().default(0),
+  rerolls: integer("rerolls").notNull().default(0),
+  cheerleaders: integer("cheerleaders").notNull().default(0),
+  assistantCoaches: integer("assistant_coaches").notNull().default(0),
   apothecary: boolean("apothecary").notNull().default(false),
-  dedicatedFans: int("dedicated_fans").notNull().default(1),
+  dedicatedFans: integer("dedicated_fans").notNull().default(1),
   touchdownSong: varchar("touchdown_song", { length: 255 }).references(
     () => song.name
   ),
@@ -124,35 +126,35 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   players: many(player),
 }));
 
-export const player = mysqlTable("player", {
+export const player = pgTable("player", {
   id: varchar("id", { length: 25 }).notNull().primaryKey(),
   name: varchar("name", { length: 255 }),
-  number: int("number").notNull(),
-  nigglingInjuries: int("niggling_injuries").notNull().default(0),
+  number: integer("number").notNull(),
+  nigglingInjuries: integer("niggling_injuries").notNull().default(0),
   missNextGame: boolean("miss_next_game").notNull().default(false),
   dead: boolean("dead").notNull().default(false),
-  agInjuries: int("ag_injuries").notNull().default(0),
-  maInjuries: int("ma_injuries").notNull().default(0),
-  paInjuries: int("pa_injuries").notNull().default(0),
-  stInjuries: int("st_injuries").notNull().default(0),
-  avInjuries: int("av_injuries").notNull().default(0),
-  touchdowns: int("touchdowns").notNull().default(0),
-  completions: int("completions").notNull().default(0),
-  deflections: int("deflections").notNull().default(0),
-  interceptions: int("interceptions").notNull().default(0),
-  casualties: int("casualties").notNull().default(0),
-  mvps: int("mvps").notNull().default(0),
-  otherSPP: int("other_spp").notNull().default(0),
-  seasonsPlayed: int("seasons_played").notNull().default(0),
+  agInjuries: integer("ag_injuries").notNull().default(0),
+  maInjuries: integer("ma_injuries").notNull().default(0),
+  paInjuries: integer("pa_injuries").notNull().default(0),
+  stInjuries: integer("st_injuries").notNull().default(0),
+  avInjuries: integer("av_injuries").notNull().default(0),
+  touchdowns: integer("touchdowns").notNull().default(0),
+  completions: integer("completions").notNull().default(0),
+  deflections: integer("deflections").notNull().default(0),
+  interceptions: integer("interceptions").notNull().default(0),
+  casualties: integer("casualties").notNull().default(0),
+  mvps: integer("mvps").notNull().default(0),
+  otherSPP: integer("other_spp").notNull().default(0),
+  seasonsPlayed: integer("seasons_played").notNull().default(0),
   positionId: varchar("position_id", { length: 25 })
     .notNull()
     .references(() => position.id),
   // The following two fields should be either BOTH null, or BOTH not null
-  // CONSTRAINT player_team_membership_nullity CHECK
+  // integer player_team_membership_nullity CHECK
   //   ((team_name IS NULL AND membership_type IS NULL) OR
   //    (team_name IS NOT NULL AND membership_type IS NOT NULL))
   teamName: varchar("team_name", { length: 255 }).references(() => team.name),
-  membershipType: mysqlEnum("membership_type", membershipType),
+  membershipType: membershipType("membership_type"),
 });
 export const playerRelations = relations(player, ({ one, many }) => ({
   position: one(position, {
@@ -166,14 +168,14 @@ export const playerRelations = relations(player, ({ one, many }) => ({
   improvements: many(improvement),
 }));
 
-export const improvement = mysqlTable(
+export const improvement = pgTable(
   "improvement",
   {
-    type: mysqlEnum("type", improvementType).notNull(),
+    type: improvementType("type").notNull(),
     playerId: varchar("player_id", { length: 255 })
       .notNull()
       .references(() => player.id),
-    order: int("order").notNull(),
+    order: integer("order").notNull(),
     skillName: varchar("skill_name", { length: 255 }).references(
       () => skill.name
     ),
@@ -193,12 +195,12 @@ export const improvementRelations = relations(improvement, ({ one }) => ({
   }),
 }));
 
-export const song = mysqlTable("song", {
+export const song = pgTable("song", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   data: varchar("data", { length: 255 }).notNull(),
 });
 
-export const coachToTeam = mysqlTable(
+export const coachToTeam = pgTable(
   "coach_to_team",
   {
     coachId: varchar("coach_id", { length: 255 }).notNull(),
@@ -215,17 +217,17 @@ export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
   }),
 }));
 
-export const roster = mysqlTable("roster", {
+export const roster = pgTable("roster", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  rerollCost: int("reroll_cost").notNull(),
-  tier: int("tier").notNull(),
+  rerollCost: integer("reroll_cost").notNull(),
+  tier: integer("tier").notNull(),
 });
 export const rosterRelations = relations(roster, ({ many }) => ({
   rosterSlots: many(rosterSlot),
   specialRuleToRoster: many(specialRuleToRoster),
 }));
 
-export const specialRule = mysqlTable("special_rule", {
+export const specialRule = pgTable("special_rule", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   description: text("description"),
 });
@@ -233,7 +235,7 @@ export const specialRuleRelations = relations(specialRule, ({ many }) => ({
   specialRuleToRoster: many(specialRuleToRoster),
 }));
 
-export const specialRuleToRoster = mysqlTable(
+export const specialRuleToRoster = pgTable(
   "special_rule_to_roster",
   {
     specialRuleName: varchar("special_rule_name", { length: 255 })
@@ -261,14 +263,14 @@ export const specialRuleToRosterRelations = relations(
   })
 );
 
-export const rosterSlot = mysqlTable(
+export const rosterSlot = pgTable(
   "roster_slot",
   {
     rosterName: varchar("roster_name", { length: 255 })
       .notNull()
       .references(() => roster.name),
     id: varchar("id", { length: 255 }).notNull().primaryKey(),
-    max: int("max").notNull(),
+    max: integer("max").notNull(),
   },
   (table) => ({
     rosterIndex: index("roster_slot_idx").on(table.rosterName),
@@ -282,15 +284,15 @@ export const rosterSlotRelations = relations(rosterSlot, ({ one, many }) => ({
   position: many(position),
 }));
 
-export const position = mysqlTable("position", {
+export const position = pgTable("position", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  cost: int("cost").notNull(),
-  ma: int("ma").notNull(),
-  st: int("st").notNull(),
-  ag: int("ag").notNull(),
-  pa: int("pa"),
-  av: int("av").notNull(),
+  cost: integer("cost").notNull(),
+  ma: integer("ma").notNull(),
+  st: integer("st").notNull(),
+  ag: integer("ag").notNull(),
+  pa: integer("pa"),
+  av: integer("av").notNull(),
   primary: skillCategorySet("primary").notNull(),
   secondary: skillCategorySet("secondary").notNull(),
   rosterSlotId: varchar("roster_slot_id", { length: 255 })
@@ -305,13 +307,13 @@ export const positionRelations = relations(position, ({ many, one }) => ({
   }),
 }));
 
-export const skill = mysqlTable("skill", {
+export const skill = pgTable("skill", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   rules: text("rules").notNull(),
-  category: mysqlEnum("category", skillCategory).notNull(),
+  category: skillCategory("category").notNull(),
 });
 
-export const skillToPosition = mysqlTable("skill_to_position", {
+export const skillToPosition = pgTable("skill_to_position", {
   skillName: varchar("skill_name", { length: 255 })
     .notNull()
     .references(() => skill.name),
@@ -333,13 +335,13 @@ export const skillToPositionRelations = relations(
   })
 );
 
-export const faq = mysqlTable("faq", {
+export const faq = pgTable("faq", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   q: text("q").notNull(),
   a: text("a").notNull(),
 });
 
-export const faqToSkill = mysqlTable("faq_to_skill", {
+export const faqToSkill = pgTable("faq_to_skill", {
   skillName: varchar("skill_name", { length: 255 })
     .notNull()
     .references(() => skill.name),
@@ -348,9 +350,9 @@ export const faqToSkill = mysqlTable("faq_to_skill", {
     .references(() => faq.id),
 });
 
-export const game = mysqlTable("game", {
+export const game = pgTable("game", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  state: mysqlEnum("state", gameStates).notNull().default("scheduled"),
+  state: gameState("state").notNull().default("scheduled"),
   awayDetailsId: varchar("away_details_id", { length: 255 })
     .notNull()
     .unique()
@@ -359,7 +361,7 @@ export const game = mysqlTable("game", {
     .notNull()
     .unique()
     .references(() => gameDetails.id),
-  weather: mysqlEnum("weather", weather),
+  weather: weather("weather"),
 });
 export const gameRelations = relations(game, ({ one }) => ({
   homeDetails: one(gameDetails, {
@@ -372,16 +374,16 @@ export const gameRelations = relations(game, ({ one }) => ({
   }),
 }));
 
-export const gameDetails = mysqlTable("game_details", {
+export const gameDetails = pgTable("game_details", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   teamName: varchar("team_name", { length: 255 })
     .notNull()
     .references(() => team.name),
-  touchdowns: int("touchdowns").notNull().default(0),
-  casualties: int("casualties").notNull().default(0),
-  pettyCashAwarded: int("petty_cash_awarded").notNull().default(0),
-  journeymenRequired: int("journeymen_required"),
-  fanFactor: int("fan_factor").notNull().default(0),
+  touchdowns: integer("touchdowns").notNull().default(0),
+  casualties: integer("casualties").notNull().default(0),
+  pettyCashAwarded: integer("petty_cash_awarded").notNull().default(0),
+  journeymenRequired: integer("journeymen_required"),
+  fanFactor: integer("fan_factor").notNull().default(0),
   mvpId: varchar("mvp_id", { length: 255 }).references(() => player.id),
 });
 export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
@@ -396,7 +398,7 @@ export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
   }),
 }));
 
-export const season = mysqlTable("season", {
+export const season = pgTable("season", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
 });
 export const seasonRelations = relations(season, ({ many }) => ({
@@ -404,7 +406,7 @@ export const seasonRelations = relations(season, ({ many }) => ({
   bracketGames: many(bracketGame),
 }));
 
-export const roundRobinGame = mysqlTable(
+export const roundRobinGame = pgTable(
   "round_robin_game",
   {
     gameId: varchar("game_id", { length: 255 })
@@ -413,7 +415,7 @@ export const roundRobinGame = mysqlTable(
     seasonName: varchar("season_name", { length: 255 })
       .notNull()
       .references(() => season.name),
-    round: int("round").notNull(),
+    round: integer("round").notNull(),
   },
   (table) => ({
     pk: primaryKey(table.seasonName, table.gameId),
@@ -430,14 +432,14 @@ export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
   }),
 }));
 
-export const bracketGame = mysqlTable(
+export const bracketGame = pgTable(
   "bracket_game",
   {
     seasonName: varchar("season_name", { length: 255 })
       .notNull()
       .references(() => season.name),
-    round: int("round").notNull(),
-    seed: int("seed").notNull(),
+    round: integer("round").notNull(),
+    seed: integer("seed").notNull(),
     gameId: varchar("game_id", { length: 255 })
       .notNull()
       .unique()
@@ -458,30 +460,30 @@ export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
   }),
 }));
 
-export const inducement = mysqlTable("inducement", {
+export const inducement = pgTable("inducement", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  max: int("max").notNull(),
-  price: int("price"),
+  max: integer("max").notNull(),
+  price: integer("price"),
   // The following two fields should be either BOTH null, or BOTH not null
-  // CONSTRAINT player_team_membership_nullity CHECK
+  // integer player_team_membership_nullity CHECK
   //   ((special_price IS NULL AND special_price_rule IS NULL) OR
   //    (special_price IS NOT NULL AND special_price_rule IS NOT NULL))
-  specialPrice: int("special_price"),
+  specialPrice: integer("special_price"),
   specialPriceRule: varchar("special_price_rule", { length: 255 }).references(
     () => specialRule.name
   ),
 });
 
-export const starPlayer = mysqlTable(
+export const starPlayer = pgTable(
   "star_player",
   {
     name: varchar("name", { length: 255 }).notNull().primaryKey(),
-    hiringFee: int("hiring_fee").notNull(),
-    ma: int("ma").notNull(),
-    st: int("st").notNull(),
-    ag: int("ag").notNull(),
-    pa: int("pa"),
-    av: int("av").notNull(),
+    hiringFee: integer("hiring_fee").notNull(),
+    ma: integer("ma").notNull(),
+    st: integer("st").notNull(),
+    ag: integer("ag").notNull(),
+    pa: integer("pa"),
+    av: integer("av").notNull(),
     partnerName: varchar("partner_name", { length: 255 }),
     specialAbility: text("special_ability").notNull(),
   },
@@ -501,7 +503,7 @@ export const starPlayerRelations = relations(starPlayer, ({ one, many }) => ({
   }),
 }));
 
-export const skillToStarPlayer = mysqlTable("skill_to_star_player", {
+export const skillToStarPlayer = pgTable("skill_to_star_player", {
   skillName: varchar("skill_name", { length: 255 })
     .notNull()
     .references(() => skill.name),
@@ -523,7 +525,7 @@ export const skillToStarPlayerRelations = relations(
   })
 );
 
-export const specialRuleToStarPlayer = mysqlTable("sr_to_sp", {
+export const specialRuleToStarPlayer = pgTable("sr_to_sp", {
   starPlayerName: varchar("star_player_name", { length: 255 })
     .notNull()
     .references(() => starPlayer.name),
@@ -545,7 +547,7 @@ export const specialRuleToStarPlayerRelations = relations(
   })
 );
 
-export const gameDetailsToStarPlayer = mysqlTable(
+export const gameDetailsToStarPlayer = pgTable(
   "game_details_to_star_player",
   {
     gameDetailsId: varchar("game_details_id", { length: 255 })
@@ -573,7 +575,7 @@ export const gameDetailsToStarPlayerRelations = relations(
   })
 );
 
-export const gameDetailsToInducement = mysqlTable(
+export const gameDetailsToInducement = pgTable(
   "game_details_to_inducement",
   {
     gameDetailsId: varchar("game_details_id", { length: 255 })
@@ -582,7 +584,7 @@ export const gameDetailsToInducement = mysqlTable(
     inducementName: varchar("inducement_name", { length: 255 })
       .notNull()
       .references(() => inducement.name),
-    count: int("count").notNull().default(1),
+    count: integer("count").notNull().default(1),
   },
   (table) => ({
     pk: primaryKey(table.gameDetailsId, table.inducementName),

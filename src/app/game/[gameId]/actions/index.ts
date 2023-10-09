@@ -8,7 +8,7 @@ import {
   player,
   rosterSlot,
   team as dbTeam,
-  weather,
+  weatherOpts,
   gameDetails,
   improvement,
   team,
@@ -74,7 +74,7 @@ export const start = zact(z.object({ id: z.string() }))(async ({ id }) => {
       ...Array.from(Array(7), () => "perfect" as const),
       "pouring_rain",
       "blizzard",
-    ] satisfies Array<(typeof weather)[number]>;
+    ] satisfies Array<(typeof weatherOpts)[number]>;
 
     const fairweatherFansHome = Math.ceil(Math.random() * 3);
     const fanFactorHome =

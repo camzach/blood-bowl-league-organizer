@@ -1,11 +1,9 @@
 import {
-  SkillCategory,
   improvement,
   player,
   position,
   roster,
   skill,
-  specialRule,
   specialRuleToRoster,
 } from "db/schema";
 
@@ -13,7 +11,6 @@ type Player = typeof player.$inferSelect;
 type Position = typeof position.$inferSelect;
 type Improvement = typeof improvement.$inferSelect;
 type Skill = typeof skill.$inferSelect;
-type SpecialRule = typeof specialRule.$inferSelect;
 type Roster = typeof roster.$inferSelect;
 type SpecialRuleToRoster = typeof specialRuleToRoster.$inferSelect;
 

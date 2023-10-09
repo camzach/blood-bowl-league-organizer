@@ -13,7 +13,7 @@ import {
   player as dbPlayer,
   team as dbTeam,
   skill as dbSkill,
-  skillCategory,
+  skillCategories,
   improvement,
 } from "db/schema";
 import { canEditTeam } from "../actions";
@@ -138,7 +138,7 @@ export const learnSkill = zact(
         }),
         z.object({
           type: z.literal("random"),
-          category: z.enum(skillCategory),
+          category: z.enum(skillCategories),
         }),
       ])
     )
