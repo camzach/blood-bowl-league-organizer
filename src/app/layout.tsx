@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 import "./global.css";
 import type { Metadata } from "next";
 import Tooltip from "components/tooltip";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { coachToTeam } from "db/schema";
 import { eq } from "drizzle-orm";
 import {
@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const { userId } = auth();
   if (!userId) return <RedirectToSignIn />;
 
-  const myTeam = await drizzle.query.coachToTeam.findFirst({
+  const myTeam = await db.query.coachToTeam.findFirst({
     where: eq(coachToTeam.coachId, userId),
   });
 

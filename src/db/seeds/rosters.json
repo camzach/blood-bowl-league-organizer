@@ -1,0 +1,2406 @@
+[
+  {
+    "name": "Imperial Nobility",
+    "specialRules": ["Old World Classic", "Apothecary Allowed"],
+    "rerollCost": 70000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Imperial Retainer Lineman",
+        "max": 12,
+        "cost": 45000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 4,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Fend"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Imperial Thrower",
+        "max": 2,
+        "cost": 75000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Pass", "Running Pass"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Noble Blitzer",
+        "max": 2,
+        "cost": 105000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Block", "Catch"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Bodyguard",
+        "max": 4,
+        "cost": 90000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 9,
+        "skills": ["Stand Firm", "Wrestle"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Imperial Ogre",
+        "max": 1,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Halfling",
+    "specialRules": [
+      "Halfling Thimble Cup",
+      "Old World Classic",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 3,
+    "players": [
+      {
+        "position": "Halfling Hopeful Lineman",
+        "max": 16,
+        "cost": 30000,
+        "MA": 5,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 7,
+        "skills": ["Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Halfling Hefty",
+        "max": 2,
+        "cost": 50000,
+        "MA": 5,
+        "ST": 2,
+        "AG": 3,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Dodge", "Fend", "Stunty"],
+        "primary": ["agility", "passing"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Halfling Catcher",
+        "max": 2,
+        "cost": 55000,
+        "MA": 5,
+        "ST": 2,
+        "AG": 3,
+        "PA": 5,
+        "AV": 7,
+        "skills": ["Catch", "Dodge", "Right Stuff", "Sprint", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Halfling Treeman",
+        "max": 2,
+        "cost": 120000,
+        "MA": 2,
+        "ST": 6,
+        "AG": 5,
+        "PA": 5,
+        "AV": 11,
+        "skills": [
+          "Mighty Blow (+1)",
+          "Stand Firm",
+          "Strong Arm",
+          "Take Root",
+          "Thick Skull",
+          "Throw Team-mate",
+          "Timmm-ber!"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Chaos Dwarf",
+    "specialRules": [
+      "Badlands Brawl",
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Undivided",
+      "Worlds Edge Superleague",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 70000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Hobgoblin Lineman",
+        "max": 16,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Chaos Dwarf Blocker",
+        "max": 6,
+        "cost": 70000,
+        "MA": 4,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": ["Block", "Tackle", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "mutation"]
+      },
+      {
+        "position": "Bull Centaur Blitzer",
+        "max": 2,
+        "cost": 130000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": ["Sprint", "Sure Feet", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Enslaved Minotaur",
+        "max": 1,
+        "cost": 150000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Animal Savagery",
+          "Frenzy",
+          "Horns",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      }
+    ]
+  },
+  {
+    "name": "Black Orc",
+    "specialRules": [
+      "Badlands Brawl",
+      "Bribery and Corruption",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Goblin Bruiser Lineman",
+        "max": 12,
+        "cost": 45000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge", "Right Stuff", "Stunty", "Thick Skull"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Black Orc",
+        "max": 6,
+        "cost": 90000,
+        "MA": 4,
+        "ST": 4,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": ["Brawler", "Grab"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Black Orc Trained Troll",
+        "max": 1,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (3+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "High Elf",
+    "specialRules": ["Elven Kingdoms League", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "High Elf Lineman",
+        "max": 16,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 9,
+        "skills": [],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "High Elf Thrower",
+        "max": 2,
+        "cost": 100000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 2,
+        "AV": 9,
+        "skills": ["Cloud Burster", "Pass", "Safe Pass"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "High Elf Catcher",
+        "max": 4,
+        "cost": 90000,
+        "MA": 8,
+        "ST": 3,
+        "AG": 2,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Catch"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "High Elf Blitzer",
+        "max": 2,
+        "cost": 100000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Block"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      }
+    ]
+  },
+  {
+    "name": "Nurgle",
+    "specialRules": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Undivided"
+    ],
+    "rerollCost": 70000,
+    "tier": 2,
+    "apothecaryAllowed": false,
+    "players": [
+      {
+        "position": "Rotter Lineman",
+        "max": 12,
+        "cost": 35000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 9,
+        "skills": ["Decay", "Plague Ridden"],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Pestigor",
+        "max": 4,
+        "cost": 75000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Horns", "Plague Ridden", "Regeneration"],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Bloater",
+        "max": 4,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 4,
+        "AG": 5,
+        "PA": 6,
+        "AV": 10,
+        "skills": [
+          "Disturbing Presence",
+          "Foul Appearance",
+          "Plague Ridden",
+          "Regeneration"
+        ],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Rotspawn",
+        "max": 1,
+        "cost": 140000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 10,
+        "skills": [
+          "Disturbing Presence",
+          "Foul Appearance",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Plague Ridden",
+          "Really Stupid",
+          "Regeneration",
+          "Tentacles"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      }
+    ]
+  },
+  {
+    "name": "Orc",
+    "specialRules": ["Badlands Brawl", "Apothecary Allowed"],
+    "rerollCost": 60000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Orc Lineman",
+        "max": 16,
+        "cost": 50000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 10,
+        "skills": ["Animosity (Orc Lineman)"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Orc Thrower",
+        "max": 2,
+        "cost": 65000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Animosity (All)", "Pass", "Sure Hands"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Orc Blitzer",
+        "max": 4,
+        "cost": 80000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 10,
+        "skills": ["Animosity (All)", "Block"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Big Un Blocker",
+        "max": 4,
+        "cost": 90000,
+        "MA": 5,
+        "ST": 4,
+        "AG": 4,
+        "PA": null,
+        "AV": 10,
+        "skills": ["Animosity (Big Uns)"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Goblin",
+        "max": 4,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Untrained Troll",
+        "max": 1,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Skaven",
+    "specialRules": ["Underworld Challenge", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Skaven Clanrat Lineman",
+        "max": 16,
+        "cost": 50000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "mutation", "strength"]
+      },
+      {
+        "position": "Skaven Thrower",
+        "max": 2,
+        "cost": 85000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 2,
+        "AV": 8,
+        "skills": ["Pass", "Sure Hands"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "mutation", "strength"]
+      },
+      {
+        "position": "Gutter Runner",
+        "max": 4,
+        "cost": 85000,
+        "MA": 9,
+        "ST": 2,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["mutation", "passing", "strength"]
+      },
+      {
+        "position": "Skaven Blitzer",
+        "max": 2,
+        "cost": 90000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 9,
+        "skills": ["Block"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "mutation", "passing"]
+      },
+      {
+        "position": "Skaven Rat Ogre",
+        "max": 1,
+        "cost": 150000,
+        "MA": 6,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Animal Savagery",
+          "Frenzy",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Prehensile Tail"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      }
+    ]
+  },
+  {
+    "name": "Tomb Kings",
+    "specialRules": ["Sylvanian Spotlight"],
+    "rerollCost": 70000,
+    "tier": 2,
+    "apothecaryAllowed": false,
+    "players": [
+      {
+        "position": "Tomb Kings Lineman",
+        "max": 16,
+        "cost": 40000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 8,
+        "skills": ["Regeneration", "Thick Skull"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Anointed Thrower",
+        "max": 2,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 4,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Pass", "Regeneration", "Sure Hands", "Thick Skull"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Anointed Blitzer",
+        "max": 2,
+        "cost": 90000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 9,
+        "skills": ["Block", "Regeneration", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Tomb Guardian",
+        "max": 4,
+        "cost": 100000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 10,
+        "skills": ["Decay", "Regeneration"],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Old World Alliance",
+    "specialRules": ["Old World Classic", "Apothecary Allowed"],
+    "rerollCost": 70000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Old World Human Lineman",
+        "max": 12,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Old World Human Thrower",
+        "max": 1,
+        "cost": 80000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Animosity (Dwarf, Halfling)", "Pass", "Sure Hands"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Old World Human Catcher",
+        "max": 1,
+        "cost": 65000,
+        "MA": 8,
+        "ST": 2,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Animosity (Dwarf, Halfling)", "Catch", "Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Old World Human Blitzer",
+        "max": 1,
+        "cost": 90000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Animosity (Dwarf, Halfling)", "Block"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Old World Dwarf Blocker",
+        "max": 2,
+        "cost": 75000,
+        "MA": 4,
+        "ST": 3,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": ["Arm Bar", "Brawler", "Loner (3+)", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Old World Dwarf Runner",
+        "max": 1,
+        "cost": 85000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Loner (3+)", "Sure Hands", "Thick Skull"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Old World Dwarf Blitzer",
+        "max": 1,
+        "cost": 80000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 10,
+        "skills": ["Block", "Loner (3+)", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Old World Dwarf Troll Slayer",
+        "max": 1,
+        "cost": 95000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": ["Block", "Dauntless", "Frenzy", "Loner (3+)", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Old World Halfling Hopeful",
+        "max": 2,
+        "cost": 30000,
+        "MA": 5,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 7,
+        "skills": [
+          "Animosity (Dwarf, Human)",
+          "Dodge",
+          "Right Stuff",
+          "Stunty"
+        ],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Old World Ogre",
+        "max": 1,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      },
+      {
+        "position": "Old World Treeman",
+        "max": 1,
+        "cost": 120000,
+        "MA": 2,
+        "ST": 6,
+        "AG": 5,
+        "PA": 5,
+        "AV": 11,
+        "skills": [
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Stand Firm",
+          "Strong Arm",
+          "Take Root",
+          "Thick Skull",
+          "Throw Team-mate",
+          "Timmm-ber!"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Chaos Renegade",
+    "specialRules": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Undivided",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 70000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Renegade Human Lineman",
+        "max": 12,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": [],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Renegade Human Thrower",
+        "max": 1,
+        "cost": 75000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Animosity (All)", "Pass", "Safe Pair of Hands"],
+        "primary": ["general", "mutation", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Renegade Goblin",
+        "max": 1,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Animosity (All)", "Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility", "mutation"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Renegade Orc",
+        "max": 1,
+        "cost": 50000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 10,
+        "skills": ["Animosity (All)"],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Renegade Skaven",
+        "max": 1,
+        "cost": 50000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Animosity (All)"],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Renegade Dark Elf",
+        "max": 1,
+        "cost": 75000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Animosity (All)"],
+        "primary": ["agility", "general", "mutation"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Renegade Troll",
+        "max": 1,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      },
+      {
+        "position": "Renegade Ogre",
+        "max": 1,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      },
+      {
+        "position": "Renegade Minotaur",
+        "max": 1,
+        "cost": 150000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Loner (4+)",
+          "Frenzy",
+          "Horns",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Unchannelled Fury"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      },
+      {
+        "position": "Renegade Rat Ogre",
+        "max": 1,
+        "cost": 150000,
+        "MA": 6,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Animal Savagery",
+          "Frenzy",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Prehensile Tail"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "mutation"]
+      }
+    ]
+  },
+  {
+    "name": "Chaos Chosen",
+    "specialRules": [
+      "Favoured of Khorne",
+      "Favoured of Nurgle",
+      "Favoured of Tzeentch",
+      "Favoured of Slaanesh",
+      "Favoured of Chaos Undivided",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Beastman Runner Lineman",
+        "max": 16,
+        "cost": 60000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Horns"],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Chosen Blocker",
+        "max": 4,
+        "cost": 100000,
+        "MA": 5,
+        "ST": 4,
+        "AG": 3,
+        "PA": 5,
+        "AV": 10,
+        "skills": [],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility"]
+      },
+      [
+        {
+          "position": "Chaos Troll",
+          "max": 1,
+          "cost": 115000,
+          "MA": 4,
+          "ST": 5,
+          "AG": 5,
+          "PA": 5,
+          "AV": 10,
+          "skills": [
+            "Always Hungry",
+            "Loner (4+)",
+            "Mighty Blow (+1)",
+            "Projectile Vomit",
+            "Really Stupid",
+            "Regeneration",
+            "Throw Team-mate"
+          ],
+          "primary": ["mutation", "strength"],
+          "secondary": ["agility", "general"]
+        },
+        {
+          "position": "Chaos Ogre",
+          "max": 1,
+          "cost": 140000,
+          "MA": 5,
+          "ST": 5,
+          "AG": 4,
+          "PA": 5,
+          "AV": 10,
+          "skills": [
+            "Bone Head",
+            "Loner (4+)",
+            "Mighty Blow (+1)",
+            "Thick Skull",
+            "Throw Team-mate"
+          ],
+          "primary": ["mutation", "strength"],
+          "secondary": ["agility", "general"]
+        },
+        {
+          "position": "Chaos Minotaur",
+          "max": 1,
+          "cost": 150000,
+          "MA": 5,
+          "ST": 5,
+          "AG": 4,
+          "PA": null,
+          "AV": 9,
+          "skills": [
+            "Loner (4+)",
+            "Frenzy",
+            "Horns",
+            "Mighty Blow (+1)",
+            "Thick Skull",
+            "Unchannelled Fury"
+          ],
+          "primary": ["mutation", "strength"],
+          "secondary": ["agility", "general"]
+        }
+      ]
+    ]
+  },
+  {
+    "name": "Lizardman",
+    "specialRules": ["Lustrian Superleague", "Apothecary Allowed"],
+    "rerollCost": 70000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Skink Runner Lineman",
+        "max": 12,
+        "cost": 60000,
+        "MA": 8,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Chameleon Skink",
+        "max": 2,
+        "cost": 70000,
+        "MA": 7,
+        "ST": 2,
+        "AG": 3,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Dodge", "On the Ball", "Shadowing", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Saurus Blocker",
+        "max": 6,
+        "cost": 85000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 5,
+        "PA": 6,
+        "AV": 10,
+        "skills": [],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Kroxigor",
+        "max": 1,
+        "cost": 140000,
+        "MA": 6,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Prehensile Tail",
+          "Thick Skull"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Norse",
+    "specialRules": [
+      "Lustrian Superleague",
+      "Old World Classic",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Norse Lineman",
+        "max": 12,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Block"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Norse Thrower",
+        "max": 2,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Block", "Pass"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Norse Catcher",
+        "max": 2,
+        "cost": 90000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Block", "Dauntless"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Norse Berserker",
+        "max": 2,
+        "cost": 90000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Block", "Frenzy", "Jump Up"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Ulfwerener",
+        "max": 2,
+        "cost": 105000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": ["Frenzy"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Yhetee",
+        "max": 1,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Claws",
+          "Disturbing Presence",
+          "Frenzy",
+          "Loner (4+)",
+          "Unchannelled Fury"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Necromantic Horror",
+    "specialRules": ["Masters of Undeath", "Sylvanian Spotlight"],
+    "rerollCost": 70000,
+    "tier": 2,
+    "apothecaryAllowed": false,
+    "players": [
+      {
+        "position": "Necro Zombie Lineman",
+        "max": 16,
+        "cost": 40000,
+        "MA": 4,
+        "ST": 3,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": ["Regeneration"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Necro Ghoul Runner",
+        "max": 2,
+        "cost": 75000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Wraith",
+        "max": 2,
+        "cost": 95000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Block",
+          "Foul Appearance",
+          "No Hands",
+          "Regeneration",
+          "Sidestep"
+        ],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Werewolf",
+        "max": 2,
+        "cost": 125000,
+        "MA": 8,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Claws", "Frenzy", "Regeneration"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Flesh Golem",
+        "max": 2,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 4,
+        "AG": 4,
+        "PA": null,
+        "AV": 10,
+        "skills": ["Regeneration", "Stand Firm", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      }
+    ]
+  },
+  {
+    "name": "Shambling Undead",
+    "specialRules": ["Masters of Undeath", "Sylvanian Spotlight"],
+    "rerollCost": 70000,
+    "tier": 1,
+    "apothecaryAllowed": false,
+    "players": [
+      [
+        {
+          "position": "Undead Skeleton Lineman",
+          "max": 12,
+          "cost": 40000,
+          "MA": 5,
+          "ST": 3,
+          "AG": 4,
+          "PA": 6,
+          "AV": 8,
+          "skills": ["Regeneration", "Thick Skull"],
+          "primary": ["general"],
+          "secondary": ["agility", "strength"]
+        },
+        {
+          "position": "Undead Zombie Lineman",
+          "max": 12,
+          "cost": 40000,
+          "MA": 4,
+          "ST": 3,
+          "AG": 4,
+          "PA": null,
+          "AV": 9,
+          "skills": ["Regeneration"],
+          "primary": ["general"],
+          "secondary": ["agility", "strength"]
+        }
+      ],
+      {
+        "position": "Undead Ghoul Runner",
+        "max": 4,
+        "cost": 75000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Wight Blitzer",
+        "max": 2,
+        "cost": 90000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 9,
+        "skills": ["Block", "Regeneration"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Mummy",
+        "max": 2,
+        "cost": 125000,
+        "MA": 3,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 10,
+        "skills": ["Mighty Blow (+1)", "Regeneration"],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Underworld Denizens",
+    "specialRules": [
+      "Bribery and Corruption",
+      "Underworld Challenge",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 70000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Underworld Goblin Lineman",
+        "max": 12,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility", "mutation"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Underworld Snotling",
+        "max": 6,
+        "cost": 15000,
+        "MA": 5,
+        "ST": 1,
+        "AG": 3,
+        "PA": 5,
+        "AV": 6,
+        "skills": [
+          "Dodge",
+          "Right Stuff",
+          "Sidestep",
+          "Stunty",
+          "Swarming",
+          "Titchy"
+        ],
+        "primary": ["agility", "mutation"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Underworld Skaven Clanrat",
+        "max": 3,
+        "cost": 50000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Animosity (Goblin)"],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Underworld Skaven Thrower",
+        "max": 1,
+        "cost": 85000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 2,
+        "AV": 8,
+        "skills": ["Animosity (Goblin)", "Pass", "Sure Hands"],
+        "primary": ["general", "mutation", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Underworld Gutter Runner",
+        "max": 1,
+        "cost": 85000,
+        "MA": 9,
+        "ST": 2,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Animosity (Goblin)", "Dodge"],
+        "primary": ["agility", "general", "mutation"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Underworld Skaven Blitzer",
+        "max": 1,
+        "cost": 90000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 9,
+        "skills": ["Animosity (Goblin)", "Block"],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Underworld Troll",
+        "max": 1,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["mutation", "strength"],
+        "secondary": ["agility", "general", "passing"]
+      },
+      {
+        "position": "Mutant Rat Ogre",
+        "max": 1,
+        "cost": 150000,
+        "MA": 6,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Animal Savagery",
+          "Frenzy",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Prehensile Tail"
+        ],
+        "primary": ["mutation", "strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Dark Elf",
+    "specialRules": ["Elven Kingdoms League", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Dark Elf Lineman",
+        "max": 12,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 9,
+        "skills": [],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Dark Elf Runner",
+        "max": 2,
+        "cost": 80000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Dump-off"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Dark Elf Blitzer",
+        "max": 4,
+        "cost": 100000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Block"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Dark Elf Assassin",
+        "max": 2,
+        "cost": 85000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Shadowing", "Stab"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Witch Elf",
+        "max": 2,
+        "cost": 110000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Dodge", "Frenzy", "Jump Up"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      }
+    ]
+  },
+  {
+    "name": "Dwarf",
+    "specialRules": ["Old World Classic", "Worlds Edge", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Dwarf Blocker Lineman",
+        "max": 12,
+        "cost": 70000,
+        "MA": 4,
+        "ST": 3,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": ["Block", "Tackle", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Dwarf Runner",
+        "max": 2,
+        "cost": 85000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Sure Hands", "Thick Skull"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Dwarf Blitzer",
+        "max": 2,
+        "cost": 80000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 10,
+        "skills": ["Block", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Troll Slayer",
+        "max": 2,
+        "cost": 95000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": ["Block", "Dauntless", "Frenzy", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Deathroller",
+        "max": 1,
+        "cost": 170000,
+        "MA": 4,
+        "ST": 7,
+        "AG": 5,
+        "PA": null,
+        "AV": 11,
+        "skills": [
+          "Break Tackle",
+          "Dirty Player (+2)",
+          "Juggernaut",
+          "Loner (5+)",
+          "Mighty Blow (+1)",
+          "No Hands",
+          "Secret Weapon",
+          "Stand Firm"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Elven Union",
+    "specialRules": ["Elven Kingdoms League", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Elven Lineman",
+        "max": 12,
+        "cost": 60000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": [],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Elven Thrower",
+        "max": 2,
+        "cost": 75000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 2,
+        "PA": 2,
+        "AV": 8,
+        "skills": ["Pass"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Elven Catcher",
+        "max": 4,
+        "cost": 100000,
+        "MA": 8,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Catch", "Nerves of Steel"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Elven Blitzer",
+        "max": 2,
+        "cost": 115000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Block", "Sidestep"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      }
+    ]
+  },
+  {
+    "name": "Amazon",
+    "specialRules": ["Lustrian Superleague", "Apothecary Allowed"],
+    "rerollCost": 60000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Eagle Warrior Linewoman",
+        "max": 16,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Python Warrior Thrower",
+        "max": 2,
+        "cost": 80000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 3,
+        "AV": 8,
+        "skills": ["Dodge", "On the Ball", "Pass", "Safe Pass"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Piranha Warrior Blitzer",
+        "max": 2,
+        "cost": 90000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Dodge", "Hit and Run", "Jump Up"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Jaguar Warrior Blocker",
+        "max": 2,
+        "cost": 110000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 3,
+        "PA": 5,
+        "AV": 9,
+        "skills": ["Defensive", "Dodge"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility"]
+      }
+    ]
+  },
+  {
+    "name": "Khorne",
+    "specialRules": ["Favoured of Khorne", "Apothecary Allowed"],
+    "rerollCost": 60000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Bloodborn Marauder Lineman",
+        "max": 16,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Frenzy"],
+        "primary": ["general", "mutation"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Khorngor",
+        "max": 4,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Horns", "Juggernaut"],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Bloodseeker",
+        "max": 4,
+        "cost": 110000,
+        "MA": 5,
+        "ST": 4,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": ["Frenzy"],
+        "primary": ["general", "mutation", "strength"],
+        "secondary": ["agility"]
+      },
+      {
+        "position": "Bloodspawn",
+        "max": 1,
+        "cost": 160000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Claws",
+          "Frenzy",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Unchannelled Fury"
+        ],
+        "primary": ["mutation", "strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Ogre",
+    "specialRules": [
+      "Badlands Brawl",
+      "Low Cost Linemen",
+      "Old World Classic",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 70000,
+    "tier": 3,
+    "players": [
+      {
+        "position": "Gnoblar Lineman",
+        "max": 16,
+        "cost": 15000,
+        "MA": 5,
+        "ST": 1,
+        "AG": 3,
+        "PA": 5,
+        "AV": 6,
+        "skills": ["Dodge", "Right Stuff", "Sidestep", "Stunty", "Titchy"],
+        "primary": ["agility"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Ogre Runt Punter",
+        "max": 1,
+        "cost": 145000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 4,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Kick Team-mate",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["passing", "strength"],
+        "secondary": ["agility", "general"]
+      },
+      {
+        "position": "Ogre Blocker",
+        "max": 5,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Goblin",
+    "specialRules": [
+      "Badlands Brawl",
+      "Bribery and Corruption",
+      "Underworld Challenge",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 3,
+    "players": [
+      {
+        "position": "Goblin Lineman",
+        "max": 16,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Bomma",
+        "max": 1,
+        "cost": 45000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Bombardier", "Dodge", "Secret Weapon", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Looney",
+        "max": 1,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": null,
+        "AV": 8,
+        "skills": ["Chainsaw", "Secret Weapon", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Fanatic",
+        "max": 1,
+        "cost": 70000,
+        "MA": 3,
+        "ST": 7,
+        "AG": 3,
+        "PA": null,
+        "AV": 8,
+        "skills": ["Ball & Chain", "No Hands", "Secret Weapon", "Stunty"],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      },
+      {
+        "position": "Pogoer",
+        "max": 1,
+        "cost": 75000,
+        "MA": 7,
+        "ST": 2,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Dodge", "Pogo Stick", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Ooligan",
+        "max": 1,
+        "cost": 65000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 6,
+        "AV": 8,
+        "skills": [
+          "Dirty Player (+1)",
+          "Disturbing Presence",
+          "Dodge",
+          "Right Stuff",
+          "Stunty"
+        ],
+        "primary": ["agility"],
+        "secondary": ["general", "passing", "strength"]
+      },
+      {
+        "position": "Doom Diver",
+        "max": 1,
+        "cost": 60000,
+        "MA": 6,
+        "ST": 2,
+        "AG": 3,
+        "PA": 6,
+        "AV": 8,
+        "skills": ["Right Stuff", "Stunty", "Swoop"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Goblin Trained Troll",
+        "max": 2,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (3+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Human",
+    "specialRules": ["Old World Classic", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Human Lineman",
+        "max": 16,
+        "cost": 50000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Human Thrower",
+        "max": 2,
+        "cost": 80000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 2,
+        "AV": 9,
+        "skills": ["Pass", "Sure Hands"],
+        "primary": ["general", "passing"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Human Catcher",
+        "max": 4,
+        "cost": 65000,
+        "MA": 8,
+        "ST": 2,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Catch", "Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["strength", "passing"]
+      },
+      {
+        "position": "Human Blitzer",
+        "max": 4,
+        "cost": 85000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 9,
+        "skills": ["Block"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Human Halfling Hopeful",
+        "max": 3,
+        "cost": 30000,
+        "MA": 5,
+        "ST": 2,
+        "AG": 3,
+        "PA": 4,
+        "AV": 7,
+        "skills": ["Dodge", "Right Stuff", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general", "strength"]
+      },
+      {
+        "position": "Human Ogre",
+        "max": 1,
+        "cost": 140000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Bone Head",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      }
+    ]
+  },
+  {
+    "name": "Snotling",
+    "specialRules": [
+      "Low Cost Linemen",
+      "Bribery and Corruption",
+      "Underworld Challenge",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 60000,
+    "tier": 3,
+    "players": [
+      {
+        "position": "Snotling Lineman",
+        "max": 16,
+        "cost": 15000,
+        "MA": 5,
+        "ST": 1,
+        "AG": 3,
+        "PA": 5,
+        "AV": 6,
+        "skills": [
+          "Dodge",
+          "Right Stuff",
+          "Sidestep",
+          "Stunty",
+          "Swarming",
+          "Titchy"
+        ],
+        "primary": ["agility"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Fungus Flinga",
+        "max": 2,
+        "cost": 30000,
+        "MA": 5,
+        "ST": 1,
+        "AG": 3,
+        "PA": 4,
+        "AV": 6,
+        "skills": [
+          "Bombardier",
+          "Dodge",
+          "Right Stuff",
+          "Secret Weapon",
+          "Sidestep",
+          "Stunty",
+          "Titchy"
+        ],
+        "primary": ["agility", "passing"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Fun-hoppa",
+        "max": 2,
+        "cost": 20000,
+        "MA": 6,
+        "ST": 1,
+        "AG": 3,
+        "PA": 5,
+        "AV": 6,
+        "skills": ["Dodge", "Pogo Stick", "Right Stuff", "Sidestep", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Stilty Runna",
+        "max": 2,
+        "cost": 20000,
+        "MA": 6,
+        "ST": 1,
+        "AG": 3,
+        "PA": 5,
+        "AV": 6,
+        "skills": ["Dodge", "Right Stuff", "Sidestep", "Sprint", "Stunty"],
+        "primary": ["agility"],
+        "secondary": ["general"]
+      },
+      {
+        "position": "Pump Wagon",
+        "max": 2,
+        "cost": 105000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Dirty Player (+1)",
+          "Juggernaut",
+          "Mighty Blow (+1)",
+          "Really Stupid",
+          "Secret Weapon",
+          "Stand Firm"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general"]
+      },
+      {
+        "position": "Snotling Trained Troll",
+        "max": 2,
+        "cost": 115000,
+        "MA": 4,
+        "ST": 5,
+        "AG": 5,
+        "PA": 5,
+        "AV": 10,
+        "skills": [
+          "Always Hungry",
+          "Loner (3+)",
+          "Mighty Blow (+1)",
+          "Projectile Vomit",
+          "Really Stupid",
+          "Regeneration",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "general", "passing"]
+      }
+    ]
+  },
+  {
+    "name": "Wood Elf",
+    "specialRules": ["Elven Kingdoms League", "Apothecary Allowed"],
+    "rerollCost": 50000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Wood Elf Lineman",
+        "max": 12,
+        "cost": 70000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": [],
+        "primary": ["agility", "general"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Wood Elf Thrower",
+        "max": 2,
+        "cost": 95000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 2,
+        "PA": 2,
+        "AV": 8,
+        "skills": ["Pass"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
+      },
+      {
+        "position": "Wood Elf Catcher",
+        "max": 4,
+        "cost": 90000,
+        "MA": 8,
+        "ST": 2,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Catch", "Dodge"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Wardancer",
+        "max": 2,
+        "cost": 125000,
+        "MA": 8,
+        "ST": 3,
+        "AG": 2,
+        "PA": 4,
+        "AV": 8,
+        "skills": ["Block", "Dodge", "Leap"],
+        "primary": ["agility", "general"],
+        "secondary": ["passing", "strength"]
+      }
+    ]
+  },
+  {
+    "name": "Vampire",
+    "specialRules": ["Sylvanian Spotlight", "Apothecary Allowed"],
+    "rerollCost": 70000,
+    "tier": 2,
+    "players": [
+      {
+        "position": "Thrall Lineman",
+        "max": 12,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Vampire Blitzer",
+        "max": 6,
+        "cost": 110000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 2,
+        "PA": 3,
+        "AV": 9,
+        "skills": ["Animal Savagery", "Hypnotic Gaze", "Regeneration"],
+        "primary": ["agility", "general", "strength"],
+        "secondary": ["passing", "strength"]
+      }
+    ]
+  }
+]

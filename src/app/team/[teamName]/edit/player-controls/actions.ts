@@ -7,7 +7,7 @@ import {
   getPlayerSppAndTv,
   getPlayerStats,
 } from "utils/get-computed-player-fields";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { and, eq, sql } from "drizzle-orm";
 import {
   player as dbPlayer,
@@ -20,7 +20,7 @@ import { canEditTeam } from "../actions";
 
 export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
   async ({ playerId }) => {
-    return drizzle.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, playerId),
         columns: {
@@ -67,7 +67,7 @@ export const update = zact(
     name: zfd.text(z.string().min(1)).optional(),
   })
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
       where: eq(dbPlayer.id, input.player),
       columns: {
@@ -144,8 +144,8 @@ export const learnSkill = zact(
     )
   )
 )(async (input) => {
-  return drizzle.transaction(async (tx) => {
-    const fetchedPlayer = await drizzle.query.player.findFirst({
+  return db.transaction(async (tx) => {
+    const fetchedPlayer = await db.query.player.findFirst({
       where: eq(dbPlayer.id, input.player),
       with: {
         team: { columns: { state: true, name: true } },
@@ -224,7 +224,7 @@ export const increaseCharacteristic = zact(
     skill: zfd.text(),
   })
 )(async (input) => {
-  await drizzle.transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
       where: eq(dbPlayer.id, input.player),
       with: {

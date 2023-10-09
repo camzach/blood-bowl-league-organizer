@@ -1,85 +1,111 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { trpc } from "utils/trpc";
 import InducementSelector from "./inducement-selector";
-import { purchaseInducements } from "../actions";
+import type { purchaseInducements as action } from "../actions";
 
-type InducementsResponseType = Awaited<
-  ReturnType<typeof trpc.inducements.list.query>
->;
-
-type SelectInducementsParams = Parameters<typeof purchaseInducements>[0][
-  | "home"
-  | "away"];
+type InducementArray = Array<{ name: string; price: number; max: number }>;
+type StarsArray = Array<{ name: string; hiringFee: number }>;
 
 type Props = {
-  inducements: [InducementsResponseType, InducementsResponseType];
+  inducements: [InducementArray, InducementArray];
+  stars: [StarsArray, StarsArray];
   pettyCash: [number, number];
   treasury: [number, number];
   gameId: string;
+  purchaseInducements: typeof action;
+};
+
+type ChoicesType = {
+  stars: string[];
+  inducements: Record<string, number>;
 };
 
 export default function Content(props: Props) {
   const [homeInducements, awayInducements] = props.inducements;
+  const [homeStars, awayStars] = props.stars;
   const [homePettyCash, awayPettyCash] = props.pettyCash;
   const [homeTreasury, awayTreasury] = props.treasury;
 
-  const [choices, setChoices] = useState({
-    home: new Map<string, { cost: number; count: number }>(),
-    away: new Map<string, { cost: number; count: number }>(),
+  const [homeChoices, setHomeChoices] = useState<ChoicesType>({
+    stars: [],
+    inducements: {},
+  });
+  const [awayChoices, setAwayChoices] = useState<ChoicesType>({
+    stars: [],
+    inducements: {},
   });
 
+  function handleChooseInducement(options: {
+    team: "home" | "away";
+    choice:
+      | {
+          inducement: string;
+          quantity: number;
+        }
+      | {
+          star: string;
+          chosen: boolean;
+        };
+  }) {
+    const func = options.team === "home" ? setHomeChoices : setAwayChoices;
+    func((old) => {
+      const inducements = old.inducements;
+      const stars = new Set(old.stars);
+      if ("inducement" in options.choice) {
+        inducements[options.choice.inducement] = options.choice.quantity;
+      } else {
+        if (options.choice.chosen) {
+          stars.add(options.choice.star);
+        } else {
+          stars.delete(options.choice.star);
+        }
+      }
+      return { ...old, inducements, stars: Array.from(stars) };
+    });
+  }
+
   const [result, setResult] = useState<Awaited<
-    ReturnType<typeof purchaseInducements>
+    ReturnType<typeof action>
   > | null>(null);
 
   const submit = (): void => {
-    const flattenChoices = (
-      from: (typeof choices)["home" | "away"]
-    ): SelectInducementsParams =>
-      Array.from(from.entries())
-        .map(([key, value]) => {
-          const [inducement, option] = key.split("--");
-          return {
-            name: inducement,
-            option,
-            quantity: value.count,
-          };
-        })
-        .filter(({ quantity }) => quantity > 0);
-    void purchaseInducements({
-      game: props.gameId,
-      home: flattenChoices(choices.home),
-      away: flattenChoices(choices.away),
-    }).then(setResult);
+    void props
+      .purchaseInducements({
+        game: props.gameId,
+        home: {
+          stars: homeChoices.stars,
+          inducements: Object.entries(homeChoices.inducements).map(
+            ([name, quantity]) => ({ name, quantity })
+          ),
+        },
+        away: {
+          stars: awayChoices.stars,
+          inducements: Object.entries(awayChoices.inducements).map(
+            ([name, quantity]) => ({ name, quantity })
+          ),
+        },
+      })
+      .then(setResult);
   };
 
-  const handleChoicesUpdate = (options: {
-    team: "home" | "away";
-    inducement: string;
-    option?: string;
-    quantity: number;
-    price: number;
-  }): void => {
-    setChoices((old) => {
-      const map = choices[options.team];
-      const cost = options.quantity * options.price;
-      const newValue = { cost, count: options.quantity };
-      const key = [options.inducement, options.option]
-        .filter(Boolean)
-        .join("--");
-      return { ...old, [options.team]: map.set(key, newValue) };
-    });
-  };
-
-  const calculateTotalCost = (
-    from: (typeof choices)["home" | "away"]
-  ): number =>
-    Array.from(from.values()).reduce(
-      (total, current) => total + current.cost,
+  const calculateTotalCost = (from: "home" | "away"): number => {
+    const choices = from === "home" ? homeChoices : awayChoices;
+    const inducements = from === "home" ? homeInducements : awayInducements;
+    const stars = from === "home" ? homeStars : awayStars;
+    const inducementCosts = Object.entries(choices.inducements).reduce(
+      (acc, [name, qty]) => {
+        return (
+          acc + (inducements.find((i) => i.name === name)?.price ?? 0) * qty
+        );
+      },
       0
     );
+    const starCosts = choices.stars.reduce((acc, name) => {
+      return acc + (stars.find((s) => s.name === name)?.hiringFee ?? 0);
+    }, 0);
+    return starCosts + inducementCosts;
+  };
 
   if (result !== null)
     return (
@@ -91,8 +117,8 @@ export default function Content(props: Props) {
       </>
     );
 
-  const homeInducementCost = calculateTotalCost(choices.home);
-  const awayInducementCost = calculateTotalCost(choices.away);
+  const homeInducementCost = calculateTotalCost("home");
+  const awayInducementCost = calculateTotalCost("away");
 
   let treasuryCostHome = 0;
   let homeFinalPettyCash = homePettyCash;
@@ -122,13 +148,13 @@ export default function Content(props: Props) {
     >
       <div>
         petty cash:{" "}
-        {Math.max(0, homeFinalPettyCash - calculateTotalCost(choices.home))}
+        {Math.max(0, homeFinalPettyCash - calculateTotalCost("home"))}
         <br />
         treasury:{" "}
         {homeTreasury -
-          Math.max(0, calculateTotalCost(choices.home) - homeFinalPettyCash)}
+          Math.max(0, calculateTotalCost("home") - homeFinalPettyCash)}
         <br />
-        total cost: {calculateTotalCost(choices.home)}
+        total cost: {calculateTotalCost("home")}
       </div>
       <div>
         Treasury Transfer
@@ -139,20 +165,21 @@ export default function Content(props: Props) {
       </div>
       <div>
         petty cash:{" "}
-        {Math.max(0, awayFinalPettyCash - calculateTotalCost(choices.away))}
+        {Math.max(0, awayFinalPettyCash - calculateTotalCost("away"))}
         <br />
         treasury:{" "}
         {awayTreasury -
-          Math.max(0, calculateTotalCost(choices.away) - awayFinalPettyCash)}
+          Math.max(0, calculateTotalCost("away") - awayFinalPettyCash)}
         <br />
-        total cost: {calculateTotalCost(choices.away)}
+        total cost: {calculateTotalCost("away")}
       </div>
       <div>
         <InducementSelector
-          options={homeInducements}
-          choices={choices.home}
-          onUpdate={(options): void => {
-            handleChoicesUpdate({ ...options, team: "home" });
+          inducements={homeInducements}
+          stars={homeStars}
+          choices={homeChoices}
+          onUpdate={(choice): void => {
+            handleChooseInducement({ team: "home", choice });
           }}
         />
       </div>
@@ -161,10 +188,11 @@ export default function Content(props: Props) {
       </button>
       <div>
         <InducementSelector
-          options={awayInducements}
-          choices={choices.away}
-          onUpdate={(options): void => {
-            handleChoicesUpdate({ ...options, team: "away" });
+          inducements={awayInducements}
+          stars={awayStars}
+          choices={awayChoices}
+          onUpdate={(choice): void => {
+            handleChooseInducement({ team: "away", choice });
           }}
         />
       </div>

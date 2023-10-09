@@ -1,9 +1,9 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import drizzle from "utils/drizzle"
+import { db } from "utils/drizzle";
 
 export default async function TeamLayout({ children }: PropsWithChildren) {
-  const teams = await drizzle.query.team.findMany({ columns: { name: true } });
+  const teams = await db.query.team.findMany({ columns: { name: true } });
   return (
     <>
       <div className="flex gap-4">

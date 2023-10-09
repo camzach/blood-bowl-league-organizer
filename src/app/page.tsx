@@ -2,13 +2,13 @@ import { RedirectToSignIn, auth } from "@clerk/nextjs";
 import { coachToTeam } from "db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 
 export default async function Home() {
   const { userId } = auth();
   if (!userId) return <RedirectToSignIn />;
 
-  const myTeam = await drizzle.query.coachToTeam.findFirst({
+  const myTeam = await db.query.coachToTeam.findFirst({
     where: eq(coachToTeam.coachId, userId),
   });
 

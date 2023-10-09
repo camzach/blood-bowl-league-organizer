@@ -11,7 +11,10 @@ if (!db) {
     throw new Error("Failed to start up, need to set DB_URI");
   }
 
-  const connectionPool = createPool(conn_string);
+  const connectionPool = createPool({
+    uri: conn_string,
+    multipleStatements: true,
+  });
 
   db = drizzle(connectionPool, {
     schema,
@@ -20,4 +23,4 @@ if (!db) {
   });
 }
 
-export default db;
+export { db };

@@ -5,7 +5,7 @@ import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { eq } from "drizzle-orm";
 import { coachToTeam } from "db/schema";
 import { RedirectToSignIn, auth } from "@clerk/nextjs";
@@ -25,7 +25,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
 
   if (!team) return notFound();
 
-  const editableTeams = await drizzle.query.coachToTeam.findMany({
+  const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, userId),
   });
 

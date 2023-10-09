@@ -13,7 +13,7 @@ import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import fetchTeam from "../fetch-team";
 import { RedirectToSignIn, auth } from "@clerk/nextjs";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot } from "db/schema";
 import { eq } from "drizzle-orm";
 import { fireStaff, hirePlayer, hireStaff } from "./actions";
@@ -28,7 +28,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
   const { userId } = auth();
 
   if (!userId) return <RedirectToSignIn />;
-  const editableTeams = await drizzle.query.coachToTeam.findMany({
+  const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, userId),
   });
   if (
@@ -41,7 +41,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
     return redirect(`/teams/${teamName}`);
   }
   const team = await fetchTeam(decodeURIComponent(teamName));
-  const skills = await drizzle.query.skill.findMany({});
+  const skills = await db.query.skill.findMany({});
 
   if (!team) return notFound();
 
@@ -49,7 +49,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
   if (state === "ready" || state === "playing")
     return redirect(`/team/${team.name}`);
 
-  const rosterSlots = await drizzle.query.rosterSlot.findMany({
+  const rosterSlots = await db.query.rosterSlot.findMany({
     where: eq(rosterSlot.rosterName, team.rosterName),
     with: { position: true },
   });

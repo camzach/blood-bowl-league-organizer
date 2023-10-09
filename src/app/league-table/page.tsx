@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { Metadata } from "next";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 import { roundRobinGame } from "db/schema";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "League Table" };
 
 async function getLeagueTable(activeSeason: string) {
-  const games = await drizzle.query.roundRobinGame.findMany({
+  const games = await db.query.roundRobinGame.findMany({
     where: eq(roundRobinGame.seasonName, activeSeason),
     with: {
       game: {

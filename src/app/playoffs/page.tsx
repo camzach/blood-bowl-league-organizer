@@ -1,10 +1,10 @@
 import { bracketGame } from "db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import drizzle from "utils/drizzle";
+import { db } from "utils/drizzle";
 
 async function getPlayoffsBracket(seasonName: string) {
-  return drizzle.query.bracketGame.findMany({
+  return db.query.bracketGame.findMany({
     where: eq(bracketGame.seasonName, seasonName),
     with: { game: { with: { homeDetails: true, awayDetails: true } } },
   });

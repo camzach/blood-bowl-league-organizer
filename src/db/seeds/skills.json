@@ -1,0 +1,1092 @@
+[
+  {
+    "name": "Catch",
+    "rules": "This player may reroll a failed Agility test when attempting to catch the ball.",
+    "category": "agility",
+    "purchasable": true
+  },
+  {
+    "name": "Diving Catch",
+    "rules": "This player may attempt to catch the ball if a pass, throw-in or kick-off causes it to land in a square within their tackle Zone after scattering or deviating. This skill does not allow this player to attempt to catch the ball if it bounces into a square within their Tackle Zone.\nAdditionally, this player may apply a +1 modifier to any attempt to catch an accurate pass if they occupy the target square.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "What happens if the ball lands in the Tackle Zones of multiple players from the same team with the Diving Catch skill? (p.75)",
+        "a": "Each player may attempt to catch the ball, in an order chosen by the controlling coach."
+      },
+      {
+        "q": "What happens if the ball lands in the Tackle Zones of multiple players from opposing teams with the Diving Catch skill? (p.75)",
+        "a": "Each player may attempt to catch the ball, in an order chosen by the active team’s coach."
+      }
+    ]
+  },
+  {
+    "name": "Diving Tackle",
+    "rules": "Should an active opposition player that is attempting to Dodge, Jump or Leap in order to vacate a square in which they are being Marked by this player will use this Skill, Your opponent must immediate subtract 2 from the result of the Agility test. This player s placed Prone in the square vacated by the opposition player. If the opposition player was being marked by more than one player with this Skill, only one player may use it.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player attempts to Dodge away from a player with the Diving Tackle skill and fails the original Dodge roll, but then uses a re-roll and succeeds, can the player with Diving Tackle use this Skill on the re-rolled attempt? (p.75)",
+        "a": "Yes"
+      }
+    ]
+  },
+  {
+    "name": "Dodge",
+    "rules": "Once per turn, during their activation, this player may re-roll a failed Agility test when attempting to Dodge. Additionally, this player may choose to use this Skill when they are the target of a Block action and a Stumble result is applied against them, as described on page 57.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Q. Can the Dodge skill be used on moves outside of a player’s activation, such as those provided from On the Ball, or the Blitz result on the Kick-off Event table? (p.75)",
+        "a": "No. The Dodge skill can only be used to re-roll a Dodge roll during that player’s activation during their own team turn."
+      }
+    ]
+  },
+  {
+    "name": "Defensive",
+    "rules": "During your opponent's team turn (but not during your own team), any opposition player being marked by this player cannot use the guard skill.",
+    "category": "agility",
+    "purchasable": true
+  },
+  {
+    "name": "Jump Up",
+    "rules": "If this player is Prone they may stand up for free (i.e. standing up does not cost this player three (3) squares of their Movement Allowance, as it normally would). Additionally, if this player is Prone when activated, they may attempt to Jump Up and perform a Block action. This player makes an Agility test, applying a +1 modifier, if this test is passed, they stand up and may perform a Block action. If the test failed, they remain Prone and their activation ends. This Skill may still be used if the player is Prone or has lost their Tackle Zone.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Does a player who has the Jump Up skill still need to roll to stand up if they also have a Movement Allowance of 2 or less? (p.44 & 75)",
+        "a": "No."
+      },
+      {
+        "q": "If a player with the Animal Savagery trait also has the Jump Up skill, do they still get the +2 to the roll if they wish to attempt to make a Block action while prone? (p.75 & 81)",
+        "a": "Yes."
+      },
+      {
+        "q": "If a player has both the Jump Up skill and the Stab trait, can they use the Jump Up skill to allow them to make a Block action from Prone on a 2 + and then replace this Block action with a Stab Special action? (p.75 & 86)",
+        "a": "Yes."
+      },
+      {
+        "q": "If, during a Blitz kick-off event, a player with the Animal Savagery trait knocks down a player on their team as part of the Animal Savagery trait, will that cause the Blitz kick-off event to immediately end? (p.41 & p.81)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Leap",
+    "rules": "During their movement, instead of jumping over a single square that is occupied by a Prone or Stunned player, as described on page 45, a player with this skill may choose to Leap over any single adjacent square, including unoccupied squares and squares occupied by standing players. Additionally, this player may reduce any negative modifier applied to the Agility test when they attempt to Jump over a Prone or Stunned player, or to Leap over an empty square or a square occupied by a standing player by 1, to a minimum of +1. A player with this skill cannot also have the Pogo Stick trait.",
+    "category": "agility",
+    "purchasable": true
+  },
+  {
+    "name": "Safe Pair of Hands",
+    "rules": "If this player is Knocked Down or Placed Prone (but not it they Fall Over) whilst in possession of the ball, the ball does not bounce. Instead, you may place the ball in an unoccupied square adjacent to the one this player occupies when they become Prone. This Skill may still be used if the player is Prone.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "a": "If a player with the Safe Pair of Hands skill is targeted by a Block action performed by a player with the Strip Ball skill, and they suffer a Push Back result, can they still use Safe Pair of Hands? (p.75)",
+        "q": "No."
+      },
+      {
+        "a": "If a player with the Safe Pair of Hands skill is Knocked Down, and there are no empty squares for them to put the ball into, what happens? (p.75)",
+        "q": "The Safe Pair of Hands skill cannot be used in this instance, and so the ball will bounce as normal."
+      }
+    ]
+  },
+  {
+    "name": "Sidestep",
+    "rules": "If this player is pushed back for any reason, they are not moved into a square chosen by the opposing coach. Instead you may choose any unoccupied square adjacent to this player. This player is pushed back into that square instead. If there are no unoccupied squares adjacent to this player, this skill cannot be used.",
+    "category": "agility",
+    "purchasable": true
+  },
+  {
+    "name": "Sneaky Git",
+    "rules": "When this player performs a Foul action, they are not Sent-Off for committing a Foul should they roll a natural double on armour roll. Additionally, the activation of this player does not have to end once the Foul have been committed. If you wish and this player has not used their full Movement Allowance, they may continue to move after committing the Foul.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with the Sneaky Git skill that performs a Foul action still be Sent-off if it rolls a natural double on the Injury roll? (p.75)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Sprint",
+    "rules": "when this player performs any action that includes movement, they may attempt to Rush three times, rather than the usual two.",
+    "category": "agility",
+    "purchasable": true
+  },
+  {
+    "name": "Sure Feet",
+    "rules": "Once per team turn, during their activation, this player may re-roll the D6 when attempting to Rush.",
+    "category": "agility",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can the Sure Feet skill be used on moves outside of a player’s activation, such as those provided from the Blitz result on the Kick-off Event table? (p.75)",
+        "a": "No. The Sure Feet skill can only be used during that player’s activation."
+      }
+    ]
+  },
+  {
+    "name": "Block",
+    "rules": "When a both down result is applied during a Block action, this player may choose to ignore it and not be knocked Down, as described on page 57.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Dauntless",
+    "rules": "When this player performs a Block action (on its own or as part of a Blitzaction), if the nominated target has a higher strength characteristic than this player before counting offensive or defensive assists but after applying any other modifiers, roll a D6 and add this player's strength characteristic to the result. If the total is higher than the target's strength characteristic, this player increases their strength characteristic to be equal to that of the target of the Block action, before counting offensive or defensive assists, for the duration of this Block action. If this player has another Skill that allows them to perform more than one Block action, such as Frenzy, they must make a Dauntless roll before each separate Block action is performed.",
+    "category": "general",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "When a player with the Dauntless skill declares a Block\naction, can they choose to not perform the Block action if they\ndo not roll the desired result for the Dauntless skill? (p.76)",
+        "a": "No, they must still perform the Block action."
+      }
+    ]
+  },
+  {
+    "name": "Dirty Player (+1)",
+    "rules": "When this player commits a Foul action, either the Armour roll or the injury roll made against the victim may be modified by the amount shown in brackets. This modifier may be applied after the roll has been made.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Dirty Player (+2)",
+    "rules": "When this player commits a Foul action, either the Armour roll or the injury roll made against the victim may be modified by the amount shown in brackets. This modifier may be applied after the roll has been made.",
+    "category": "general",
+    "purchasable": false
+  },
+  {
+    "name": "Fend",
+    "rules": "If this player is pushed back as the result of any block dice result being applied against them, they may choose to prevent the player that pushed them back from following-up. However, the player that pushed them back may continue to move as part of a Blitz action if they have Movement Allowance remaining or by Rushing. The skill cannot be used when this player is chain-pushed, against a player with Ball & Chain trait or against a player with the Juggernaut skill that performed the Block action as part of a Blitz.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Frenzy",
+    "rules": "Every time this player performs a Block action (on its own or as part of a Blitz action), they must follow-up if the target is pushed back and if they are able. If the target is still Standing after being pushed back, and if this player was able to follow-up, this player must then perform a second block action against the same target, again following-up if the target is pushed back. If this player performing a Blitz action, performing a second Block action will also cost them one square of their Movement Allowance. If this player has no Movement Allowance left to perform a second Block action, they must Rush to do so. If they cannot Rush, they cannot perform a second Block action. Note that if an opposition player in possession of the ball is pushed back into your End Zone and is still standing, a touchdown will be scored, ending the drive. In this case, the second Block action is not performed. A player with this skill cannot also have Grab skill.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Kick",
+    "rules": "If this player is nominated to be the kicking player during a kick-off, you may choose to halve the result of the D6 to determine the number of squares that the ball deviates, rounding any fractions down.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Pro",
+    "rules": "During their activation, this player may attempt to re-roll one dice. This dice may have been rolled either as a single dice roll, as part of a multiple dice roll or as part of a dice pool, but cannot be a dice that was rolled as part of an Armour, Injury or Casualty roll. Roll a D6:\n- On a roll of 3+, the dice can be re-rolled.\n- On a roll of 1 or 2, the dice cannot be re-rolled.\nOnce this player has attempted to use this Skill, they may not use a re-roll from any other source to re-roll this one dice.",
+    "category": "general",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with the Pro skill use the re-roll outside of their activation – for example, to Catch or Intercept the ball? (p.77)",
+        "a": "No. The Pro skill can only be used during that player’s activation."
+      },
+      {
+        "q": "If a player has both the Pro and Brawler skills, can they re-roll a single Both Down result for the Brawler skill, and then use the Pro skill to attempt to re-roll another dice from the same dice pool? (p.77 & 80)",
+        "a": "Yes, so long as the same dice isn’t re-rolled more than once."
+      }
+    ]
+  },
+  {
+    "name": "Shadowing",
+    "rules": "This player can use this Skill when an opposition player they are Marking voluntarily moves out of a square within this player's Tackle Zone. Roll a D6, adding the MA of this player to the roll and then subtracting the MA of the opposition player. If the result is 6 or higher, or if the roll is a natural 6, this player may immediately move into the square vacated by the opposition player (this player does not need to Dodge to make this move). If, however, the result is 5 or lower, or if the roll is a natural 1, this skill has no further effect. A player may use this skill any number of times per turn, during either team's turn, If an opposition player is being Marked by more than one player with this Skill, only one player may use it.",
+    "category": "general",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player attempts to Dodge away from a player with the Shadowing skill, which roll happens first: the Dodge roll or the roll for Shadowing? (p.77)",
+        "a": "The Dodge roll will happen first, and once the Dodge has been resolved the opposing player may roll for Shadowing if they wish."
+      }
+    ]
+  },
+  {
+    "name": "Strip Ball",
+    "rules": "When this player targets an opposition player that is in possession of the ball with a Block action (on its own or as part of a Blitz action), choosing to apply a Push Back result will cause that player to drop the ball in the square they are pushed back into. The ball will bounce from the square the player is pushed back into, as if they had been Knocked Down.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Sure Hands",
+    "rules": "This player may re-roll any failed attempt to pick up the ball. In addition, the Strip Ball skill cannot be used against a player with this Skill.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Tackle",
+    "rules": "When an active opposition player attempts to Dodge from a square in which they were being Marked by one or more players on your team with this Skill, that player cannot use the Dodge skill. Additionally, when an opposition player is targeted by a Block action performed by a player with this Skill, that player cannot use the Dodge skill if a Stumble result is applied against them.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Wrestle",
+    "rules": "This player may use this Skill when a Both Down result is applied, either when they perform a Block action or when they are the target of a Block action. Instead of applying the Both Down result as normal, and regardless of any other Skills either player may possess, both players are placed Prone.",
+    "category": "general",
+    "purchasable": true
+  },
+  {
+    "name": "Big Hand",
+    "rules": "This player may ignore any modifier(s) for being marked or for Pouring Rain weather conditions when they attempt to pick up the ball.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Claws",
+    "rules": "When you make an armour roll against an opposition player that was Knocked Down as the result of a Block action performed by this player, a roll of 8+ before applying any modifiers will break their armour, regardless of their actual Armour Value.",
+    "category": "mutation",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
+        "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Disturbing Presence",
+    "rules": "When an opposition player performs either a Pass action, a Throw Team-mate action or a Throw Bomb Special action, or attempts to either interfere with a pass or to catch the ball, they must apply a -1 modifier to the test for each player on your team with this Skill that is within three squares of them, even if the player with this Skill is prone, Stunned or has lost their Tackle Zone.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Extra Arms",
+    "rules": "This player may apply +1 modifier when they attempt to pick up or catch the ball, or when they attempt to interfere with a pass.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Foul Appearance",
+    "rules": "When an opposition player declares a Block action targeting this player (on its own or as part of a Blitz action), or any Special actions that targets this player, their coach must firs roll a D6, even if this player has lost their Tackle Zone. On a roll of 1, the player cannot perform the declared action and the action is wasted. This Skill may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "mutation",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player with the Foul Appearance skill is chosen as the target of a Blitz action, when do they roll to see if the action is wasted? (p.78)",
+        "a": "As soon as the Blitz action is declared. This will mean that, if they fail, they will lose their entire action and will be unable to make either the Move action or Block action as part of the Blitz action.]"
+      },
+      {
+        "q": "If a player with the Foul Appearance skill is chosen as the target of a Foul action, does the player that declared them as the target of a Foul action have to make the roll for Foul Appearance? (p.78)",
+        "a": "No, as Foul Appearance only triggers when the player is chosen as the target of either a Block action or a Special action."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
+  },
+  {
+    "name": "Horns",
+    "rules": "When the player performs a Block action as part of a Blitz action (but not on its own), you may apply a +1 modifier to this player's Strength characteristic. This modifier is applied before counting assists, before applying any other Strength modifiers and before using any other Skills or Traits.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Iron Hard Skin",
+    "rules": "The Claws skill cannot be used when making an armour roll against this player. This Skill may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Monstrous Mouth",
+    "rules": "This player may re-roll any failed attempt to catch the ball. In addition, the Strip Ball skill cannot be used against this player.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Prehensile Tail",
+    "rules": "When an active opposition player attempts to Dodge, Jump or Leap in order to vacate a square in which they are being Marked by this player, there is an additional -1 modifier applied to the active player's Agility test. If the opposition player is being Marked by more than one player with this Mutation, only one player may use it.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Tentacles",
+    "rules": "This player can use this Skill when an opposition player they are Marking voluntarily moves out of a square within this player's Tackle Zone. Roll a D6, adding the ST of this player to the roll and then subtracting the ST of the opposition player. If the result is 6 or higher, or if the roll is a natural 6, the opposition player is held firmly in place and their movement comes to an end. If, however, the result is 5 or lower, or if the roll is a natural 1, this Skill has no further effect. A player may use this Skill any number or times per turn, during either team's turn. If an opposition player is being Marked by more than one player with this Skill, only one player may use it.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Two Heads",
+    "rules": "This player may apply a +1 modifier to the Agility test when they attempt to Dodge.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Very Long Legs",
+    "rules": "This player may reduce any negative modifier applied to the Agility test when they attempt to Jump over a Prone or Stunned player (or to Leap over an empty square or a square occupied by a Standing player, if this player has the Leap Skill) by 1, to a minimum 0f -1. Additionally, this player may apply a +2 modifier to any attempts to interfere with a pass they make. Finally this player ignores the Cloud Burster skill.",
+    "category": "mutation",
+    "purchasable": true
+  },
+  {
+    "name": "Accurate",
+    "rules": "When this player performs a Quick Pass action or a Short Pass action, you may apply an additional +1 modifier to the Passing Ability test.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Cannoneer",
+    "rules": "When this player performs a Long Pass action or a Long Bomb Pass action, you may apply an additional +1 modifier to the Passing Ability test.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Does the Cannoneer skill still apply when a player makes a Hail Mary Pass? (p.79)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Cloud Burster",
+    "rules": "When this player performs a Long Pass action or a Long Bomb Pass action, you may choose to make the opposing coach re-roll a successful attempt to interfere with the pass.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Dump-off",
+    "rules": "If this player is nominated as the target of a Block action (or a Special action granted by a Skill or Trait that can be performed instead of a Block action) and if they are in possession of the ball, they may immediately perform a Quick Pass action, interrupting the activation of the opposition player performing the Block action (or Special action) to do so. This Quick Pass action cannot cause a Turnover, but otherwise all of the normal rules for passing the ball apply. Once the Quick Pass action is resolved, the active player performs the Block action and their team turn continues.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "When a player with the Dump-off skill is nominated as the target of a Blitz action, when do they make their Quick Pass action? (p.79)",
+        "a": "As soon as they are nominated as the target of the Blitz action."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      },
+      {
+        "q": "Can a player with both the Dump-off and the Pass skills use the Pass skill when making a Pass action as part of the Dump-off skill? (p.79)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Fumblerooskie",
+    "rules": "When this player performs a Move or Blitz action whilst in possession of the ball, they may choose to 'drop' the ball. The ball may be placed in any square the player vacates during their movement and does not bounce. No turnover is caused.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Hail Mary Pass",
+    "rules": "When this player performs a Pass action (or a Throw Bomb action), the target square can be anywhere on the pitch and the range ruler does not need to be used. A Hail Mary Pass is never accurate, regardless of the result of the Passing Ability test it will always be inaccurate at best. A Passing Ability test is made and can be re-rolled as normal in order to determine if the Hail Mary Pass is wildly inaccurate or is fumbled. A Hail Mary Pass cannot be interfered with. This Skill may not be used in a Blizzard.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Is a Hail Mary Pass treated as a Long bomb when determining any modifiers for testing for accuracy? (p.79)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Leader",
+    "rules": "A team which has one or more players with this Skill gains a single extra team re-roll, However, the Leader re-roll can only be used if there is at least one player with this Skill on the pitch (even if the player with this Skill is Prone, Stunned or has lost their Tackle Zone). If all players with this Skill are removed from play before the Leader re-roll is used, is lost. The Leader Re-roll can be carried over into extra time if it is not used, but the team does not receive a new one at the start of extra time. Unlike standard Team Re-rolls, the Leader Re-roll cannot be lost due to a Halfling Master Chef. Otherwise, the Leader re-roll is treated just like a normal team re-roll.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player with the Leader re-roll is removed from the pitch before their Leader re-roll has been used, then the re-roll would be lost. If the player would subsequently return to the pitch (such as recovering from being KO’d), is the re-roll available again? (p.79)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Nerves of Steel",
+    "rules": "This player may ignore any modifier(s) for being Marked when they attempt to perform a Pass action, attempt to catch the ball or attempt to interfere with a pass.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "On the Ball",
+    "rules": "This player may move up to three squares (regardless their MA), following all of the normal movement rules, when the opposing coach declares that one of their player is going to perform a Pass action. This move is made after the range has been measured and the target square declared, but before the active player makes a Passing Ability test. Making this move interrupts the activation of the opposition player performing the Pass action. A player may use this Skill when an opposition player uses the Dump-Off skill, but should this player Fail Over whilst moving, a Turnover is caused. Additionally, during each Start of Drive sequence, after Step 2 but before Step 3, one Open player with this Skill on the receiving team may move up to three squares (regardless of their MA). This Skill may not be used if a touchback is caused when the kick deviates and does not allow the player to cross into their opponent's half of the pitch.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can multiple players from the same team use the On The Ball skill in response to the same Pass action? If so, what happens if one of them Falls Over before the others have been able to use the On The Ball skill? (p.79)",
+        "a": "Yes. However, if one player Falls Over before the others have been able to use the On The Ball skill then the sequence ends and no further players can move. "
+      }
+    ]
+  },
+  {
+    "name": "Pass",
+    "rules": "This player may re-roll a failed Passing Ability test when performing a Pass action.",
+    "category": "passing",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with both the Dump-off and the Pass skills use the Pass skill when making a Pass action as part of the Dump-off skill? (p.79)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Running Pass",
+    "rules": "If this player performs a Quick Pass action, their activation does not have to end once the pass is resolved. If you wish and if this player has not used their full Movement Allowance, they may continue to move after resolving the pass.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Safe Pass",
+    "rules": "Should This player fumble a Pass Action, the ball is not dropped, does not bounce from the square this player occupies, and no Turnover is caused. Instead, this player retains possession of the ball and their activation ends.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Wall Thrower",
+    "rules": "When this player throws the ball at the wall, they may apply an additional +1 modifier when testing for the accuracy of the pass.",
+    "category": "passing",
+    "purchasable": true
+  },
+  {
+    "name": "Arm Bar",
+    "rules": "If an opposition player Falls Over as a result of failing their Agility test when attempting to Dodge, Jump or Leap out of a square in which they were being Marked by this player, you may apply a +1 modifier to either the armour roll or Injury roll. This modifier may be applied after the roll has been made and may be applied even if this player is row Prone. If the opposition player was being marked by more than one player with this Skill, only one player may use it.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Brawler",
+    "rules": "When this player performs a Block action on its own (but not as part of a Blitz Action), this player may re-roll a single Both Down result.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Brawler states that a player can use this skill when making a Block action on its own (but not as part of a Blitz action). Can a player with this skill use it when it has an assist from a friendly player? (p.80)",
+        "a": "Yes. The ‘on its own’ part simply means it can only be used as a regular Block action, and not part of another action that includes a Block (such as a Blitz action)."
+      }
+    ]
+  },
+  {
+    "name": "Break Tackle",
+    "rules": "Once during their activation, after making an Agility test in order to Dodge, this player may modify the dice roll by +1 if their Strength characteristic is 4 or less, or by +2 if their Strength characteristic is 5 or more.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Grab",
+    "rules": "When this player performs a Block action (on its own or as part of a Blitz action), using this Skill prevents the target of the Block action from using the Side Step skill. Additionally, when this player performs a Block Action on its own (but not as part of a Blitz action), if the target is pushed back, this player may choose any unoccupied square adjacent to the target to push that player into. If there are no unoccupied squares, this Skill cannot be used. A player with this Skill cannot also have the Frenzy skill.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with the Grab skill choose not to use it if they wish? (p.80)",
+        "a": "Yes. Remember that only Skills and Traits marked with an * are compulsory."
+      }
+    ]
+  },
+  {
+    "name": "Guard",
+    "rules": "This player can offer both offensive and defensive assists regardless of how many opposition players are marking them.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Can a player with the Guard skill still provide offensive and defensive assists when they have lost their Tackle Zone? (p.80)",
+        "a": "No."
+      },
+      {
+        "q": "Can the Guard skill be used to provide offensive and defensive assists when a player is performing a Foul action? (p.80)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Juggernaut",
+    "rules": "When this player performs a Block action as part of a Blitz action (but not on its own), they may choose to treat a Both Down result as a Push Back result, in addition, when this player performs a Block action as part of a Blitz action, the target of the Block action may not use the Fend, Stand Firm or Wrestle skills.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Mighty Blow (+1)",
+    "rules": "When an opposition player is Knocked Down as the result of a Block action performed by this player (on its own or as part of a Blitz action), you may modify either the Armour roll or Injury roll by the amount shown in brackets. This modifier may be applied after the roll has been made. This Skill cannot be used with the Stab or Chainsaw traits.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player with the Mighty Blow (+X) skill makes a Block action, and chooses the Both Down result and is Knocked Down themselves, can they still apply the effects of Mighty Blow (+X)? (p.57 & 80)",
+        "a": "No, as when the Armour roll is made for the opposition player, the player with Mighty Blow (+X) is Prone and so cannot use the skill."
+      },
+      {
+        "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
+        "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Mighty Blow (+2)",
+    "rules": "When an opposition player is Knocked Down as the result of a Block action performed by this player (on its own or as part of a Blitz action), you may modify either the Armour roll or Injury roll by the amount shown in brackets. This modifier may be applied after the roll has been made. This Skill cannot be used with the Stab or Chainsaw traits.",
+    "category": "strength",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with the Mighty Blow (+X) skill makes a Block action, and chooses the Both Down result and is Knocked Down themselves, can they still apply the effects of Mighty Blow (+X)? (p.57 & 80)",
+        "a": "No, as when the Armour roll is made for the opposition player, the player with Mighty Blow (+X) is Prone and so cannot use the skill."
+      },
+      {
+        "q": "Can a player with both the Claws and Mighty Blow (+X) skills use them together to allow them to break an opposition player's armour on less than 8+ provided by the Claws skill? (p.78 & 80)",
+        "a": "No."
+      },
+      {
+        "q": "If a player has both the Mighty Blow (+X) skill and the Claws trait, they cannot use the Mighty Blow (+X) skill to modify the Armour roll due to Claws, but can they still use it to modify the Injury roll? (p.80)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Multiple Block",
+    "rules": "When this player performs a Block action on its own (but not as part of a Blitz action), they may choose to perform two Block actions, each targeting a different player they are Marking. However, doing so will reduce this player's Strength characteristic by 2 for the duration of this activation. Both Block actions are performed simultaneously, meaning both are resolved in full even if one or both result is a Turnover. The dice rolls for each Block action should be kept separate to avoid confusion. This player cannot follow-up when using this Skill. Note that choosing to use this Skill means this player will be unable to use the Frenzy skill during the same activation.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "If a player with Multiple Block also has the Grab skill, can they place the second opposition player that they Blocked into the square that was initially occupied by the first opposition player that they Blocked? (p.80)",
+        "a": "No, as both Block actions happen simultaneously."
+      },
+      {
+        "q": "When a player with the Multiple Block skill declares two adjacent opposing players the target of their Block, do both opponents grant defensive assists to each other if there are no other players from the active team marking them? (p.81)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Pile Driver",
+    "rules": "When an opposition player is Knocked Down by this player as the result of a Block action (on its own or as part of a Blitz action), this player may immediately commit a free Foul action against the Knocked Down player. To use this Skill, this player must be Standing after the block dice result has been selected and applied, and must occupy a square adjacent to the Knocked Down player, After using this Skill, this player is Placed Prone and their activation ends immediately.",
+    "category": "strength",
+    "purchasable": true,
+    "faq": [
+      {
+        "q": "Does the free Foul action from Pile Driver happen before or after making the Armour roll (and potentially an Injury roll) for the player being Knocked Down? (p.80)",
+        "a": "After – so long as the player is still on the pitch of course!"
+      },
+      {
+        "q": "The Pile Driver skill states that the player performing the Block\naction may then perform a ‘free’ Foul action against the Knocked\nDown player. Does this ‘free’ Foul action mean that it does not\ncount towards the team’s one Foul action per turn, or does it\nmean that the player can perform this action for free? (p.80)",
+        "a": "This means that the player may perform this action for\nfree. This Skill cannot be used if the team has already used\ntheir Foul action for that team turn, and if used will mean\nthat another player cannot also make a Foul action during the\nsame team turn."
+      }
+    ]
+  },
+  {
+    "name": "Stand Firm",
+    "rules": "This player may choose not to be pushed back, either as the result of a Block action made against them or by a chain-push. Using this Skill does not prevent an opposition player with the Frenzy Skill from performing a second Block action if this player is still Standing after the first.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Strong Arm",
+    "rules": "This player may apply a +1 modifier to any Passing Ability test rolls they make when performing a Throw Team-mate action. A player that does not have the Throw team-mate trait cannot have this Skill.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Thick Skull",
+    "rules": "When an Injury roll is made against this player (even if this player is Prone, Stunned or has lost their Tackle Zone), they can only be KO'd on a roll of 9, and will treat a roll of 8 as stunned result. If this player also has the Stunty trait, they can only be KO'd on a roll of 8, and will treat a roll of 7 as Stunned result. All other results are unaffected.",
+    "category": "strength",
+    "purchasable": true
+  },
+  {
+    "name": "Animal Savagery",
+    "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before peforming the action, roll a D6, applying a +2 modifier to the dice roll if you declared the player would perform a Block or Blitz action (or a Special action granted by a Skill or Trait that can be performed instead of a Block action):\nOn a Roll of 1-3, this player lashes out at their team-mates:\nOne Standing team-mate of your choice that is currently adjacent to this player is immediately Knocked Down by this player. This does not cause a Turnover unless the Knocked Down player was in possession of the ball. After making an armour roll (and possible Injury roll) against the Knocked Down player, this player may continue their activation and complete their declared action if able, Note that, if this player has any applicable Skills, the coach of the opposing team may use them when making an Armour roll (and possible Injury roll) against the Knocked Down player.\nIf this player is not currently adjacent to any Standing team-mates, this player's activation ends immediately. Additionally, this player loses their Tackle Zone until they are next activated.\nOn a roll of 4+, this player continues their activation as normal and completes their declared action.\nIf you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with Animal Savagery knocks down a friendly\nmodel, are they forced to use Claws, Piledriver, Mighty Blow\n(X+) (or any other Skills that would affect Armour or Injury\nrolls), or can they choose not to? (p.81)",
+        "a": "The only Skills the opposing coach may choose for the\nplayer with Animal Savagery to use are Claws and Mighty\nBlow (+X). In this case, treat the Knock Down as being the\nresult of a Block action."
+      },
+      {
+        "q": "If a player with Animal Savagery knocks down a teammate\nthat hasn’t yet activated during that team turn, can the\nKnocked Down player still activate provided they haven’t been\nStunned or removed from the pitch? (p.81)",
+        "a": "Yes."
+      },
+      {
+        "q": "Will a Prone player that fails its roll for Animal Savagery still lash out against a team-mate?",
+        "a": "Yes."
+      },
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (Orc Lineman)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (Big Uns)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (All)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (Dwarf, Halfling)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (Dwarf, Human)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Animosity (Goblin)",
+    "rules": "This player is jealous of and dislikes certain other players of their team, as shown in brackets after the name of the Skill on this player's profile. This may be defined by position or race. For example, a Skaven Thrower on an Underworld Denizens team has Animosity (Underworld Goblin Lineman), meaning they suffer Animosity towards any Underworld Goblin Lineman players on their team, Whereas a Skaven Renegade on a Chaos Renegade team has Animosity (all team-mates), meaning they suffer Animosity towards all of their team-mates equally. When this player wishes to perform a Hand-off action to a team-mate of the type listed, or attempts to perform a Pass action and the target square is occupied by a team-mate of the type listed, this player may refuse to do so. Roll a D6. On a roll of 1, this player refuses to perform the action and their activation comes to an end. Animosity does not extend to Mercenaries or Star Players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Animosity (X) trait make the roll to\nsee whether they can perform a Pass action or Hand-off action\nto the relevant player at the start of their activation or just\nbefore attempting the desired action? (p.81)",
+        "a": "Animosity (X) states when they attempt to perform\nthe action, so the roll will be made immediately before\nthey attempt to perform the action, not at the start of\ntheir activation."
+      }
+    ]
+  },
+  {
+    "name": "Always Hungry",
+    "rules": "If this player wishes to perform a Throw Team-mate action, roll a D6 after they have finished moving, but before they throw their team-mate. On a roll of 2+, continue with the throw as normal. On a roll of 1, this player will attempt to eat their team-mate. Roll another D6:\nOn a roll of 1, the team-mate has been eaten and is immediately removed from the Team Draft list. No apothecary can save them and no Regeneration attempts can be made. If the team-mate was in possession of the ball, it will bounce from the square the player occupies.\nOn a roll of 2+, the team-mate squirms free and the Throw Team-mate action is automatically fumbled, as described on page 53.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Ball & Chain",
+    "rules": "When this player is activated, the only action they may perform is a \"Ball & Chain Move\" special action. There is no limit to how many players with this Trait may perform this Special action each team turn.\nWhen this player performs this Special action:\nPlace the Throw-in template over the player, facing towards either End Zone or either sideline as you wish.\nRoll a D6 and move the player one square in the direction indicated.\nA player with Ball & Chain automatically passes any Agility tests they may be required to make in order to Dodge, regardless of any modifiers.\nIf this movement takes the player off the pitch, they risk Injury by the crowd\nIf this movement takes the player into a square in which the ball is placed, the player is considered to have moved involuntary. Therefore, they may not attempt to pick the ball up and the ball will bounce.\nRepeat this process for each square the player moves.\nIf this player would move into a square that is occupied by a Standing player from either team, they must perform a Block action against that player, following the normal rules, but with the following exceptions:\nA Ball & Chain player ignores the Foul Appearance Skill\nA Ball & Chain player must follow-up if they push-back another player.\nIf this player moves into a square that is occupied by a Prone or Stunned player from either team, for any reason, that player is immediately pushed back and an Armour Roll is made against them.\nThis player may Rush. Declare that the player will Rush before placing the Throw-in template and rolling the D6 to determine direction:\nIf this player Rushes into an occupied square, move them as normal and roll a D6:\nOn a roll of 2+, this player moves without mishap.\nOn a roll of 1 (before or after modification), the player Falls Over.\nIf this player Rushes into a square that is occupied by a standing player from either team, roll a D6:\nOn a roll of 2+, this player moves without mishap and will perform a Block action against the player occupying the square as described previously.\nOn a roll of 1 (before or after modification), the player occupying the square is pushed back and this player will Fall Over after moving into the vacated square.\nIf this player ever Falls Over, is Knocked Down or is placed Prone, an Injury roll is immediately made against them (no Armour roll is required), treating a Stunned result as a KO'd result.\nA player with this Trait cannot also have the Diving Tackle, Frenzy, Grab, Leap, Multiple Block, On the Ball or Shadowing skills. This Trait must still be used if the player is Prone or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "What assists, if any, does a Ball & Chain player receive when they are forced to Block a friendly player as per the Ball & Chain Move Special action? (p.82)",
+        "a": "None."
+      },
+      {
+        "q": "Does a player with the Ball & Chain trait have to use their full Movement Allowance? (p.82)",
+        "a": "No."
+      },
+      {
+        "q": "If a player with the Ball & Chain trait performs a Block action against a team-mate as a result of the Ball & Chain Move Special action, which coach chooses the result of the Block action? (p.82)",
+        "a": "The coach of the player performing the Block action."
+      },
+      {
+        "q": "If a player with the Ball & Chain trait moves into a square occupied by a Prone or Stunned player, does the resulting Armour roll benefit from the Mighty Blow (+X) skill if applicable? (p.82)",
+        "a": "No, as in this instance a Block action wasn’t made."
+      }
+    ]
+  },
+  {
+    "name": "Bombardier",
+    "rules": "When activated and if they are Standing, this player can perform a \"Throw Bomb\" Special action. This Special action is neither a Pass action nor a Throw Team-mate action, so does not prevent another player performing one of those actions during the same team turn. However, only a single player with this Trait may perform this Special action each team turn.\nA Bomb can be thrown and caught, and the throw interfered with, just like a ball, using the rules for Pass action as described on page 48, with the following exceptions:\nA player may not stand up or move before performing a Throw Bomb action.\nBombs do not bounce and can come to rest on the ground in an occupied square. Should a player fail to catch a Bomb, it will come to rest on the ground in the square that player occupies.\nIf a Bomb is fumbled, it will explode immediately in the square occupied by the player attempting to throw it.\nIf a Bomb comes to rest on the ground in an empty square or is caught by an opposite player, no Turnover is caused.\nA player that is in possession of the ball can still catch a Bomb.\nAny Skills that can be used when performing a Pass action can also be used when performing a Throw Bomb Special action, with the exception of On the Ball.\nIf a Bomb is caught by a player on either team, roll a D6:\n\nOn a roll of 4+, the Bomb explodes immediately, as described below.\nOn a roll of 1-3, that player must throw the Bomb again immediately. This throw takes place out of the normal sequence of play.\nShould a Bomb ever leave the pitch, it explodes in the crowd with no effect (on the game) before the crowd can throw it back.\n\nWhen a Bomb comes to rest on the ground, in either an occupied square, in a square occupied by a player that failed to catch the Bomb or in a square occupid by a Prone or Stunned player, it will explode immediately:\nIf the Bomb explodes in an occupied square, that player is automatically hit by the explosion.\nRoll a D6 for each player (from either team) that occupies a square adjacet to the one in which the Bomb exploded:\nOn a roll of 4+, the player has been hit by the explosion.\nOn a roll of 1-3, the player manages to avoid the explosion.\nAny Standing players hit by the explosion are Placed Prone.\nAn Armour roll (and possibly an Injury roll as well) is made against any player hit by the explosion, even if they were already Prone or Stunned.\nIf the player performing the Throw Bomb Special action is hit by their bomb and Placed Prone, either as the result of a Fumbled throw or by being hit by the explosion, then a Turnover is caused.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player Deflects a Bomb, but fails to convert it into an Interception, will it scatter from the square they are in or will they drop it? (p.83)",
+        "a": "It will scatter from the square they are in, in the same manner as a Deflected ball."
+      },
+      {
+        "q": "What happens when the player with Bombardier trait and the Safe Pass skill fumbles a throw when making a Throw Bomb Special Action?",
+        "a": "The bomb will not be dropped and will not explode in the player's hands. The player's activation will still end."
+      },
+      {
+        "q": "Can a Player who made a Throw Bomb Special action still use the Running Pass skill to move after throwing the bomb? (p.79 & 83)",
+        "a": "Yes."
+      },
+      {
+        "q": "When using Bombardier trait, can a re-roll be used when determining if a bomb that is caught explodes?",
+        "a": "No."
+      },
+      {
+        "q": "Do Skills that apply to the ball, but are not part of a Pass action (such as Fumblerooskie), also apply to a bomb? (p.83)",
+        "a": "No, because a bomb is not a ball."
+      },
+      {
+        "q": "Can a player use a re-roll of any kind (Team Re-roll, Pro, etc.) to re-roll to see if a bomb that was caught will explode? (p.83)",
+        "a": "No."
+      },
+      {
+        "q": "If a player making a Throw Bomb Special action fumbles the Bomb, does this cause a Turnover? (p.83)",
+        "a": "No."
+      },
+      {
+        "q": "Can a player with both the Bombardier trait and the Dump- off skill use the Dump-off skill to perform a Throw Bomb Special action when they are chosen as the target of a Block Action? (p.79 & 83)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Bone Head",
+    "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6:\nOn a roll of 1, this player forgets what they are doing and their activation ends immediately. Additionally, this player loses their Tackle Zone until they are next activated.\nOn a roll of 2+, this player continues their activation as normal and completes their declared action.\nIf you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
+  },
+  {
+    "name": "Chainsaw",
+    "rules": "Instead of performing a Block action (on its own or as part of a Blitz action), this player may perform a \"Chainsaw Attack\" Special action. Exactly as described for a Block action, nominate a single Standing player to be the target of the Chainsaw Attack Special action, There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Chainsaw Attack Special action, roll a D6:\nOn a roll of 2+, the nominated target is hit by Chainsaw!\nOn a roll of 1, the Chainsaw will violently 'kick-back' and hit the player wielding it. This will result in a Turnover.\nIn either case, an Armour roll is made against the player hit by the Chainsaw, adding +3 to the result.\nIf the armour of the player hit is broken, they become Prone and an Injury roll is made against them. This Injury roll cannot be modified in any way.\nIf the armour of the player hit is not broken, this Trait has no effect\nThis player can only use the Chainsaw once per turn (i.e., Chainsaw cannot be used with Frenzy or Multipe Block) and if used as part of a Blitz action, this player cannot continue moving after using it.\nIf this player Fails Over or is Knocked Down, the opposing coach may add +3 to the Armour roll made against the player.\nIf an opposition player performs a Block action targeting this player and a Player Down! or a POW! result is applied, +3 is added to the Armour roll. If a Both Down result is applied, +3 is added to both Armour rolls.\nFinally, this player may use their Chainsaw when they perform a Foul action. Roll a D6 for kick-back as described above. Once again, an Armour roll is made against the player hit by the Chainsaw. adding +3 to the score.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Q. If I roll a 1 when rolling to see if I can use a Chainsaw or Projectile Vomit, is a Turnover caused? (p.84 & 86)",
+        "a": "No. The player is Placed Prone and an Injury roll made against them. They are not Knocked Down. It will only cause a Turnover if they are in possession of the ball."
+      },
+      {
+        "q": "Can a player with the Chainsaw trait choose to perform a standard Block action instead of a Chainsaw Attack Special action? (p.84)",
+        "a": "Yes."
+      },
+      {
+        "q": "When a player with the Chainsaw trait uses their chainsaw as part of a Foul action, will they still be subjected to the same offensive assists and defensive assists as a normal Foul action? (p.84)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Decay",
+    "rules": "If this player suffers a Casualty result on the injury table, there is a +1 modifier applied to all rolls made against this player on the Casualty table",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Hypnotic Gaze",
+    "rules": "During their activation, this player may perform a 'Hypnotic Gaze' Special action. There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Hypnotic Gaze Special action, nominate a single Standing opposition player that has not lost their Tackle Zone and that this player is Marking. Then make an Agility test for this player, applying a -1 modifier for every player (other than the nominated player) that is Marking this player. If the test is passed, the nominated player loses their Tackle Zone until they are next activated.\nThis player may move before performing this Special action, following all of the normal movement rules. However, once this Special action has been performed, this player may not move further and their activation comes to an end.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a model with the Animal Savagery trait wishes to use\nthe Hypnotic Gaze trait, will the bonus +2 to their Animal\nSavagery roll as if they were performing a Block or a Blitz\naction? (p.81 & 85)",
+        "a": "No."
+      },
+      {
+        "q": "Can a player with the Hypnotic Gaze trait perform the\nHypnotic Gaze Special action in the same activation in which\nthey declared a Block action, Blitz action, Foul action or Pass\naction? (p.85)",
+        "a": "No. Hypnotic Gaze is a Special action, and therefore must\nbe declared at the start of a player’s activation like all other\nactions (p.42). The Hypnotic Gaze Special action allows a\nplayer to move before they perform the Hypnotic Gaze Special\naction if they wish."
+      }
+    ]
+  },
+  {
+    "name": "Kick Team-mate",
+    "rules": "Once per team turn, in addition to another player performing either a Pass or a Throw Team-mate action, a single player with this Traits on the active team can perform a 'Kick Team-mate' Special action, follow the rules for Throw Team-mates actions as described on page 52.\nHowever, if the Kick Team-mate Special action is fumbled, the kicked player is automatically removed from play and an injury roll is made against them, treating a Stunned result as a KO'd result (note that, if the player that performed this action also has the Mighty Blow (+x) skill, the coach of the opposing team may use that Skill on this Injury roll). If the kicked player was in possession of the ball when removed from play, the ball will bounce from the square they occupied.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player makes a superb Kick Team-mate Special action, does it generate Star Player Points like a Throw Team-mate Special action? (p.70)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Loner (3+)",
+    "rules": "If this player wishes to use a team re-roll, roll a D6. If you roll equal to or higher than the target number show in brackets, this player may use the team re-roll as normal. Otherwise, the original result stands without being re-rolled but the team re-roll is lost just as if it had been used. This Trait must still be used if the player is Prone or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can a player use a Team re-roll to re-roll a failed Loner (3+) roll? (p.85)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Loner (4+)",
+    "rules": "If this player wishes to use a team re-roll, roll a D6. If you roll equal to or higher than the target number show in brackets, this player may use the team re-roll as normal. Otherwise, the original result stands without being re-rolled but the team re-roll is lost just as if it had been used. This Trait must still be used if the player is Prone or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can a player use a Team re-roll to re-roll a failed Loner (4+) roll? (p.85)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Loner (5+)",
+    "rules": "If this player wishes to use a team re-roll, roll a D6. If you roll equal to or higher than the target number show in brackets, this player may use the team re-roll as normal. Otherwise, the original result stands without being re-rolled but the team re-roll is lost just as if it had been used. This Trait must still be used if the player is Prone or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can a player use a Team re-roll to re-roll a failed Loner (5+) roll? (p.85)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "No Hands",
+    "rules": "This player is unable to take possession of the ball. They may not attempt to pick it up, to catch it, or attempt to interfere with a pass. Any attempt to do so will automatically fail, causing the ball to bounce. Should this player voluntarily move into a square in which the ball is placed, they cannot attempt to pick it up. The ball will bounce and a Turnover is caused as if this player had failed an attempt to pick up the ball.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can a player with the No Hands trait attempt to interfere\nwith a Pass action in order to automatically fail and force the\nball to bounce? (p.85)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Plague Ridden",
+    "rules": "Once per game, if an opposition player with Strength characteristic of 4 or less that does not have the Decay, Regeneration or Stunty traits suffers a Casualty result of 15-16, DEAD as the result of a Block action performed or a Foul action committed by a player with this Trait that belongs to your team, and if that player cannot be saved by an apothecary, you may choose to use this Trait. If you do, that player does not die; they have instead been infected with a virulent plague! If your team has the 'Favoured of Nurgle' special rule, a new 'Rotter Lineman' player, drawn from the Nurgle roster, can be placed immediately in the Reserves box of your team's dugout (this may cause a team to have more than 16 players for the remainder of this game). During step 4 of the post-game sequence, this player may be permanently hired, Exactly as you would a Journeyman player that had played for your team (see page 72).",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Pogo Stick",
+    "rules": "During their movement, instead of jumping over a single square that is occupied by a Prone or Stunned player, as described on page 45, a player with this Trait may choose to Leap over any single adjacent square, including unoccupied square and squares occupied by Standing players. Additionally, when this player makes and Agility test to jump over a Prone or Stunned player, or to Leap over an empty square or a square occupied by a Standing player, they may ignore any negative modifiers that would normally be applied for being Marked in the square they jumped or leaped from and/or for being marked in the square they have jumped or leaped into. A player with this Trait cannot also have the Leap skill.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a player with the Pogo Stick trait still suffer the -1\nmodifier to their Agility test when attempting to Leap away\nfrom a player with the Prehensile Tail mutation? (p.85)",
+        "a": "No, a player with the Pogo Stick trait ignores all negative\nmodifiers applied for being Marked when attempting to Leap."
+      },
+      {
+        "q": "Does a player with the Pogo Stick trait still suffer the -2\nmodifier to their Agility test when attempting to Leap away\nfrom a player who uses the Diving Tackle skill? (p.85)",
+        "a": "No, a player with the Pogo Stick trait ignores all negative\nmodifiers applied for being Marked when attempting to Leap."
+      }
+    ]
+  },
+  {
+    "name": "Projectile Vomit",
+    "rules": "Instead of performing a Block action (on its own or as part of a Blitz action), this player may perform a 'Projectile Vomit' Special action. Exactly as described for a Block action, nominate a single Standing player to be the target of the Projectile Vomit Special action. There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Projectile Vomit Special action, roll a D6:\nOn a roll of 2+, this player regurgitates acidic bile onto the nominated target.\nOn a roll of 1, this player belches and snorts, before covering itself in acid bile.\nIn either case, an armour roll is made against the player hit by the Projectile vomit. This Armour roll cannot be modified in any way.\nIf the armour of the player hit is broken, they become Prone and an Injury roll is made against them. This Injury roll cannot be modified in any way.\nIf the armour of the playerhit is not broken, this Trait has no effect.\nA player can only perform this Special action once per turn (i.e. Projectile Vomit cannot be used with Frenzy or Multiple Block).",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Q. If I roll a 1 when rolling to see if I can use a Chainsaw or\nProjectile Vomit, is a Turnover caused? (p.84 & 86)",
+        "a": "No. The player is Placed Prone and an Injury roll made\nagainst them. They are not Knocked Down. It will only cause\na Turnover if they are in possession of the ball."
+      }
+    ]
+  },
+  {
+    "name": "Really Stupid",
+    "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6, applying a +2 modifier to the dice roll if this player is currently adjacent to one or more Standing team-mates that do not have this Trait:\nOn a roll of 1-3, this player forgets what they are doing and their activation ends immediately. Additionally, this player loses their Tackle Zone until they are next activated.\nOn a roll of 4+, this player continues their activation as normal and completes their declared action.\nNote that if you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
+  },
+  {
+    "name": "Regeneration",
+    "rules": "After a Casualty roll has been made against this player, roll a D6. On a roll of 4+, the Casualty roll is dicarded without effect and the player is placed in the Reserves box rather than the Casualty box of their team dugout. On a roll of 1-3, however, the result of the Casualty roll is applied as normal. This Trait may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can a Team Re-roll be used to re-roll a Regeneration roll? (p.86)",
+        "a": "No as the active team's team turn has already ended by the time the Regeneration roll is made."
+      },
+      {
+        "q": "If a player suffers a Casualty, and then rolls a 4+ for their\nRegeneration trait allowing them not to suffer the Casualty,\ndoes the player that inflicted the Casualty still gain Star Player\nPoints for inflicting a Casualty? (p.86)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Right Stuff",
+    "rules": "If this player also has a Strength characteristic of 3 or less, they can be thrown by a team-mate with the Throw Team-mate skill, as described on page 52. This Trait may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Secret Weapon",
+    "rules": "When a drive in which this player took part ends, even if this player was not on the pitch at the end of the drive, this player will be Sent-off for committing a Foul, as described on page 63.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "The Secret Weapon trait states that at the end of a drive in which they participated they will be Sent-off for committing a Foul. Does this mean that you can Argue the Call in this instance? (p.86)",
+        "a": "Yes."
+      },
+      {
+        "q": "During the End of Drive Sequence, what happens first: players are Sent-off for the Secret Weapon trait, or any end of drive weather effects (such as Sweltering Heat)? (p.66)",
+        "a": "During the End of Drive Sequence, Secret Weapons are always Sent-off before any other effects."
+      }
+    ]
+  },
+  {
+    "name": "Stab",
+    "rules": "Instead of performing a Block action (on its own or as part of a Blitz action), this player may perform a 'Stab' Special action. Exactly as described for a Block action, nominate a single Standing player to be the target of the Stab Special action. There is no limit to how many players with this Trait may perform this Special action each team turn.\nTo perform a Stab Special action, make an unmodified Armour roll against the target:\nIf the Armour of the player hit is broken, they become Prone and an Injury roll is made against them, This Injury roll cannot be modified in any way.\nIf the Armour of the player hit is not broken, this Trait has no effect.\nIf Stab is used as part of a Blitz action, the player cannot continue moving after using it.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Q. Can the Stab trait be used in conjunction with the Multiple Block skill to make two Stab Special actions?",
+        "a": "Yes."
+      },
+      {
+        "q": "If a player has both the Frenzy skill and the Stab trait, if they declare a Block action which results in a Pushed Back result when they follow up and have to perform a second Block action, can they then use the Stab trait to replace the second Block action with the Stab Special action? (p.77 & 86)",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Stunty",
+    "rules": "When this player makes an Agility test in order to Dodge, they ignore any -1 modifiers for being Marked in the square they have moved into, unless they also have either the Bombardier trait, the Chainsaw trait or the Swoop trait.\nHowever, when an opposition player attempts to interfere with a Pass action performed by this player, that player may apply a +1 modifier to their Agility test.\nFinally, player with this Trait are more prone to injury. Therefore, when an Injury roll is made against this player, roll 2D6 and consult the Stunty Injury table, on page 60. This Trait may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Swarming",
+    "rules": "During each Start of Drive sequence, after Step 2 but before Step 3, you may remove D3 players with this Trait from the Reserves box of your dugout and set them up on the pitch, allowing you to set up more than the usual 11 players. These extra players may not be placed on the Line of Scrimmage or in a Wide Zone. Swarming players must be set up in their team's half.\nWhen using Swarming, a coach may not set up more players with the Swarming trait onto the pitch than the number of friendly players with the Swarming trait that were already set up. So, if a team had 2 players with the Swarming trait already set up on the pitch, and then rolled for 3 more players to enter the pitch via Swarming, only a maximum of 2 more Swarming players could be set up on the pitch.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Swoop",
+    "rules": "If this player is thrown by a team-mate, as described on page 52, they do not scatter before landing as they normally would. Instead, you may place the Throw-in template over the player, facing towards either End Zone or either sideline as you wish. The player then moves from the target square D3 squares in a direction determined by rolling a D6 and referring to the Throw-in template.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Take Root",
+    "rules": "When this player is activated, even if they are Prone or have lost theio Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6:\nOn a roll of 1, this player becomes 'Rooted':\nA Rooted player cannot move from the square they currently occupy for any reason, voluntarily or otherwise, until the end of this drive, or until they are Knocked Down or Placed Prone.\nA Rooted player may perform any action available to them provided they can do so without moving. For example, a Rooted player may perform a Pass action but may not move before making the pass, and so on.\nOn a roll of 2+, this player continues their activation as normal.\nIf you declared that this player would perform any action that includes movement (Pass, Hand-off, Blitz or Foul) prior to them becoming Rooted, they may, complete the action if possible. If they cannot, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Q. Can a player that has been Rooted as per the Take Root trait use a skill such as Pile Driver or Wrestle in order to place themselves Prone and therefore no longer be rooted?",
+        "a": "Yes."
+      }
+    ]
+  },
+  {
+    "name": "Titchy",
+    "rules": "This player may apply a +1 modifier to any Agility tests they make in order to Dodge. However, if an opposition player dodges into a square within the Tackle Zone of this player, this player does not count as Marking the moving player for the purpose of calculating Agility test modifiers.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Throw Team-mate",
+    "rules": "If this player also has a Strength characteristic of 5 or more, they may perform a Throw Team-mate action, as described on page 52, allowing them to throw a team-mate with the Right Stuff trait.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a thrown player lands in an occupied square and then subsequently bounces into another occupied square, is the player that is in the new occupied square also Knocked Down? (p.54)",
+        "a": "A: Yes."
+      }
+    ]
+  },
+  {
+    "name": "Timmm-ber!",
+    "rules": "If the player has a Movement Allowance of 2 or less, apply a +1 modifier to the dice roll when they attempt to stand up (as described on page 44) for each Open, Standing team-mate they are currently adjacent to. A natural 1 is always a failure, no matter how many team-mates are helping. This Trait may still be used if the player is Prone, Stunned, or has lost their Tackle Zone.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can any of the Passing skills that are used when performing a Pass action also be used when performing a Throw Team-mate action? (p.79)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Unchannelled Fury",
+    "rules": "When this player is activated, even if they are Prone or have lost their Tackle Zone, immediately after declaring the action they will perform but before performing the action, roll a D6, applying a +2 modifier to the dice roll if you declared the player would perform a Block or Blitz action (or a Special action granted by a Skill or Trait that can be performed instead of a Block action)\nOn a roll of 1-3, this player rages incoherently at others but achieves little else. Their activation ends immediately.\nOn a roll of 4+, this player continues their activation as normal and completes their declared action.\nIf you declared that this player would perform an action which can only be performed once per team turn and this player's activation ended before the action could be completed, the action is considered to have been performed and no other player on your team may perform the same action this team turn.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "If a player with a Trait that requires them to roll a dice to see if they can activate normally (such as Bone Head or Unchanneled Fury) and wishes to declare a player with either the Foul Appearance or Dump-off skills as the target of an action, do they roll for their Trait or for the opposing player’s Skill first? (p.78 & 79)",
+        "a": "The player will first nominate the target of their action, then roll for their Trait, and then the opposing player will use their Skill."
+      }
+    ]
+  },
+  {
+    "name": "Drunkard",
+    "rules": "This player suffers a -1 penality to the dice roll when attempting to Rush.",
+    "category": "trait",
+    "purchasable": false
+  },
+  {
+    "name": "Pick-Me-Up",
+    "rules": "At the end of the opposition's team turn, roll a D6 for each Prone, non-Stunned team-mate within three squares of a standing player with this Trait. On a 5+, the Prone player may immediately stand up.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Does a Prone player on a Norse team roll a D6 for each\nBeer Boar they are in range of as per the Pick-me-up trait, or\nonly a single D6 regardless of the number of Beer Boars they\nare in range of? (p.5)",
+        "a": "Just one D6."
+      },
+      {
+        "q": "If a Beer Boar stands up as a result of another Beer Boar’s\nPick-me-up trait, can other team-mates now benefit from its\nown Pick-me-up trait? (p.5)",
+        "a": "No."
+      }
+    ]
+  },
+  {
+    "name": "Hit and Run",
+    "rules": "After a player with this Trait performs a Block action, they may immediately move one free square ignoring Tackle Zones so long as they are still Standing. They must ensure that after this free move, they are not Marked by or Marking any opposition players.",
+    "category": "trait",
+    "purchasable": false,
+    "faq": [
+      {
+        "q": "Can the Hit and Run trait be used as part of a Blitz action?\n(p.5)",
+        "a": "Yes, as Hit and Run can be used during a Block action.\nA Blitz action contains a Block action."
+      },
+      {
+        "q": "Can Hit and Run be used after a Block performed by a\nplayer with the Frenzy skill resulting in a Push Back, in order\nto move away from the targeted player and not perform the\nsecond Block? (p.5)",
+        "a": "No. Frenzy requires the player to have to follow up and\nperform the second Block. Hit and Run may be used after\nthis second Block as normal, if applicable."
+      }
+    ]
+  }
+]
