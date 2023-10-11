@@ -8,15 +8,15 @@ import InjuryButton from "./injury-button";
 import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
-import { getSession } from "next-auth/react";
 import { Modal } from "components/modal";
-import { end } from "../actions";
+import type { end as action } from "../actions";
 
 type NameAndId = { id: string; name: string | null };
-type InputType = Parameters<typeof end>[0];
+type InputType = Parameters<typeof action>[0];
 
 type Props = {
   gameId: string;
+  end: typeof action;
 } & Record<
   "home" | "away",
   { name: string; song?: string } & Record<
@@ -34,7 +34,7 @@ const gameStateParser = z
       z.object({
         playerName: z.string().or(z.null()),
         injury: z
-          .enum(["AG", "MA", "PA", "ST", "AV", "MNG", "NI", "DEAD"])
+          .enum(["ag", "ma", "pa", "st", "av", "mng", "ni", "dead"])
           .optional(),
         starPlayerPoints: z
           .object({
@@ -51,10 +51,7 @@ const gameStateParser = z
   })
   .catch({ touchdowns: [0, 0], casualties: [0, 0], playerUpdates: {} });
 
-type PlayerUpdates = Partial<z.infer<typeof gameStateParser>["playerUpdates"]>;
-type GameState = Omit<z.infer<typeof gameStateParser>, "playerUpdates"> & {
-  playerUpdates: PlayerUpdates;
-};
+type GameState = z.infer<typeof gameStateParser>;
 
 function safeParse(input: string): unknown {
   try {
@@ -64,7 +61,7 @@ function safeParse(input: string): unknown {
   }
 }
 
-export default function ScoreWidget({ home, away, gameId }: Props) {
+export default function ScoreWidget({ home, away, gameId, end }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -87,25 +84,6 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
     newParams.set("gameState", btoa(JSON.stringify(gameState)));
     router.replace(`${pathname}?${newParams.toString()}`);
   }, [gameState, pathname, router, searchParams]);
-
-  useEffect(() => {
-    let timeout: number | null = null;
-    const checkSession = async () => {
-      const session = await getSession();
-      if (!session) return;
-      const time = Math.max(
-        0,
-        (new Date(session.expires).getTime() - Date.now()) * 0.75
-      );
-      timeout = window.setTimeout(() => {
-        void checkSession();
-      }, time);
-    };
-    void checkSession();
-    return () => {
-      if (timeout !== null) clearTimeout(timeout);
-    };
-  }, []);
 
   const { touchdowns, casualties, playerUpdates } = gameState;
   const setTouchdowns = (update: InputType["touchdowns"]): void => {
@@ -197,7 +175,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       by?: NameAndId;
       player: NameAndId;
       injury: NonNullable<
-        NonNullable<GameState["playerUpdates"][string]>["injury"] | "BH"
+        NonNullable<GameState["playerUpdates"][string]>["injury"] | "bh"
       >;
     }
   ): void => {
@@ -207,7 +185,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         team === "away" ? casualties[1] + 1 : casualties[1],
       ]);
     }
-    if (options.injury !== "BH") addInjury(options.player, options.injury);
+    if (options.injury !== "bh") addInjury(options.player, options.injury);
     if (options.by !== undefined) addSPP(options.by, "casualties");
   };
 
@@ -253,7 +231,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       </div>
       <InjuryButton onSubmit={onInjury} home={home} away={away} />
       <SPPButton onSubmit={addSPP} home={home} away={away} />
-      <SubmitButton gameState={gameState} />
+      <SubmitButton gameState={gameState} end={end} />
       <PlayerUpdatesDialog playerUpdates={playerUpdates} />
     </div>
   );
@@ -261,36 +239,17 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
 
 type SubmitButtonProps = {
   gameState: GameState & { game: string };
+  end: typeof action;
 };
-function SubmitButton({ gameState }: SubmitButtonProps) {
+function SubmitButton({ gameState, end }: SubmitButtonProps) {
   const { startMutation, isMutating } = useServerMutation();
   const [submissionResult, setSubmissionResult] = useState<
     null | "success" | "failure"
   >(null);
 
   const submit = (): void => {
-    const [injuries, starPlayerPoints] = Object.entries(
-      gameState.playerUpdates
-    ).reduce<[InputType["injuries"], InputType["starPlayerPoints"]]>(
-      (prev, curr) => {
-        if (!curr[1]) return prev;
-        const [prevInj, prevSPP] = prev;
-        const [playerId, { injury, starPlayerPoints: currSPP }] = curr;
-        if (injury !== undefined) prevInj.push({ playerId, injury });
-        if (currSPP) prevSPP[playerId] = { ...prevSPP[playerId], ...currSPP };
-        return [prevInj, prevSPP];
-      },
-      [[], {}]
-    );
     startMutation(() => {
-      const clonedState = {
-        ...structuredClone(gameState),
-        playerUpdates: undefined,
-        injuries,
-        starPlayerPoints,
-      };
-      delete clonedState.playerUpdates;
-      return end(clonedState)
+      return end(gameState)
         .then(() => {
           setSubmissionResult("success");
         })

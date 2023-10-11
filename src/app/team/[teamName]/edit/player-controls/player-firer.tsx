@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import useServerMutation from "utils/use-server-mutation";
 import { fire } from "./actions";
+import { hireExistingPlayer } from "../actions";
 
 type Props = {
   id: string;
+  mode: "hire" | "fire";
 };
 
-export default function PlayerFirer({ id }: Props) {
+export default function PlayerFirer({ id, mode }: Props) {
   const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
@@ -31,17 +33,44 @@ export default function PlayerFirer({ id }: Props) {
       }
     });
   };
+  const handleHire = (): void => {
+    startMutation(async () => {
+      try {
+        return hireExistingPlayer({
+          player: id,
+          number: 1,
+        });
+      } catch {
+        setError(true);
+      }
+    });
+  };
 
-  if (isMutating) return <>Firing...</>;
+  if (mode === "fire") {
+    if (isMutating) return <>Firing...</>;
 
-  if (error) return <>Failed to fire player</>;
+    if (error) return <>Failed to fire player</>;
 
-  return (
-    <button
-      className="btn-secondary btn-outline btn-sm btn"
-      onClick={handleFire}
-    >
-      Fire!
-    </button>
-  );
+    return (
+      <button
+        className="btn btn-secondary btn-outline btn-sm"
+        onClick={handleFire}
+      >
+        Fire!
+      </button>
+    );
+  } else {
+    if (isMutating) return <>Firing...</>;
+
+    if (error) return <>Failed to fire player</>;
+
+    return (
+      <button
+        className="btn btn-success btn-outline btn-sm"
+        onClick={handleHire}
+      >
+        Hire!
+      </button>
+    );
+  }
 }

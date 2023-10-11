@@ -6,21 +6,21 @@ export type PlayerType = {
   id: string;
   name: string | null;
   number: number;
-  MA: number;
-  PA: number | null;
-  AG: number;
-  ST: number;
-  AV: number;
-  teamValue: number;
+  ma: number;
+  av: number;
+  st: number;
+  ag: number;
+  pa: number | null;
   missNextGame: boolean;
-  starPlayerPoints: number;
   nigglingInjuries: number;
+  starPlayerPoints: number;
+  teamValue: number;
+  position: { name: string };
   skills: Array<{
     name: string;
     rules: string;
     faq?: Array<{ q: string; a: string }>;
   }>;
-  position: { name: string };
 };
 
 export type TeamTableProps<T extends PlayerType> = {

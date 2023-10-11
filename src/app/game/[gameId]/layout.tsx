@@ -1,5 +1,7 @@
+import { game as dbGame } from "db/schema";
+import { eq } from "drizzle-orm";
 import type { PropsWithChildren } from "react";
-import { prisma } from "utils/prisma";
+import { db } from "utils/drizzle";
 
 export const dynamic = "force-dynamic";
 
@@ -8,11 +10,13 @@ export async function generateMetadata({
 }: {
   params: { gameId: string };
 }) {
-  const game = await prisma.game.findUniqueOrThrow({
-    where: { id: params.gameId },
-    select: { homeTeamName: true, awayTeamName: true },
+  const game = await db.query.game.findFirst({
+    where: eq(dbGame.id, params.gameId),
+    with: { homeDetails: true, awayDetails: true },
   });
-  return { title: `${game.awayTeamName} @ ${game.homeTeamName}` };
+  return {
+    title: `${game?.awayDetails.teamName} @ ${game?.homeDetails.teamName}`,
+  };
 }
 
 export default function Layout({ children }: PropsWithChildren) {

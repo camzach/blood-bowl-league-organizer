@@ -1,53 +1,63 @@
 "use server";
-import { SkillCategory, TeamState } from "@prisma/client";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { zact } from "zact/server";
-import { prisma } from "utils/prisma";
-import { getServerSession } from "utils/server-action-getsession";
 import {
   getPlayerSkills,
   getPlayerSppAndTv,
   getPlayerStats,
 } from "utils/get-computed-player-fields";
-
-function upperFirst<T extends string>(str: T): Capitalize<T> {
-  return `${str.charAt(0).toUpperCase()}${str.slice(1)}` as Capitalize<T>;
-}
+import { db } from "utils/drizzle";
+import { and, eq, sql } from "drizzle-orm";
+import {
+  player as dbPlayer,
+  team as dbTeam,
+  skill as dbSkill,
+  skillCategories,
+  improvement,
+} from "db/schema";
+import { canEditTeam } from "../actions";
 
 export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
   async ({ playerId }) => {
-    const session = await getServerSession();
-    const player = await prisma.player.findFirstOrThrow({
-      where: { id: playerId },
-      select: {
-        playerTeamName: true,
-        playerTeam: { select: { state: true, name: true } },
-        position: { select: { cost: true } },
-        id: true,
-      },
-    });
-    if (player.playerTeam === null)
-      throw new Error("Player is not on any team");
-    if (!session) throw new Error("Not authenticated");
-    if (!session.user.teams.includes(player.playerTeam.name))
-      throw new Error("User does not have permission to modify this team");
-    if (player.playerTeam.state === TeamState.Draft) {
-      return prisma.team.update({
-        where: { name: player.playerTeam.name },
-        data: {
-          players: { delete: { id: player.id } },
-          treasury: { increment: player.position.cost },
+    return db.transaction(async (tx) => {
+      const player = await tx.query.player.findFirst({
+        where: eq(dbPlayer.id, playerId),
+        columns: {
+          membershipType: true,
+          id: true,
+        },
+        with: {
+          position: { columns: { cost: true } },
+          team: { columns: { state: true, name: true } },
         },
       });
-    }
-    if (player.playerTeam.state === TeamState.PostGame) {
-      return prisma.player.update({
-        where: { id: player.id },
-        data: { playerTeam: { disconnect: true } },
-      });
-    }
-    throw new Error("Team not in Draft or PostGame state");
+      if (!player) throw new Error("Player does not exist");
+      if (player.team === null) throw new Error("Player is not on any team");
+      if (player.membershipType !== "player")
+        throw new Error("Player is not fireable");
+      if (!(await canEditTeam(player.team.name, tx)))
+        throw new Error("User does not have permission to modify this team");
+
+      if (player.team.state === "draft") {
+        return Promise.all([
+          tx.delete(dbPlayer).where(eq(dbPlayer.id, playerId)),
+          tx.update(dbTeam).set({
+            treasury: sql`${dbTeam.treasury} - ${player.position.cost}`,
+          }),
+        ]);
+      }
+      if (player.team.state === "hiring") {
+        return tx
+          .update(dbPlayer)
+          .set({
+            teamName: null,
+            membershipType: null,
+          })
+          .where(eq(dbPlayer.id, playerId));
+      }
+      throw new Error("Team not in hiring state");
+    });
   }
 );
 
@@ -58,57 +68,64 @@ export const update = zact(
     name: zfd.text(z.string().min(1)).optional(),
   })
 )(async (input) => {
-  const session = await getServerSession();
-  if (!session) throw new Error("Not authenticated");
-
-  const fetchedPlayer = await prisma.player.findUniqueOrThrow({
-    where: { id: input.player },
-    include: {
-      playerTeam: { select: { state: true, name: true } },
-      improvements: {
-        include: { skill: true }
+  return db.transaction(async (tx) => {
+    const player = await tx.query.player.findFirst({
+      where: eq(dbPlayer.id, input.player),
+      columns: {
+        membershipType: true,
+        number: true,
       },
-      position: {
-        include: { skills: true },
-      },
-    },
-  });
-  const player = { ...fetchedPlayer, skills: getPlayerSkills(fetchedPlayer) };
-
-  if (player.playerTeam === null) throw new Error("Player is not on any team");
-
-  if (!session.user.teams.includes(player.playerTeam.name))
-    throw new Error("User does not have permission to modify this team");
-  if (
-    !([TeamState.PostGame, TeamState.Draft] as TeamState[]).includes(
-      player.playerTeam.state
-    )
-  )
-    throw new Error("Team is not modifiable");
-
-  const mutations = [
-    prisma.player.update({
-      where: { id: player.id },
-      data: { number: input.number, name: input.name },
-    }),
-  ];
-  if (input.number !== undefined) {
-    const otherPlayer = await prisma.player.findFirst({
-      where: {
-        number: input.number,
-        playerTeamName: player.playerTeamName,
+      with: {
+        team: { columns: { state: true, name: true } },
+        improvements: {
+          with: { skill: true },
+        },
+        position: {
+          with: { skillToPosition: { with: { skill: true } } },
+        },
       },
     });
-    if (otherPlayer) {
-      mutations.push(
-        prisma.player.update({
-          where: { id: otherPlayer.id },
-          data: { number: player.number },
+    if (!player) throw new Error("Player does not exist");
+
+    if (player.team === null || player.membershipType !== "player")
+      throw new Error("Player is not on any team");
+
+    if (!(await canEditTeam(player.team.name, tx)))
+      throw new Error("User does not have permission to modify this team");
+
+    if (player.team.state !== "draft" && player.team.state !== "hiring")
+      throw new Error("Team is not modifiable at this time");
+
+    const otherPlayer =
+      input.number !== undefined &&
+      (await tx.query.player.findFirst({
+        where: and(
+          eq(dbPlayer.number, input.number),
+          eq(dbPlayer.teamName, player.team.name),
+          eq(dbPlayer.membershipType, "player")
+        ),
+        columns: { id: true },
+      }));
+
+    const mutations = [
+      tx
+        .update(dbPlayer)
+        .set({
+          number: input.number,
+          name: input.name,
         })
-      );
-    }
-  }
-  return prisma.$transaction(mutations);
+        .where(eq(dbPlayer.id, input.player)),
+      otherPlayer &&
+        tx
+          .update(dbPlayer)
+          .set({
+            number: player.number,
+          })
+          .where(eq(dbPlayer.id, otherPlayer.id)),
+    ];
+
+    await Promise.all(mutations);
+  });
 });
 
 export const learnSkill = zact(
@@ -122,70 +139,76 @@ export const learnSkill = zact(
         }),
         z.object({
           type: z.literal("random"),
-          category: z.enum(
-            Object.values(SkillCategory) as [SkillCategory, ...SkillCategory[]]
-          ),
+          category: z.enum(skillCategories),
         }),
       ])
     )
   )
 )(async (input) => {
-  const session = await getServerSession();
-  if (!session) throw new Error("Not authenticated");
-
-  const fetchedPlayer = await prisma.player.findUniqueOrThrow({
-    where: { id: input.player },
-    include: {
-      playerTeam: { select: { state: true, name: true } },
-      improvements: { include: { skill: true } },
-      position: {
-        include: { skills: true },
+  return db.transaction(async (tx) => {
+    const fetchedPlayer = await db.query.player.findFirst({
+      where: eq(dbPlayer.id, input.player),
+      with: {
+        team: { columns: { state: true, name: true } },
+        improvements: { with: { skill: true } },
+        position: { with: { skillToPosition: { with: { skill: true } } } },
       },
-    },
-  });
-  const player = {
-    ...fetchedPlayer,
-    skills: getPlayerSkills(fetchedPlayer),
-    totalImprovements: fetchedPlayer.improvements.length,
-  };
+    });
+    if (!fetchedPlayer) throw new Error("Player not found");
+    const player = {
+      ...fetchedPlayer,
+      skills: getPlayerSkills(fetchedPlayer),
+      totalImprovements: fetchedPlayer.improvements.length,
+    };
 
-  if (player.playerTeam === null) throw new Error("Player is not on any team");
-  if (!session.user.teams.includes(player.playerTeam.name))
-    throw new Error("User does not have permission to modify this team");
-  if (player.playerTeam.state !== TeamState.PostGame)
-    throw new Error("Team is not in PostGame state");
+    if (player.team === null) throw new Error("Player is not on any team");
 
-  return prisma.$transaction(async (tx) => {
+    if (!(await canEditTeam(player.team.name, tx))) {
+      throw new Error("User does not have permission to modify this team");
+    }
+    if (player.team.state !== "improving")
+      throw new Error("Team is not in improving state");
     const chooseRandom = <T>(list: T[]) =>
       list[Math.floor(Math.random() * list.length)];
     const skill =
       "skill" in input
-        ? await prisma.skill.findUniqueOrThrow({ where: { name: input.skill } })
+        ? await tx.query.skill.findFirst({
+            where: eq(dbSkill.name, input.skill),
+          })
         : chooseRandom(
-            await prisma.skill.findMany({ where: { category: input.category } })
+            await tx.query.skill.findMany({
+              where: eq(dbSkill.category, input.category),
+            })
           );
+    if (!skill) throw new Error("Skill not recognized");
     if (
       !player.position.primary.includes(skill.category) &&
       !player.position.secondary.includes(skill.category)
     )
       throw new Error("Player cannot take a skill from this category");
 
-    const updatedPlayer = await tx.player.update({
-      where: { id: input.player },
-      data: {
-        improvements: {
-          create: {
-            type: `${upperFirst(input.type)}Skill`,
-            order: player.improvements.length,
-            skillName: skill.name,
+    await tx.insert(improvement).values({
+      type: `${input.type}_skill`,
+      order: player.improvements.length,
+      skillName: skill.name,
+      playerId: player.id,
+    });
+
+    const updatedPlayer = await tx.query.player.findFirst({
+      where: eq(dbPlayer.id, player.id),
+      with: {
+        improvements: { with: { skill: true } },
+        position: {
+          with: {
+            rosterSlot: {
+              with: { roster: { with: { specialRuleToRoster: true } } },
+            },
           },
         },
       },
-      include: {
-        improvements: { include: { skill: true } },
-        position: { include: { Roster: { include: { specialRules: true } } } },
-      },
     });
+    if (!updatedPlayer) throw new Error("Failed to select after update");
+
     const { starPlayerPoints } = getPlayerSppAndTv(updatedPlayer);
 
     if (updatedPlayer.improvements.length > 6)
@@ -198,87 +221,108 @@ export const learnSkill = zact(
 export const increaseCharacteristic = zact(
   zfd.formData({
     player: zfd.text(),
-    preferences: z.array(zfd.text(z.enum(["MA", "AV", "AG", "ST", "PA"]))),
+    preferences: z.array(zfd.text(z.enum(["ma", "av", "ag", "st", "pa"]))),
     skill: zfd.text(),
   })
 )(async (input) => {
-  const player = await prisma.player.findUniqueOrThrow({
-    where: { id: input.player },
-    include: { position: true, _count: { select: { improvements: true } } },
-  });
+  await db.transaction(async (tx) => {
+    const player = await tx.query.player.findFirst({
+      where: eq(dbPlayer.id, input.player),
+      with: {
+        position: true,
+        improvements: true,
+      },
+    });
 
-  const skill = await prisma.skill.findUniqueOrThrow({
-    where: { name: input.skill },
-  });
+    if (!player) throw new Error("Player not found");
 
-  if (
-    !player.position.primary.includes(skill.category) ||
-    !player.position.secondary.includes(skill.category)
-  )
-    throw new Error("Player cannot take a skill from this category");
+    const skill = await tx.query.skill.findFirst({
+      where: eq(dbSkill.name, input.skill),
+    });
+    if (!skill) throw new Error("Skill not found");
 
-  const rollTable: Array<Array<"MA" | "AV" | "PA" | "AG" | "ST">> = [
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV"],
-    ["MA", "AV", "PA"],
-    ["MA", "AV", "PA"],
-    ["MA", "AV", "PA"],
-    ["MA", "AV", "PA"],
-    ["MA", "AV", "PA"],
-    ["MA", "AV", "PA"],
-    ["PA", "AG"],
-    ["AG", "ST"],
-    ["MA", "AV", "PA", "AG", "ST"],
-  ];
+    if (
+      !player.position.primary.includes(skill.category) &&
+      !player.position.secondary.includes(skill.category)
+    )
+      throw new Error("Player cannot take a skill from this category");
 
-  const availableOptions = rollTable[Math.floor(Math.random() * 16)];
-  const characteristicChoice =
-    input.preferences.find((pref) => availableOptions.includes(pref)) ??
-    "FallbackSkill";
-  await prisma.$transaction(async (tx) => {
-    const updatedPlayer = await tx.player.update({
-      where: { id: input.player },
-      data: {
+    const rollTable: Array<Array<"ma" | "av" | "pa" | "ag" | "st">> = [
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av"],
+      ["ma", "av", "pa"],
+      ["ma", "av", "pa"],
+      ["ma", "av", "pa"],
+      ["ma", "av", "pa"],
+      ["ma", "av", "pa"],
+      ["ma", "av", "pa"],
+      ["pa", "ag"],
+      ["ag", "st"],
+      ["ma", "av", "pa", "ag", "st"],
+    ];
+
+    const availableOptions = rollTable[Math.floor(Math.random() * 16)];
+    const characteristicChoice =
+      input.preferences.find((pref) => availableOptions.includes(pref)) ??
+      "fallback_skill";
+
+    await tx.insert(improvement).values({
+      playerId: player.id,
+      order: player.improvements.length,
+      type: characteristicChoice,
+      skillName:
+        characteristicChoice === "fallback_skill" ? skill.name : undefined,
+    });
+
+    const updatedPlayer = await tx.query.player.findFirst({
+      where: eq(dbPlayer.id, player.id),
+      with: {
         improvements: {
-          create: {
-            order: player._count.improvements,
-            type: characteristicChoice,
-            ...(characteristicChoice === "FallbackSkill"
-              ? { skill: { connect: { name: skill.name } } }
-              : {}),
+          with: { skill: true },
+        },
+        position: {
+          with: {
+            rosterSlot: {
+              with: {
+                roster: {
+                  with: { specialRuleToRoster: true },
+                },
+              },
+            },
           },
         },
       },
-      include: {
-        improvements: { include: { skill: true } },
-        position: { include: { Roster: { include: { specialRules: true } } } }
-      },
     });
+    if (!updatedPlayer) throw new Error("Failed to select after updating");
+
     const { starPlayerPoints } = getPlayerSppAndTv(updatedPlayer);
-    if (starPlayerPoints < 0) throw new Error("Player does not have enough SPP");
-  
-    if (characteristicChoice !== 'FallbackSkill'){
-    const updatedStats = getPlayerStats(updatedPlayer);
-    const statMinMax = {
-      MA: [1, 9],
-      ST: [1, 8],
-      AG: [1, 6],
-      PA: [1, 6],
-      AV: [3, 11],
-    };
-    if (
-      (updatedStats[characteristicChoice] ?? 1) <
-        statMinMax[characteristicChoice][0] ||
-      (updatedStats[characteristicChoice] ?? 1) >
-        statMinMax[characteristicChoice][1] ||
-      updatedPlayer.improvements.filter((i) => i.type === characteristicChoice)
-        .length > 2
-    )
-      throw new Error("Stat cannot be improved further");}
+    if (starPlayerPoints < 0)
+      throw new Error("Player does not have enough SPP");
+
+    if (characteristicChoice !== "fallback_skill") {
+      const updatedStats = getPlayerStats(updatedPlayer);
+      const statMinMax = {
+        ma: [1, 9],
+        st: [1, 8],
+        ag: [1, 6],
+        pa: [1, 6],
+        av: [3, 11],
+      };
+      if (
+        (updatedStats[characteristicChoice] ?? 1) <
+          statMinMax[characteristicChoice][0] ||
+        (updatedStats[characteristicChoice] ?? 1) >
+          statMinMax[characteristicChoice][1] ||
+        updatedPlayer.improvements.filter(
+          (i) => i.type === characteristicChoice
+        ).length > 2
+      )
+        throw new Error("Stat cannot be improved further");
+    }
   });
 });

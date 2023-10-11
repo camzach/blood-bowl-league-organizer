@@ -10,7 +10,7 @@ type Props = {
   from: "redrafts" | "journeymen";
 };
 
-export default function PlayerFirer({ player, number, team, from }: Props) {
+export default function PlayerHirer({ player, number }: Props) {
   const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);
 
@@ -27,7 +27,7 @@ export default function PlayerFirer({ player, number, team, from }: Props) {
 
   const handleHire = (): void => {
     startMutation(() => {
-      return hireExistingPlayer({ player, number, team, from }).catch(() => {
+      return hireExistingPlayer({ player, number }).catch(() => {
         setError(true);
       });
     });
@@ -38,7 +38,7 @@ export default function PlayerFirer({ player, number, team, from }: Props) {
 
   return (
     <button
-      className="btn-bordered btn-primary btn-sm btn"
+      className="btn-bordered btn btn-primary btn-sm"
       onClick={handleHire}
     >
       Hire!

@@ -1,9 +1,16 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "pages/api/auth/[...nextauth]";
+import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import { coachToTeam } from "db/schema";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { db } from "utils/drizzle";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const { userId } = auth();
+  if (!userId) return <RedirectToSignIn />;
+
+  const myTeam = await db.query.coachToTeam.findFirst({
+    where: eq(coachToTeam.coachId, userId),
+  });
 
   return (
     <>
@@ -14,7 +21,7 @@ export default async function Home() {
           </Link>
         </li>
         <li>
-          <Link className="link" href={`/team/${session?.user.teams[0]}`}>
+          <Link className="link" href={`/team/${myTeam?.teamName}`}>
             View your team
           </Link>
         </li>

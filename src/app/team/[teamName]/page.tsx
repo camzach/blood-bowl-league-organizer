@@ -5,7 +5,11 @@ import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
-import { fetchTeam } from "./fetch-team";
+import { db } from "utils/drizzle";
+import { eq } from "drizzle-orm";
+import { coachToTeam } from "db/schema";
+import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import fetchTeam from "./fetch-team";
 
 type Props = { params: { teamName: string } };
 
@@ -14,15 +18,25 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function TeamPage({ params: { teamName } }: Props) {
-  const team = await fetchTeam(decodeURIComponent(teamName));
+  const { userId } = auth();
+  if (!userId) return <RedirectToSignIn />;
+
+  const team = await fetchTeam(decodeURIComponent(teamName), false);
 
   if (!team) return notFound();
+
+  const editableTeams = await db.query.coachToTeam.findMany({
+    where: eq(coachToTeam.coachId, userId),
+  });
 
   return (
     <>
       <h1 className="text-4xl">
         {team.name}
-        <EditButton teamName={team.name} />
+        {editableTeams.some((entry) => entry.teamName === team.name) &&
+          (team.state === "draft" ||
+            team.state === "hiring" ||
+            team.state === "improving") && <EditButton teamName={team.name} />}
       </h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -39,7 +53,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
       Dedicated Fans -- {team.dedicatedFans}
       <SongControls
         team={team.name}
-        currentSong={team.touchdownSong?.name}
+        currentSong={team.touchdownSong ?? undefined}
         isEditable={false}
       />
       <TeamTable players={team.players} />
@@ -49,15 +63,16 @@ export default async function TeamPage({ params: { teamName } }: Props) {
             <th />
             <th>Cost</th>
             <th>Count</th>
-            <th>Total</th>
+            <th>Team Value</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Rerolls</td>
             <td>
-              {team.roster.rerollCost.toLocaleString()} /{" "}
-              {(team.roster.rerollCost * 2).toLocaleString()}
+              {team.state === "draft"
+                ? team.roster.rerollCost.toLocaleString()
+                : (team.roster.rerollCost * 2).toLocaleString()}
             </td>
             <td>{team.rerolls}</td>
             <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>

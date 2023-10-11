@@ -4,14 +4,16 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { end } from "../actions";
 
-type InjuryType = Parameters<typeof end>[0]["injuries"][number]["injury"];
+type InjuryType = NonNullable<
+  Parameters<typeof end>[0]["playerUpdates"][number]["injury"]
+>;
 type PlayerType = { id: string; name: string | null; number: number };
 
 type NameAndId = { name: string | null; id: string };
 type Props = {
   onSubmit: (
     team: "home" | "away" | "neither",
-    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | "BH" }
+    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | "bh" }
   ) => void;
 } & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
 
@@ -98,7 +100,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
           <label>
             Injured Player&apos;s team:
             <select
-              className="select-bordered select select-sm"
+              className="select select-bordered select-sm"
               {...register("injuredTeam")}
             >
               <option>home</option>
@@ -108,7 +110,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
           <label>
             Injured Player:
             <select
-              className="select-bordered select select-sm"
+              className="select select-bordered select-sm"
               {...register("injuredPlayer")}
             >
               <optgroup label="Rostered Players">
@@ -133,25 +135,25 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
           <label>
             Type of injury:
             <select
-              className="select-bordered select select-sm"
+              className="select select-bordered select-sm"
               {...register("type")}
             >
-              <option value="BH">Badly Hurt</option>
-              <option value="MNG">Miss Next Game</option>
-              <option value="NI">Niggling Injury</option>
-              <option value="ST">-1 ST</option>
-              <option value="AV">-1 AV</option>
-              <option value="MA">-1 MA</option>
-              <option value="AG">+1 AG</option>
-              <option value="PA">+1 PA</option>
-              <option value="DEAD">Dead</option>
+              <option value="bh">Badly Hurt</option>
+              <option value="mng">Miss Next Game</option>
+              <option value="ni">Niggling Injury</option>
+              <option value="st">-1 ST</option>
+              <option value="av">-1 AV</option>
+              <option value="ma">-1 MA</option>
+              <option value="ag">+1 AG</option>
+              <option value="pa">+1 PA</option>
+              <option value="dead">Dead</option>
             </select>
           </label>
           <br />
           <label>
             Caused by Team:
             <select
-              className="select-bordered select select-sm"
+              className="select select-bordered select-sm"
               {...register("causingTeam")}
             >
               <option>home</option>
@@ -163,7 +165,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
             <label>
               Caused By:
               <select
-                className="select-bordered select select-sm"
+                className="select select-bordered select-sm"
                 {...register("causingPlayer")}
               >
                 <optgroup label="Rostered Players">
@@ -195,7 +197,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
           </button>
         </div>
       </Modal>
-      <button className="btn-sm btn" onClick={() => setIsOpen(true)}>
+      <button className="btn btn-sm" onClick={() => setIsOpen(true)}>
         Booboo
       </button>
     </>

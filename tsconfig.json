@@ -30,7 +30,7 @@
     "prisma",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "src/app",
+    "src/app"
 ],
   "exclude": [
     "node_modules",

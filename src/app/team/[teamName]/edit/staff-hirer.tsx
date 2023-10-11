@@ -1,7 +1,7 @@
 "use client";
 import { NumberInput } from "components/number-input";
 import { useEffect, useState } from "react";
-import {
+import type {
   hireStaff as hireStaffAction,
   fireStaff as fireStaffAction,
 } from "./actions";
@@ -15,6 +15,8 @@ type Props = {
   teamName: string;
   max: number;
   treasury: number;
+  hireStaffAction: typeof hireStaffAction;
+  fireStaffAction: typeof fireStaffAction;
 };
 
 export default function StaffHirer({
@@ -25,6 +27,8 @@ export default function StaffHirer({
   cost,
   max,
   treasury,
+  hireStaffAction,
+  fireStaffAction,
 }: Props) {
   const { startMutation, isMutating } = useServerMutation();
   const [error, setError] = useState(false);

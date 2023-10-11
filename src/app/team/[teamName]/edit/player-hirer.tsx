@@ -1,14 +1,14 @@
 "use client";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import type { Position } from "@prisma/client";
-import { hirePlayer as hirePlayerAction } from "./actions";
 import useServerMutation from "utils/use-server-mutation";
+import type { hirePlayer as hirePlayerAction } from "./actions";
 
 type Props = {
-  positions: Position[];
+  positions: Array<{ name: string; cost: number }>;
   treasury: number;
   freeNumbers: number[];
   teamName: string;
+  hirePlayerAction: typeof hirePlayerAction;
 };
 
 export function PlayerHirer({
@@ -16,6 +16,7 @@ export function PlayerHirer({
   treasury,
   freeNumbers,
   teamName,
+  hirePlayerAction,
 }: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
