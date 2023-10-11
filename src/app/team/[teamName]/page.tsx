@@ -21,7 +21,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
   const { userId } = auth();
   if (!userId) return <RedirectToSignIn />;
 
-  const team = await fetchTeam(decodeURIComponent(teamName));
+  const team = await fetchTeam(decodeURIComponent(teamName), false);
 
   if (!team) return notFound();
 
@@ -39,7 +39,6 @@ export default async function TeamPage({ params: { teamName } }: Props) {
             team.state === "improving") && <EditButton teamName={team.name} />}
       </h1>
       <div className="my-4 flex flex-col text-lg">
-        <span>TV - unknown</span>
         <span>TV - {calculateTV(team).toLocaleString()}</span>
         <span>
           Current TV -{" "}

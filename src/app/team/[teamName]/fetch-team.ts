@@ -1,18 +1,24 @@
 import { eq } from "drizzle-orm";
 import { db } from "utils/drizzle";
-import { team as dbTeam } from "db/schema";
+import { team as dbTeam, player } from "db/schema";
 import {
   getPlayerStats,
   getPlayerSppAndTv,
   getPlayerSkills,
 } from "utils/get-computed-player-fields";
 
-export default async function fetchTeam(name: string) {
+export default async function fetchTeam(
+  name: string,
+  includeNonPlayers: boolean
+) {
   const fetchedTeam = await db.query.team.findFirst({
     where: eq(dbTeam.name, name),
     with: {
       roster: true,
       players: {
+        where: includeNonPlayers
+          ? undefined
+          : eq(player.membershipType, "player"),
         with: {
           improvements: { with: { skill: true } },
           position: {

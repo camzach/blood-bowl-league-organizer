@@ -430,7 +430,7 @@
     "name": "Orc",
     "specialRules": ["Badlands Brawl", "Apothecary Allowed"],
     "rerollCost": 60000,
-    "tier": 1,
+    "tier": 2,
     "players": [
       {
         "position": "Orc Lineman",
@@ -1432,7 +1432,7 @@
       "Apothecary Allowed"
     ],
     "rerollCost": 70000,
-    "tier": 2,
+    "tier": 1,
     "players": [
       {
         "position": "Underworld Goblin Lineman",
@@ -2100,7 +2100,7 @@
     "name": "Human",
     "specialRules": ["Old World Classic", "Apothecary Allowed"],
     "rerollCost": 50000,
-    "tier": 1,
+    "tier": 2,
     "players": [
       {
         "position": "Human Lineman",

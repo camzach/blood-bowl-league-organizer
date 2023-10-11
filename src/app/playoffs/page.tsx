@@ -50,7 +50,7 @@ export default async function Playoffs() {
     }
     return prev;
   }, []);
-  console.log(rounds.length);
+
   return (
     <div
       style={{
