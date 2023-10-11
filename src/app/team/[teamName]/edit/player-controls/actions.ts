@@ -51,6 +51,7 @@ export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
         return tx
           .update(dbPlayer)
           .set({
+            teamName: null,
             membershipType: null,
           })
           .where(eq(dbPlayer.id, playerId));

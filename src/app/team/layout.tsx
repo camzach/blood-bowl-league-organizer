@@ -7,7 +7,7 @@ export default async function TeamLayout({ children }: PropsWithChildren) {
   return (
     <>
       <div className="flex gap-4">
-        <ul className="menu min-w-[200px] max-w-fit">
+        <ul className="menu min-w-[200px] max-w-fit border-r border-r-primary">
           {teams
             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
             .map((team) => (

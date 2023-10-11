@@ -51,6 +51,7 @@ export function HireablePlayerManager({
         />
       ),
     },
+    "name",
     "position",
     "skills",
     "ma",

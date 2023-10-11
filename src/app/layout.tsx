@@ -34,7 +34,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           <header className="navbar bg-primary text-primary-content">
             <h1 className="m-0 inline-block w-min text-4xl">BBLO</h1>
             <nav className="ml-8 flex gap-8">
-              <Link className="text-2xl" href={`/team/${myTeam?.teamName}`}>
+              <Link
+                className="text-2xl"
+                href={`/team/${myTeam?.teamName ?? "new"}`}
+              >
                 Teams
               </Link>
               <Link className="text-2xl" href={`/schedule`}>
