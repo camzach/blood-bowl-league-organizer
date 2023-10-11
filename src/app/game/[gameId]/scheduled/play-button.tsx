@@ -2,9 +2,15 @@
 import { useState } from "react";
 import { Die } from "components/die";
 import Link from "next/link";
-import { start } from "../actions";
+import type { start as startAction } from "../actions";
 
-export function PlayButton({ gameId }: { gameId: string }) {
+export function PlayButton({
+  gameId,
+  start,
+}: {
+  gameId: string;
+  start: typeof startAction;
+}) {
   const [response, setResponse] = useState<Awaited<
     ReturnType<typeof start>
   > | null>(null);

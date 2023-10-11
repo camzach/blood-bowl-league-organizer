@@ -1,6 +1,6 @@
 import { getPlayerSppAndTv } from "./get-computed-player-fields";
 
-type PlayerType = Parameters<typeof getPlayerSppAndTv>[0]
+type PlayerType = Parameters<typeof getPlayerSppAndTv>[0];
 
 type Team = {
   players: PlayerType[];

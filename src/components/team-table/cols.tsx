@@ -38,27 +38,27 @@ export const cols = [
   {
     id: "ma",
     name: "MA",
-    Component: ({ MA }) => <>{MA}</>,
+    Component: ({ ma }) => <>{ma}</>,
   },
   {
     id: "st",
     name: "ST",
-    Component: ({ ST }) => <>{ST}</>,
+    Component: ({ st }) => <>{st}</>,
   },
   {
     id: "pa",
     name: "PA",
-    Component: ({ PA }) => <>{PA !== null ? `${PA}+` : "—"}</>,
+    Component: ({ pa }) => <>{pa !== null ? `${pa}+` : "—"}</>,
   },
   {
     id: "ag",
     name: "AG",
-    Component: ({ AG }) => <>{`${AG}+`}</>,
+    Component: ({ ag }) => <>{`${ag}+`}</>,
   },
   {
     id: "av",
     name: "AV",
-    Component: ({ AV }) => <>{`${AV}+`}</>,
+    Component: ({ av }) => <>{`${av}+`}</>,
   },
   {
     id: "ni",

@@ -1,23 +1,27 @@
 import { S3 } from "@aws-sdk/client-s3";
+import { canEditTeam } from "app/team/[teamName]/edit/actions";
 import { randomUUID } from "crypto";
+import { team as dbTeam, song as dbSong } from "db/schema";
+import { eq } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
-import { getServerSession } from "next-auth";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { authOptions } from "pages/api/auth/[...nextauth]";
-import { prisma } from "utils/prisma";
+import { db } from "utils/drizzle";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { team: string } }
 ) {
-  const { touchdownSong } = await prisma.team.findUniqueOrThrow({
-    where: { name: params.team },
-    select: { touchdownSong: true },
+  const team = await db.query.team.findFirst({
+    where: eq(dbTeam.name, decodeURIComponent(params.team)),
+    with: { song: true },
   });
+  if (!team) return new NextResponse("No team found", { status: 404 });
 
-  if (!touchdownSong)
-    return new NextResponse("Team has no songs", { status: 404 });
+  if (!canEditTeam(decodeURIComponent(params.team)))
+    return new NextResponse("Unauthorized", { status: 503 });
+
+  if (!team.song) return new NextResponse("Team has no songs", { status: 404 });
 
   try {
     const s3 = new S3({
@@ -29,7 +33,7 @@ export async function GET(
     });
     const object = await s3.getObject({
       Bucket: process.env.S3_BUCKET ?? "",
-      Key: touchdownSong.data,
+      Key: team.song.data,
     });
 
     if (object.Body === undefined)
@@ -49,10 +53,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { team: string } }
 ) {
-  const session = await getServerSession(authOptions);
-
-  if (!(session?.user.teams.includes(params.team) ?? false))
-    return new NextResponse("You do not have permission", { status: 403 });
+  if (!canEditTeam(decodeURIComponent(params.team)))
+    return new NextResponse("Unauthorized", { status: 503 });
 
   const form = await req.formData();
   const file = form.get("file");
@@ -79,10 +81,17 @@ export async function POST(
   });
 
   try {
-    const { touchdownSong: current } = await prisma.team.findUniqueOrThrow({
-      where: { name: params.team },
-      select: { touchdownSong: true },
+    const team = await db.query.team.findFirst({
+      where: eq(dbTeam.name, decodeURIComponent(params.team)),
+      with: { song: true },
     });
+    if (!team) return new NextResponse("No team found", { status: 404 });
+
+    if (!canEditTeam(decodeURIComponent(params.team)))
+      return new NextResponse("Unauthorized", { status: 503 });
+
+    const current = team.song;
+
     if (current) {
       await s3.deleteObject({
         Bucket: process.env.S3_BUCKET ?? "",
@@ -107,9 +116,16 @@ export async function POST(
     });
   }
 
-  await prisma.team.update({
-    where: { name: params.team },
-    data: { touchdownSong: { create: { data: Key, name: songName } } },
-  });
+  await db
+    .insert(dbSong)
+    .values([{ data: Key, name: songName }])
+    .then(() =>
+      db
+        .update(dbTeam)
+        .set({
+          touchdownSong: songName,
+        })
+        .where(eq(dbTeam.name, decodeURIComponent(params.team)))
+    );
   return new NextResponse("Success");
 }

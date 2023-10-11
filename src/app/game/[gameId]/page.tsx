@@ -1,26 +1,28 @@
+import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "utils/prisma";
+import { db } from "utils/drizzle";
+import { game as dbGame } from "db/schema";
 
 export default async function Game({
   params: { gameId },
 }: {
   params: { gameId: string };
 }) {
-  const game = await prisma.game.findUnique({
-    where: { id: decodeURIComponent(gameId) },
-    include: { MVPs: true },
+  const game = await db.query.game.findFirst({
+    where: eq(dbGame.id, decodeURIComponent(gameId)),
+    with: {
+      homeDetails: {
+        with: { mvp: true },
+      },
+      awayDetails: {
+        with: { mvp: true },
+      },
+    },
   });
   if (!game) return notFound();
 
-  if (game.state !== "Complete")
+  if (game.state !== "complete")
     return redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
-
-  const [homeMVP, awayMVP] = [game.homeTeamName, game.awayTeamName].map(
-    (team) =>
-      game.MVPs.find((p) =>
-        [p.playerTeamName, p.journeymanTeamName].includes(team)
-      )
-  );
 
   return (
     <div className="grid w-full place-items-center">
@@ -28,25 +30,33 @@ export default async function Game({
         <thead>
           <tr>
             <th className="border-0" />
-            <th>{game.homeTeamName}</th>
-            <th>{game.awayTeamName}</th>
+            <th>{game.homeDetails.teamName}</th>
+            <th>{game.awayDetails.teamName}</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Score</td>
-            <td>{game.touchdownsHome}</td>
-            <td>{game.touchdownsAway}</td>
+            <td>{game.homeDetails.touchdowns}</td>
+            <td>{game.awayDetails.touchdowns}</td>
           </tr>
           <tr>
             <td>Casualties</td>
-            <td>{game.casualtiesHome}</td>
-            <td>{game.casualtiesAway}</td>
+            <td>{game.homeDetails.casualties}</td>
+            <td>{game.awayDetails.casualties}</td>
           </tr>
           <tr>
             <td>MVP</td>
-            <td>{homeMVP?.name ?? homeMVP?.number ?? "None"}</td>
-            <td>{awayMVP?.name ?? awayMVP?.number ?? "None"}</td>
+            <td>
+              {game.homeDetails.mvp?.name ??
+                game.homeDetails.mvp?.number ??
+                "None"}
+            </td>
+            <td>
+              {game.awayDetails.mvp?.name ??
+                game.awayDetails.mvp?.number ??
+                "None"}
+            </td>
           </tr>
         </tbody>
       </table>

@@ -1,57 +1,68 @@
-import { prisma } from "utils/prisma";
+import { eq } from "drizzle-orm";
+import { db } from "utils/drizzle";
+import { team as dbTeam, player } from "db/schema";
 import {
-  getPlayerSkills,
-  getPlayerSppAndTv,
   getPlayerStats,
+  getPlayerSppAndTv,
+  getPlayerSkills,
 } from "utils/get-computed-player-fields";
-import { Prisma } from "@prisma/client";
 
-const playerSelect = {
-  include: {
-    improvements: { include: { skill: true } },
-    position: {
-      include: {
-        skills: true,
-        Roster: { select: { specialRules: true } },
+export default async function fetchTeam(
+  name: string,
+  includeNonPlayers: boolean
+) {
+  const fetchedTeam = await db.query.team.findFirst({
+    where: eq(dbTeam.name, name),
+    with: {
+      roster: true,
+      players: {
+        where: includeNonPlayers
+          ? undefined
+          : eq(player.membershipType, "player"),
+        with: {
+          improvements: { with: { skill: true } },
+          position: {
+            with: {
+              skillToPosition: { with: { skill: true } },
+              rosterSlot: {
+                with: {
+                  roster: {
+                    with: {
+                      specialRuleToRoster: { with: { specialRule: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
-  },
-} satisfies Prisma.PlayerArgs;
-
-export async function fetchTeam(teamName: string) {
-  const team = await prisma.team.findUnique({
-    where: { name: teamName },
-    include: {
-      roster: { include: { positions: true } },
-      players: playerSelect,
-      redrafts: playerSelect,
-      journeymen: playerSelect,
-      touchdownSong: { select: { name: true } },
-    },
   });
-  if (team === null) return null;
+
+  if (!fetchedTeam) return null;
+
   return {
-    ...team,
-    players: team.players.map((p) => ({
-      ...p,
-      skills: getPlayerSkills(p),
-      totalImprovements: p.improvements.length,
-      ...getPlayerStats(p),
-      ...getPlayerSppAndTv(p),
-    })),
-    journeymen: team.journeymen.map((p) => ({
-      ...p,
-      skills: getPlayerSkills(p),
-      totalImprovements: p.improvements.length,
-      ...getPlayerStats(p),
-      ...getPlayerSppAndTv(p),
-    })),
-    redrafts: team.redrafts.map((p) => ({
-      ...p,
-      skills: getPlayerSkills(p),
-      totalImprovements: p.improvements.length,
-      ...getPlayerStats(p),
-      ...getPlayerSppAndTv(p),
-    })),
+    ...fetchedTeam,
+    players: fetchedTeam.players.map((p) => {
+      const position = {
+        ...p.position,
+        skills: p.position.skillToPosition.map((stp) => stp.skill),
+        roster: {
+          ...p.position.rosterSlot.roster,
+          specialRules: p.position.rosterSlot.roster.specialRuleToRoster.map(
+            (sr) => sr.specialRule
+          ),
+        },
+      };
+      return {
+        ...p,
+        ...getPlayerStats(p),
+        ...getPlayerSppAndTv(p),
+        position,
+        skills: getPlayerSkills(p),
+        totalImprovements: p.improvements.length,
+      };
+    }),
   };
 }

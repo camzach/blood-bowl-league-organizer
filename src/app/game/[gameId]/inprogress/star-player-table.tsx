@@ -1,6 +1,6 @@
-import type { Skill, StarPlayer } from "@prisma/client";
 import { TeamTable } from "components/team-table";
 import { tooltipId } from "components/tooltip";
+import { skill, starPlayer } from "db/schema";
 import { ReactElement } from "react";
 
 async function getMarkup(component: ReactElement) {
@@ -10,7 +10,9 @@ async function getMarkup(component: ReactElement) {
 }
 
 type Props = {
-  stars: Array<StarPlayer & { skills: Skill[] }>;
+  stars: Array<
+    typeof starPlayer.$inferSelect & { skills: (typeof skill.$inferSelect)[] }
+  >;
 };
 
 export default async function StarPlayerTable({ stars }: Props) {
@@ -36,8 +38,8 @@ export default async function StarPlayerTable({ stars }: Props) {
         "ag",
         "pa",
         {
-          id: "specialRule",
-          name: "Special Rule",
+          id: "specialAbility",
+          name: "Special Ability",
           Component: SpecialRuleColumn,
         },
       ]}
@@ -46,10 +48,10 @@ export default async function StarPlayerTable({ stars }: Props) {
 }
 
 type SpecialRuleColumnProps = {
-  specialRule: string;
+  specialAbility: string;
 };
-async function SpecialRuleColumn({ specialRule }: SpecialRuleColumnProps) {
-  const [ruleName, ruleText] = specialRule.split(": ");
+async function SpecialRuleColumn({ specialAbility }: SpecialRuleColumnProps) {
+  const [ruleName, ruleText] = specialAbility.split(": ");
   return (
     <a
       data-tooltip-id={tooltipId}
