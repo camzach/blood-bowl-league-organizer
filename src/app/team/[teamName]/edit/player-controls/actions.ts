@@ -44,7 +44,7 @@ export const fire = zact(zfd.formData({ playerId: zfd.text() }))(
           tx.delete(dbPlayer).where(eq(dbPlayer.id, playerId)),
           tx.update(dbTeam).set({
             treasury: sql`${dbTeam.treasury} - ${player.position.cost}`,
-          }),
+          }).where(eq(dbTeam.name, player.team.name)),
         ]);
       }
       if (player.team.state === "hiring") {

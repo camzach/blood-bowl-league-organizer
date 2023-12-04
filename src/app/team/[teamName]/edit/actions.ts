@@ -195,7 +195,7 @@ export const hireStaff = zact(
           ? true
           : sql`${dbTeam[input.type]} + ${input.quantity}`,
       treasury: sql`${dbTeam.treasury} - ${cost}`,
-    });
+    }).where(eq(dbTeam.name, input.team));
 
     const updatedTeam = await tx.query.team.findFirst({
       where: eq(dbTeam.name, input.team),
