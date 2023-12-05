@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-// import PasswordChangeNotif from "./password-changer";
 import "./global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
@@ -11,6 +10,7 @@ import {
   RedirectToSignIn,
   UserButton,
   auth,
+  currentUser,
 } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const { userId } = auth();
+  const user: { publicMetadata: { isAdmin?: boolean } } | null =
+    await currentUser();
   if (!userId) return <RedirectToSignIn />;
 
   const myTeam = await db.query.coachToTeam.findFirst({
@@ -48,6 +50,11 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               <Link className="text-2xl" href={`/playoffs`}>
                 Playoffs
               </Link>
+              {user?.publicMetadata.isAdmin && (
+                <Link className="text-2xl" href={`/admin`}>
+                  Admin
+                </Link>
+              )}
             </nav>
             <span className="ml-auto">
               <UserButton />
