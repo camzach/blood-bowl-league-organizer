@@ -54,7 +54,10 @@ export default async function EditTeam({ params: { teamName } }: Props) {
   });
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(
-    (n) => !team.players.some((p) => p.number === n),
+    (n) =>
+      !team.players.some(
+        (p) => p.membershipType === "player" && p.number === n,
+      ),
   );
 
   return (
