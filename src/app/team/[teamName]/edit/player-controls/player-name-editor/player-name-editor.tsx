@@ -1,5 +1,5 @@
 "use client";
-import useServerMutation from "utils/use-server-mutation";
+import useRefreshingAction from "utils/use-refreshing-action";
 import type { update } from "../actions";
 
 type Props = {
@@ -13,13 +13,13 @@ export default function PlayerNameEditor({
   id,
   update,
 }: Props) {
-  const { startMutation, isMutating } = useServerMutation();
+  const { execute, status } = useRefreshingAction(update);
   const handleNameChange = (newName: string): void => {
     if (newName === playerName || newName === "") return;
-    startMutation(() => update({ player: id, name: newName }));
+    execute({ player: id, name: newName });
   };
 
-  if (isMutating) return <>Updating...</>;
+  if (status === "executing") return <>Updating...</>;
 
   return (
     <input

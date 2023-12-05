@@ -1,7 +1,7 @@
 import { SkillCategory, skill } from "db/schema";
 import { increaseCharacteristic } from "./actions";
 import { useState } from "react";
-import useServerMutation from "utils/use-server-mutation";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type Stat = "ma" | "av" | "pa" | "ag" | "st";
 const stats: Stat[] = ["ma", "av", "pa", "ag", "st"];
@@ -33,7 +33,7 @@ type Props = {
 export function StatList({ playerId, skills }: Props) {
   const [chosenStats, setChosenStats] = useState<Stat[]>([]);
   const [skill, setSkill] = useState("");
-  const { startMutation, isMutating } = useServerMutation();
+  const { execute, status } = useRefreshingAction(increaseCharacteristic);
 
   const remainingItems = stats.filter((i) => !chosenStats.includes(i));
 
@@ -51,21 +51,19 @@ export function StatList({ playerId, skills }: Props) {
         av: 0,
         pa: 0,
         skill: 0,
-      }
+      },
     );
 
   const commit = () => {
     if (!isNonempty(chosenStats)) return;
-    startMutation(() =>
-      increaseCharacteristic({
-        player: playerId,
-        preferences: chosenStats,
-        skill,
-      })
-    );
+    execute({
+      player: playerId,
+      preferences: chosenStats,
+      skill,
+    });
   };
 
-  if (isMutating) return <>Updating...</>;
+  if (status === "executing") return <>Updating...</>;
 
   return (
     <>

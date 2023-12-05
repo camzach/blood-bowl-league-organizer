@@ -4,7 +4,7 @@ import { Modal } from "components/modal";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ready } from "./actions";
-import useServerMutation from "utils/use-server-mutation";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type Props = {
   team: string;
@@ -13,50 +13,31 @@ type Props = {
 export default function ReadyButton({ team }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const { startMutation, isMutating } = useServerMutation(false);
-  const [response, setResponse] = useState<
-    Awaited<ReturnType<typeof ready>> | null | undefined
-  >(undefined);
-  const readyTeam = (): void => {
-    startMutation(() =>
-      ready(team).then((res) => {
-        setResponse(res);
-        setIsOpen(true);
-      })
-    );
-  };
+  const { execute, result, status } = useRefreshingAction(ready);
 
   return (
     <>
       <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        {(() => {
-          switch (response) {
-            case null:
-            case undefined:
-              return null;
-            default:
-              return (
-                <>
-                  <Die result={response.expensiveMistakeRoll} />
-                  {response.expensiveMistake} - Lost{" "}
-                  {response.expensiveMistakesCost} gold!
-                  <button
-                    onClick={(): void => {
-                      setIsOpen(false);
-                      router.refresh();
-                    }}
-                  >
-                    OK
-                  </button>
-                </>
-              );
-          }
-        })()}
+        {status === "hasSucceeded" && result.data ? (
+          <>
+            <Die result={result.data.expensiveMistakeRoll} />
+            {result.data.expensiveMistake} - Lost{" "}
+            {result.data.expensiveMistakesCost} gold!
+            <button
+              onClick={(): void => {
+                setIsOpen(false);
+                router.refresh();
+              }}
+            >
+              OK
+            </button>
+          </>
+        ) : null}
       </Modal>
-      {isMutating ? (
+      {status === "executing" ? (
         "Submitting..."
       ) : (
-        <button className="btn" onClick={readyTeam}>
+        <button className="btn" onClick={() => execute(team)}>
           Ready for next game
         </button>
       )}

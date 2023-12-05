@@ -1,8 +1,18 @@
 "use client";
-import { Tooltip as BaseTooltip } from "react-tooltip";
+import { useId, useCallback } from "react";
+import { Tooltip as BaseTooltip, ITooltip } from "react-tooltip";
 
-export const tooltipId = "tooltip";
+export default function useTooltip() {
+  const tooltipId = useId();
 
-export default function Tooltip() {
-  return <BaseTooltip clickable id={tooltipId} />;
+  const Tooltip = useCallback(
+    (props: Omit<ITooltip, "id">) => (
+      <BaseTooltip {...props} id={tooltipId}>
+        {props.children}
+      </BaseTooltip>
+    ),
+    [tooltipId],
+  );
+
+  return [Tooltip, tooltipId] as const;
 }

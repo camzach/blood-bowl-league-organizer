@@ -35,9 +35,7 @@ const skillsToStarPlayers: (typeof skillToStarPlayer.$inferInsert)[] = [];
 const specialRulesToStarPlayers: (typeof specialRuleToStarPlayer.$inferInsert)[] =
   [];
 
-type NotArray<T extends any | Array<any>> = T extends Array<any>
-  ? T[number]
-  : T;
+type NotArray<T> = T extends Array<infer R> ? R : T;
 
 for (const s of skillSeed) {
   skills.push({
@@ -49,7 +47,7 @@ for (const s of skillSeed) {
 
 function createPosition(
   p: NotArray<(typeof rosterSeed)[number]["players"][number]>,
-  slotId: string
+  slotId: string,
 ) {
   const posId = nanoid();
   positions.push({
@@ -147,7 +145,7 @@ const skillToPositionInsert = positionInsert
   .then(() => db.insert(skillToPosition).values(skillsToPositions))
   .then(() => console.log("skillToPosition inserted"));
 const inducementInsert = specialRuleInsert.then(() =>
-  db.insert(inducement).values(inducements)
+  db.insert(inducement).values(inducements),
 );
 const starPlayerInsert = db
   .insert(starPlayer)
@@ -160,7 +158,7 @@ const starPlayerSkillsInsert = Promise.all([
   db
     .insert(skillToStarPlayer)
     .values(skillsToStarPlayers)
-    .then(() => console.log("skillToStar inserted"))
+    .then(() => console.log("skillToStar inserted")),
 );
 const specialRuleToStarInsert = Promise.all([
   starPlayerInsert,
@@ -169,7 +167,7 @@ const specialRuleToStarInsert = Promise.all([
   db
     .insert(specialRuleToStarPlayer)
     .values(specialRulesToStarPlayers)
-    .then(() => console.log("specRuleToStar added"))
+    .then(() => console.log("specRuleToStar added")),
 );
 
 Promise.all([

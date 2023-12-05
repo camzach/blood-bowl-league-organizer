@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 // import PasswordChangeNotif from "./password-changer";
 import "./global.css";
 import type { Metadata } from "next";
-import Tooltip from "components/tooltip";
 import { db } from "utils/drizzle";
 import { coachToTeam } from "db/schema";
 import { eq } from "drizzle-orm";
@@ -55,7 +54,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             </span>
           </header>
           <main className="p-4">{children}</main>
-          <Tooltip />
         </body>
       </html>
     </ClerkProvider>

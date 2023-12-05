@@ -1,13 +1,6 @@
 import { TeamTable } from "components/team-table";
-import { tooltipId } from "components/tooltip";
+import useTooltip from "components/tooltip";
 import { skill, starPlayer } from "db/schema";
-import { ReactElement } from "react";
-
-async function getMarkup(component: ReactElement) {
-  return (await import("react-dom/server")).default.renderToStaticMarkup(
-    component
-  );
-}
 
 type Props = {
   stars: Array<
@@ -15,7 +8,7 @@ type Props = {
   >;
 };
 
-export default async function StarPlayerTable({ stars }: Props) {
+export default function StarPlayerTable({ stars }: Props) {
   return (
     <TeamTable
       compact
@@ -51,13 +44,13 @@ type SpecialRuleColumnProps = {
   specialAbility: string;
 };
 async function SpecialRuleColumn({ specialAbility }: SpecialRuleColumnProps) {
+  const [Tooltip, tooltipId] = useTooltip();
   const [ruleName, ruleText] = specialAbility.split(": ");
   return (
-    <a
-      data-tooltip-id={tooltipId}
-      data-tooltip-html={await getMarkup(
-        <div
-          className={`
+    <>
+      <a data-tooltip-id={tooltipId}>{ruleName}</a>
+      <Tooltip
+        className={`
             max-h-64
             max-w-xl
             overflow-auto
@@ -66,12 +59,9 @@ async function SpecialRuleColumn({ specialAbility }: SpecialRuleColumnProps) {
             font-sans
             leading-6
           `}
-        >
-          {ruleText}
-        </div>
-      )}
-    >
-      {ruleName}
-    </a>
+      >
+        {ruleText}
+      </Tooltip>
+    </>
   );
 }

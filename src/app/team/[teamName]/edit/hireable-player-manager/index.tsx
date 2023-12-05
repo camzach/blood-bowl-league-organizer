@@ -3,7 +3,7 @@ import type { TeamTableProps } from "components/team-table";
 import { TeamTable } from "components/team-table";
 import { useState, useCallback } from "react";
 import fetchTeam from "../../fetch-team";
-import { PlayerActions } from "../player-controls/action-buttons";
+import { PlayerActions } from "./action-buttons";
 import { skill } from "db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
@@ -25,8 +25,8 @@ export function HireablePlayerManager({
       players.map((p) => [
         p.id,
         freeNumbers.includes(p.number) ? p.number : freeNumbers[0],
-      ])
-    )
+      ]),
+    ),
   );
 
   const handleNumberChange = useCallback(
@@ -36,7 +36,7 @@ export function HireablePlayerManager({
         [id]: n,
       }));
     },
-    []
+    [],
   );
 
   const cols: TeamTableProps<(typeof players)[number]>["cols"] = [
@@ -79,7 +79,12 @@ export function HireablePlayerManager({
       name: "Actions",
       id: "act",
       Component: (player) => (
-        <PlayerActions player={player} skills={skills} state={state} />
+        <PlayerActions
+          player={player}
+          skills={skills}
+          state={state}
+          number={numbers[player.id]}
+        />
       ),
     },
   ];

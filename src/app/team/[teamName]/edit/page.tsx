@@ -4,7 +4,7 @@ import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
 import calculateTV from "utils/calculate-tv";
-// import ReadyTeam from "./ready-team";
+import ReadyTeam from "./ready-team";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
@@ -16,7 +16,6 @@ import { RedirectToSignIn, auth } from "@clerk/nextjs";
 import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot } from "db/schema";
 import { eq } from "drizzle-orm";
-import { fireStaff, hirePlayer, hireStaff } from "./actions";
 
 type Props = { params: { teamName: string } };
 
@@ -35,7 +34,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
     !editableTeams.some(
       (entry) =>
         entry.teamName === decodeURIComponent(teamName) &&
-        entry.coachId === userId
+        entry.coachId === userId,
     )
   ) {
     return redirect(`/teams/${teamName}`);
@@ -55,7 +54,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
   });
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(
-    (n) => !team.players.some((p) => p.number === n)
+    (n) => !team.players.some((p) => p.number === n),
   );
 
   return (
@@ -82,8 +81,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
         teamName={team.name}
         treasury={team.treasury}
         max={6}
-        hireStaffAction={hireStaff}
-        fireStaffAction={fireStaff}
       />
       <SongControls
         team={team.name}
@@ -121,14 +118,13 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             .filter(
               (slot) =>
                 team.players.filter((p) =>
-                  slot.position.some((pos) => pos.id === p.position.id)
-                ).length < slot.max
+                  slot.position.some((pos) => pos.id === p.position.id),
+                ).length < slot.max,
             )
             .flatMap((slot) => slot.position)}
           treasury={team.treasury}
           freeNumbers={freeNumbers}
           teamName={team.name}
-          hirePlayerAction={hirePlayer}
         />
       </div>
       <HireablePlayerManager
@@ -166,8 +162,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                     : team.roster.rerollCost * 2
                 }
                 max={6}
-                hireStaffAction={hireStaff}
-                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.rerolls * team.roster.rerollCost).toLocaleString()}</td>
@@ -184,8 +178,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 current={team.assistantCoaches}
                 cost={10_000}
                 max={10}
-                hireStaffAction={hireStaff}
-                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.assistantCoaches * 10000).toLocaleString()}</td>
@@ -202,8 +194,6 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 current={team.cheerleaders}
                 cost={10_000}
                 max={10}
-                hireStaffAction={hireStaff}
-                fireStaffAction={fireStaff}
               />
             </td>
             <td>{team.cheerleaders * 10000}</td>
@@ -220,15 +210,13 @@ export default async function EditTeam({ params: { teamName } }: Props) {
                 cost={50_000}
                 treasury={team.treasury}
                 max={1}
-                hireStaffAction={hireStaff}
-                fireStaffAction={fireStaff}
               />
             </td>
             <td>{(team.apothecary ? 50_000 : 0).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
-      {/* <ReadyTeam team={team.name} /> */}
+      <ReadyTeam team={team.name} />
     </>
   );
 }

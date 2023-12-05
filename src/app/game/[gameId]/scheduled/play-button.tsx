@@ -1,43 +1,32 @@
 "use client";
-import { useState } from "react";
 import { Die } from "components/die";
 import Link from "next/link";
-import type { start as startAction } from "../actions";
+import { start } from "../actions";
+import useRefreshingAction from "utils/use-refreshing-action";
 
-export function PlayButton({
-  gameId,
-  start,
-}: {
-  gameId: string;
-  start: typeof startAction;
-}) {
-  const [response, setResponse] = useState<Awaited<
-    ReturnType<typeof start>
-  > | null>(null);
-  const startGame = (): void => {
-    void start({ id: gameId }).then(setResponse);
-  };
+export function PlayButton({ gameId }: { gameId: string }) {
+  const { execute, result, status } = useRefreshingAction(start);
 
-  if (response) {
+  if (status === "hasSucceeded" && result.data) {
     return (
       <>
         <span className="text-4xl">
-          <Die result={response.fairweatherFansHome} />+
-          {response.fanFactorHome - response.fairweatherFansHome}=
-          {response.fanFactorHome}
+          <Die result={result.data.fairweatherFansHome} />+
+          {result.data.fanFactorHome - result.data.fairweatherFansHome}=
+          {result.data.fanFactorHome}
         </span>
         <br />
         <span className="text-4xl">
-          <Die result={response.fairweatherFansAway} />+
-          {response.fanFactorAway - response.fairweatherFansAway}=
-          {response.fanFactorAway}
+          <Die result={result.data.fairweatherFansAway} />+
+          {result.data.fanFactorAway - result.data.fairweatherFansAway}=
+          {result.data.fanFactorAway}
         </span>
         <br />
         <span className="text-4xl">
-          <Die result={response.weatherRoll[0]} />
-          <Die result={response.weatherRoll[1]} />
+          <Die result={result.data.weatherRoll[0]} />
+          <Die result={result.data.weatherRoll[1]} />
           {"=>"}
-          {response.weatherResult}
+          {result.data.weatherResult}
         </span>
         <br />
         Now go to{" "}
@@ -49,7 +38,7 @@ export function PlayButton({
   }
 
   return (
-    <button className="btn" onClick={startGame}>
+    <button className="btn" onClick={() => execute({ id: gameId })}>
       Play!!!
     </button>
   );

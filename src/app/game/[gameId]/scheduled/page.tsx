@@ -3,7 +3,6 @@ import { PlayButton } from "./play-button";
 import { notFound, redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 import { game as dbGame } from "db/schema";
-import { start as startAction } from "../actions";
 
 export default async function Game({
   params: { gameId },
@@ -18,5 +17,5 @@ export default async function Game({
   if (game.state !== "scheduled")
     redirect(`game/${gameId}/${game.state.toLowerCase()}`);
 
-  return <PlayButton gameId={gameId} start={startAction} />;
+  return <PlayButton gameId={gameId} />;
 }

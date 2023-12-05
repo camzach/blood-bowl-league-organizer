@@ -1,18 +1,19 @@
 "use client";
-import FireButton from "./player-firer";
-import { Popup, advancementCosts } from "./advancement-modal";
+import { Popup, advancementCosts } from "../player-controls/advancement-modal";
 import { useState } from "react";
 import { Modal } from "components/modal";
 import { skill } from "db/schema";
 import type fetchTeam from "../../fetch-team";
+import PlayerHirer from "./hire-button";
 
 type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
+  number: number;
   skills: Array<typeof skill.$inferSelect>;
   state: "hiring" | "improving" | "draft";
 };
 
-export function PlayerActions({ player, skills, state }: Props) {
+export function PlayerActions({ player, skills, state, number }: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
     Object.values(advancementCosts).some(
@@ -21,7 +22,10 @@ export function PlayerActions({ player, skills, state }: Props) {
 
   return (
     <>
-      {state === "improving" ? (
+      {(state === "hiring" || state === "draft") && (
+        <PlayerHirer player={player.id} number={number} />
+      )}
+      {state === "improving" && (
         <button
           className="btn btn-accent btn-sm"
           onClick={() => setOpen(true)}
@@ -29,8 +33,6 @@ export function PlayerActions({ player, skills, state }: Props) {
         >
           Spend SPP
         </button>
-      ) : (
-        <FireButton id={player.id} />
       )}
       {canAdvance && (
         <Modal isOpen={isOpen} onRequestClose={() => setOpen(false)}>
