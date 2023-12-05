@@ -1,14 +1,13 @@
 "use client";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import useServerMutation from "utils/use-server-mutation";
-import type { hirePlayer as hirePlayerAction } from "./actions";
+import { hirePlayer } from "./actions";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type Props = {
   positions: Array<{ name: string; cost: number }>;
   treasury: number;
   freeNumbers: number[];
   teamName: string;
-  hirePlayerAction: typeof hirePlayerAction;
 };
 
 export function PlayerHirer({
@@ -16,34 +15,27 @@ export function PlayerHirer({
   treasury,
   freeNumbers,
   teamName,
-  hirePlayerAction,
 }: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
-  const { startMutation, isMutating } = useServerMutation();
-  const [error, setError] = useState(false);
+  const { execute, status } = useRefreshingAction(hirePlayer);
+
+  useEffect(() => {
+    if (!freeNumbers.includes(number)) {
+      setNumber(freeNumbers[0]);
+    }
+  }, [freeNumbers, number]);
 
   useEffect(() => {
     if (!positions.some((pos) => pos.name === position))
       setPosition(positions[0]?.name);
   }, [position, positions]);
 
-  useEffect(() => {
-    if (error && !isMutating) {
-      const timeout = setTimeout(() => {
-        setError(false);
-      }, 1500);
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-  }, [error, isMutating]);
-
   const handlePositionSelect = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       setPosition(e.target.value);
     },
-    []
+    [],
   );
 
   const handleNumberSelect = useCallback(
@@ -52,23 +44,12 @@ export function PlayerHirer({
       if (Number.isNaN(val)) return;
       setNumber(val);
     },
-    []
+    [],
   );
 
-  const hirePlayer = (): void => {
-    startMutation(async () => {
-      try {
-        await hirePlayerAction({ team: teamName, position, number });
-        setNumber(freeNumbers.find((n) => n !== number) ?? freeNumbers[0]);
-      } catch {
-        setError(true);
-      }
-    });
-  };
+  if (status === "executing") return <>Hiring...</>;
 
-  if (isMutating) return <>Hiring...</>;
-
-  if (error) return <>An error occurred. Try again.</>;
+  if (status === "hasErrored") return <>An error occurred. Try again.</>;
 
   return (
     <div className="join">
@@ -92,7 +73,10 @@ export function PlayerHirer({
           <option key={n}>{n}</option>
         ))}
       </select>
-      <button className="btn-primary join-item btn" onClick={hirePlayer}>
+      <button
+        className="btn-primary join-item btn"
+        onClick={() => execute({ number, team: teamName, position })}
+      >
         HIRE!!!
       </button>
     </div>

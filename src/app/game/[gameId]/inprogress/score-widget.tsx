@@ -2,21 +2,20 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Fragment, MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import useServerMutation from "utils/use-server-mutation";
 import { z } from "zod";
 import InjuryButton from "./injury-button";
 import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { Modal } from "components/modal";
-import type { end as action } from "../actions";
+import { end } from "../actions";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type NameAndId = { id: string; name: string | null };
-type InputType = Parameters<typeof action>[0];
+type InputType = Parameters<typeof end>[0];
 
 type Props = {
   gameId: string;
-  end: typeof action;
 } & Record<
   "home" | "away",
   { name: string; song?: string } & Record<
@@ -46,7 +45,7 @@ const gameStateParser = z
             otherSPP: z.number().optional(),
           })
           .optional(),
-      })
+      }),
     ),
   })
   .catch({ touchdowns: [0, 0], casualties: [0, 0], playerUpdates: {} });
@@ -61,7 +60,7 @@ function safeParse(input: string): unknown {
   }
 }
 
-export default function ScoreWidget({ home, away, gameId, end }: Props) {
+export default function ScoreWidget({ home, away, gameId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,10 +72,10 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
       return {
         game: gameId,
         ...gameStateParser.parse(
-          safeParse(atob(decodeURIComponent(encodedGameState)))
+          safeParse(atob(decodeURIComponent(encodedGameState))),
         ),
       };
-    }
+    },
   );
 
   useEffect(() => {
@@ -96,7 +95,7 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
     player: NameAndId,
     type: keyof NonNullable<
       NonNullable<GameState["playerUpdates"][string]>["starPlayerPoints"]
-    >
+    >,
   ): void => {
     const { name: playerName, id: playerId } = player;
     setGameState((o) => ({
@@ -116,7 +115,9 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
   };
   const addInjury = (
     player: NameAndId,
-    type: NonNullable<NonNullable<GameState["playerUpdates"][number]>["injury"]>
+    type: NonNullable<
+      NonNullable<GameState["playerUpdates"][number]>["injury"]
+    >,
   ): void => {
     const { name: playerName, id: playerId } = player;
     setGameState((o) => ({
@@ -177,7 +178,7 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
       injury: NonNullable<
         NonNullable<GameState["playerUpdates"][string]>["injury"] | "bh"
       >;
-    }
+    },
   ): void => {
     if (team !== "neither") {
       setCasualties([
@@ -231,7 +232,7 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
       </div>
       <InjuryButton onSubmit={onInjury} home={home} away={away} />
       <SPPButton onSubmit={addSPP} home={home} away={away} />
-      <SubmitButton gameState={gameState} end={end} />
+      <SubmitButton gameState={gameState} />
       <PlayerUpdatesDialog playerUpdates={playerUpdates} />
     </div>
   );
@@ -239,28 +240,12 @@ export default function ScoreWidget({ home, away, gameId, end }: Props) {
 
 type SubmitButtonProps = {
   gameState: GameState & { game: string };
-  end: typeof action;
 };
-function SubmitButton({ gameState, end }: SubmitButtonProps) {
-  const { startMutation, isMutating } = useServerMutation();
-  const [submissionResult, setSubmissionResult] = useState<
-    null | "success" | "failure"
-  >(null);
+function SubmitButton({ gameState }: SubmitButtonProps) {
+  const { execute, status } = useRefreshingAction(end);
 
-  const submit = (): void => {
-    startMutation(() => {
-      return end(gameState)
-        .then(() => {
-          setSubmissionResult("success");
-        })
-        .catch(() => {
-          setSubmissionResult("failure");
-        });
-    });
-  };
-
-  if (isMutating) return <span>Submitting...</span>;
-  if (submissionResult === "failure") {
+  if (status === "executing") return <span>Submitting...</span>;
+  if (status === "hasErrored") {
     return (
       <>
         There was an error with your submission.
@@ -278,9 +263,9 @@ function SubmitButton({ gameState, end }: SubmitButtonProps) {
       </>
     );
   }
-  if (submissionResult === "success") return <span>Success! Good game!</span>;
+  if (status === "hasSucceeded") return <span>Success! Good game!</span>;
   return (
-    <button className="btn" onClick={submit}>
+    <button className="btn" onClick={() => execute(gameState)}>
       Done
     </button>
   );

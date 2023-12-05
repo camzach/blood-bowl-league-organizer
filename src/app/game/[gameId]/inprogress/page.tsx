@@ -11,7 +11,6 @@ import {
 import { db } from "utils/drizzle";
 import { and, eq, inArray } from "drizzle-orm";
 import { game as dbGame, player } from "db/schema";
-import { end } from "../actions";
 
 type Props = {
   params: { gameId: string };
@@ -36,7 +35,7 @@ const detailsSelect = {
         players: {
           where: and(
             inArray(player.membershipType, ["player", "journeyman"]),
-            eq(player.missNextGame, false)
+            eq(player.missNextGame, false),
           ),
           with: {
             position: {
@@ -107,7 +106,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
           cols={cols}
         />
         {game.homeDetails.team.players.filter(
-          (p) => p.membershipType === "journeyman"
+          (p) => p.membershipType === "journeyman",
         ).length > 0 && (
           <>
             <div className="divider">Journeymen</div>
@@ -159,7 +158,6 @@ export default async function InProgress({ params: { gameId } }: Props) {
             .filter((p) => p.membershipType === "journeyman")
             .sort((a, b) => a.number - b.number),
         }}
-        end={end}
       />
       <div className="flex w-full flex-col">
         <TeamTable
@@ -175,7 +173,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
           cols={cols}
         />
         {game.awayDetails.team.players.filter(
-          (p) => p.membershipType === "journeyman"
+          (p) => p.membershipType === "journeyman",
         ).length > 0 && (
           <>
             <div className="divider">Journeymen</div>

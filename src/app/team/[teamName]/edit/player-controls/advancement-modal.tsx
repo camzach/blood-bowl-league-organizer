@@ -1,9 +1,9 @@
 import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
-import useServerMutation from "utils/use-server-mutation";
 import { learnSkill } from "./actions";
 import type { skill, SkillCategory } from "db/schema";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -43,28 +43,24 @@ type Props = {
 };
 export function Popup({ player, skills, onHide }: Props) {
   const [tab, setTab] = useState<SkillCategory | "stat">(
-    player.position.primary[0]
+    player.position.primary[0],
   );
-  const { startMutation, isMutating } = useServerMutation();
+  const { status, execute } = useRefreshingAction(learnSkill);
 
   const purchaseSkill = (skill: string) => () => {
     if (tab === "stat") return;
-    startMutation(async () => {
-      await learnSkill({
-        player: player.id,
-        type: "chosen",
-        skill,
-      });
+    execute({
+      player: player.id,
+      type: "chosen",
+      skill,
     });
   };
   const purchaseRandom = () => {
     if (tab === "stat") return;
-    startMutation(async () => {
-      await learnSkill({
-        player: player.id,
-        type: "random",
-        category: tab,
-      });
+    execute({
+      player: player.id,
+      type: "random",
+      category: tab,
     });
   };
 
@@ -82,11 +78,11 @@ export function Popup({ player, skills, onHide }: Props) {
       passing: [],
       strength: [],
       trait: [],
-    }
+    },
   );
 
   const disabledSkills = player.skills.flatMap(
-    (s) => skillConflicts[s.name] ?? []
+    (s) => skillConflicts[s.name] ?? [],
   );
 
   const statIncreaseSkills = {
@@ -96,9 +92,9 @@ export function Popup({ player, skills, onHide }: Props) {
         skillsByCategory[category].filter(
           (s) =>
             !disabledSkills.includes(s.name) &&
-            !player.skills.some((skill) => skill.name === s.name)
+            !player.skills.some((skill) => skill.name === s.name),
         ),
-      ])
+      ]),
     ),
     secondary: Object.fromEntries(
       player.position.secondary.map((category) => [
@@ -106,13 +102,13 @@ export function Popup({ player, skills, onHide }: Props) {
         skillsByCategory[category].filter(
           (s) =>
             !disabledSkills.includes(s.name) &&
-            !player.skills.some((skill) => skill.name === s.name)
+            !player.skills.some((skill) => skill.name === s.name),
         ),
-      ])
+      ]),
     ),
   };
 
-  if (isMutating) return <>Mutating...</>;
+  if (status === "executing") return <>Mutating...</>;
 
   return (
     <>

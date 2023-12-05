@@ -1,11 +1,10 @@
 "use client";
 import { NumberInput } from "components/number-input";
-import { useEffect, useState } from "react";
-import type {
+import {
   hireStaff as hireStaffAction,
   fireStaff as fireStaffAction,
 } from "./actions";
-import useServerMutation from "utils/use-server-mutation";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type Props = {
   title: string;
@@ -15,8 +14,6 @@ type Props = {
   teamName: string;
   max: number;
   treasury: number;
-  hireStaffAction: typeof hireStaffAction;
-  fireStaffAction: typeof fireStaffAction;
 };
 
 export default function StaffHirer({
@@ -27,50 +24,49 @@ export default function StaffHirer({
   cost,
   max,
   treasury,
-  hireStaffAction,
-  fireStaffAction,
 }: Props) {
-  const { startMutation, isMutating } = useServerMutation();
-  const [error, setError] = useState(false);
+  const { execute: hireAction, status: hireStatus } = useRefreshingAction(
+    hireStaffAction,
+    {
+      onError: (_, __, reset) => {
+        setTimeout(reset, 1500);
+      },
+    },
+  );
+  const { execute: fireAction, status: fireStatus } = useRefreshingAction(
+    fireStaffAction,
+    {
+      onError: (_, __, reset) => {
+        setTimeout(reset, 1500);
+      },
+    },
+  );
 
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more
   const inputMax = Math.min(max, Math.floor(treasury / cost) + current);
 
-  useEffect(() => {
-    if (error && !isMutating) {
-      const timeout = setTimeout(() => {
-        setError(false);
-      }, 1500);
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-  }, [error, isMutating]);
-
   const hireStaff = (val: number): void => {
-    startMutation(() => {
-      const action =
-        val > current
-          ? hireStaffAction({
-              team: teamName,
-              type,
-              quantity: val - current,
-            })
-          : fireStaffAction({
-              team: teamName,
-              type,
-              quantity: current - val,
-            });
-      return action.catch(() => {
-        setError(true);
+    if (val > current) {
+      hireAction({
+        team: teamName,
+        type,
+        quantity: val - current,
       });
-    });
+    } else {
+      fireAction({
+        team: teamName,
+        type,
+        quantity: current - val,
+      });
+    }
   };
 
-  if (isMutating) return <>Mutating...</>;
+  if (hireStatus === "executing" || fireStatus === "executing")
+    return <>Mutating...</>;
 
-  if (error) return <>Failed to hire staff</>;
+  if (hireStatus === "hasErrored" || fireStatus === "hasErrored")
+    return <>Failed to hire staff</>;
 
   return max > 1 ? (
     <NumberInput

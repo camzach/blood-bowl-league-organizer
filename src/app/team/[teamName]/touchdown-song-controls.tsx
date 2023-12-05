@@ -1,8 +1,7 @@
 "use client";
 import classNames from "classnames";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useController, useForm } from "react-hook-form";
-import useServerMutation from "utils/use-server-mutation";
 
 type Props = { team: string; currentSong?: string; isEditable: boolean };
 
@@ -11,7 +10,7 @@ type FormValues = { songName: string; file: File };
 export default function SongControls({ team, currentSong, isEditable }: Props) {
   const [showForm, setShowForm] = useState(false);
 
-  const { startMutation, isMutating } = useServerMutation();
+  const [isTransitioning, startTransition] = useTransition();
   const { register, handleSubmit, control } = useForm<FormValues>();
   const { field: fileControl } = useController({ control, name: "file" });
   const onSubmit = handleSubmit((data: FormValues) => {
@@ -19,16 +18,16 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     Object.entries(data).forEach(([k, v]) => {
       formData.set(k, v);
     });
-    startMutation(() => {
+    startTransition(async () => {
       setShowForm(false);
-      return fetch(`/api/songs/${team}`, {
+      await fetch(`/api/songs/${team}`, {
         method: "POST",
         body: formData,
       });
     });
   });
 
-  if (isMutating) return <div>Submitting song...</div>;
+  if (isTransitioning) return <div>Submitting song...</div>;
 
   const editor = (
     <>
