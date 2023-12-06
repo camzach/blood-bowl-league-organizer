@@ -1,6 +1,6 @@
 import { TeamTable } from "components/team-table";
-import useTooltip from "components/tooltip";
 import { skill, starPlayer } from "db/schema";
+import { SpecialRuleColumn } from "./star-special-rule-column";
 
 type Props = {
   stars: Array<
@@ -37,31 +37,5 @@ export default function StarPlayerTable({ stars }: Props) {
         },
       ]}
     />
-  );
-}
-
-type SpecialRuleColumnProps = {
-  specialAbility: string;
-};
-async function SpecialRuleColumn({ specialAbility }: SpecialRuleColumnProps) {
-  const [Tooltip, tooltipId] = useTooltip();
-  const [ruleName, ruleText] = specialAbility.split(": ");
-  return (
-    <>
-      <a data-tooltip-id={tooltipId}>{ruleName}</a>
-      <Tooltip
-        className={`
-            max-h-64
-            max-w-xl
-            overflow-auto
-            whitespace-pre-wrap
-            text-start
-            font-sans
-            leading-6
-          `}
-      >
-        {ruleText}
-      </Tooltip>
-    </>
   );
 }
