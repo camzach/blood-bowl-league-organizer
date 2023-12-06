@@ -10,6 +10,7 @@ import { Fireworks } from "fireworks-js";
 import { Modal } from "components/modal";
 import { end } from "../actions";
 import { useAction } from "next-safe-action/hook";
+import type { Route } from "next";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = Parameters<typeof end>[0];
@@ -81,7 +82,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams?.toString() ?? "");
     newParams.set("gameState", btoa(JSON.stringify(gameState)));
-    router.replace(`${pathname}?${newParams.toString()}`);
+    router.replace(`${pathname}?${newParams.toString()}` as Route);
   }, [gameState, pathname, router, searchParams]);
 
   const { touchdowns, casualties, playerUpdates } = gameState;
