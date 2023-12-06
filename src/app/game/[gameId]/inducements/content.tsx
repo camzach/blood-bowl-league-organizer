@@ -109,7 +109,7 @@ export default function Content(props: Props) {
     return (
       <>
         Now let&apos;s{" "}
-        <Link className="link" href={`/game/${props.gameId}/inprogress`}>
+        <Link className="link" href={`/game/${props.gameId}/in_progress`}>
           Play!
         </Link>
       </>

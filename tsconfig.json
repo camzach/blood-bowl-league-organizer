@@ -25,15 +25,6 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": [
-    "src",
-    "prisma",
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "src/app"
-],
-  "exclude": [
-    "node_modules",
-    ".next"
-  ]
+  "include": ["src", "next-env.d.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

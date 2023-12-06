@@ -41,17 +41,17 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               >
                 Teams
               </Link>
-              <Link className="text-2xl" href={`/schedule`}>
+              <Link className="text-2xl" href="/schedule">
                 Schedule
               </Link>
-              <Link className="text-2xl" href={`/league-table`}>
+              <Link className="text-2xl" href="/league-table">
                 League Table
               </Link>
-              <Link className="text-2xl" href={`/playoffs`}>
+              <Link className="text-2xl" href="/playoffs">
                 Playoffs
               </Link>
               {user?.publicMetadata.isAdmin && (
-                <Link className="text-2xl" href={`/admin`}>
+                <Link className="text-2xl" href="/admin">
                   Admin
                 </Link>
               )}
