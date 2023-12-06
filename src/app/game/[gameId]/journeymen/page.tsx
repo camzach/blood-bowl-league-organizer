@@ -3,7 +3,6 @@ import Content from "./content";
 import { db } from "utils/drizzle";
 import { game as dbGame, player, rosterSlot } from "db/schema";
 import { and, eq, gte } from "drizzle-orm";
-import { selectJourneymen } from "../actions";
 
 const detailsFeilds = {
   with: {
@@ -22,7 +21,7 @@ const detailsFeilds = {
         players: {
           where: and(
             eq(player.missNextGame, false),
-            eq(player.membershipType, "player")
+            eq(player.membershipType, "player"),
           ),
         },
       },
@@ -53,18 +52,17 @@ export default async function Journeymen({ params: { gameId } }: Props) {
       home={{
         name: game.homeDetails.team.name,
         choices: game.homeDetails.team.roster.rosterSlots.flatMap(
-          (slot) => slot.position
+          (slot) => slot.position,
         ),
         needed: Math.max(0, 11 - game.homeDetails.team.players.length),
       }}
       away={{
         name: game.awayDetails.team.name,
         choices: game.awayDetails.team.roster.rosterSlots.flatMap(
-          (slot) => slot.position
+          (slot) => slot.position,
         ),
         needed: Math.max(0, 11 - game.awayDetails.team.players.length),
       }}
-      selectJourneymen={selectJourneymen}
     />
   );
 }

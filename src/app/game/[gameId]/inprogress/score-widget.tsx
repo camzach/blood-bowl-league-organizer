@@ -9,7 +9,7 @@ import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { Modal } from "components/modal";
 import { end } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hook";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = Parameters<typeof end>[0];
@@ -242,7 +242,7 @@ type SubmitButtonProps = {
   gameState: GameState & { game: string };
 };
 function SubmitButton({ gameState }: SubmitButtonProps) {
-  const { execute, status } = useRefreshingAction(end);
+  const { execute, status } = useAction(end);
 
   if (status === "executing") return <span>Submitting...</span>;
   if (status === "hasErrored") {

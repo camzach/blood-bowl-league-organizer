@@ -12,7 +12,7 @@ if (!db) {
     const client = new Client({
       connectionString: process.env.POSTGRES_URL,
     });
-    await client.connect();
+    client.connect();
     db = devDrizzle(client, { schema, logger: false }) as typeof db;
   } else {
     db = drizzle(sql, {

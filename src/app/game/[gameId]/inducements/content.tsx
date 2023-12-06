@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import InducementSelector from "./inducement-selector";
-import type { purchaseInducements as action } from "../actions";
+import { purchaseInducements } from "../actions";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type InducementArray = Array<{ name: string; price: number; max: number }>;
 type StarsArray = Array<{ name: string; hiringFee: number }>;
@@ -13,7 +14,6 @@ type Props = {
   pettyCash: [number, number];
   treasury: [number, number];
   gameId: string;
-  purchaseInducements: typeof action;
 };
 
 type ChoicesType = {
@@ -67,28 +67,24 @@ export default function Content(props: Props) {
     });
   }
 
-  const [result, setResult] = useState<Awaited<
-    ReturnType<typeof action>
-  > | null>(null);
+  const { execute, status } = useRefreshingAction(purchaseInducements);
 
   const submit = (): void => {
-    void props
-      .purchaseInducements({
-        game: props.gameId,
-        home: {
-          stars: homeChoices.stars,
-          inducements: Object.entries(homeChoices.inducements).map(
-            ([name, quantity]) => ({ name, quantity })
-          ),
-        },
-        away: {
-          stars: awayChoices.stars,
-          inducements: Object.entries(awayChoices.inducements).map(
-            ([name, quantity]) => ({ name, quantity })
-          ),
-        },
-      })
-      .then(setResult);
+    execute({
+      game: props.gameId,
+      home: {
+        stars: homeChoices.stars,
+        inducements: Object.entries(homeChoices.inducements).map(
+          ([name, quantity]) => ({ name, quantity }),
+        ),
+      },
+      away: {
+        stars: awayChoices.stars,
+        inducements: Object.entries(awayChoices.inducements).map(
+          ([name, quantity]) => ({ name, quantity }),
+        ),
+      },
+    });
   };
 
   const calculateTotalCost = (from: "home" | "away"): number => {
@@ -101,7 +97,7 @@ export default function Content(props: Props) {
           acc + (inducements.find((i) => i.name === name)?.price ?? 0) * qty
         );
       },
-      0
+      0,
     );
     const starCosts = choices.stars.reduce((acc, name) => {
       return acc + (stars.find((s) => s.name === name)?.hiringFee ?? 0);
@@ -109,7 +105,7 @@ export default function Content(props: Props) {
     return starCosts + inducementCosts;
   };
 
-  if (result !== null)
+  if (status === "hasSucceeded")
     return (
       <>
         Now let&apos;s{" "}
@@ -118,6 +114,10 @@ export default function Content(props: Props) {
         </Link>
       </>
     );
+
+  if (status === "executing") {
+    return "Submitting...";
+  }
 
   const homeInducementCost = calculateTotalCost("home");
   const awayInducementCost = calculateTotalCost("away");
@@ -131,14 +131,14 @@ export default function Content(props: Props) {
     treasuryCostAway = Math.max(0, awayInducementCost - awayPettyCash);
     treasuryCostHome = Math.max(
       0,
-      homeInducementCost - (homePettyCash + treasuryCostAway)
+      homeInducementCost - (homePettyCash + treasuryCostAway),
     );
     homeFinalPettyCash += treasuryCostAway;
   } else if (awayPettyCash > 0) {
     treasuryCostHome = Math.max(0, homeInducementCost - homePettyCash);
     treasuryCostAway = Math.max(
       0,
-      awayInducementCost - (awayPettyCash + treasuryCostHome)
+      awayInducementCost - (awayPettyCash + treasuryCostHome),
     );
     awayFinalPettyCash += treasuryCostHome;
   }

@@ -8,7 +8,7 @@ function getInducementPrice(
     specialPrice: number | null;
     specialPriceRule: string | null;
   },
-  specialRules: string[]
+  specialRules: string[],
 ): number | null {
   if (
     inducement.specialPriceRule !== null &&
@@ -25,7 +25,7 @@ export async function calculateInducementCosts(
   stars: Array<string>,
   specialRules: string[],
   playerCount: number,
-  tx: typeof db
+  tx: typeof db,
 ): Promise<number> {
   if (stars.length > 2)
     throw new InducementError("Only 2 star players permitted");
@@ -48,14 +48,14 @@ export async function calculateInducementCosts(
   for (const player of starPlayers) {
     if (
       !player.specialRuleToStarPlayer.some(({ specialRuleName: rule }) =>
-        specialRules.some((r) => r === rule)
+        specialRules.some((r) => r === rule),
       )
     )
       throw new InducementError("Invalid Star Player selected");
 
     if (player.partnerName !== null && !stars.includes(player.partnerName))
       throw new InducementError(
-        `${player.name} and ${player.partnerName} must be hired together`
+        `${player.name} and ${player.partnerName} must be hired together`,
       );
 
     starPlayerCost += player.hiringFee;
@@ -66,7 +66,7 @@ export async function calculateInducementCosts(
       ? await tx.query.inducement.findMany({
           where: inArray(
             inducement.name,
-            inducements.map((ind) => ind.name)
+            inducements.map((ind) => ind.name),
           ),
         })
       : [];
@@ -75,7 +75,7 @@ export async function calculateInducementCosts(
   const inducementCounts: Record<string, number> = {};
   for (const inducement of inducements) {
     const foundInducement = chosenInducements.find(
-      (ind) => ind.name === inducement.name
+      (ind) => ind.name === inducement.name,
     );
     if (!foundInducement)
       throw new InducementError("Unknown inducement specified");
