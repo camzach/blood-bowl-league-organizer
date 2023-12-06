@@ -2,10 +2,10 @@
 import { Die } from "components/die";
 import Link from "next/link";
 import { start } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hook";
 
 export function PlayButton({ gameId }: { gameId: string }) {
-  const { execute, result, status } = useRefreshingAction(start);
+  const { execute, result, status } = useAction(start);
 
   if (status === "hasSucceeded" && result.data) {
     return (

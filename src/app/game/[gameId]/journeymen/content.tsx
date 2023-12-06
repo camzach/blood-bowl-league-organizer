@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import type { selectJourneymen as selectJourneymenAction } from "../actions";
+import { selectJourneymen } from "../actions";
+import useRefreshingAction from "utils/use-refreshing-action";
 
 type TeamWithChoices = {
   name: string;
@@ -15,7 +16,6 @@ type Props = {
   gameId: string;
   home: TeamWithChoices;
   away: TeamWithChoices;
-  selectJourneymen: typeof selectJourneymenAction;
 };
 
 function ChoicesList(props: {
@@ -50,27 +50,13 @@ function ChoicesList(props: {
   );
 }
 
-export default function Journeymen({
-  home,
-  away,
-  gameId,
-  selectJourneymen,
-}: Props) {
+export default function Journeymen({ home, away, gameId }: Props) {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
-  const [response, setResponse] = useState<Awaited<
-    ReturnType<typeof selectJourneymen>
-  > | null>(null);
 
-  const submitJourneymen = (): void => {
-    void selectJourneymen({
-      game: gameId,
-      home: homeChoice,
-      away: awayChoice,
-    }).then(setResponse);
-  };
+  const { execute, status } = useRefreshingAction(selectJourneymen);
 
-  if (response !== null) {
+  if (status === "hasSucceeded") {
     return (
       <>
         Now go to{" "}
@@ -79,6 +65,10 @@ export default function Journeymen({
         </Link>
       </>
     );
+  }
+
+  if (status === "executing") {
+    return "Submitting...";
   }
 
   return (
@@ -102,7 +92,12 @@ export default function Journeymen({
         />
       )}
       <br />
-      <button className="btn" onClick={submitJourneymen}>
+      <button
+        className="btn"
+        onClick={() =>
+          execute({ game: gameId, home: homeChoice, away: awayChoice })
+        }
+      >
         Submit!
       </button>
     </>

@@ -289,19 +289,23 @@ export const selectJourneymen = action(
             pettyCashAwarded: pettyCashAway,
           })
           .where(eq(gameDetails.id, game.awayDetails.id)),
-        tx
-          .insert(player)
-          .values(newPlayers)
-          .then(() =>
-            tx.insert(improvement).values(
-              newPlayers.map((p) => ({
-                playerId: p.id,
-                type: "chosen_skill" as const,
-                order: -1,
-                skillName: "Loner (4+)",
-              })),
-            ),
-          ),
+        ...(newPlayers.length > 0
+          ? [
+              tx
+                .insert(player)
+                .values(newPlayers)
+                .then(() =>
+                  tx.insert(improvement).values(
+                    newPlayers.map((p) => ({
+                      playerId: p.id,
+                      type: "chosen_skill" as const,
+                      order: -1,
+                      skillName: "Loner (4+)",
+                    })),
+                  ),
+                ),
+            ]
+          : []),
       ]);
 
       return {

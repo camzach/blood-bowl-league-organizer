@@ -8,7 +8,6 @@ import {
   starPlayer,
 } from "db/schema";
 import { eq, getTableColumns, inArray, isNotNull, or } from "drizzle-orm";
-import { purchaseInducements } from "../actions";
 
 function getChoicesForSpecialRules(rules: string[]) {
   const inducements = db
@@ -17,8 +16,8 @@ function getChoicesForSpecialRules(rules: string[]) {
     .where(
       or(
         isNotNull(inducement.price),
-        inArray(inducement.specialPriceRule, rules)
-      )
+        inArray(inducement.specialPriceRule, rules),
+      ),
     )
     .then((res) =>
       res.map((i) => ({
@@ -27,14 +26,14 @@ function getChoicesForSpecialRules(rules: string[]) {
         rules.includes(i.specialPriceRule)
           ? i.specialPrice
           : i.price) as number,
-      }))
+      })),
     );
   const stars = db
     .selectDistinct(getTableColumns(starPlayer))
     .from(starPlayer)
     .leftJoin(
       specialRuleToStarPlayer,
-      eq(starPlayer.name, specialRuleToStarPlayer.starPlayerName)
+      eq(starPlayer.name, specialRuleToStarPlayer.starPlayerName),
     )
     .where(inArray(specialRuleToStarPlayer.specialRuleName, rules))
     .orderBy(starPlayer.name);
@@ -80,13 +79,13 @@ export default async function Inducements({
 
   const homeOptions = await getChoicesForSpecialRules(
     game.homeDetails.team.roster.specialRuleToRoster.map(
-      (r) => r.specialRuleName
-    )
+      (r) => r.specialRuleName,
+    ),
   );
   const awayOptions = await getChoicesForSpecialRules(
     game.awayDetails.team.roster.specialRuleToRoster.map(
-      (r) => r.specialRuleName
-    )
+      (r) => r.specialRuleName,
+    ),
   );
 
   return (
@@ -102,7 +101,6 @@ export default async function Inducements({
         game.awayDetails.team.treasury,
       ]}
       gameId={gameId}
-      purchaseInducements={purchaseInducements}
     />
   );
 }
