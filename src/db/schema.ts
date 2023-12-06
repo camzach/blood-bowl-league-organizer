@@ -73,7 +73,7 @@ const skillCategorySet = customType<{
   toDriver: (input) =>
     input.reduce(
       (prev, curr) => prev | (1 << skillCategories.indexOf(curr)),
-      0
+      0,
     ),
   fromDriver: (output) => skillCategories.filter((_, i) => output & (1 << i)),
 });
@@ -91,7 +91,7 @@ export const team = pgTable("team", {
   apothecary: boolean("apothecary").notNull().default(false),
   dedicatedFans: integer("dedicated_fans").notNull().default(1),
   touchdownSong: varchar("touchdown_song", { length: 255 }).references(
-    () => song.name
+    () => song.name,
   ),
 });
 export const teamRelations = relations(team, ({ one, many }) => ({
@@ -158,12 +158,12 @@ export const improvement = pgTable(
       .references(() => player.id),
     order: integer("order").notNull(),
     skillName: varchar("skill_name", { length: 255 }).references(
-      () => skill.name
+      () => skill.name,
     ),
   },
   (table) => ({
     pk: primaryKey(table.playerId, table.order),
-  })
+  }),
 );
 export const improvementRelations = relations(improvement, ({ one }) => ({
   player: one(player, {
@@ -189,7 +189,7 @@ export const coachToTeam = pgTable(
       .notNull()
       .references(() => team.name),
   },
-  (table) => ({ pk: primaryKey(table.coachId, table.teamName) })
+  (table) => ({ pk: primaryKey(table.coachId, table.teamName) }),
 );
 export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
   team: one(team, {
@@ -228,7 +228,7 @@ export const specialRuleToRoster = pgTable(
   },
   (table) => ({
     pk: primaryKey(table.specialRuleName, table.rosterName),
-  })
+  }),
 );
 export const specialRuleToRosterRelations = relations(
   specialRuleToRoster,
@@ -241,7 +241,7 @@ export const specialRuleToRosterRelations = relations(
       fields: [specialRuleToRoster.rosterName],
       references: [roster.name],
     }),
-  })
+  }),
 );
 
 export const rosterSlot = pgTable(
@@ -255,7 +255,7 @@ export const rosterSlot = pgTable(
   },
   (table) => ({
     rosterIndex: index("roster_slot_idx").on(table.rosterName),
-  })
+  }),
 );
 export const rosterSlotRelations = relations(rosterSlot, ({ one, many }) => ({
   roster: one(roster, {
@@ -313,7 +313,7 @@ export const skillToPositionRelations = relations(
       fields: [skillToPosition.positionId],
       references: [position.id],
     }),
-  })
+  }),
 );
 
 export const faq = pgTable("faq", {
@@ -400,7 +400,7 @@ export const roundRobinGame = pgTable(
   },
   (table) => ({
     pk: primaryKey(table.seasonName, table.gameId),
-  })
+  }),
 );
 export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
   season: one(season, {
@@ -428,7 +428,7 @@ export const bracketGame = pgTable(
   },
   (table) => ({
     pk: primaryKey(table.seasonName, table.round, table.seed),
-  })
+  }),
 );
 export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
   season: one(season, {
@@ -451,7 +451,7 @@ export const inducement = pgTable("inducement", {
   //    (special_price IS NOT NULL AND special_price_rule IS NOT NULL))
   specialPrice: integer("special_price"),
   specialPriceRule: varchar("special_price_rule", { length: 255 }).references(
-    () => specialRule.name
+    () => specialRule.name,
   ),
 });
 
@@ -473,7 +473,7 @@ export const starPlayer = pgTable(
       columns: [table.partnerName],
       foreignColumns: [table.name],
     }),
-  })
+  }),
 );
 export const starPlayerRelations = relations(starPlayer, ({ one, many }) => ({
   skillToStarPlayer: many(skillToStarPlayer),
@@ -503,7 +503,7 @@ export const skillToStarPlayerRelations = relations(
       fields: [skillToStarPlayer.starPlayerName],
       references: [starPlayer.name],
     }),
-  })
+  }),
 );
 
 export const specialRuleToStarPlayer = pgTable("sr_to_sp", {
@@ -525,7 +525,7 @@ export const specialRuleToStarPlayerRelations = relations(
       fields: [specialRuleToStarPlayer.starPlayerName],
       references: [starPlayer.name],
     }),
-  })
+  }),
 );
 
 export const gameDetailsToStarPlayer = pgTable(
@@ -540,7 +540,7 @@ export const gameDetailsToStarPlayer = pgTable(
   },
   (table) => ({
     pk: primaryKey(table.gameDetailsId, table.starPlayerName),
-  })
+  }),
 );
 export const gameDetailsToStarPlayerRelations = relations(
   gameDetailsToStarPlayer,
@@ -553,7 +553,7 @@ export const gameDetailsToStarPlayerRelations = relations(
       fields: [gameDetailsToStarPlayer.starPlayerName],
       references: [starPlayer.name],
     }),
-  })
+  }),
 );
 
 export const gameDetailsToInducement = pgTable(
@@ -569,5 +569,5 @@ export const gameDetailsToInducement = pgTable(
   },
   (table) => ({
     pk: primaryKey(table.gameDetailsId, table.inducementName),
-  })
+  }),
 );

@@ -679,7 +679,7 @@ export const end = action(
         })
         .where(eq(team.name, game.awayDetails.teamName));
 
-      return Promise.all([
+      await Promise.all([
         playerUpdates,
         gameUpdate,
         homeDetailsUpdate,

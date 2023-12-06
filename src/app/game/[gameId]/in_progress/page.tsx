@@ -10,7 +10,7 @@ import {
 } from "utils/get-computed-player-fields";
 import { db } from "utils/drizzle";
 import { and, eq, inArray } from "drizzle-orm";
-import { game as dbGame, player } from "db/schema";
+import { game as dbGame, player, starPlayer } from "db/schema";
 
 type Props = {
   params: { gameId: string };
@@ -18,13 +18,7 @@ type Props = {
 
 const detailsSelect = {
   with: {
-    gameDetailsToStarPlayer: {
-      with: {
-        starPlayer: {
-          with: { skillToStarPlayer: { with: { skill: true } } },
-        },
-      },
-    },
+    gameDetailsToStarPlayer: true,
     team: {
       columns: {
         name: true,
@@ -87,6 +81,22 @@ export default async function InProgress({ params: { gameId } }: Props) {
   });
   if (!game) return notFound();
 
+  // query star players separately because the query got too big and broke
+  const stars = (
+    await db.query.starPlayer.findMany({
+      where: inArray(
+        starPlayer.name,
+        [game.homeDetails, game.awayDetails].flatMap((details) =>
+          details.gameDetailsToStarPlayer.map((star) => star.starPlayerName),
+        ),
+      ),
+      with: { skillToStarPlayer: { with: { skill: true } } },
+    })
+  ).map((star) => ({
+    ...star,
+    skills: star.skillToStarPlayer.map((skill) => skill.skill),
+  }));
+
   return (
     <div
       className="mx-auto grid w-4/5 grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,3fr)] gap-3"
@@ -128,10 +138,9 @@ export default async function InProgress({ params: { gameId } }: Props) {
           <>
             <div className="divider">Star Players</div>
             <StarPlayerTable
-              stars={game.homeDetails.gameDetailsToStarPlayer.map((e) => ({
-                ...e.starPlayer,
-                skills: e.starPlayer.skillToStarPlayer.map((s) => s.skill),
-              }))}
+              stars={game.homeDetails.gameDetailsToStarPlayer.map(
+                (e) => stars.find((star) => star.name === e.starPlayerName)!,
+              )}
             />
           </>
         )}
@@ -191,14 +200,13 @@ export default async function InProgress({ params: { gameId } }: Props) {
             />
           </>
         )}
-        {game.homeDetails.gameDetailsToStarPlayer.length > 0 && (
+        {game.awayDetails.gameDetailsToStarPlayer.length > 0 && (
           <>
             <div className="divider">Star Players</div>
             <StarPlayerTable
-              stars={game.homeDetails.gameDetailsToStarPlayer.map((e) => ({
-                ...e.starPlayer,
-                skills: e.starPlayer.skillToStarPlayer.map((s) => s.skill),
-              }))}
+              stars={game.awayDetails.gameDetailsToStarPlayer.map(
+                (e) => stars.find((star) => star.name === e.starPlayerName)!,
+              )}
             />
           </>
         )}
