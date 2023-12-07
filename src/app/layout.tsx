@@ -28,9 +28,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   if (!userId) return <RedirectToSignIn />;
 
-  const myTeam = await db.query.coachToTeam.findFirst({
-    where: eq(coachToTeam.coachId, userId),
-  });
+  const teams = await db.query.team.findMany();
 
   return (
     <ClerkProvider>
@@ -50,7 +48,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 </span>
                 <nav className="navbar-center hidden gap-3 md:flex">
                   <NavLinks
-                    team={myTeam?.teamName ?? "new"}
+                    teams={teams.map((t) => t.name)}
                     isAdmin={!!user?.publicMetadata.isAdmin}
                   />
                 </nav>
@@ -66,9 +64,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 aria-label="close sidebar"
                 className="drawer-overlay"
               ></label>
-              <nav className="menu min-h-full w-fit bg-base-200 p-4 pr-16 text-base-content">
+              <nav className="menu min-h-full w-fit bg-base-200 p-4 text-base-content">
                 <NavLinks
-                  team={myTeam?.teamName ?? "new"}
+                  teams={teams.map((t) => t.name)}
                   isAdmin={!!user?.publicMetadata.isAdmin}
                 />
               </nav>
@@ -80,27 +78,35 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   );
 }
 
-function NavLinks(props: { team: string; isAdmin: boolean }) {
-  const result = [
-    <Link key="team" className="text-xl" href={`/team/${props.team}`}>
-      Team
-    </Link>,
-    <Link key="schedule" className="text-xl" href="/schedule">
-      Schedule
-    </Link>,
-    <Link key="table" className="text-xl" href="/league-table">
-      League Table
-    </Link>,
-    <Link key="playoffs" className="text-xl" href="/playoffs">
-      Playoffs
-    </Link>,
-  ];
-  if (props.isAdmin) {
-    result.push(
-      <Link key="admin" className="text-xl" href="/admin">
-        Admin
-      </Link>,
-    );
-  }
-  return result;
+function NavLinks(props: { teams: string[]; isAdmin: boolean }) {
+  return (
+    <ul className="menu text-xl md:menu-horizontal">
+      <li>
+        <details>
+          <summary>Teams</summary>
+          <ul>
+            {props.teams.map((team) => (
+              <li key={team}>
+                <Link href={`/team/${team}`}>{team}</Link>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </li>
+      <li>
+        <Link href="/schedule">Schedule</Link>
+      </li>
+      <li>
+        <Link href="/league-table">League Table</Link>
+      </li>
+      <li>
+        <Link href="/playoffs">Playoffs</Link>
+      </li>
+      {props.isAdmin && (
+        <li>
+          <Link href="/admin">Admin</Link>
+        </li>
+      )}
+    </ul>
+  );
 }
