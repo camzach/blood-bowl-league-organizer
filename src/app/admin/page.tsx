@@ -10,11 +10,12 @@ import {
   season,
 } from "db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { notFound } from "next/navigation";
 
 export default async function AdminPage() {
   const user = await currentUser();
 
-  if (!user?.publicMetadata.isAdmin) return "503";
+  if (!user?.publicMetadata.isAdmin) return notFound();
 
   return (
     <form>
