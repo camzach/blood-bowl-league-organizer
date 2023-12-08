@@ -3,8 +3,6 @@ import type { PropsWithChildren } from "react";
 import "./global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
-import { coachToTeam } from "db/schema";
-import { eq } from "drizzle-orm";
 import {
   ClerkProvider,
   RedirectToSignIn,
@@ -84,7 +82,7 @@ function NavLinks(props: { teams: string[]; isAdmin: boolean }) {
       <li>
         <details>
           <summary>Teams</summary>
-          <ul>
+          <ul className="z-10">
             {props.teams.map((team) => (
               <li key={team}>
                 <Link href={`/team/${team}`}>{team}</Link>

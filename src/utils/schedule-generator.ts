@@ -56,15 +56,24 @@ export function generateSchedule(teams: string[]) {
   };
 
   function rebalance(): void {
+    /*
+      Derived from:
+      Sigrid Knust, Michael von Thaden,
+      Balanced home–away assignments,
+      Discrete Optimization,
+      Volume 3, Issue 4,
+      2006,
+      Pages 354-365,
+      ISSN 1572-5286,
+      https://doi.org/10.1016/j.disopt.2006.07.002.
+    */
     if (localTeams.includes(null)) {
-      const [tooManyHome] =
-        Object.entries(homeAwayCounts).find(
-          ([_, [home, away]]) => home - away > 0,
-        ) ?? ([] as never[]);
-      const [tooManyAway] =
-        Object.entries(homeAwayCounts).find(
-          ([_, [home, away]]) => away - home > 0,
-        ) ?? ([] as never[]);
+      const [tooManyHome] = Object.entries(homeAwayCounts).find(
+        ([_, [home, away]]) => home - away > 0,
+      )!;
+      const [tooManyAway] = Object.entries(homeAwayCounts).find(
+        ([_, [home, away]]) => away - home > 0,
+      )!;
       const gameToFix = pairings.find(
         ([home, away]) => home === tooManyHome && away === tooManyAway,
       );
@@ -89,20 +98,15 @@ export function generateSchedule(teams: string[]) {
         }
       }
       // gameA and gameB will always be found
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       switchHomeAway(gameA!);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       switchHomeAway(gameB!);
     } else {
-      // This will always find a pairing
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const [tooManyHome] = Object.entries(homeAwayCounts).find(
         ([_, [home, away]]) => home - away > 1,
-      )!;
+      ) ?? [null];
       if (tooManyHome !== null) {
         const game =
           // This will always find a pairing
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           pairings.find(
             ([home, away]) =>
               home === tooManyHome &&
@@ -111,19 +115,19 @@ export function generateSchedule(teams: string[]) {
         switchHomeAway(game);
         return;
       }
+      // No team has too many home games, so some team must have too many away games
+      // This case is symmetrical to the one above
       const [tooManyAway] =
         // This will always find a pairing
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         Object.entries(homeAwayCounts).find(
           ([_, [home, away]]) => away - home > 1,
         )!;
       const game =
         // This will always find a pairing
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         pairings.find(
           ([home, away]) =>
-            home === tooManyAway &&
-            homeAwayCounts[away][1] > homeAwayCounts[away][0],
+            away === tooManyAway &&
+            homeAwayCounts[home][0] > homeAwayCounts[home][1],
         )!;
       switchHomeAway(game);
     }
