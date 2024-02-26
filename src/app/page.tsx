@@ -21,7 +21,7 @@ export default async function Home() {
           </Link>
         </li>
         <li>
-          <Link className="link" href={`/team/${myTeam?.teamName}`}>
+          <Link className="link" href={`/team/${myTeam?.teamName ?? "new"}`}>
             View your team
           </Link>
         </li>
