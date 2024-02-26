@@ -6,7 +6,7 @@ import { Pool } from "@neondatabase/serverless";
 let db: ReturnType<typeof drizzle<typeof schema>> = global.db;
 
 if (!db) {
-  const pool = new Pool({ connectionString: process.env.POSTGRES_URL! });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
   db = drizzle(pool, { schema, logger: false });
 }
 
