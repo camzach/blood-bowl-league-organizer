@@ -81,21 +81,23 @@ export default async function InProgress({ params: { gameId } }: Props) {
   });
   if (!game) return notFound();
 
+  const starsToQuery = [game.homeDetails, game.awayDetails].flatMap((details) =>
+    details.gameDetailsToStarPlayer.map((star) => star.starPlayerName),
+  );
+
   // query star players separately because the query got too big and broke
-  const stars = (
-    await db.query.starPlayer.findMany({
-      where: inArray(
-        starPlayer.name,
-        [game.homeDetails, game.awayDetails].flatMap((details) =>
-          details.gameDetailsToStarPlayer.map((star) => star.starPlayerName),
-        ),
-      ),
-      with: { skillToStarPlayer: { with: { skill: true } } },
-    })
-  ).map((star) => ({
-    ...star,
-    skills: star.skillToStarPlayer.map((skill) => skill.skill),
-  }));
+  const stars =
+    starsToQuery.length > 0
+      ? (
+          await db.query.starPlayer.findMany({
+            where: inArray(starPlayer.name, starsToQuery),
+            with: { skillToStarPlayer: { with: { skill: true } } },
+          })
+        ).map((star) => ({
+          ...star,
+          skills: star.skillToStarPlayer.map((skill) => skill.skill),
+        }))
+      : [];
 
   return (
     <div
