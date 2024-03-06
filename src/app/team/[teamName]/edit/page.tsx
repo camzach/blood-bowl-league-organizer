@@ -16,6 +16,7 @@ import { RedirectToSignIn, auth } from "@clerk/nextjs";
 import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot } from "db/schema";
 import { eq } from "drizzle-orm";
+import DoneImproving from "./done-improving";
 
 type Props = { params: { teamName: string } };
 
@@ -219,7 +220,11 @@ export default async function EditTeam({ params: { teamName } }: Props) {
           </tr>
         </tbody>
       </table>
-      <ReadyTeam team={team.name} />
+      {team.state === "improving" ? (
+        <DoneImproving team={team.name} />
+      ) : (
+        <ReadyTeam team={team.name} />
+      )}
     </>
   );
 }

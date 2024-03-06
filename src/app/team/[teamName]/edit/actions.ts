@@ -382,6 +382,30 @@ export const fireStaff = action(
   },
 );
 
+export const doneImproving = action(z.string(), async (input) => {
+  return db.transaction(async (tx) => {
+    if (!canEditTeam(input, tx))
+      throw new Error("User does not have permission to modify this team");
+    const team = await tx.query.team.findFirst({
+      where: eq(dbTeam.name, input),
+      columns: {
+        name: true,
+        state: true,
+      },
+    });
+    if (!team) throw new Error("Team not found");
+    if (team.state !== "improving")
+      throw new Error("Team not in Improving state");
+
+    await tx
+      .update(dbTeam)
+      .set({ state: "hiring" })
+      .where(eq(dbTeam.name, team.name));
+
+    return true;
+  });
+});
+
 export const ready = action(z.string(), async (input) => {
   return db.transaction(async (tx) => {
     if (!canEditTeam(input, tx))
@@ -397,7 +421,7 @@ export const ready = action(z.string(), async (input) => {
     });
     if (!team) throw new Error("Team not found");
     if (team.state !== "draft" && team.state !== "hiring")
-      throw new Error("Team not in Draft or PostGame state");
+      throw new Error("Team not in Draft or Hiring state");
     if (team.state === "draft" && team.players.length < 11)
       throw new Error("11 players required to draft a team");
 
