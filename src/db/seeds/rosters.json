@@ -1174,52 +1174,35 @@
   },
   {
     "name": "Norse",
-    "specialRules": [
-      "Lustrian Superleague",
-      "Old World Classic",
-      "Apothecary Allowed"
-    ],
+    "specialRules": ["Old World Classic", "Apothecary Allowed"],
     "rerollCost": 60000,
     "tier": 1,
     "players": [
       {
-        "position": "Norse Lineman",
-        "max": 12,
+        "position": "Norse Raider Lineman",
+        "max": 16,
         "cost": 50000,
         "MA": 6,
         "ST": 3,
         "AG": 3,
         "PA": 4,
         "AV": 8,
-        "skills": ["Block"],
+        "skills": ["Block", "Drunkard", "Thick Skull"],
         "primary": ["general"],
-        "secondary": ["agility", "strength"]
+        "secondary": ["agility", "passing", "strength"]
       },
       {
-        "position": "Norse Thrower",
+        "position": "Beer Boar",
         "max": 2,
-        "cost": 70000,
-        "MA": 6,
-        "ST": 3,
+        "cost": 20000,
+        "MA": 5,
+        "ST": 1,
         "AG": 3,
-        "PA": 3,
-        "AV": 8,
-        "skills": ["Block", "Pass"],
-        "primary": ["general", "passing"],
-        "secondary": ["agility", "strength"]
-      },
-      {
-        "position": "Norse Catcher",
-        "max": 2,
-        "cost": 90000,
-        "MA": 7,
-        "ST": 3,
-        "AG": 3,
-        "PA": 5,
-        "AV": 8,
-        "skills": ["Block", "Dauntless"],
-        "primary": ["agility", "general"],
-        "secondary": ["strength"]
+        "PA": null,
+        "AV": 6,
+        "skills": ["Dodge", "No Hands", "Pick-Me-Up", "Stunty", "Titchy"],
+        "primary": [],
+        "secondary": ["agility"]
       },
       {
         "position": "Norse Berserker",
@@ -1232,7 +1215,20 @@
         "AV": 8,
         "skills": ["Block", "Frenzy", "Jump Up"],
         "primary": ["general", "strength"],
-        "secondary": ["agility"]
+        "secondary": ["agility", "passing"]
+      },
+      {
+        "position": "Valkyrie",
+        "max": 2,
+        "cost": 95000,
+        "MA": 7,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Catch", "Dauntless", "Pass", "Strip Ball"],
+        "primary": ["agility", "general", "passing"],
+        "secondary": ["strength"]
       },
       {
         "position": "Ulfwerener",
@@ -1253,7 +1249,7 @@
         "cost": 140000,
         "MA": 5,
         "ST": 5,
-        "AG": 5,
+        "AG": 4,
         "PA": null,
         "AV": 9,
         "skills": [
