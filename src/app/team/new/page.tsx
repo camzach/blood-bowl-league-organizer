@@ -1,9 +1,15 @@
 import { auth } from "@clerk/nextjs";
-import { coachToTeam, roster, team } from "db/schema";
+import {
+  coachToTeam,
+  optionalSpecialRuleToRoster,
+  roster,
+  team,
+} from "db/schema";
 import { getTableColumns, eq, isNull, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "utils/drizzle";
+import RosterSelector from "./roster-selector";
 
 export default async function NewTeam() {
   const { userId } = auth();
@@ -15,10 +21,11 @@ export default async function NewTeam() {
     .leftJoin(coachToTeam, eq(team.name, coachToTeam.teamName))
     .where(and(isNull(coachToTeam.coachId), eq(team.state, "draft")));
 
-  const rosters = await db
-    .select({ name: roster.name, tier: roster.tier })
-    .from(roster)
-    .orderBy(roster.tier, roster.name);
+  const rosters = await db.query.roster.findMany({
+    columns: { name: true, tier: true },
+    with: { optionalSpecialRules: true },
+    orderBy: [roster.tier, roster.name],
+  });
 
   return (
     <>
@@ -31,13 +38,23 @@ export default async function NewTeam() {
           const name = data.get("name")?.toString();
           const roster = data.get("roster")?.toString();
           const coachId = data.get("userId")?.toString();
+          const optionalRule = data.get("optionalRule")?.toString();
 
           if (!name || !roster || !coachId) return null;
+          const ruleOptions =
+            await db.query.optionalSpecialRuleToRoster.findMany({
+              where: eq(optionalSpecialRuleToRoster.rosterName, roster),
+            });
+          const option = ruleOptions.find(
+            (opt) => opt.specialRuleName === optionalRule,
+          );
+          if (ruleOptions.length > 0 && !option) return null;
 
           await db.transaction(async (tx) => {
             await tx.insert(team).values({
               name,
               rosterName: roster,
+              chosenSpecialRuleName: option?.specialRuleName,
             });
             await tx.insert(coachToTeam).values({
               coachId,
@@ -62,13 +79,7 @@ export default async function NewTeam() {
             placeholder="Team Name"
             name="name"
           />
-          <select className="join-item select select-bordered" name="roster">
-            {rosters.map((opt) => (
-              <option key={opt.name} value={opt.name}>
-                {opt.name} - Tier {["Ⅰ", "Ⅱ", "Ⅲ"][opt.tier - 1]}
-              </option>
-            ))}
-          </select>
+          <RosterSelector rosters={rosters} />
         </div>
       </form>
       {teams.length > 0 && (

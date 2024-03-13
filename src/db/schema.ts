@@ -85,6 +85,7 @@ export const team = pgTable("team", {
   rosterName: varchar("roster_name", { length: 255 })
     .notNull()
     .references(() => roster.name),
+  chosenSpecialRuleName: varchar("chosen_special_rule_name", { length: 255 }),
   rerolls: integer("rerolls").notNull().default(0),
   cheerleaders: integer("cheerleaders").notNull().default(0),
   assistantCoaches: integer("assistant_coaches").notNull().default(0),
@@ -98,6 +99,10 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   roster: one(roster, {
     fields: [team.rosterName],
     references: [roster.name],
+  }),
+  specialRuleChoice: one(specialRule, {
+    fields: [team.chosenSpecialRuleName],
+    references: [specialRule.name],
   }),
   song: one(song, {
     fields: [team.touchdownSong],
@@ -206,6 +211,7 @@ export const roster = pgTable("roster", {
 export const rosterRelations = relations(roster, ({ many }) => ({
   rosterSlots: many(rosterSlot),
   specialRuleToRoster: many(specialRuleToRoster),
+  optionalSpecialRules: many(optionalSpecialRuleToRoster),
 }));
 
 export const specialRule = pgTable("special_rule", {
@@ -239,6 +245,34 @@ export const specialRuleToRosterRelations = relations(
     }),
     roster: one(roster, {
       fields: [specialRuleToRoster.rosterName],
+      references: [roster.name],
+    }),
+  }),
+);
+
+export const optionalSpecialRuleToRoster = pgTable(
+  "optional_special_rule_to_roster",
+  {
+    specialRuleName: varchar("special_rule_name", { length: 255 })
+      .notNull()
+      .references(() => specialRule.name),
+    rosterName: varchar("roster_name", { length: 255 })
+      .notNull()
+      .references(() => roster.name),
+  },
+  (table) => ({
+    pk: primaryKey(table.specialRuleName, table.rosterName),
+  }),
+);
+export const optionalSpecialRuleToRosterRelations = relations(
+  optionalSpecialRuleToRoster,
+  ({ one }) => ({
+    specialRule: one(specialRule, {
+      fields: [optionalSpecialRuleToRoster.specialRuleName],
+      references: [specialRule.name],
+    }),
+    roster: one(roster, {
+      fields: [optionalSpecialRuleToRoster.rosterName],
       references: [roster.name],
     }),
   }),

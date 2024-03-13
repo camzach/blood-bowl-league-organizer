@@ -1,9 +1,11 @@
 "use server";
 
 import nanoid from "../utils/nanoid";
+import * as schema from "./schema";
 import {
   SkillCategory,
   inducement,
+  optionalSpecialRuleToRoster,
   position,
   roster,
   rosterSlot,
@@ -20,6 +22,7 @@ import skillSeed from "./seeds/skills.json" assert { type: "json" };
 import inducementSeed from "./seeds/inducements.json" assert { type: "json" };
 import starPlayerSeed from "./seeds/starPlayers.json" assert { type: "json" };
 import { db } from "../utils/drizzle";
+import { sql } from "drizzle-orm";
 
 export default async function seedDb() {
   const skills: (typeof skill.$inferInsert)[] = [];
@@ -29,6 +32,8 @@ export default async function seedDb() {
   const positions: (typeof position.$inferInsert)[] = [];
   const skillsToPositions: (typeof skillToPosition.$inferInsert)[] = [];
   const specialRulesToRosters: (typeof specialRuleToRoster.$inferInsert)[] = [];
+  const optionalSpecialRulesToRosters: (typeof optionalSpecialRuleToRoster.$inferInsert)[] =
+    [];
   const inducements: (typeof inducement.$inferInsert)[] = [];
   const starPlayers: (typeof starPlayer.$inferInsert)[] = [];
   const skillsToStarPlayers: (typeof skillToStarPlayer.$inferInsert)[] = [];
@@ -90,6 +95,15 @@ export default async function seedDb() {
         rosterName: r.name,
       });
     }
+    if (r.specialRuleOptions) {
+      for (const rule of r.specialRuleOptions) {
+        specialRules.add(rule);
+        optionalSpecialRulesToRosters.push({
+          specialRuleName: rule,
+          rosterName: r.name,
+        });
+      }
+    }
   }
 
   for (const i of inducementSeed) {
@@ -114,6 +128,7 @@ export default async function seedDb() {
       });
     }
     for (const r of s.playsFor) {
+      specialRules.add(r);
       specialRulesToStarPlayers.push({
         specialRuleName: r,
         starPlayerName: s.name,
@@ -139,6 +154,13 @@ export default async function seedDb() {
   const specialRuleToRosterInsert = rosterInsert
     .then(() => db.insert(specialRuleToRoster).values(specialRulesToRosters))
     .then(() => console.log("specialRuleToRoster inserted"));
+  const optionalSpecialRuleToRosterInsert = rosterInsert
+    .then(() =>
+      db
+        .insert(optionalSpecialRuleToRoster)
+        .values(optionalSpecialRulesToRosters),
+    )
+    .then(() => console.log("optionalSpecialRuleToRoster inserted"));
   const positionInsert = rosterSlotInsert
     .then(() => db.insert(position).values(positions))
     .then(() => console.log("positions inserted"));
@@ -177,6 +199,7 @@ export default async function seedDb() {
     rosterInsert,
     rosterSlotInsert,
     specialRuleToRosterInsert,
+    optionalSpecialRuleToRosterInsert,
     positionInsert,
     skillToPositionInsert,
     inducementInsert,
