@@ -43,6 +43,19 @@ function getChoicesForSpecialRules(rules: string[]) {
   }));
 }
 
+const detailsSelection = {
+  with: {
+    team: {
+      columns: {
+        treasury: true,
+        name: true,
+        chosenSpecialRuleName: true,
+      },
+      with: { roster: { with: { specialRuleToRoster: true } } },
+    },
+  },
+} as const;
+
 export default async function Inducements({
   params: { gameId },
 }: {
@@ -54,22 +67,8 @@ export default async function Inducements({
       state: true,
     },
     with: {
-      homeDetails: {
-        with: {
-          team: {
-            columns: { treasury: true, name: true },
-            with: { roster: { with: { specialRuleToRoster: true } } },
-          },
-        },
-      },
-      awayDetails: {
-        with: {
-          team: {
-            columns: { treasury: true, name: true },
-            with: { roster: { with: { specialRuleToRoster: true } } },
-          },
-        },
-      },
+      homeDetails: detailsSelection,
+      awayDetails: detailsSelection,
     },
   });
   if (!game) return notFound();
@@ -77,15 +76,19 @@ export default async function Inducements({
   if (game.state !== "inducements")
     redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
 
+  function getTeamSpecialRules(
+    team: NonNullable<typeof game>[`${"home" | "away"}Details`]["team"],
+  ) {
+    const rules = team.roster.specialRuleToRoster.map((r) => r.specialRuleName);
+    if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);
+    return rules;
+  }
+
   const homeOptions = await getChoicesForSpecialRules(
-    game.homeDetails.team.roster.specialRuleToRoster.map(
-      (r) => r.specialRuleName,
-    ),
+    getTeamSpecialRules(game.homeDetails.team),
   );
   const awayOptions = await getChoicesForSpecialRules(
-    game.awayDetails.team.roster.specialRuleToRoster.map(
-      (r) => r.specialRuleName,
-    ),
+    getTeamSpecialRules(game.awayDetails.team),
   );
 
   return (

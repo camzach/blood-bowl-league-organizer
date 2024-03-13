@@ -343,6 +343,7 @@ export const purchaseInducements = action(
             columns: {
               name: true,
               treasury: true,
+              chosenSpecialRuleName: true,
             },
             with: {
               roster: { with: { specialRuleToRoster: true } },
@@ -378,14 +379,22 @@ export const purchaseInducements = action(
       if (game.state !== "inducements")
         throw new Error("Game not awaiting inducements");
 
+      const teamSpecialRules = (
+        team: (typeof game)[`${"home" | "away"}Details`]["team"],
+      ) => {
+        const rules = team.roster.specialRuleToRoster.map(
+          (r) => r.specialRuleName,
+        );
+        if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);
+        return rules;
+      };
+
       const [homeInducementCost, awayInducementCost] = await Promise.all(
         (["home", "away"] as const).map(async (t) =>
           calculateInducementCosts(
             input[t].inducements,
             input[t].stars,
-            game[`${t}Details`].team.roster.specialRuleToRoster.map(
-              (r) => r.specialRuleName,
-            ),
+            teamSpecialRules(game[`${t}Details`].team),
             game[`${t}Details`].team.players.length,
             tx,
           ),

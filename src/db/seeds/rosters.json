@@ -154,13 +154,15 @@
     "name": "Chaos Dwarf",
     "specialRules": [
       "Badlands Brawl",
+      "Worlds Edge Superleague",
+      "Apothecary Allowed"
+    ],
+    "specialRuleOptions": [
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Undivided",
-      "Worlds Edge Superleague",
-      "Apothecary Allowed"
+      "Favoured of Chaos Undivided"
     ],
     "rerollCost": 70000,
     "tier": 1,
@@ -347,13 +349,7 @@
   },
   {
     "name": "Nurgle",
-    "specialRules": [
-      "Favoured of Khorne",
-      "Favoured of Nurgle",
-      "Favoured of Tzeentch",
-      "Favoured of Slaanesh",
-      "Favoured of Chaos Undivided"
-    ],
+    "specialRules": ["Favoured of Nurgle"],
     "rerollCost": 70000,
     "tier": 2,
     "apothecaryAllowed": false,
@@ -833,13 +829,13 @@
   },
   {
     "name": "Chaos Renegade",
-    "specialRules": [
+    "specialRules": ["Apothecary Allowed"],
+    "specialRuleOptions": [
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Undivided",
-      "Apothecary Allowed"
+      "Favoured of Chaos Undivided"
     ],
     "rerollCost": 70000,
     "tier": 2,
@@ -1005,13 +1001,13 @@
   },
   {
     "name": "Chaos Chosen",
-    "specialRules": [
+    "specialRules": ["Apothecary Allowed"],
+    "specialRuleOptions": [
       "Favoured of Khorne",
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
-      "Favoured of Chaos Undivided",
-      "Apothecary Allowed"
+      "Favoured of Chaos Undivided"
     ],
     "rerollCost": 60000,
     "tier": 2,
@@ -1174,7 +1170,12 @@
   },
   {
     "name": "Norse",
-    "specialRules": ["Old World Classic", "Apothecary Allowed"],
+    "specialRules": ["Apothecary Allowed"],
+    "specialRuleOptions": [
+      "Favoured of Khorne",
+      "Favoured of Chaos Undivided",
+      "Old World Classic"
+    ],
     "rerollCost": 60000,
     "tier": 1,
     "players": [
@@ -1632,7 +1633,11 @@
   },
   {
     "name": "Dwarf",
-    "specialRules": ["Old World Classic", "Worlds Edge", "Apothecary Allowed"],
+    "specialRules": [
+      "Old World Classic",
+      "Worlds Edge Superleague",
+      "Apothecary Allowed"
+    ],
     "rerollCost": 50000,
     "tier": 1,
     "players": [
