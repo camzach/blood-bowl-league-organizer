@@ -8,7 +8,7 @@ import EditButton from "./edit-button";
 import { db } from "utils/drizzle";
 import { eq } from "drizzle-orm";
 import { coachToTeam } from "db/schema";
-import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import fetchTeam from "./fetch-team";
 
 type Props = { params: { teamName: string } };
@@ -18,15 +18,19 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function TeamPage({ params: { teamName } }: Props) {
-  const { userId } = auth();
-  if (!userId) return <RedirectToSignIn />;
+  const user = await currentUser();
+  if (!user) return <RedirectToSignIn />;
 
-  const team = await fetchTeam(decodeURIComponent(teamName), false);
+  const team = await fetchTeam(
+    decodeURIComponent(teamName),
+    user.publicMetadata.league as string,
+    false,
+  );
 
   if (!team) return notFound();
 
   const editableTeams = await db.query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, userId),
+    where: eq(coachToTeam.coachId, user.id),
   });
 
   return (

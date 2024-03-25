@@ -2,18 +2,33 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { db } from "utils/drizzle";
 import type { Metadata } from "next";
-import { eq } from "drizzle-orm";
-import { roundRobinGame } from "db/schema";
+import { and, eq } from "drizzle-orm";
+import { season } from "db/schema";
+import { currentUser, RedirectToSignIn } from "@clerk/nextjs";
 
 export const metadata: Metadata = { title: "Schedule" };
 
 export default async function Schedule() {
-  const games = await db.query.roundRobinGame.findMany({
-    where: eq(roundRobinGame.seasonName, process.env.ACTIVE_SEASON ?? ""),
+  const user = await currentUser();
+  if (!user) return <RedirectToSignIn />;
+
+  const activeSeason = await db.query.season.findFirst({
+    where: and(
+      eq(season.leagueName, user.publicMetadata.league as string),
+      eq(season.isActive, true),
+    ),
     with: {
-      game: { with: { homeDetails: true, awayDetails: true } },
+      roundRobinGames: {
+        with: { game: { with: { homeDetails: true, awayDetails: true } } },
+      },
     },
   });
+
+  if (!activeSeason) {
+    return "No season currently active. Ask your league administrator when the next one begins!";
+  }
+
+  const games = activeSeason.roundRobinGames;
 
   const rounds = games.reduce<(typeof games)[]>((prev, curr) => {
     if (!(curr.round - 1 in prev)) {

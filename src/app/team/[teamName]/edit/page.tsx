@@ -12,7 +12,7 @@ import { PlayerActions } from "./player-controls/action-buttons";
 import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import fetchTeam from "../fetch-team";
-import { RedirectToSignIn, auth } from "@clerk/nextjs";
+import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot } from "db/schema";
 import { eq } from "drizzle-orm";
@@ -25,22 +25,26 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function EditTeam({ params: { teamName } }: Props) {
-  const { userId } = auth();
+  const user = await currentUser();
 
-  if (!userId) return <RedirectToSignIn />;
+  if (!user) return <RedirectToSignIn />;
   const editableTeams = await db.query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, userId),
+    where: eq(coachToTeam.coachId, user.id),
   });
   if (
     !editableTeams.some(
       (entry) =>
         entry.teamName === decodeURIComponent(teamName) &&
-        entry.coachId === userId,
+        entry.coachId === user.id,
     )
   ) {
     return redirect(`/teams/${teamName}`);
   }
-  const team = await fetchTeam(decodeURIComponent(teamName), true);
+  const team = await fetchTeam(
+    decodeURIComponent(teamName),
+    user.publicMetadata.league as string,
+    true,
+  );
   const skills = await db.query.skill.findMany({});
 
   if (!team) return notFound();
