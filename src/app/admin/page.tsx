@@ -9,7 +9,6 @@ import {
   roundRobinGame,
   season,
 } from "db/schema";
-import seedDb from "db/seed";
 import { eq, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
@@ -61,9 +60,6 @@ export default async function AdminPage() {
         }}
       >
         Clear Season
-      </button>
-      <button formAction={seedDb} className="btn btn-accent">
-        Seed Database
       </button>
     </form>
   );

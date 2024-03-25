@@ -446,12 +446,6 @@
     "purchasable": true
   },
   {
-    "name": "Wall Thrower",
-    "rules": "When this player throws the ball at the wall, they may apply an additional +1 modifier when testing for the accuracy of the pass.",
-    "category": "passing",
-    "purchasable": true
-  },
-  {
     "name": "Arm Bar",
     "rules": "If an opposition player Falls Over as a result of failing their Agility test when attempting to Dodge, Jump or Leap out of a square in which they were being Marked by this player, you may apply a +1 modifier to either the armour roll or Injury roll. This modifier may be applied after the roll has been made and may be applied even if this player is row Prone. If the opposition player was being marked by more than one player with this Skill, only one player may use it.",
     "category": "strength",
