@@ -69,7 +69,7 @@ export function StatList({ playerId, skills }: Props) {
     <>
       <div className="form-control">
         <span className="text-lg">Stat preferences:</span>
-        <table className="table-zebra my-2 table w-fit">
+        <table className="table table-zebra my-2 w-fit">
           <thead>
             <tr>
               <th></th>
@@ -82,12 +82,12 @@ export function StatList({ playerId, skills }: Props) {
             {chosenStats.map((stat, i) => (
               <tr key={stat}>
                 <td>{i + 1}</td>
-                <td>{stat}</td>
+                <td>{stat.toUpperCase()}</td>
                 <td>{probs[stat] * 100}%</td>
                 <td>
                   <div className="join">
                     <button
-                      className="btn-primary btn-xs join-item btn"
+                      className="btn btn-primary join-item btn-xs"
                       disabled={i === 0}
                       onClick={() =>
                         setChosenStats((o) => {
@@ -101,7 +101,7 @@ export function StatList({ playerId, skills }: Props) {
                       ↑
                     </button>
                     <button
-                      className="btn-primary btn-xs join-item btn"
+                      className="btn btn-primary join-item btn-xs"
                       disabled={i === chosenStats.length - 1}
                       onClick={() =>
                         setChosenStats((o) => {
@@ -115,7 +115,7 @@ export function StatList({ playerId, skills }: Props) {
                       ↓
                     </button>
                     <button
-                      className="btn-secondary btn-xs join-item btn"
+                      className="btn btn-secondary join-item btn-xs"
                       onClick={() =>
                         setChosenStats((o) => o.filter((el) => el !== stat))
                       }
@@ -130,7 +130,7 @@ export function StatList({ playerId, skills }: Props) {
               <td>{chosenStats.length + 1}</td>
               <td>
                 <select
-                  className="select-bordered select select-sm"
+                  className="select select-bordered select-sm"
                   onChange={(e) => setSkill(e.target.value)}
                   value={skill}
                 >
@@ -162,7 +162,7 @@ export function StatList({ playerId, skills }: Props) {
         {remainingItems.length > 0 && (
           <select
             placeholder="Select a stat"
-            className="select-bordered select select-sm"
+            className="select select-bordered select-sm"
             onChange={(e) => {
               setChosenStats((o) => [
                 ...o,
@@ -175,7 +175,9 @@ export function StatList({ playerId, skills }: Props) {
               Add another preference
             </option>
             {remainingItems.map((opt) => (
-              <option key={opt}>{opt}</option>
+              <option key={opt} value={opt}>
+                {opt.toUpperCase()}
+              </option>
             ))}
           </select>
         )}
