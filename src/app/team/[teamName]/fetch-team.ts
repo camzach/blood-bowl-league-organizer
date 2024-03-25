@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "utils/drizzle";
 import { team as dbTeam, player } from "db/schema";
 import {
@@ -9,10 +9,11 @@ import {
 
 export default async function fetchTeam(
   name: string,
-  includeNonPlayers: boolean
+  league: string,
+  includeNonPlayers: boolean,
 ) {
   const fetchedTeam = await db.query.team.findFirst({
-    where: eq(dbTeam.name, name),
+    where: and(eq(dbTeam.name, name), eq(dbTeam.leagueName, league)),
     with: {
       roster: true,
       players: {
@@ -51,7 +52,7 @@ export default async function fetchTeam(
         roster: {
           ...p.position.rosterSlot.roster,
           specialRules: p.position.rosterSlot.roster.specialRuleToRoster.map(
-            (sr) => sr.specialRule
+            (sr) => sr.specialRule,
           ),
         },
       };

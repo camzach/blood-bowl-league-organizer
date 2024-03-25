@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 import {
   coachToTeam,
   optionalSpecialRuleToRoster,
@@ -39,8 +39,10 @@ export default async function NewTeam() {
           const roster = data.get("roster")?.toString();
           const coachId = data.get("userId")?.toString();
           const optionalRule = data.get("optionalRule")?.toString();
+          const user = await currentUser();
 
-          if (!name || !roster || !coachId) return null;
+          if (!name || !roster || !coachId || !user?.publicMetadata.league)
+            return null;
           const ruleOptions =
             await db.query.optionalSpecialRuleToRoster.findMany({
               where: eq(optionalSpecialRuleToRoster.rosterName, roster),
@@ -55,6 +57,7 @@ export default async function NewTeam() {
               name,
               rosterName: roster,
               chosenSpecialRuleName: option?.specialRuleName,
+              leagueName: user.publicMetadata.league as string,
             });
             await tx.insert(coachToTeam).values({
               coachId,

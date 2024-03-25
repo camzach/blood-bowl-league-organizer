@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { eq, relations } from "drizzle-orm";
 import {
   integer,
   pgEnum,
@@ -10,6 +10,7 @@ import {
   text,
   customType,
   foreignKey,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const teamStates = [
@@ -80,6 +81,9 @@ const skillCategorySet = customType<{
 
 export const team = pgTable("team", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
+  leagueName: varchar("league_name", { length: 255 })
+    .notNull()
+    .references(() => league.name),
   treasury: integer("treasury").notNull().default(1_000_000),
   state: teamState("state").notNull().default("draft"),
   rosterName: varchar("roster_name", { length: 255 })
@@ -169,7 +173,7 @@ export const improvement = pgTable(
     ),
   },
   (table) => ({
-    pk: primaryKey(table.playerId, table.order),
+    pk: primaryKey({ columns: [table.playerId, table.order] }),
   }),
 );
 export const improvementRelations = relations(improvement, ({ one }) => ({
@@ -196,7 +200,7 @@ export const coachToTeam = pgTable(
       .notNull()
       .references(() => team.name),
   },
-  (table) => ({ pk: primaryKey(table.coachId, table.teamName) }),
+  (table) => ({ pk: primaryKey({ columns: [table.coachId, table.teamName] }) }),
 );
 export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
   team: one(team, {
@@ -235,7 +239,7 @@ export const specialRuleToRoster = pgTable(
       .references(() => roster.name),
   },
   (table) => ({
-    pk: primaryKey(table.specialRuleName, table.rosterName),
+    pk: primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
   }),
 );
 export const specialRuleToRosterRelations = relations(
@@ -263,7 +267,7 @@ export const optionalSpecialRuleToRoster = pgTable(
       .references(() => roster.name),
   },
   (table) => ({
-    pk: primaryKey(table.specialRuleName, table.rosterName),
+    pk: primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
   }),
 );
 export const optionalSpecialRuleToRosterRelations = relations(
@@ -415,12 +419,28 @@ export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
   }),
 }));
 
-export const season = pgTable("season", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-});
-export const seasonRelations = relations(season, ({ many }) => ({
+export const season = pgTable(
+  "season",
+  {
+    name: varchar("name", { length: 255 }).notNull().primaryKey(),
+    leagueName: varchar("league_name")
+      .notNull()
+      .references(() => league.name),
+    isActive: boolean("is_active").notNull().default(false),
+  },
+  (table) => ({
+    oneActiveSeason: uniqueIndex()
+      .on(table.leagueName)
+      .where(eq(table.isActive, true)),
+  }),
+);
+export const seasonRelations = relations(season, ({ one, many }) => ({
   roundRobinGames: many(roundRobinGame),
   bracketGames: many(bracketGame),
+  season: one(league, {
+    fields: [season.leagueName],
+    references: [league.name],
+  }),
 }));
 
 export const roundRobinGame = pgTable(
@@ -435,7 +455,7 @@ export const roundRobinGame = pgTable(
     round: integer("round").notNull(),
   },
   (table) => ({
-    pk: primaryKey(table.seasonName, table.gameId),
+    pk: primaryKey({ columns: [table.seasonName, table.gameId] }),
   }),
 );
 export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
@@ -575,7 +595,7 @@ export const gameDetailsToStarPlayer = pgTable(
       .references(() => starPlayer.name),
   },
   (table) => ({
-    pk: primaryKey(table.gameDetailsId, table.starPlayerName),
+    pk: primaryKey({ columns: [table.gameDetailsId, table.starPlayerName] }),
   }),
 );
 export const gameDetailsToStarPlayerRelations = relations(
@@ -604,6 +624,14 @@ export const gameDetailsToInducement = pgTable(
     count: integer("count").notNull().default(1),
   },
   (table) => ({
-    pk: primaryKey(table.gameDetailsId, table.inducementName),
+    pk: primaryKey({ columns: [table.gameDetailsId, table.inducementName] }),
   }),
 );
+
+export const league = pgTable("league", {
+  name: varchar("name", { length: 255 }).notNull().primaryKey(),
+  discordGuildId: varchar("discord_guild_id"),
+});
+export const leagueRelations = relations(league, ({ many }) => ({
+  seasons: many(season),
+}));

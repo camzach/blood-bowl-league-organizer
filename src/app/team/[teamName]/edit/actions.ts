@@ -9,7 +9,7 @@ import {
   rosterSlot,
   player as dbPlayer,
 } from "db/schema";
-import { auth } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
@@ -33,18 +33,19 @@ export async function canEditTeam(team: string | string[], tx?: typeof db) {
 export const create = action(
   z.object({ name: z.string().min(1), roster: z.string() }),
   async (input) => {
-    const { userId } = auth();
-    if (!userId) throw new Error("Not authenticated");
+    const user = await currentUser();
+    if (!user?.publicMetadata.league) throw new Error("Not authenticated");
     const { name: teamName, roster } = input;
     try {
       return db.transaction(async (tx) => {
         const insertedTeam = await tx.insert(dbTeam).values({
           name: teamName,
           rosterName: roster,
+          leagueName: user.publicMetadata.league as string,
         });
         await tx.insert(coachToTeam).values({
           teamName,
-          coachId: userId,
+          coachId: user.id,
         });
         return insertedTeam;
       });

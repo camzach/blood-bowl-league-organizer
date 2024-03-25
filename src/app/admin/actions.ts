@@ -7,8 +7,13 @@ import { db } from "utils/drizzle";
 import { action } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
 import { z } from "zod";
+import { currentUser } from "@clerk/nextjs";
 
 export const scheduleAction = action(z.any(), async () => {
+  const user = await currentUser();
+  if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
+    throw new Error("Not authenticated");
+  }
   await db.transaction(async (tx) => {
     const games = await tx.select({ count: count() }).from(game);
     if (games[0].count > 0) throw new Error("Schedule already generated");
@@ -26,7 +31,9 @@ export const scheduleAction = action(z.any(), async () => {
     }));
     await tx
       .insert(season)
-      .values([{ name: "2024" }])
+      .values([
+        { name: "2024", leagueName: user.publicMetadata.league as string },
+      ])
       .onConflictDoNothing();
     for (const round of rounds) {
       for (const roundGame of round.pairs) {

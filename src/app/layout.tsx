@@ -3,13 +3,14 @@ import type { PropsWithChildren } from "react";
 import "./global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
+import { team as dbTeam } from "db/schema";
 import {
   ClerkProvider,
   RedirectToSignIn,
   UserButton,
-  auth,
   currentUser,
 } from "@clerk/nextjs";
+import { eq } from "drizzle-orm";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -17,16 +18,16 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: PropsWithChildren) {
-  const { userId } = auth();
-  const user: { publicMetadata: { isAdmin?: boolean } } | null =
-    await currentUser();
+  const user = await currentUser();
 
   // TODO: investigate useId issue
   const drawerId = "_drawer_";
 
-  if (!userId) return <RedirectToSignIn />;
+  if (!user) return <RedirectToSignIn />;
 
-  const teams = await db.query.team.findMany();
+  const teams = await db.query.team.findMany({
+    where: eq(dbTeam.leagueName, user.publicMetadata.league as string),
+  });
 
   return (
     <ClerkProvider>

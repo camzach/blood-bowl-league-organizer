@@ -1,30 +1,40 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
-import { roundRobinGame } from "db/schema";
+import { season } from "db/schema";
+import { currentUser, RedirectToSignIn } from "@clerk/nextjs";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "League Table" };
 
-async function getLeagueTable(activeSeason: string) {
-  const games = await db.query.roundRobinGame.findMany({
-    where: eq(roundRobinGame.seasonName, activeSeason),
+async function getLeagueTable() {
+  const user = await currentUser();
+  if (!user) return <RedirectToSignIn />;
+
+  const activeSeason = await db.query.season.findFirst({
+    where: and(
+      eq(season.leagueName, user.publicMetadata.league as string),
+      eq(season.isActive, true),
+    ),
     with: {
-      game: {
-        with: {
-          homeDetails: true,
-          awayDetails: true,
-        },
+      roundRobinGames: {
+        with: { game: { with: { homeDetails: true, awayDetails: true } } },
       },
     },
   });
+
+  if (!activeSeason) {
+    return "No season currently active. Ask your league administrator when the next one begins!";
+  }
+
+  const games = activeSeason.roundRobinGames;
 
   const teams = new Set(
     games.flatMap(({ game: { homeDetails, awayDetails } }) => [
       homeDetails.teamName,
       awayDetails.teamName,
-    ])
+    ]),
   );
 
   const table = games.reduce(
@@ -91,16 +101,14 @@ async function getLeagueTable(activeSeason: string) {
           tdDiff: 0,
           casDiff: 0,
         },
-      ])
-    )
+      ]),
+    ),
   );
   return table;
 }
 
 export default async function Page() {
-  const activeSeason = process.env.ACTIVE_SEASON;
-  if (activeSeason === undefined) return <>No active season</>;
-  const table = await getLeagueTable(activeSeason);
+  const table = await getLeagueTable();
 
   return (
     <table className="table table-zebra mx-auto w-3/5">
