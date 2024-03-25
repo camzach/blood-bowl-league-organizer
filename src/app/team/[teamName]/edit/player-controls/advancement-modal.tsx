@@ -28,6 +28,10 @@ const skillConflicts: Partial<Record<string, string[]>> = {
   ],
 };
 
+function upperFirst(str: string) {
+  return (str.charAt(0)?.toUpperCase() ?? "") + str.slice(1);
+}
+
 type Props = {
   player: {
     id: string;
@@ -41,7 +45,7 @@ type Props = {
   skills: Array<typeof skill.$inferSelect>;
   onHide: () => void;
 };
-export function Popup({ player, skills, onHide }: Props) {
+export function Popup({ player, skills }: Props) {
   const [tab, setTab] = useState<SkillCategory | "stat">(
     player.position.primary[0],
   );
@@ -112,46 +116,71 @@ export function Popup({ player, skills, onHide }: Props) {
 
   return (
     <>
-      <div className="tabs">
-        {player.position.primary.map((category) => (
-          <div
-            key={category}
-            className={classNames([
-              "tab tab-lifted",
-              tab === category && "tab-active",
-            ])}
-            onClick={() => setTab(category)}
-          >
-            {`${category} - ${
-              advancementCosts["Chosen Primary"][player.totalImprovements]
-            } SPP`}
+      <div className="flex gap-2">
+        <div className="flex flex-col">
+          <span className="text-center">
+            {advancementCosts["Random Primary"][player.totalImprovements]}
+            {" / "}
+            {advancementCosts["Chosen Primary"][player.totalImprovements]}
+            {" SPP"}
+          </span>
+          <div className="tabs-boxed tabs">
+            {player.position.primary.map((category) => (
+              <div
+                key={category}
+                className={classNames([
+                  "tab [--tab-bg:var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)))]",
+                  tab === category && "tab-active",
+                ])}
+                onClick={() => setTab(category)}
+              >
+                {upperFirst(category)}
+              </div>
+            ))}
           </div>
-        ))}
-        {player.position.secondary.map((category) => (
-          <div
-            key={category}
-            className={classNames([
-              "tab tab-lifted",
-              tab === category && "tab-active",
-            ])}
-            onClick={() => setTab(category)}
-          >
-            {`${category} - ${
-              advancementCosts["Chosen Secondary"][player.totalImprovements]
-            } SPP`}
+        </div>
+        <div className="flex flex-col">
+          <span className="text-center">
+            {advancementCosts["Random Secondary"][player.totalImprovements]}
+            {" / "}
+            {advancementCosts["Chosen Secondary"][player.totalImprovements]}
+            {" SPP"}
+          </span>
+          <div className="tabs-boxed tabs">
+            {player.position.secondary.map((category) => (
+              <div
+                key={category}
+                className={classNames([
+                  "tab [--tab-bg:blue]",
+                  tab === category && "tab-active",
+                ])}
+                onClick={() => setTab(category)}
+              >
+                {upperFirst(category)}
+              </div>
+            ))}
           </div>
-        ))}
-        <div
-          className={classNames(["tab", tab === "stat" && "tab-active"])}
-          onClick={() => setTab("stat")}
-        >
-          {`Stat Increase - ${
-            advancementCosts["Characteristic Improvement"][
-              player.totalImprovements
-            ]
-          }`}
+        </div>
+        <div className="flex flex-col">
+          <span className="text-center">
+            {
+              advancementCosts["Characteristic Improvement"][
+                player.totalImprovements
+              ]
+            }{" "}
+            spp
+          </span>
+          <div className="tabs-boxed tabs">
+            <div
+              className={classNames(["tab", tab === "stat" && "tab-active"])}
+              onClick={() => setTab("stat")}
+            >
+              Stat Increase
+            </div>
+          </div>
         </div>
       </div>
+      <div className="divider my-0 py-0" />
       {tab !== "stat" && (
         <div className="form-control gap-2">
           <div className="grid grid-cols-4 gap-2">
@@ -159,7 +188,7 @@ export function Popup({ player, skills, onHide }: Props) {
               <button
                 key={s.name}
                 className={classNames([
-                  "btn",
+                  "btn leading-4",
                   player.skills.some((sk) => sk.name === s.name) &&
                     "btn-outline",
                 ])}
