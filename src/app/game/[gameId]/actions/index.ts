@@ -557,7 +557,7 @@ export const end = action(
       for (const [playerId, update] of Object.entries(input.playerUpdates)) {
         const fetchedPlayer = players.find((p) => p.id === playerId);
         if (!fetchedPlayer) throw new Error("Player not found");
-        const player = {
+        const updatedPlayer = {
           ...fetchedPlayer,
           ...getPlayerStats(fetchedPlayer),
         };
@@ -570,7 +570,7 @@ export const end = action(
             update.injury === "st" ||
             update.injury === "av"
           ) {
-            if (player[update.injury] - 1 < statMinMax[update.injury][0])
+            if (updatedPlayer[update.injury] - 1 < statMinMax[update.injury][0])
               throw new Error(
                 "Invalid injury, stat cannot be reduced any more",
               );
@@ -579,7 +579,10 @@ export const end = action(
             } + 1`;
           }
           if (update.injury === "pa" || update.injury === "ag") {
-            if ((player[update.injury] ?? 6) + 1 > statMinMax[update.injury][1])
+            if (
+              (updatedPlayer[update.injury] ?? 6) + 1 >
+              statMinMax[update.injury][1]
+            )
               throw new Error(
                 "Invalid injury, stat cannot be increased any more",
               );
@@ -593,8 +596,12 @@ export const end = action(
             mappedUpdate.teamName = null;
             mappedUpdate.membershipType = null;
             mappedUpdate.dead = true;
-            mvpChoicesAway = mvpChoicesAway.filter((p) => p.id !== player.id);
-            mvpChoicesHome = mvpChoicesHome.filter((p) => p.id !== player.id);
+            mvpChoicesAway = mvpChoicesAway.filter(
+              (p) => p.id !== updatedPlayer.id,
+            );
+            mvpChoicesHome = mvpChoicesHome.filter(
+              (p) => p.id !== updatedPlayer.id,
+            );
           }
         }
         if (update.starPlayerPoints !== undefined) {
@@ -689,7 +696,7 @@ export const end = action(
         .where(eq(team.name, game.awayDetails.teamName));
 
       await Promise.all([
-        playerUpdates,
+        Promise.all(playerUpdates),
         gameUpdate,
         homeDetailsUpdate,
         awayDetailsUpdate,
