@@ -85,7 +85,9 @@ export const team = pgTable("team", {
   rosterName: varchar("roster_name", { length: 255 })
     .notNull()
     .references(() => roster.name),
-  chosenSpecialRuleName: varchar("chosen_special_rule_name", { length: 255 }),
+  chosenSpecialRuleName: varchar("chosen_special_rule_name", {
+    length: 255,
+  }).references(() => specialRule.name),
   rerolls: integer("rerolls").notNull().default(0),
   cheerleaders: integer("cheerleaders").notNull().default(0),
   assistantCoaches: integer("assistant_coaches").notNull().default(0),
