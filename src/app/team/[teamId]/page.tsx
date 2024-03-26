@@ -7,14 +7,18 @@ import { TeamTable } from "components/team-table";
 import EditButton from "./edit-button";
 import { db } from "utils/drizzle";
 import { eq } from "drizzle-orm";
-import { coachToTeam } from "db/schema";
+import { coachToTeam, team as dbTeam } from "db/schema";
 import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import fetchTeam from "./fetch-team";
 
 type Props = { params: { teamId: string } };
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: decodeURIComponent(params.teamId) };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const routeTeam = await db.query.team.findFirst({
+    where: eq(dbTeam.id, params.teamId),
+    columns: { name: true },
+  });
+  return { title: routeTeam?.name ?? "Unknown Team" };
 }
 
 export default async function TeamPage({ params: { teamId } }: Props) {

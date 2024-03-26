@@ -14,14 +14,18 @@ import PlayerNameEditor from "./player-controls/player-name-editor";
 import fetchTeam from "../fetch-team";
 import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import { db } from "utils/drizzle";
-import { coachToTeam, rosterSlot } from "db/schema";
+import { coachToTeam, rosterSlot, team as dbTeam } from "db/schema";
 import { eq } from "drizzle-orm";
 import DoneImproving from "./done-improving";
 
 type Props = { params: { teamId: string } };
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: decodeURIComponent(params.teamId) };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const routeTeam = await db.query.team.findFirst({
+    where: eq(dbTeam.id, params.teamId),
+    columns: { name: true },
+  });
+  return { title: routeTeam?.name ?? "Unknown Team" };
 }
 
 export default async function EditTeam({ params: { teamId } }: Props) {
