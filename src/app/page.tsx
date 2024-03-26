@@ -10,7 +10,7 @@ export default async function Home() {
 
   const myTeam = await db.query.coachToTeam.findFirst({
     where: eq(coachToTeam.coachId, userId),
-    with: { team: { columns: { name: true } } },
+    with: { team: { columns: { id: true } } },
   });
 
   return (
@@ -22,7 +22,7 @@ export default async function Home() {
           </Link>
         </li>
         <li>
-          <Link className="link" href={`/team/${myTeam?.team.name ?? "new"}`}>
+          <Link className="link" href={`/team/${myTeam?.team.id ?? "new"}`}>
             View your team
           </Link>
         </li>
