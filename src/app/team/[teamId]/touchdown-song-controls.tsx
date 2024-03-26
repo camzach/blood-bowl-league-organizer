@@ -3,11 +3,15 @@ import classNames from "classnames";
 import { useState, useTransition } from "react";
 import { useController, useForm } from "react-hook-form";
 
-type Props = { team: string; currentSong?: string; isEditable: boolean };
+type Props = { teamId: string; currentSong?: string; isEditable: boolean };
 
 type FormValues = { songName: string; file: File };
 
-export default function SongControls({ team, currentSong, isEditable }: Props) {
+export default function SongControls({
+  teamId,
+  currentSong,
+  isEditable,
+}: Props) {
   const [showForm, setShowForm] = useState(false);
 
   const [isTransitioning, startTransition] = useTransition();
@@ -20,7 +24,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
     });
     startTransition(async () => {
       setShowForm(false);
-      await fetch(`/api/songs/${team}`, {
+      await fetch(`/api/songs/${teamId}`, {
         method: "POST",
         body: formData,
       });
@@ -42,7 +46,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
         }}
       />
       <form
-        className={showForm ? "join-vertical join" : "hidden"}
+        className={showForm ? "join join-vertical" : "hidden"}
         onSubmit={(e) => {
           void onSubmit(e);
         }}
@@ -50,7 +54,7 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
         <input
           {...register("songName", { required: true })}
           placeholder="Song name"
-          className="input-bordered input join-item"
+          className="input join-item input-bordered"
         />
         <input
           name={fileControl.name}
@@ -61,9 +65,9 @@ export default function SongControls({ team, currentSong, isEditable }: Props) {
           }}
           type="file"
           accept="audio/*"
-          className="file-input-bordered file-input join-item"
+          className="file-input join-item file-input-bordered"
         />
-        <button className="join-item btn" type="submit">
+        <button className="btn join-item" type="submit">
           Submit
         </button>
       </form>

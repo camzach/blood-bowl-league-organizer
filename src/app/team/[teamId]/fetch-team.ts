@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "utils/drizzle";
 import { team as dbTeam, player } from "db/schema";
 import {
@@ -8,12 +8,11 @@ import {
 } from "utils/get-computed-player-fields";
 
 export default async function fetchTeam(
-  name: string,
-  league: string,
+  id: string,
   includeNonPlayers: boolean,
 ) {
   const fetchedTeam = await db.query.team.findFirst({
-    where: and(eq(dbTeam.name, name), eq(dbTeam.leagueName, league)),
+    where: eq(dbTeam.id, id),
     with: {
       roster: true,
       players: {

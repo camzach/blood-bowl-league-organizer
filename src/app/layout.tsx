@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 </span>
                 <nav className="navbar-center hidden gap-3 md:flex">
                   <NavLinks
-                    teams={teams.map((t) => t.name)}
+                    teams={teams}
                     isAdmin={!!user?.publicMetadata.isAdmin}
                   />
                 </nav>
@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               ></label>
               <nav className="menu min-h-full w-fit bg-base-200 p-4 text-base-content">
                 <NavLinks
-                  teams={teams.map((t) => t.name)}
+                  teams={teams}
                   isAdmin={!!user?.publicMetadata.isAdmin}
                 />
               </nav>
@@ -77,7 +77,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   );
 }
 
-function NavLinks(props: { teams: string[]; isAdmin: boolean }) {
+function NavLinks(props: {
+  teams: Array<{ name: string; id: string }>;
+  isAdmin: boolean;
+}) {
   return (
     <ul className="menu text-xl md:menu-horizontal">
       <li>
@@ -85,8 +88,8 @@ function NavLinks(props: { teams: string[]; isAdmin: boolean }) {
           <summary>Teams</summary>
           <ul className="z-10">
             {props.teams.map((team) => (
-              <li key={team}>
-                <Link href={`/team/${team}`}>{team}</Link>
+              <li key={team.id}>
+                <Link href={`/team/${team.id}`}>{team.name}</Link>
               </li>
             ))}
           </ul>

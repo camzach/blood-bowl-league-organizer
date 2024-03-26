@@ -11,7 +11,7 @@ type Props = {
   type: Parameters<typeof hireStaffAction>[0]["type"];
   current: number;
   cost: number;
-  teamName: string;
+  teamId: string;
   max: number;
   treasury: number;
 };
@@ -20,7 +20,7 @@ export default function StaffHirer({
   title,
   current,
   type,
-  teamName,
+  teamId,
   cost,
   max,
   treasury,
@@ -49,13 +49,13 @@ export default function StaffHirer({
   const hireStaff = (val: number): void => {
     if (val > current) {
       hireAction({
-        team: teamName,
+        teamId,
         type,
         quantity: val - current,
       });
     } else {
       fireAction({
-        team: teamName,
+        teamId,
         type,
         quantity: current - val,
       });

@@ -22,6 +22,7 @@ const detailsSelect = {
     team: {
       columns: {
         name: true,
+        id: true,
         touchdownSong: true,
       },
       with: {
@@ -151,6 +152,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
         gameId={gameId}
         home={{
           name: game.homeDetails.team.name,
+          id: game.homeDetails.team.id,
           song: game.homeDetails.team.song?.data,
           players: game.homeDetails.team.players
             .filter((p) => p.membershipType === "player")
@@ -160,8 +162,9 @@ export default async function InProgress({ params: { gameId } }: Props) {
             .sort((a, b) => a.number - b.number),
         }}
         away={{
-          name: game.awayDetails.team.name,
-          song: game.awayDetails.team.song?.data,
+          name: game.homeDetails.team.name,
+          id: game.homeDetails.team.id,
+          song: game.homeDetails.team.song?.data,
           players: game.awayDetails.team.players
             .filter((p) => p.membershipType === "player")
             .sort((a, b) => a.number - b.number),

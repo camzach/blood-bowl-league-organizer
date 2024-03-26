@@ -20,14 +20,15 @@ async function getUserTeams(tx?: typeof db) {
 
   return (tx ?? db).query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, userId),
+    with: { team: { columns: { id: true } } },
   });
 }
 
-export async function canEditTeam(team: string | string[], tx?: typeof db) {
+export async function canEditTeam(teamId: string | string[], tx?: typeof db) {
   const editableTeams = await getUserTeams(tx);
-  if (Array.isArray(team))
-    return team.some((t) => editableTeams.some((e) => e.teamName === t));
-  return editableTeams.some((e) => e.teamName === team);
+  if (Array.isArray(teamId))
+    return teamId.some((t) => editableTeams.some((e) => e.team.id === t));
+  return editableTeams.some((e) => e.team.id === teamId);
 }
 
 export const create = action(
@@ -38,13 +39,15 @@ export const create = action(
     const { name: teamName, roster } = input;
     try {
       return db.transaction(async (tx) => {
+        const teamId = nanoid();
         const insertedTeam = await tx.insert(dbTeam).values({
           name: teamName,
+          id: teamId,
           rosterName: roster,
           leagueName: user.publicMetadata.league as string,
         });
         await tx.insert(coachToTeam).values({
-          teamName,
+          teamId,
           coachId: user.id,
         });
         return insertedTeam;
@@ -60,14 +63,14 @@ export const create = action(
 
 export const hirePlayer = action(
   z.object({
-    team: z.string(),
+    teamId: z.string(),
     position: z.string(),
     number: z.number().min(1).max(16),
     name: z.string().optional(),
   }),
   async (input) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.team, tx)))
+      if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
 
       const positionQuery = await db
@@ -79,7 +82,10 @@ export const hirePlayer = action(
         .innerJoin(rosterSlot, eq(rosterSlot.id, dbPosition.rosterSlotId))
         .innerJoin(dbTeam, eq(dbTeam.rosterName, rosterSlot.rosterName))
         .where(
-          and(eq(dbTeam.name, input.team), eq(dbPosition.name, input.position)),
+          and(
+            eq(dbTeam.name, input.teamId),
+            eq(dbPosition.name, input.position),
+          ),
         )
         .limit(1);
 
@@ -91,19 +97,19 @@ export const hirePlayer = action(
       await tx
         .update(dbTeam)
         .set({ treasury: sql`${dbTeam.treasury} - ${position.cost}` })
-        .where(eq(dbTeam.name, input.team));
+        .where(eq(dbTeam.id, input.teamId));
 
       await tx.insert(dbPlayer).values({
         id: nanoid(),
         name: input.name,
         number: input.number,
         positionId: position.id,
-        teamName: input.team,
+        teamId: input.teamId,
         membershipType: "player",
       });
 
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.name, input.team),
+        where: eq(dbTeam.id, input.teamId),
         columns: { treasury: true, state: true },
         with: {
           players: {
@@ -144,7 +150,7 @@ export const hirePlayer = action(
 
 export const hireStaff = action(
   z.object({
-    team: z.string(),
+    teamId: z.string(),
     type: z.enum([
       "apothecary",
       "assistantCoaches",
@@ -156,10 +162,10 @@ export const hireStaff = action(
   }),
   async (input) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.team, tx)))
+      if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
       const team = await db.query.team.findFirst({
-        where: eq(dbTeam.name, input.team),
+        where: eq(dbTeam.name, input.teamId),
         with: {
           roster: {
             columns: { rerollCost: true },
@@ -201,10 +207,10 @@ export const hireStaff = action(
               : sql`${dbTeam[input.type]} + ${input.quantity}`,
           treasury: sql`${dbTeam.treasury} - ${cost}`,
         })
-        .where(eq(dbTeam.name, input.team));
+        .where(eq(dbTeam.id, input.teamId));
 
       const updatedTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.name, input.team),
+        where: eq(dbTeam.id, input.teamId),
         columns: {
           treasury: true,
           apothecary: true,
@@ -309,7 +315,7 @@ export const hireExistingPlayer = action(
 
 export const fireStaff = action(
   z.object({
-    team: z.string(),
+    teamId: z.string(),
     type: z.enum([
       "apothecary",
       "assistantCoaches",
@@ -321,10 +327,10 @@ export const fireStaff = action(
   }),
   async (input) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.team, tx)))
+      if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.name, input.team),
+        where: eq(dbTeam.id, input.teamId),
         columns: { state: true, name: true },
         with: {
           roster: { columns: { rerollCost: true } },
@@ -354,10 +360,10 @@ export const fireStaff = action(
                 }`
               : undefined,
         })
-        .where(eq(dbTeam.name, input.team));
+        .where(eq(dbTeam.id, input.teamId));
 
       const updatedTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.name, input.team),
+        where: eq(dbTeam.id, input.teamId),
         columns: {
           state: true,
           apothecary: true,
@@ -514,10 +520,10 @@ export const ready = action(z.string(), async (input) => {
         .where(eq(dbTeam.name, input)),
       tx
         .update(dbPlayer)
-        .set({ membershipType: null, teamName: null })
+        .set({ membershipType: null, teamId: null })
         .where(
           and(
-            eq(dbPlayer.teamName, input),
+            eq(dbPlayer.teamId, input),
             eq(dbPlayer.membershipType, "journeyman"),
           ),
         ),

@@ -15,7 +15,7 @@ import {
   gameDetailsToStarPlayer,
   gameDetailsToInducement,
 } from "db/schema";
-import { canEditTeam } from "app/team/[teamName]/edit/actions";
+import { canEditTeam } from "app/team/[teamId]/edit/actions";
 import calculateTV from "utils/calculate-tv";
 import { nanoid } from "nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
@@ -50,11 +50,9 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
         awayDetails: teamDetailsOptions,
       },
     });
-    if (!game) throw new Error("Could not ifnd game");
+    if (!game) throw new Error("Could not find game");
 
-    if (
-      !canEditTeam([game.homeDetails.teamName, game.awayDetails.teamName], tx)
-    )
+    if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId], tx))
       throw new Error("User does not have permission for this game");
 
     if (
@@ -250,7 +248,7 @@ export const selectJourneymen = action(
             number: 99 - i,
             positionId: homeChoice.id,
             membershipType: "journeyman" as const,
-            teamName: game.homeDetails.teamName,
+            teamId: game.homeDetails.teamId,
           })),
         );
       }
@@ -262,7 +260,7 @@ export const selectJourneymen = action(
             number: 99 - i,
             positionId: awayChoice.id,
             membershipType: "journeyman" as const,
-            teamName: game.awayDetails.teamName,
+            teamId: game.awayDetails.teamId,
           })),
         );
       }
@@ -525,7 +523,7 @@ export const end = action(
       });
       if (!game) throw new Error("Game not found");
 
-      if (!canEditTeam([game.homeDetails.teamName, game.awayDetails.teamName]))
+      if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId]))
         throw new Error("User does not have permission for this game");
 
       const statMinMax = {
@@ -593,7 +591,7 @@ export const end = action(
           if (update.injury === "ni")
             mappedUpdate.nigglingInjuries = sql`${player.nigglingInjuries} + 1`;
           if (update.injury === "dead") {
-            mappedUpdate.teamName = null;
+            mappedUpdate.teamId = null;
             mappedUpdate.membershipType = null;
             mappedUpdate.dead = true;
             mvpChoicesAway = mvpChoicesAway.filter(
@@ -685,7 +683,7 @@ export const end = action(
           dedicatedFans: homeFansUpdate,
           treasury: sql`${team.treasury} + ${homeWinnings}`,
         })
-        .where(eq(team.name, game.homeDetails.teamName));
+        .where(eq(team.name, game.homeDetails.teamId));
       const awayTeamUpdate = tx
         .update(team)
         .set({
@@ -693,7 +691,7 @@ export const end = action(
           dedicatedFans: awayFansUpdate,
           treasury: sql`${team.treasury} + ${awayWinnings}`,
         })
-        .where(eq(team.name, game.awayDetails.teamName));
+        .where(eq(team.name, game.awayDetails.teamId));
 
       await Promise.all([
         Promise.all(playerUpdates),

@@ -1,5 +1,5 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { canEditTeam } from "app/team/[teamName]/edit/actions";
+import { canEditTeam } from "app/team/[teamId]/edit/actions";
 import { randomUUID } from "crypto";
 import { team as dbTeam, song as dbSong } from "db/schema";
 import { eq } from "drizzle-orm";
@@ -10,15 +10,15 @@ import { db } from "utils/drizzle";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { team: string } }
+  { params }: { params: { teamId: string } },
 ) {
   const team = await db.query.team.findFirst({
-    where: eq(dbTeam.name, decodeURIComponent(params.team)),
+    where: eq(dbTeam.name, decodeURIComponent(params.teamId)),
     with: { song: true },
   });
   if (!team) return new NextResponse("No team found", { status: 404 });
 
-  if (!canEditTeam(decodeURIComponent(params.team)))
+  if (!canEditTeam(decodeURIComponent(params.teamId)))
     return new NextResponse("Unauthorized", { status: 503 });
 
   if (!team.song) return new NextResponse("Team has no songs", { status: 404 });
@@ -51,9 +51,9 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { team: string } }
+  { params }: { params: { teamId: string } },
 ) {
-  if (!canEditTeam(decodeURIComponent(params.team)))
+  if (!canEditTeam(decodeURIComponent(params.teamId)))
     return new NextResponse("Unauthorized", { status: 503 });
 
   const form = await req.formData();
@@ -82,12 +82,12 @@ export async function POST(
 
   try {
     const team = await db.query.team.findFirst({
-      where: eq(dbTeam.name, decodeURIComponent(params.team)),
+      where: eq(dbTeam.id, decodeURIComponent(params.teamId)),
       with: { song: true },
     });
     if (!team) return new NextResponse("No team found", { status: 404 });
 
-    if (!canEditTeam(decodeURIComponent(params.team)))
+    if (!canEditTeam(decodeURIComponent(params.teamId)))
       return new NextResponse("Unauthorized", { status: 503 });
 
     const current = team.song;
@@ -125,7 +125,7 @@ export async function POST(
         .set({
           touchdownSong: songName,
         })
-        .where(eq(dbTeam.name, decodeURIComponent(params.team)))
+        .where(eq(dbTeam.id, decodeURIComponent(params.teamId))),
     );
   return new NextResponse("Success");
 }

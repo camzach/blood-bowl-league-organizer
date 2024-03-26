@@ -12,10 +12,13 @@ export async function generateMetadata({
 }) {
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, params.gameId),
-    with: { homeDetails: true, awayDetails: true },
+    with: {
+      homeDetails: { with: { team: { columns: { name: true } } } },
+      awayDetails: { with: { team: { columns: { name: true } } } },
+    },
   });
   return {
-    title: `${game?.awayDetails.teamName} @ ${game?.homeDetails.teamName}`,
+    title: `${game?.awayDetails.team.name} @ ${game?.homeDetails.team.name}`,
   };
 }
 

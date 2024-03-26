@@ -19,7 +19,14 @@ async function getLeagueTable() {
     ),
     with: {
       roundRobinGames: {
-        with: { game: { with: { homeDetails: true, awayDetails: true } } },
+        with: {
+          game: {
+            with: {
+              homeDetails: { with: { team: { columns: { name: true } } } },
+              awayDetails: { with: { team: { columns: { name: true } } } },
+            },
+          },
+        },
       },
     },
   });
@@ -32,8 +39,8 @@ async function getLeagueTable() {
 
   const teams = new Set(
     games.flatMap(({ game: { homeDetails, awayDetails } }) => [
-      homeDetails.teamName,
-      awayDetails.teamName,
+      homeDetails.team.name,
+      awayDetails.team.name,
     ]),
   );
 
@@ -44,46 +51,46 @@ async function getLeagueTable() {
 
       // Win / Loss / Draw
       if (homeDetails.touchdowns > awayDetails.touchdowns) {
-        next[homeDetails.teamName].points += 3;
-        next[homeDetails.teamName].wins += 1;
-        next[awayDetails.teamName].losses += 1;
+        next[homeDetails.team.name].points += 3;
+        next[homeDetails.team.name].wins += 1;
+        next[awayDetails.team.name].losses += 1;
       }
       if (homeDetails.touchdowns < awayDetails.touchdowns) {
-        next[awayDetails.teamName].points += 3;
-        next[awayDetails.teamName].wins += 1;
-        next[homeDetails.teamName].losses += 1;
+        next[awayDetails.team.name].points += 3;
+        next[awayDetails.team.name].wins += 1;
+        next[homeDetails.team.name].losses += 1;
       }
       if (homeDetails.touchdowns === awayDetails.touchdowns) {
-        next[homeDetails.teamName].points += 1;
-        next[awayDetails.teamName].points += 1;
-        next[homeDetails.teamName].draws += 1;
-        next[awayDetails.teamName].draws += 1;
+        next[homeDetails.team.name].points += 1;
+        next[awayDetails.team.name].points += 1;
+        next[homeDetails.team.name].draws += 1;
+        next[awayDetails.team.name].draws += 1;
       }
 
       // Casualties
-      if (homeDetails.casualties >= 3) next[homeDetails.teamName].points += 1;
-      if (awayDetails.casualties >= 3) next[awayDetails.teamName].points += 1;
+      if (homeDetails.casualties >= 3) next[homeDetails.team.name].points += 1;
+      if (awayDetails.casualties >= 3) next[awayDetails.team.name].points += 1;
 
       // Perfect Defense
-      if (homeDetails.touchdowns === 0) next[awayDetails.teamName].points += 1;
-      if (awayDetails.touchdowns === 0) next[homeDetails.teamName].points += 1;
+      if (homeDetails.touchdowns === 0) next[awayDetails.team.name].points += 1;
+      if (awayDetails.touchdowns === 0) next[homeDetails.team.name].points += 1;
 
       // Major Win
-      if (homeDetails.touchdowns >= 3) next[homeDetails.teamName].points += 1;
-      if (awayDetails.touchdowns >= 3) next[awayDetails.teamName].points += 1;
+      if (homeDetails.touchdowns >= 3) next[homeDetails.team.name].points += 1;
+      if (awayDetails.touchdowns >= 3) next[awayDetails.team.name].points += 1;
 
       // Stats
-      next[homeDetails.teamName].td += homeDetails.touchdowns;
-      next[awayDetails.teamName].td += awayDetails.touchdowns;
-      next[homeDetails.teamName].cas += homeDetails.casualties;
-      next[awayDetails.teamName].cas += awayDetails.casualties;
-      next[homeDetails.teamName].tdDiff +=
+      next[homeDetails.team.name].td += homeDetails.touchdowns;
+      next[awayDetails.team.name].td += awayDetails.touchdowns;
+      next[homeDetails.team.name].cas += homeDetails.casualties;
+      next[awayDetails.team.name].cas += awayDetails.casualties;
+      next[homeDetails.team.name].tdDiff +=
         homeDetails.touchdowns - awayDetails.touchdowns;
-      next[awayDetails.teamName].tdDiff +=
+      next[awayDetails.team.name].tdDiff +=
         awayDetails.touchdowns - homeDetails.touchdowns;
-      next[homeDetails.teamName].casDiff +=
+      next[homeDetails.team.name].casDiff +=
         homeDetails.casualties - awayDetails.casualties;
-      next[awayDetails.teamName].casDiff +=
+      next[awayDetails.team.name].casDiff +=
         awayDetails.casualties - homeDetails.casualties;
 
       return next;

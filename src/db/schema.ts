@@ -10,6 +10,7 @@ import {
   text,
   customType,
   foreignKey,
+  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -79,28 +80,35 @@ const skillCategorySet = customType<{
   fromDriver: (output) => skillCategories.filter((_, i) => output & (1 << i)),
 });
 
-export const team = pgTable("team", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  leagueName: varchar("league_name", { length: 255 })
-    .notNull()
-    .references(() => league.name),
-  treasury: integer("treasury").notNull().default(1_000_000),
-  state: teamState("state").notNull().default("draft"),
-  rosterName: varchar("roster_name", { length: 255 })
-    .notNull()
-    .references(() => roster.name),
-  chosenSpecialRuleName: varchar("chosen_special_rule_name", {
-    length: 255,
-  }).references(() => specialRule.name),
-  rerolls: integer("rerolls").notNull().default(0),
-  cheerleaders: integer("cheerleaders").notNull().default(0),
-  assistantCoaches: integer("assistant_coaches").notNull().default(0),
-  apothecary: boolean("apothecary").notNull().default(false),
-  dedicatedFans: integer("dedicated_fans").notNull().default(1),
-  touchdownSong: varchar("touchdown_song", { length: 255 }).references(
-    () => song.name,
-  ),
-});
+export const team = pgTable(
+  "team",
+  {
+    id: varchar("id", { length: 25 }).notNull().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    leagueName: varchar("league_name", { length: 255 })
+      .notNull()
+      .references(() => league.name),
+    treasury: integer("treasury").notNull().default(1_000_000),
+    state: teamState("state").notNull().default("draft"),
+    rosterName: varchar("roster_name", { length: 255 })
+      .notNull()
+      .references(() => roster.name),
+    chosenSpecialRuleName: varchar("chosen_special_rule_name", {
+      length: 255,
+    }).references(() => specialRule.name),
+    rerolls: integer("rerolls").notNull().default(0),
+    cheerleaders: integer("cheerleaders").notNull().default(0),
+    assistantCoaches: integer("assistant_coaches").notNull().default(0),
+    apothecary: boolean("apothecary").notNull().default(false),
+    dedicatedFans: integer("dedicated_fans").notNull().default(1),
+    touchdownSong: varchar("touchdown_song", { length: 255 }).references(
+      () => song.name,
+    ),
+  },
+  (table) => ({
+    uniqueTeamNamePerLeague: unique("name").on(table.name, table.leagueName),
+  }),
+);
 export const teamRelations = relations(team, ({ one, many }) => ({
   roster: one(roster, {
     fields: [team.rosterName],
@@ -143,9 +151,9 @@ export const player = pgTable("player", {
     .references(() => position.id),
   // The following two fields should be either BOTH null, or BOTH not null
   // integer player_team_membership_nullity CHECK
-  //   ((team_name IS NULL AND membership_type IS NULL) OR
-  //    (team_name IS NOT NULL AND membership_type IS NOT NULL))
-  teamName: varchar("team_name", { length: 255 }).references(() => team.name),
+  //   ((team_id IS NULL AND membership_type IS NULL) OR
+  //    (team_id IS NOT NULL AND membership_type IS NOT NULL))
+  teamId: varchar("team_id", { length: 255 }).references(() => team.id),
   membershipType: membershipType("membership_type"),
 });
 export const playerRelations = relations(player, ({ one, many }) => ({
@@ -154,8 +162,8 @@ export const playerRelations = relations(player, ({ one, many }) => ({
     references: [position.id],
   }),
   team: one(team, {
-    fields: [player.teamName],
-    references: [team.name],
+    fields: [player.teamId],
+    references: [team.id],
   }),
   improvements: many(improvement),
 }));
@@ -196,16 +204,16 @@ export const coachToTeam = pgTable(
   "coach_to_team",
   {
     coachId: varchar("coach_id", { length: 255 }).notNull(),
-    teamName: varchar("team_name", { length: 255 })
+    teamId: varchar("team_id", { length: 255 })
       .notNull()
-      .references(() => team.name),
+      .references(() => team.id),
   },
-  (table) => ({ pk: primaryKey({ columns: [table.coachId, table.teamName] }) }),
+  (table) => ({ pk: primaryKey({ columns: [table.coachId, table.teamId] }) }),
 );
 export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
   team: one(team, {
-    fields: [coachToTeam.teamName],
-    references: [team.name],
+    fields: [coachToTeam.teamId],
+    references: [team.id],
   }),
 }));
 
@@ -397,9 +405,9 @@ export const gameRelations = relations(game, ({ one }) => ({
 
 export const gameDetails = pgTable("game_details", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  teamName: varchar("team_name", { length: 255 })
+  teamId: varchar("team_id", { length: 255 })
     .notNull()
-    .references(() => team.name),
+    .references(() => team.id),
   touchdowns: integer("touchdowns").notNull().default(0),
   casualties: integer("casualties").notNull().default(0),
   pettyCashAwarded: integer("petty_cash_awarded").notNull().default(0),
@@ -409,8 +417,8 @@ export const gameDetails = pgTable("game_details", {
 });
 export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
   team: one(team, {
-    fields: [gameDetails.teamName],
-    references: [team.name],
+    fields: [gameDetails.teamId],
+    references: [team.id],
   }),
   gameDetailsToStarPlayer: many(gameDetailsToStarPlayer),
   mvp: one(player, {

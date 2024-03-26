@@ -6,7 +6,14 @@ import { db } from "utils/drizzle";
 async function getPlayoffsBracket(seasonName: string) {
   return db.query.bracketGame.findMany({
     where: eq(bracketGame.seasonName, seasonName),
-    with: { game: { with: { homeDetails: true, awayDetails: true } } },
+    with: {
+      game: {
+        with: {
+          homeDetails: { with: { team: { columns: { name: true } } } },
+          awayDetails: { with: { team: { columns: { name: true } } } },
+        },
+      },
+    },
   });
 }
 
@@ -29,7 +36,7 @@ function buildGrid(numRounds: number) {
           i % 2 === 0
             ? [[...l, i + 1, maxSeed - i], r]
             : [l, [...r, i + 1, maxSeed - i]],
-        [[], []]
+        [[], []],
       );
     grid.unshift(left.map((n) => `g-${r}-${n}`));
     grid.push(right.map((n) => `g-${r}-${n}`));
@@ -73,15 +80,16 @@ export default async function Playoffs() {
             >
               {game.game ? (
                 <Link className="link" href={`/game/${game.game.id}`}>
-                  {game.game.awayDetails.teamName} @{" "}
-                  {game.game.homeDetails.teamName}
+                  {game.game.awayDetails.team.name}
+                  {" @ "}
+                  {game.game.homeDetails.team.name}
                 </Link>
               ) : (
                 <>TBD</>
               )}
             </div>
           );
-        })
+        }),
       )}
     </div>
   );

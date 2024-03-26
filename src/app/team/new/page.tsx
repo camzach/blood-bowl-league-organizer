@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 import RosterSelector from "./roster-selector";
+import { nanoid } from "nanoid";
 
 export default async function NewTeam() {
   const { userId } = auth();
@@ -18,7 +19,7 @@ export default async function NewTeam() {
   const teams = await db
     .select(getTableColumns(team))
     .from(team)
-    .leftJoin(coachToTeam, eq(team.name, coachToTeam.teamName))
+    .leftJoin(coachToTeam, eq(team.id, coachToTeam.teamId))
     .where(and(isNull(coachToTeam.coachId), eq(team.state, "draft")));
 
   const rosters = await db.query.roster.findMany({
@@ -53,15 +54,17 @@ export default async function NewTeam() {
           if (ruleOptions.length > 0 && !option) return null;
 
           await db.transaction(async (tx) => {
+            const teamId = nanoid();
             await tx.insert(team).values({
               name,
+              id: teamId,
               rosterName: roster,
               chosenSpecialRuleName: option?.specialRuleName,
               leagueName: user.publicMetadata.league as string,
             });
             await tx.insert(coachToTeam).values({
               coachId,
-              teamName: name,
+              teamId,
             });
           });
 
@@ -91,28 +94,25 @@ export default async function NewTeam() {
           <form
             action={async (input: FormData) => {
               "use server";
-              const teamName = input.get("teamname")?.toString();
+              const teamId = input.get("teamId")?.toString();
               const coachId = input.get("userId")?.toString();
 
-              if (!teamName || !coachId) return null;
+              if (!teamId || !coachId) return null;
 
               await db.insert(coachToTeam).values({
                 coachId,
-                teamName,
+                teamId,
               });
               revalidatePath("/");
-              return redirect(`/team/${teamName}/edit`);
+              return redirect(`/team/${teamId}/edit`);
             }}
           >
             <input hidden readOnly value={userId} name="userId" />
             <span className="join">
               <button className="btn join-item">Redraft an exiting team</button>
-              <select
-                className="join-item select select-accent"
-                name="teamname"
-              >
-                {teams.map(({ name, rosterName }) => (
-                  <option key={name} value={name}>
+              <select className="join-item select select-accent" name="teamId">
+                {teams.map(({ id, name, rosterName }) => (
+                  <option key={name} value={id}>
                     {name} - {rosterName}
                   </option>
                 ))}

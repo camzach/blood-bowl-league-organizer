@@ -11,23 +11,21 @@ import { coachToTeam } from "db/schema";
 import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import fetchTeam from "./fetch-team";
 
-type Props = { params: { teamName: string } };
+type Props = { params: { teamId: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
-  return { title: decodeURIComponent(params.teamName) };
+  return { title: decodeURIComponent(params.teamId) };
 }
 
-export default async function TeamPage({ params: { teamName } }: Props) {
+export default async function TeamPage({ params: { teamId } }: Props) {
   const user = await currentUser();
   if (!user) return <RedirectToSignIn />;
 
-  const team = await fetchTeam(
-    decodeURIComponent(teamName),
-    user.publicMetadata.league as string,
-    false,
-  );
+  const team = await fetchTeam(decodeURIComponent(teamId), false);
 
-  if (!team) return notFound();
+  if (!team || team.leagueName !== (user.publicMetadata.league as string)) {
+    return notFound();
+  }
 
   const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, user.id),
@@ -37,10 +35,10 @@ export default async function TeamPage({ params: { teamName } }: Props) {
     <>
       <h1 className="text-4xl">
         {team.name}
-        {editableTeams.some((entry) => entry.teamName === team.name) &&
+        {editableTeams.some((entry) => entry.teamId === team.id) &&
           (team.state === "draft" ||
             team.state === "hiring" ||
-            team.state === "improving") && <EditButton teamName={team.name} />}
+            team.state === "improving") && <EditButton teamId={team.id} />}
       </h1>
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -56,7 +54,7 @@ export default async function TeamPage({ params: { teamName } }: Props) {
       <br />
       Dedicated Fans -- {team.dedicatedFans}
       <SongControls
-        team={team.name}
+        teamId={team.id}
         currentSong={team.touchdownSong ?? undefined}
         isEditable={false}
       />
