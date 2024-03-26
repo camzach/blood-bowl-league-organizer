@@ -53,8 +53,8 @@ export default async function NewTeam() {
           );
           if (ruleOptions.length > 0 && !option) return null;
 
+          const teamId = nanoid();
           await db.transaction(async (tx) => {
-            const teamId = nanoid();
             await tx.insert(team).values({
               name,
               id: teamId,
@@ -69,7 +69,7 @@ export default async function NewTeam() {
           });
 
           revalidatePath("/");
-          return redirect(`/team/${name}/edit`);
+          return redirect(`/team/${teamId}/edit`);
         }}
       >
         <input hidden readOnly value={userId} name="userId" />
