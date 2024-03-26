@@ -41,11 +41,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
   ) {
     return redirect(`/teams/${teamId}`);
   }
-  const team = await fetchTeam(
-    decodeURIComponent(teamId),
-    user.publicMetadata.league as string,
-    true,
-  );
+  const team = await fetchTeam(decodeURIComponent(teamId), true);
   const skills = await db.query.skill.findMany({});
 
   if (!team) return notFound();
