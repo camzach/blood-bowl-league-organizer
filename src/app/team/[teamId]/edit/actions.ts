@@ -380,6 +380,8 @@ export const fireStaff = action(
         throw new Error("Cannot purchase deidcated fans after draft");
       if (updatedTeam.dedicatedFans > 6)
         throw new Error("Cannot have more than 6 dedicated fans");
+      if (updatedTeam.dedicatedFans < 1)
+        throw new Error("Cannot have less than 1 dedicated fans");
 
       return updatedTeam;
     });

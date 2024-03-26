@@ -82,15 +82,20 @@ export default async function EditTeam({ params: { teamId } }: Props) {
       Treasury -- {team.treasury}
       <br />
       Dedicated Fans --{" "}
-      <StaffHirer
-        title={"Dedicated Fans"}
-        type={"dedicatedFans"}
-        current={team.dedicatedFans}
-        cost={10_000}
-        teamId={team.id}
-        treasury={team.treasury}
-        max={6}
-      />
+      {team.state === "draft" ? (
+        <StaffHirer
+          title={"Dedicated Fans"}
+          type={"dedicatedFans"}
+          current={team.dedicatedFans}
+          cost={10_000}
+          teamId={team.id}
+          treasury={team.treasury}
+          min={1}
+          max={6}
+        />
+      ) : (
+        team.dedicatedFans
+      )}
       <SongControls
         teamId={team.id}
         currentSong={team.touchdownSong ?? undefined}
