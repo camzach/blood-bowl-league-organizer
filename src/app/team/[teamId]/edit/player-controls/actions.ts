@@ -29,14 +29,14 @@ export const fire = action(
         },
         with: {
           position: { columns: { cost: true } },
-          team: { columns: { state: true, name: true } },
+          team: { columns: { state: true, id: true } },
         },
       });
       if (!player) throw new Error("Player does not exist");
       if (player.team === null) throw new Error("Player is not on any team");
       if (player.membershipType !== "player")
         throw new Error("Player is not fireable");
-      if (!(await canEditTeam(player.team.name, tx)))
+      if (!(await canEditTeam(player.team.id, tx)))
         throw new Error("User does not have permission to modify this team");
 
       if (player.team.state === "draft") {
@@ -47,7 +47,7 @@ export const fire = action(
             .set({
               treasury: sql`${dbTeam.treasury} + ${player.position.cost}`,
             })
-            .where(eq(dbTeam.name, player.team.name)),
+            .where(eq(dbTeam.id, player.team.id)),
         ]);
         return true;
       }
@@ -153,7 +153,7 @@ export const learnSkill = action(
       const fetchedPlayer = await db.query.player.findFirst({
         where: eq(dbPlayer.id, input.player),
         with: {
-          team: { columns: { state: true, name: true } },
+          team: { columns: { state: true, id: true } },
           improvements: { with: { skill: true } },
           position: { with: { skillToPosition: { with: { skill: true } } } },
         },
@@ -167,7 +167,7 @@ export const learnSkill = action(
 
       if (player.team === null) throw new Error("Player is not on any team");
 
-      if (!(await canEditTeam(player.team.name, tx))) {
+      if (!(await canEditTeam(player.team.id, tx))) {
         throw new Error("User does not have permission to modify this team");
       }
       if (player.team.state !== "improving")

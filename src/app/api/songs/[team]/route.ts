@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: { teamId: string } },
 ) {
   const team = await db.query.team.findFirst({
-    where: eq(dbTeam.name, decodeURIComponent(params.teamId)),
+    where: eq(dbTeam.id, decodeURIComponent(params.teamId)),
     with: { song: true },
   });
   if (!team) return new NextResponse("No team found", { status: 404 });

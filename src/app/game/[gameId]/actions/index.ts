@@ -113,9 +113,9 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
         state: "playing",
       })
       .where(
-        inArray(dbTeam.name, [
-          game.homeDetails.team.name,
-          game.awayDetails.team.name,
+        inArray(dbTeam.id, [
+          game.homeDetails.team.id,
+          game.awayDetails.team.id,
         ]),
       );
     const gameUpdate = tx
@@ -156,7 +156,7 @@ export const selectJourneymen = action(
     return db.transaction(async (tx) => {
       const teamFields = {
         columns: {
-          name: true,
+          id: true,
           apothecary: true,
           assistantCoaches: true,
           cheerleaders: true,
@@ -204,9 +204,7 @@ export const selectJourneymen = action(
       });
       if (!game) throw new Error("Failed to find game");
 
-      if (
-        !canEditTeam([game.homeDetails.team.name, game.awayDetails.team.name])
-      )
+      if (!canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id]))
         throw new Error("User does not have permission to modify this game");
 
       if (game.state !== "journeymen")
@@ -339,7 +337,7 @@ export const purchaseInducements = action(
         with: {
           team: {
             columns: {
-              name: true,
+              id: true,
               treasury: true,
               chosenSpecialRuleName: true,
             },
@@ -368,10 +366,7 @@ export const purchaseInducements = action(
       });
       if (!game) throw new Error("Game does not exist");
       if (
-        !canEditTeam(
-          [game.homeDetails.team.name, game.awayDetails.team.name],
-          tx,
-        )
+        !canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id], tx)
       )
         throw new Error("User does not have permission for this game");
       if (game.state !== "inducements")
@@ -427,13 +422,13 @@ export const purchaseInducements = action(
           .set({
             treasury: sql`${team.treasury} - ${treasuryCostHome}`,
           })
-          .where(eq(team.name, game.homeDetails.team.name)),
+          .where(eq(team.id, game.homeDetails.team.id)),
         tx
           .update(team)
           .set({
             treasury: sql`${team.treasury} - ${treasuryCostAway}`,
           })
-          .where(eq(team.name, game.awayDetails.team.name)),
+          .where(eq(team.id, game.awayDetails.team.id)),
         tx
           .update(dbGame)
           .set({
@@ -683,7 +678,7 @@ export const end = action(
           dedicatedFans: homeFansUpdate,
           treasury: sql`${team.treasury} + ${homeWinnings}`,
         })
-        .where(eq(team.name, game.homeDetails.teamId));
+        .where(eq(team.id, game.homeDetails.teamId));
       const awayTeamUpdate = tx
         .update(team)
         .set({
@@ -691,7 +686,7 @@ export const end = action(
           dedicatedFans: awayFansUpdate,
           treasury: sql`${team.treasury} + ${awayWinnings}`,
         })
-        .where(eq(team.name, game.awayDetails.teamId));
+        .where(eq(team.id, game.awayDetails.teamId));
 
       await Promise.all([
         Promise.all(playerUpdates),
