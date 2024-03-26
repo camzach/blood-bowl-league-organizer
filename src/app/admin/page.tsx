@@ -4,6 +4,7 @@ import { db } from "utils/drizzle";
 import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import DiscordGuildLinker from "./discord-guild-linker";
 
 export default async function AdminPage() {
   const user = await currentUser();
@@ -27,25 +28,7 @@ export default async function AdminPage() {
         <button className="btn btn-warning join-item" formAction={clearAction}>
           Clear Season
         </button>
-      </form>
-      <form
-        action={async (data: FormData) => {
-          "use server";
-          console.log("updating");
-          await db
-            .update(dbLeague)
-            .set({ discordGuildId: data.get("guildId")?.toString() || null })
-            .where(eq(dbLeague.name, league.name));
-          console.log("done!");
-        }}
-      >
-        <input
-          type="text"
-          name="guildId"
-          defaultValue={league.discordGuildId ?? undefined}
-          className="input input-secondary"
-        />
-        <button className="btn btn-outline px-2">Save</button>
+        <DiscordGuildLinker />
       </form>
     </>
   );

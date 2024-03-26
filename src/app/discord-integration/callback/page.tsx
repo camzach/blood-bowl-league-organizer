@@ -2,19 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-type FetchState =
-  | {
-      loading: true;
-    }
-  | {
-      loading: false;
-      error: true;
-    }
-  | {
-      loading: false;
-      guild_id: string;
-    };
-
 export default function Page() {
   const [state, setState] = useState<"loading" | "error" | "success">(
     "loading",
@@ -38,6 +25,6 @@ export default function Page() {
   } else if (state === "error") {
     return "Something went wrong. Please try again later.";
   } else {
-    return "Complete! You may close this window now."
+    return "Complete! You may close this window now.";
   }
 }
