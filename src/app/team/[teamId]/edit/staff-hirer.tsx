@@ -12,6 +12,7 @@ type Props = {
   current: number;
   cost: number;
   teamId: string;
+  min?: number;
   max: number;
   treasury: number;
 };
@@ -22,6 +23,7 @@ export default function StaffHirer({
   type,
   teamId,
   cost,
+  min = 0,
   max,
   treasury,
 }: Props) {
@@ -72,7 +74,7 @@ export default function StaffHirer({
     <NumberInput
       value={current}
       label={title}
-      min={0}
+      min={min}
       max={inputMax}
       onChange={hireStaff}
     />
