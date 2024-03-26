@@ -19,7 +19,7 @@ type Props = {
   gameId: string;
 } & Record<
   "home" | "away",
-  { name: string; song?: string } & Record<
+  { id: string; name: string; song?: string } & Record<
     "players" | "journeymen",
     Array<NameAndId & { number: number }>
   >
@@ -225,9 +225,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
               }}
               className="flex-1"
             />
-            {team.song && (
-              <audio src={`/api/songs/${team.name}`} ref={songRef} />
-            )}
+            {team.song && <audio src={`/api/songs/${team.id}`} ref={songRef} />}
           </Fragment>
         ))}
       </div>

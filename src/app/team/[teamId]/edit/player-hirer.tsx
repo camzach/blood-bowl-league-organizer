@@ -7,14 +7,14 @@ type Props = {
   positions: Array<{ name: string; cost: number }>;
   treasury: number;
   freeNumbers: number[];
-  teamName: string;
+  teamId: string;
 };
 
 export function PlayerHirer({
   positions,
   treasury,
   freeNumbers,
-  teamName,
+  teamId,
 }: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
@@ -54,7 +54,7 @@ export function PlayerHirer({
   return (
     <div className="join">
       <select
-        className="select-bordered select join-item"
+        className="join-item select select-bordered"
         value={position}
         onChange={handlePositionSelect}
       >
@@ -65,7 +65,7 @@ export function PlayerHirer({
         ))}
       </select>
       <select
-        className="select-bordered select join-item"
+        className="join-item select select-bordered"
         value={number}
         onChange={handleNumberSelect}
       >
@@ -74,8 +74,8 @@ export function PlayerHirer({
         ))}
       </select>
       <button
-        className="btn-primary join-item btn"
-        onClick={() => execute({ number, team: teamName, position })}
+        className="btn btn-primary join-item"
+        onClick={() => execute({ number, teamId, position })}
       >
         HIRE!!!
       </button>

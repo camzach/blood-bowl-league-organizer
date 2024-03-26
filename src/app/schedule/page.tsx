@@ -19,7 +19,14 @@ export default async function Schedule() {
     ),
     with: {
       roundRobinGames: {
-        with: { game: { with: { homeDetails: true, awayDetails: true } } },
+        with: {
+          game: {
+            with: {
+              homeDetails: { with: { team: { columns: { name: true } } } },
+              awayDetails: { with: { team: { columns: { name: true } } } },
+            },
+          },
+        },
       },
     },
   });
@@ -59,8 +66,8 @@ export default async function Schedule() {
                 {gameIdx === 0 && (
                   <td rowSpan={round.length}>{roundIdx + 1}</td>
                 )}
-                <td>{game.homeDetails.teamName}</td>
-                <td>{game.awayDetails.teamName}</td>
+                <td>{game.homeDetails.team.name}</td>
+                <td>{game.awayDetails.team.name}</td>
                 <td>
                   {game.homeDetails.touchdowns} - {game.awayDetails.touchdowns}
                 </td>

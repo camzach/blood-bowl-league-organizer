@@ -12,10 +12,10 @@ export default async function Game({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
     with: {
       homeDetails: {
-        with: { mvp: true },
+        with: { mvp: true, team: { columns: { name: true } } },
       },
       awayDetails: {
-        with: { mvp: true },
+        with: { mvp: true, team: { columns: { name: true } } },
       },
     },
   });
@@ -30,8 +30,8 @@ export default async function Game({
         <thead>
           <tr>
             <th className="border-0" />
-            <th>{game.homeDetails.teamName}</th>
-            <th>{game.awayDetails.teamName}</th>
+            <th>{game.homeDetails.team.name}</th>
+            <th>{game.awayDetails.team.name}</th>
           </tr>
         </thead>
         <tbody>

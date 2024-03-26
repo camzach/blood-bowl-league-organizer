@@ -18,30 +18,31 @@ import { coachToTeam, rosterSlot } from "db/schema";
 import { eq } from "drizzle-orm";
 import DoneImproving from "./done-improving";
 
-type Props = { params: { teamName: string } };
+type Props = { params: { teamId: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
-  return { title: decodeURIComponent(params.teamName) };
+  return { title: decodeURIComponent(params.teamId) };
 }
 
-export default async function EditTeam({ params: { teamName } }: Props) {
+export default async function EditTeam({ params: { teamId } }: Props) {
   const user = await currentUser();
 
   if (!user) return <RedirectToSignIn />;
   const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, user.id),
   });
+
   if (
     !editableTeams.some(
       (entry) =>
-        entry.teamName === decodeURIComponent(teamName) &&
+        entry.teamId === decodeURIComponent(teamId) &&
         entry.coachId === user.id,
     )
   ) {
-    return redirect(`/teams/${teamName}`);
+    return redirect(`/teams/${teamId}`);
   }
   const team = await fetchTeam(
-    decodeURIComponent(teamName),
+    decodeURIComponent(teamId),
     user.publicMetadata.league as string,
     true,
   );
@@ -86,12 +87,12 @@ export default async function EditTeam({ params: { teamName } }: Props) {
         type={"dedicatedFans"}
         current={team.dedicatedFans}
         cost={10_000}
-        teamName={team.name}
+        teamId={team.name}
         treasury={team.treasury}
         max={6}
       />
       <SongControls
-        team={team.name}
+        teamId={team.id}
         currentSong={team.touchdownSong ?? undefined}
         isEditable={true}
       />
@@ -132,7 +133,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             .flatMap((slot) => slot.position)}
           treasury={team.treasury}
           freeNumbers={freeNumbers}
-          teamName={team.name}
+          teamId={team.name}
         />
       </div>
       <HireablePlayerManager
@@ -159,7 +160,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             </td>
             <td>
               <StaffHirer
-                teamName={team.name}
+                teamId={team.name}
                 type={"rerolls"}
                 title={"Rerolls"}
                 treasury={team.treasury}
@@ -179,7 +180,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                teamName={team.name}
+                teamId={team.name}
                 type={"assistantCoaches"}
                 title={"Assistant Coaches"}
                 treasury={team.treasury}
@@ -195,7 +196,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                teamName={team.name}
+                teamId={team.name}
                 type={"cheerleaders"}
                 title={"Cheerleaders"}
                 treasury={team.treasury}
@@ -211,7 +212,7 @@ export default async function EditTeam({ params: { teamName } }: Props) {
             <td>50,000</td>
             <td>
               <StaffHirer
-                teamName={team.name}
+                teamId={team.name}
                 type={"apothecary"}
                 title={"Apothecary"}
                 current={Number(team.apothecary)}

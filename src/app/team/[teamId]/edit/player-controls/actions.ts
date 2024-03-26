@@ -55,7 +55,7 @@ export const fire = action(
         await tx
           .update(dbPlayer)
           .set({
-            teamName: null,
+            teamId: null,
             membershipType: null,
           })
           .where(eq(dbPlayer.id, playerId));
@@ -81,7 +81,7 @@ export const update = action(
           number: true,
         },
         with: {
-          team: { columns: { state: true, name: true } },
+          team: { columns: { state: true, id: true } },
           improvements: {
             with: { skill: true },
           },
@@ -95,7 +95,7 @@ export const update = action(
       if (player.team === null || player.membershipType !== "player")
         throw new Error("Player is not on any team");
 
-      if (!(await canEditTeam(player.team.name, tx)))
+      if (!(await canEditTeam(player.team.id, tx)))
         throw new Error("User does not have permission to modify this team");
 
       if (player.team.state !== "draft" && player.team.state !== "hiring")
@@ -106,7 +106,7 @@ export const update = action(
         (await tx.query.player.findFirst({
           where: and(
             eq(dbPlayer.number, input.number),
-            eq(dbPlayer.teamName, player.team.name),
+            eq(dbPlayer.teamId, player.team.id),
             eq(dbPlayer.membershipType, "player"),
           ),
           columns: { id: true },
