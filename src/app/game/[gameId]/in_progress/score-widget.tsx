@@ -216,14 +216,15 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
             [away, "away", awaySongRef],
           ] as const
         ).map(([team, homeOrAway, songRef]) => (
-          <Fragment key={team.name}>
+          <Fragment key={team.id}>
             <TDButton
-              team={team.name}
-              {...team}
+              teamName={team.name}
               onSubmit={(player): void => {
                 onTD(homeOrAway, player);
               }}
               className="flex-1"
+              players={team.players}
+              journeymen={team.journeymen}
             />
             {team.song && <audio src={`/api/songs/${team.id}`} ref={songRef} />}
           </Fragment>

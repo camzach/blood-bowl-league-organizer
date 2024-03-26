@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 type NameAndId = { name: string | null; id: string };
 
 type Props = {
-  team: string;
+  teamName: string;
   onSubmit: (player?: NameAndId) => void;
   className?: string;
 } & Record<
@@ -21,7 +21,7 @@ type FormValues = {
 export default function TDButton({
   players,
   journeymen,
-  team,
+  teamName,
   onSubmit,
   className,
 }: Props) {
@@ -71,10 +71,10 @@ export default function TDButton({
         </button>
       </Modal>
       <button
-        className={classNames(["btn-sm btn", className])}
+        className={classNames(["btn btn-sm", className])}
         onClick={() => setIsOpen(true)}
       >
-        TD {team}
+        TD {teamName}
       </button>
     </>
   );

@@ -7,10 +7,10 @@ import { ready } from "./actions";
 import useRefreshingAction from "utils/use-refreshing-action";
 
 type Props = {
-  team: string;
+  teamId: string;
 };
 
-export default function ReadyButton({ team }: Props) {
+export default function ReadyButton({ teamId }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { execute, result, status } = useRefreshingAction(ready);
@@ -37,7 +37,7 @@ export default function ReadyButton({ team }: Props) {
       {status === "executing" ? (
         "Submitting..."
       ) : (
-        <button className="btn" onClick={() => execute(team)}>
+        <button className="btn" onClick={() => execute(teamId)}>
           Ready for next game
         </button>
       )}

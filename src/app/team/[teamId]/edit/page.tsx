@@ -48,7 +48,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
 
   const state = team.state;
   if (state === "ready" || state === "playing")
-    return redirect(`/team/${team.name}`);
+    return redirect(`/team/${team.id}`);
 
   const rosterSlots = await db.query.rosterSlot.findMany({
     where: eq(rosterSlot.rosterName, team.rosterName),
@@ -83,7 +83,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
         type={"dedicatedFans"}
         current={team.dedicatedFans}
         cost={10_000}
-        teamId={team.name}
+        teamId={team.id}
         treasury={team.treasury}
         max={6}
       />
@@ -129,7 +129,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             .flatMap((slot) => slot.position)}
           treasury={team.treasury}
           freeNumbers={freeNumbers}
-          teamId={team.name}
+          teamId={team.id}
         />
       </div>
       <HireablePlayerManager
@@ -156,7 +156,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             </td>
             <td>
               <StaffHirer
-                teamId={team.name}
+                teamId={team.id}
                 type={"rerolls"}
                 title={"Rerolls"}
                 treasury={team.treasury}
@@ -176,7 +176,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                teamId={team.name}
+                teamId={team.id}
                 type={"assistantCoaches"}
                 title={"Assistant Coaches"}
                 treasury={team.treasury}
@@ -192,7 +192,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                teamId={team.name}
+                teamId={team.id}
                 type={"cheerleaders"}
                 title={"Cheerleaders"}
                 treasury={team.treasury}
@@ -208,7 +208,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>50,000</td>
             <td>
               <StaffHirer
-                teamId={team.name}
+                teamId={team.id}
                 type={"apothecary"}
                 title={"Apothecary"}
                 current={Number(team.apothecary)}
@@ -222,9 +222,9 @@ export default async function EditTeam({ params: { teamId } }: Props) {
         </tbody>
       </table>
       {team.state === "improving" ? (
-        <DoneImproving team={team.name} />
+        <DoneImproving teamId={team.id} />
       ) : (
-        <ReadyTeam team={team.name} />
+        <ReadyTeam teamId={team.id} />
       )}
     </>
   );
