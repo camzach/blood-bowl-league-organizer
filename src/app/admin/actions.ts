@@ -8,7 +8,7 @@ import {
   roundRobinGame,
   season,
 } from "db/schema";
-import { count, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { db } from "utils/drizzle";
 import { action } from "utils/safe-action";
@@ -21,9 +21,23 @@ export const scheduleAction = action(z.any(), async () => {
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
   }
+
   await db.transaction(async (tx) => {
-    const games = await tx.select({ count: count() }).from(game);
-    if (games[0].count > 0) throw new Error("Schedule already generated");
+    const activeSeason = await tx.query.season.findFirst({
+      where: and(
+        eq(season.leagueName, user.publicMetadata.league as string),
+        eq(season.isActive, true),
+      ),
+      extras: (season) => ({
+        gamesCount:
+          sql<number>`SELECT COUNT(*) FROM ${roundRobinGame} WHERE ${roundRobinGame.seasonId}=${season.id}`.as(
+            "totalGames",
+          ),
+      }),
+    });
+    if (!activeSeason) throw new Error("No active season");
+    if (activeSeason.gamesCount > 0)
+      throw new Error("Schedule already generated");
 
     const teams = (await tx.query.team.findMany({ columns: { id: true } })).map(
       (t) => t.id,
@@ -36,12 +50,7 @@ export const scheduleAction = action(z.any(), async () => {
         away: { teamId: pair[1], id: nanoid() },
       })),
     }));
-    await tx
-      .insert(season)
-      .values([
-        { name: "2024", leagueName: user.publicMetadata.league as string },
-      ])
-      .onConflictDoNothing();
+
     for (const round of rounds) {
       for (const roundGame of round.pairs) {
         await tx.insert(gameDetails).values([roundGame.home, roundGame.away]);
@@ -57,7 +66,7 @@ export const scheduleAction = action(z.any(), async () => {
           {
             gameId,
             round: round.number,
-            seasonName: "2024",
+            seasonId: activeSeason.id,
           },
         ]);
       }
@@ -66,18 +75,32 @@ export const scheduleAction = action(z.any(), async () => {
 });
 
 export const clearAction = action(z.any(), async () => {
-  "use server";
-  const seasonName = process.env.ACTIVE_SEASON;
-  if (!seasonName) throw new Error("No active season");
+  const user = await currentUser();
+  if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
+    throw new Error("Not authenticated");
+  }
 
-  return db.transaction(async (tx) => {
+  await db.transaction(async (tx) => {
+    const activeSeason = await tx.query.season.findFirst({
+      where: and(
+        eq(season.leagueName, user.publicMetadata.league as string),
+        eq(season.isActive, true),
+      ),
+      extras: (season) => ({
+        gamesCount:
+          sql<number>`SELECT COUNT(*) FROM ${roundRobinGame} WHERE ${roundRobinGame.seasonId}=${season.id}`.as(
+            "totalGames",
+          ),
+      }),
+    });
+    if (!activeSeason) throw new Error("No active season");
     const gameIds = (
       await tx
         .delete(roundRobinGame)
-        .where(eq(roundRobinGame.seasonName, seasonName))
+        .where(eq(roundRobinGame.seasonId, activeSeason.id))
         .returning({ gameId: roundRobinGame.gameId })
     ).map((round) => round.gameId);
-    await tx.delete(season).where(eq(season.name, seasonName));
+
     if (gameIds.length === 0) return;
     const gameDetailsIds = (
       await tx.delete(game).where(inArray(game.id, gameIds)).returning({

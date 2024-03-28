@@ -430,7 +430,8 @@ export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
 export const season = pgTable(
   "season",
   {
-    name: varchar("name", { length: 255 }).notNull().primaryKey(),
+    id: varchar("id", { length: 25 }).primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
     leagueName: varchar("league_name")
       .notNull()
       .references(() => league.name),
@@ -451,25 +452,20 @@ export const seasonRelations = relations(season, ({ one, many }) => ({
   }),
 }));
 
-export const roundRobinGame = pgTable(
-  "round_robin_game",
-  {
-    gameId: varchar("game_id", { length: 255 })
-      .notNull()
-      .references(() => game.id),
-    seasonName: varchar("season_name", { length: 255 })
-      .notNull()
-      .references(() => season.name),
-    round: integer("round").notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.seasonName, table.gameId] }),
-  }),
-);
+export const roundRobinGame = pgTable("round_robin_game", {
+  gameId: varchar("game_id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .references(() => game.id),
+  seasonId: varchar("season_id", { length: 255 })
+    .notNull()
+    .references(() => season.id),
+  round: integer("round").notNull(),
+});
 export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
   season: one(season, {
-    fields: [roundRobinGame.seasonName],
-    references: [season.name],
+    fields: [roundRobinGame.seasonId],
+    references: [season.id],
   }),
   game: one(game, {
     fields: [roundRobinGame.gameId],
@@ -480,24 +476,27 @@ export const roundRobinGameRelations = relations(roundRobinGame, ({ one }) => ({
 export const bracketGame = pgTable(
   "bracket_game",
   {
-    seasonName: varchar("season_name", { length: 255 })
+    seasonId: varchar("season_id", { length: 255 })
       .notNull()
-      .references(() => season.name),
+      .references(() => season.id),
     round: integer("round").notNull(),
     seed: integer("seed").notNull(),
     gameId: varchar("game_id", { length: 255 })
-      .notNull()
-      .unique()
+      .primaryKey()
       .references(() => game.id),
   },
   (table) => ({
-    pk: primaryKey(table.seasonName, table.round, table.seed),
+    uniqueSeedPerRound: unique("bracket_game_unique_round_seeds").on(
+      table.seasonId,
+      table.round,
+      table.seed,
+    ),
   }),
 );
 export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
   season: one(season, {
-    fields: [bracketGame.seasonName],
-    references: [season.name],
+    fields: [bracketGame.seasonId],
+    references: [season.id],
   }),
   game: one(game, {
     fields: [bracketGame.gameId],
