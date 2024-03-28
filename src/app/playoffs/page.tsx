@@ -1,11 +1,13 @@
-import { bracketGame } from "db/schema";
-import { eq } from "drizzle-orm";
+import { currentUser } from "@clerk/nextjs";
+import { bracketGame, season } from "db/schema";
+import { and, eq } from "drizzle-orm";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { db } from "utils/drizzle";
 
-async function getPlayoffsBracket(seasonName: string) {
+async function getPlayoffsBracket(seasonId: string) {
   return db.query.bracketGame.findMany({
-    where: eq(bracketGame.seasonName, seasonName),
+    where: eq(bracketGame.seasonId, seasonId),
     with: {
       game: {
         with: {
@@ -48,7 +50,17 @@ function buildGrid(numRounds: number) {
 }
 
 export default async function Playoffs() {
-  const games = await getPlayoffsBracket(process.env.ACTIVE_SEASON ?? "");
+  const user = await currentUser();
+  if (!user?.publicMetadata.league) return notFound();
+  const activeSeason = await db.query.season.findFirst({
+    where: and(
+      eq(season.leagueName, user.publicMetadata.league as string),
+      eq(season.isActive, true),
+    ),
+  });
+  if (!activeSeason) return notFound();
+
+  const games = await getPlayoffsBracket(activeSeason.id);
   const rounds = games.reduce<(typeof games)[]>((prev, curr) => {
     if (!(curr.round - 1 in prev)) {
       prev[curr.round - 1] = [curr];
