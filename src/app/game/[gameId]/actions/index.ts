@@ -317,7 +317,7 @@ const inducementChoicesSchema = z.object({
   inducements: z.array(
     z.object({
       name: z.string(),
-      quantity: z.number().int().gt(0).default(1),
+      quantity: z.number().int().nonnegative().default(1),
     }),
   ),
 });
@@ -444,15 +444,17 @@ export const purchaseInducements = action(
               })),
             ),
           ),
-        (input.home.inducements.some((i) => (i.quantity ?? 1) > 0) ||
-          input.away.inducements.some((i) => (i.quantity ?? 1) > 0)) &&
+        (input.home.inducements.some((i) => i.quantity > 0) ||
+          input.away.inducements.some((i) => i.quantity > 0)) &&
           tx.insert(gameDetailsToInducement).values(
             (["home", "away"] as const).flatMap((t) =>
-              input[t].inducements.map((i) => ({
-                inducementName: i.name,
-                count: i.quantity,
-                gameDetailsId: game[`${t}Details`].id,
-              })),
+              input[t].inducements
+                .filter((i) => i.quantity > 0)
+                .map((i) => ({
+                  inducementName: i.name,
+                  count: i.quantity,
+                  gameDetailsId: game[`${t}Details`].id,
+                })),
             ),
           ),
       ]);
