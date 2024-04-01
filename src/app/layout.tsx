@@ -86,7 +86,7 @@ function NavLinks(props: {
       <li>
         <details>
           <summary>Teams</summary>
-          <ul className="z-10">
+          <ul className="z-10 w-fit">
             {props.teams.map((team) => (
               <li key={team.id}>
                 <Link href={`/team/${team.id}`}>{team.name}</Link>
