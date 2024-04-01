@@ -1,8 +1,8 @@
 import { NumberInput } from "components/number-input";
 
 type Props = {
-  inducements: Array<{ name: string; max: number }>;
-  stars: Array<{ name: string }>;
+  inducements: Array<{ name: string; max: number; price: number }>;
+  stars: Array<{ name: string; hiringFee: number }>;
   choices: { inducements: Record<string, number>; stars: string[] };
   onUpdate: (
     options:
@@ -10,7 +10,7 @@ type Props = {
           inducement: string;
           quantity: number;
         }
-      | { star: string; chosen: boolean }
+      | { star: string; chosen: boolean },
   ) => void;
 };
 export default function InducementSelector({
@@ -39,7 +39,8 @@ export default function InducementSelector({
                   });
                 }}
               />
-              {star.name}
+              <span className="mr-4">{star.name}</span>
+              <span className="ml-auto">{star.hiringFee.toLocaleString()}</span>
             </label>
           </li>
         ))}
@@ -51,10 +52,19 @@ export default function InducementSelector({
             {
               <>
                 <NumberInput
+                  className="w-full"
                   min={0}
                   max={ind.max}
                   value={choices.inducements[ind.name] ?? 0}
                   label={ind.name}
+                  labelElement={
+                    <>
+                      <span className="mr-4">{ind.name}</span>
+                      <span className="ml-auto">
+                        {ind.price.toLocaleString()}
+                      </span>
+                    </>
+                  }
                   showLabel
                   onChange={(val): void => {
                     onUpdate({

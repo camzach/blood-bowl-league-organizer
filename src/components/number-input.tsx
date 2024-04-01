@@ -1,9 +1,11 @@
 import classNames from "classnames";
-import { useRef, ChangeEvent, useCallback, useId } from "react";
+import { useRef, ChangeEvent, useCallback, useId, ReactElement } from "react";
 
 type Props = {
+  className?: string;
   value: number;
   label: string;
+  labelElement?: ReactElement;
   showLabel?: boolean;
   min?: number;
   max?: number;
@@ -12,6 +14,8 @@ type Props = {
 export function NumberInput({
   value,
   label,
+  className,
+  labelElement,
   showLabel = false,
   min,
   max,
@@ -22,8 +26,8 @@ export function NumberInput({
     onChange(
       Math.min(
         Math.max(min ?? -Infinity, e.target.valueAsNumber),
-        max ?? Infinity
-      )
+        max ?? Infinity,
+      ),
     );
   };
   const handleTick = useCallback(
@@ -31,27 +35,27 @@ export function NumberInput({
       if (dir === "up") onChange(Math.min(value + 1, max ?? Infinity));
       else onChange(Math.max(value - 1, min ?? -Infinity));
     },
-    [value, min, max, onChange]
+    [value, min, max, onChange],
   );
   const id = useId();
   return (
-    <span className="inline-flex flex-col">
+    <span className={classNames("inline-flex flex-col", className)}>
       <label
         htmlFor={id}
-        className={classNames(!showLabel && "invisible h-0 w-0")}
+        className={classNames("label", !showLabel && "invisible h-0 w-0")}
       >
-        {label}
+        {labelElement ?? label}
       </label>
       <span className="relative w-28">
         <button
-          className="btn-sm btn-square btn absolute left-0 top-0 rounded-r-none"
+          className="btn btn-square btn-sm absolute left-0 top-0 rounded-r-none"
           onClick={handleTick("down")}
           disabled={min !== undefined && value <= min}
         >
           -
         </button>
         <input
-          className="input-bordered input input-sm w-full px-12 text-center"
+          className="input input-bordered input-sm w-full px-12 text-center"
           style={{ appearance: "textfield" }}
           id={id}
           aria-label={label}
@@ -63,7 +67,7 @@ export function NumberInput({
           ref={inputRef}
         />
         <button
-          className="btn-sm btn-square btn absolute right-0 top-0 rounded-l-none"
+          className="btn btn-square btn-sm absolute right-0 top-0 rounded-l-none"
           onClick={handleTick("up")}
           disabled={max !== undefined && value >= max}
         >
