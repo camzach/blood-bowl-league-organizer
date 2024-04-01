@@ -28,15 +28,15 @@ export const scheduleAction = action(z.any(), async () => {
         eq(season.leagueName, user.publicMetadata.league as string),
         eq(season.isActive, true),
       ),
-      extras: (season) => ({
-        gamesCount:
-          sql<number>`SELECT COUNT(*) FROM ${roundRobinGame} WHERE ${roundRobinGame.seasonId}=${season.id}`.as(
-            "totalGames",
-          ),
-      }),
+      with: {
+        roundRobinGames: {
+          columns: {},
+          extras: { _: sql<never>`'_'`.as("_") },
+        },
+      },
     });
     if (!activeSeason) throw new Error("No active season");
-    if (activeSeason.gamesCount > 0)
+    if (activeSeason.roundRobinGames.length > 0)
       throw new Error("Schedule already generated");
 
     const teams = (await tx.query.team.findMany({ columns: { id: true } })).map(
