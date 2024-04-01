@@ -190,7 +190,7 @@ export default function Content(props: Props) {
       </button>
       <div>
         <InducementSelector
-          inducements={awayInducements}
+          inducements={homeInducements}
           stars={awayStars}
           choices={awayChoices}
           onUpdate={(choice): void => {
