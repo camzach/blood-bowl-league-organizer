@@ -12,7 +12,9 @@
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
     "vercel-build": "next build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "seed": "tsx src/db/seed.ts",
+    "fuzz": "tsx src/db/fuzz.ts"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +22,7 @@
     "@aws-sdk/client-s3": "^3.465.0",
     "@aws-sdk/signature-v4-crt": "^3.465.0",
     "@clerk/nextjs": "^4.29.3",
+    "@faker-js/faker": "^8.4.1",
     "@neondatabase/serverless": "^0.8.1",
     "classnames": "^2.3.2",
     "drizzle-orm": "^0.29.1",
@@ -61,7 +64,7 @@
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.7",
     "tailwindcss": "^3.3.5",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.7.1",
     "typescript": "5.3.2",
     "ws": "^8.16.0"
   }
