@@ -163,8 +163,8 @@ export default async function InProgress({ params: { gameId } }: Props) {
         }}
         away={{
           name: game.awayDetails.team.name,
-          id: game.homeDetails.team.id,
-          song: game.homeDetails.team.song?.data,
+          id: game.awayDetails.team.id,
+          song: game.awayDetails.team.song?.data,
           players: game.awayDetails.team.players
             .filter((p) => p.membershipType === "player")
             .sort((a, b) => a.number - b.number),
