@@ -18,7 +18,15 @@ export default function Skill({ skill }: Props) {
       </a>
       <Tooltip
         clickable
-        className="max-h-64 max-w-xl overflow-auto whitespace-pre-wrap leading-6 [&:has(p+p)>p]:ps-4 [&:has(p+p)>p]:-indent-4"
+        className={`
+          max-h-64
+          max-w-xl
+          overflow-auto
+          whitespace-pre-wrap
+          leading-6
+          [&:has(p+p)>p]:ps-4
+          [&:has(p+p)>p]:-indent-4
+        `}
       >
         {skill.rules.split("\n").map((text, i) => (
           <p key={i}>{text}</p>
