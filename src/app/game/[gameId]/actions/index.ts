@@ -129,12 +129,14 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
       .update(gameDetails)
       .set({
         journeymenRequired: homeJourneymen.count,
+        fanFactor: fanFactorHome,
       })
       .where(eq(gameDetails.id, game.homeDetails.id));
     const awayDetailsUpdate = tx
       .update(gameDetails)
       .set({
         journeymenRequired: awayJourneymen.count,
+        fanFactor: fanFactorAway,
       })
       .where(eq(gameDetails.id, game.awayDetails.id));
     return Promise.all([
