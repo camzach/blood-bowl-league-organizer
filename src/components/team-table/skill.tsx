@@ -29,7 +29,9 @@ export default function Skill({ skill }: Props) {
         `}
       >
         {skill.rules.split("\n").map((text, i) => (
-          <p key={i}>{text}</p>
+          <p className="mt-2" key={i}>
+            {text}
+          </p>
         ))}
         {skill.faq && (
           <ul className="mt-3 gap-4">
