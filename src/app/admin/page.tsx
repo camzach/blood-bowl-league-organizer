@@ -5,6 +5,7 @@ import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import DiscordGuildLinker from "./discord-guild-linker";
+import ScheduleManager from "./schedule-manager";
 
 export default async function AdminPage() {
   const user = await currentUser();
@@ -17,8 +18,8 @@ export default async function AdminPage() {
   if (!league) return notFound();
 
   return (
-    <>
-      <form className="join">
+    <div className="flex flex-col">
+      <form className="join mb-5">
         <button
           className="btn btn-primary join-item"
           formAction={scheduleAction}
@@ -30,6 +31,7 @@ export default async function AdminPage() {
         </button>
         <DiscordGuildLinker />
       </form>
-    </>
+      <ScheduleManager leagueName={league.name} />
+    </div>
   );
 }
