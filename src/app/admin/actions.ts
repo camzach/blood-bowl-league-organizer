@@ -86,12 +86,6 @@ export const clearAction = action(z.any(), async () => {
         eq(season.leagueName, user.publicMetadata.league as string),
         eq(season.isActive, true),
       ),
-      extras: (season) => ({
-        gamesCount:
-          sql<number>`SELECT COUNT(*) FROM ${roundRobinGame} WHERE ${roundRobinGame.seasonId}=${season.id}`.as(
-            "totalGames",
-          ),
-      }),
     });
     if (!activeSeason) throw new Error("No active season");
     const gameIds = (

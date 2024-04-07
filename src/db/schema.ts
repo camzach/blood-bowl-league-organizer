@@ -12,6 +12,7 @@ import {
   foreignKey,
   unique,
   uniqueIndex,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 export const teamStates = [
@@ -391,6 +392,8 @@ export const game = pgTable("game", {
     .unique()
     .references(() => gameDetails.id),
   weather: weather("weather"),
+  scheduledTime: timestamp("scheduled_time"),
+  discordEventId: varchar("discord_event_id"),
 });
 export const gameRelations = relations(game, ({ one }) => ({
   homeDetails: one(gameDetails, {
