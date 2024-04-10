@@ -12,7 +12,7 @@ export default function ReadyButton({ teamId }: Props) {
   return status === "executing" ? (
     "Submitting..."
   ) : (
-    <button className="btn" onClick={() => execute(teamId)}>
+    <button className="btn btn-primary" onClick={() => execute(teamId)}>
       Done improving players
     </button>
   );
