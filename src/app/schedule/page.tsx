@@ -53,6 +53,7 @@ export default async function Schedule() {
           <th>Round</th>
           <th>Home</th>
           <th>Away</th>
+          <th>Time</th>
           <th>TD</th>
           <th>Cas</th>
           <th>Link</th>
@@ -68,6 +69,7 @@ export default async function Schedule() {
                 )}
                 <td>{game.homeDetails.team.name}</td>
                 <td>{game.awayDetails.team.name}</td>
+                <td>{game.scheduledTime?.toLocaleString() ?? "Unscheduled"}</td>
                 <td>
                   {game.homeDetails.touchdowns} - {game.awayDetails.touchdowns}
                 </td>
