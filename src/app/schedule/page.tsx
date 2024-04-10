@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { season } from "db/schema";
 import { currentUser, RedirectToSignIn } from "@clerk/nextjs";
+import LocalTimestamp from "./local-timestamp";
 
 export const metadata: Metadata = { title: "Schedule" };
 
@@ -69,7 +70,13 @@ export default async function Schedule() {
                 )}
                 <td>{game.homeDetails.team.name}</td>
                 <td>{game.awayDetails.team.name}</td>
-                <td>{game.scheduledTime?.toLocaleString() ?? "Unscheduled"}</td>
+                <td>
+                  {game.scheduledTime ? (
+                    <LocalTimestamp time={game.scheduledTime} />
+                  ) : (
+                    "Unscheduled"
+                  )}
+                </td>
                 <td>
                   {game.homeDetails.touchdowns} - {game.awayDetails.touchdowns}
                 </td>
