@@ -113,3 +113,37 @@ export const clearAction = action(z.any(), async () => {
     await tx.delete(gameDetails).where(inArray(gameDetails.id, gameDetailsIds));
   });
 });
+export const rescheduleGames = action(
+  z.array(z.object({ id: z.string(), time: z.string().datetime() })),
+  async (games) => {
+    const user = await currentUser();
+    if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
+      throw new Error("Not authenticated");
+    }
+    await db.transaction(async (tx) => {
+      const activeSeason = await tx.query.season.findFirst({
+        where: and(
+          eq(season.leagueName, user.publicMetadata.league as string),
+          eq(season.isActive, true),
+        ),
+        with: {
+          roundRobinGames: true,
+        },
+      });
+
+      await Promise.all(
+        games.map(async (g) => {
+          if (!activeSeason?.roundRobinGames.some((gg) => gg.gameId === g.id)) {
+            throw new Error("Game not found");
+          }
+          return tx
+            .update(game)
+            .set({ scheduledTime: new Date(g.time) })
+            .where(eq(game.id, g.id));
+        }),
+      );
+
+      return "Success";
+    });
+  },
+);
