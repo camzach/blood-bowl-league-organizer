@@ -9,7 +9,7 @@ import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { Modal } from "components/modal";
 import { end } from "../actions";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import type { Route } from "next";
 
 type NameAndId = { id: string; name: string | null };

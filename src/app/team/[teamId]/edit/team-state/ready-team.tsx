@@ -2,42 +2,46 @@
 import { Die } from "components/die";
 import { Modal } from "components/modal";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ready } from "./actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { ready } from "../actions";
+import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   teamId: string;
+  showResult: boolean;
 };
 
-export default function ReadyButton({ teamId }: Props) {
+export default function ReadyButton({ teamId, showResult }: Props) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const { execute, result, status } = useRefreshingAction(ready);
+  const { execute, result, status } = useAction(ready, {
+    onSuccess() {
+      if (!showResult) {
+        router.refresh();
+      }
+    },
+  });
 
   return (
     <>
-      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        {status === "hasSucceeded" && result.data ? (
-          <>
+      {showResult && status === "hasSucceeded" && result.data && (
+        <Modal isOpen>
+          <div className="flex flex-col">
             <Die result={result.data.expensiveMistakeRoll} />
             {result.data.expensiveMistake} - Lost{" "}
             {result.data.expensiveMistakesCost} gold!
             <button
               onClick={(): void => {
-                setIsOpen(false);
                 router.refresh();
               }}
             >
               OK
             </button>
-          </>
-        ) : null}
-      </Modal>
+          </div>
+        </Modal>
+      )}
       {status === "executing" ? (
         "Submitting..."
       ) : (
-        <button className="btn" onClick={() => execute(teamId)}>
+        <button className="btn btn-primary" onClick={() => execute(teamId)}>
           Ready for next game
         </button>
       )}

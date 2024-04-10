@@ -2,7 +2,7 @@
 import { Die } from "components/die";
 import Link from "next/link";
 import { start } from "../actions";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 
 export function PlayButton({ gameId }: { gameId: string }) {
   const { execute, result, status } = useAction(start);

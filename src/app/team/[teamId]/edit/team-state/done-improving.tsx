@@ -1,5 +1,5 @@
 "use client";
-import { doneImproving } from "./actions";
+import { doneImproving } from "../actions";
 import useRefreshingAction from "utils/use-refreshing-action";
 
 type Props = {
