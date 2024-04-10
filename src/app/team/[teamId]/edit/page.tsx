@@ -4,7 +4,6 @@ import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
 import calculateTV from "utils/calculate-tv";
-import ReadyTeam from "./ready-team";
 import SongControls from "../touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "components/team-table";
@@ -16,7 +15,7 @@ import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
 import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot, team as dbTeam } from "db/schema";
 import { eq } from "drizzle-orm";
-import DoneImproving from "./done-improving";
+import TeamState from "./team-state";
 
 type Props = { params: { teamId: string } };
 
@@ -69,6 +68,11 @@ export default async function EditTeam({ params: { teamId } }: Props) {
   return (
     <>
       <h1 className="text-4xl">{team.name}</h1>
+      {(team.state === "draft" ||
+        team.state === "hiring" ||
+        team.state === "improving") && (
+        <TeamState state={team.state} id={team.id} />
+      )}
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
         <span>
@@ -230,11 +234,6 @@ export default async function EditTeam({ params: { teamId } }: Props) {
           </tr>
         </tbody>
       </table>
-      {team.state === "improving" ? (
-        <DoneImproving teamId={team.id} />
-      ) : (
-        <ReadyTeam teamId={team.id} />
-      )}
     </>
   );
 }
