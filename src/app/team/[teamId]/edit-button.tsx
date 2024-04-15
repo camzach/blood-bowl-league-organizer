@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 type Props = {
   teamId: string;
 };
@@ -7,9 +9,9 @@ export default function EditButton({ teamId }: Props) {
   return (
     <span className="text-lg">
       {" - "}
-      <a className="link" href={`/team/${teamId}/edit`}>
+      <Link className="link" href={`/team/${teamId}/edit`}>
         Edit
-      </a>
+      </Link>
     </span>
   );
 }
