@@ -46,7 +46,8 @@ export default function TDButton({
             <optgroup label="Rostered Players">
               {players.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name ?? p.number}
+                  {p.number}
+                  {p.name && ` - ${p.name}`}
                 </option>
               ))}
             </optgroup>
@@ -54,7 +55,8 @@ export default function TDButton({
               <optgroup label="Journeymen">
                 {journeymen.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name ?? p.number}
+                    {p.number}
+                    {p.name && ` - ${p.name}`}
                   </option>
                 ))}
               </optgroup>
