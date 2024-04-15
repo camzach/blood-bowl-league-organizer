@@ -13,7 +13,7 @@ type NameAndId = { name: string | null; id: string };
 type Props = {
   onSubmit: (
     team: "home" | "away" | "neither",
-    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | "bh" }
+    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | "bh" },
   ) => void;
 } & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
 
@@ -70,7 +70,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
   useEffect(() => {
     setValue(
       "injuredPlayer",
-      [...injuredPlayers.players, ...injuredPlayers.journeymen][0].id
+      [...injuredPlayers.players, ...injuredPlayers.journeymen][0].id,
     );
   }, [
     setValue,
@@ -82,7 +82,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data.causingTeam, {
       player: [...injuredPlayers.journeymen, ...injuredPlayers.players].find(
-        (p) => p.id === data.injuredPlayer
+        (p) => p.id === data.injuredPlayer,
       )!,
       injury: data.type,
       by: [
@@ -116,7 +116,8 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
               <optgroup label="Rostered Players">
                 {injuredPlayers.players.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name ?? p.number}
+                    {p.number}
+                    {p.name && ` - ${p.name}`}
                   </option>
                 ))}
               </optgroup>
@@ -124,7 +125,8 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
                 <optgroup label="Journeymen">
                   {injuredPlayers.journeymen.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name ?? p.number}
+                      {p.number}
+                      {p.name && ` - ${p.name}`}
                     </option>
                   ))}
                 </optgroup>
@@ -171,7 +173,8 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
                 <optgroup label="Rostered Players">
                   {causingPlayers.players.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name ?? p.number}
+                      {p.number}
+                      {p.name && ` - ${p.name}`}
                     </option>
                   ))}
                 </optgroup>
@@ -179,7 +182,8 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
                   <optgroup label="Journeymen">
                     {causingPlayers.journeymen.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name ?? p.number}
+                        {p.number}
+                        {p.name && ` - ${p.name}`}
                       </option>
                     ))}
                   </optgroup>

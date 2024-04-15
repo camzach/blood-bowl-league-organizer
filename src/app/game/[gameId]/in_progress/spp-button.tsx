@@ -17,7 +17,7 @@ type FormValues = {
 type Props = {
   onSubmit: (
     player: { name: string | null; id: string },
-    type: SPPType
+    type: SPPType,
   ) => void;
 } & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
 
@@ -36,7 +36,7 @@ export default function SPPButton({ home, away, onSubmit }: Props) {
 
   const onSubmitForm = handleSubmit(({ player, type }) => {
     const targetPlayer = [...journeymen, ...players].find(
-      (p) => p.id === player
+      (p) => p.id === player,
     )!;
     onSubmit(targetPlayer, type);
     setIsOpen(false);
@@ -59,14 +59,16 @@ export default function SPPButton({ home, away, onSubmit }: Props) {
             <optgroup label="Rostered">
               {players.map((p) => (
                 <option value={p.id} key={p.id}>
-                  {p.name ?? p.number}
+                  {p.number}
+                  {p.name && ` - ${p.name}`}
                 </option>
               ))}
             </optgroup>
             <optgroup label="Journeymen">
               {journeymen.map((p) => (
                 <option value={p.id} key={p.id}>
-                  {p.name ?? p.number}
+                  {p.number}
+                  {p.name && ` - ${p.name}`}
                 </option>
               ))}
             </optgroup>
