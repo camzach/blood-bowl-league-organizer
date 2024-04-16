@@ -30,11 +30,11 @@ export default async function Schedule({
   const parsedYear = (year !== undefined && parseInt(year)) || NaN;
 
   return (
-    <div className="mx-auto grid w-3/4 grid-cols-[1fr_4fr] gap-4 p-3">
-      <div>
+    <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
+      <div className="lg:mt-16">
         <Controls teams={teams} mode={mode} state={state} selected={teamId} />
       </div>
-      <div>
+      <div className="basis-full">
         {mode === "list" ? (
           <List games={games} />
         ) : (

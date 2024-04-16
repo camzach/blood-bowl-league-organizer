@@ -47,7 +47,7 @@ export default function Calendar(props: Props) {
   lastMonthSearch.set("year", lastMonth.getFullYear().toString());
 
   return (
-    <>
+    <div className="w-full">
       <span className="mb-4 flex items-center justify-center gap-4 text-3xl">
         <button
           className="btn"
@@ -68,7 +68,7 @@ export default function Calendar(props: Props) {
           &gt;
         </button>
       </span>
-      <div className="aut-rows-min grid grid-cols-7 gap-3">
+      <div className="grid auto-rows-fr grid-cols-[repeat(7,1fr)] gap-3 overflow-scroll">
         {Array.from(Array(6 * 7), (_, i) => addDays(firstDay, i)).map(
           (date) => {
             const gameList = props.games.filter(
@@ -77,7 +77,7 @@ export default function Calendar(props: Props) {
             return (
               <div
                 className={classNames(
-                  "flex aspect-square flex-col overflow-clip rounded-xl border bg-base-200 shadow-xl",
+                  "flex aspect-[1/2] min-w-20 flex-col overflow-clip rounded-xl border bg-base-200 shadow-xl lg:aspect-square",
                   isSameDay(new Date(), date)
                     ? "border-accent"
                     : "border-neutral",
@@ -98,7 +98,7 @@ export default function Calendar(props: Props) {
           },
         )}
       </div>
-    </>
+    </div>
   );
 }
 
