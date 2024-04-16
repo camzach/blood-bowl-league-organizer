@@ -11,6 +11,7 @@ import {
   currentUser,
 } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
+import TeamsList from "./teams-list";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -84,16 +85,7 @@ function NavLinks(props: {
   return (
     <ul className="menu text-xl md:menu-horizontal">
       <li>
-        <details>
-          <summary>Teams</summary>
-          <ul className="z-10 w-fit">
-            {props.teams.map((team) => (
-              <li key={team.id}>
-                <Link href={`/team/${team.id}`}>{team.name}</Link>
-              </li>
-            ))}
-          </ul>
-        </details>
+        <TeamsList teams={props.teams} />
       </li>
       <li>
         <Link href="/schedule">Schedule</Link>
