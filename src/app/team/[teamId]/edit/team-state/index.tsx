@@ -9,36 +9,26 @@ type Props = {
 
 export default function TeamState({ state, id }: Props) {
   return (
-    <>
-      <ol className="timeline">
+    <div className="my-2 inline-flex flex-col gap-2">
+      <ol className="steps">
         {state === "draft" ? (
           <>
-            <li>
-              <TimelineCheckbox checked />
-              <span className="timeline-end">Draft Team</span>
-              <hr />
-            </li>
+            <li className="step step-primary">Draft Team</li>
           </>
         ) : (
           <>
-            <li>
-              <TimelineCheckbox checked />
-              <span className="timeline-end">Improve Players</span>
-              <hr className={classNames(state === "hiring" && "bg-primary")} />
-            </li>
-            <li>
-              <hr className={classNames(state === "hiring" && "bg-primary")} />
-              <TimelineCheckbox checked={state === "hiring"} />
-              <span className="timeline-end">Hire and Fire</span>
-              <hr />
+            <li className="step step-primary">Improve Players</li>
+            <li
+              className={classNames(
+                "step",
+                state === "hiring" && "step-primary",
+              )}
+            >
+              Hire and Fire
             </li>
           </>
         )}
-        <li>
-          <hr />
-          <TimelineCheckbox />
-          <span className="timeline-end">Ready to play</span>
-        </li>
+        <li className="step">Ready to play</li>
       </ol>
 
       {state === "improving" ? (
@@ -46,7 +36,7 @@ export default function TeamState({ state, id }: Props) {
       ) : (
         <ReadyTeam teamId={id} showResult={state !== "draft"} />
       )}
-    </>
+    </div>
   );
 }
 
