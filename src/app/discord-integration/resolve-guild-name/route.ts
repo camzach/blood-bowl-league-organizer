@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { db } from "utils/drizzle";
 
 export async function GET() {
-  console.log("resolving guild");
   const user = await currentUser();
   if (!user?.publicMetadata.isAdmin) return;
 
