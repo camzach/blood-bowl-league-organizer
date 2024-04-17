@@ -161,7 +161,6 @@ export function StatList({ playerId, skills }: Props) {
         </table>
         {remainingItems.length > 0 && (
           <select
-            placeholder="Select a stat"
             className="select select-bordered select-sm"
             onChange={(e) => {
               setChosenStats((o) => [
