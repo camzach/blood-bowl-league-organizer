@@ -59,7 +59,6 @@ const cols = [
   "av",
   "ag",
   "pa",
-  "ni",
 ] satisfies ComponentProps<typeof TeamTable>["cols"];
 const journeymanCols = [
   "number",
@@ -102,10 +101,36 @@ export default async function InProgress({ params: { gameId } }: Props) {
 
   return (
     <div
-      className="mx-auto grid w-4/5 grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,3fr)] gap-3"
+      className="mx-auto grid w-4/5 auto-cols-fr grid-cols-2 gap-3 gap-x-12"
       style={{ placeItems: "start center" }}
     >
-      <div className="flex w-full flex-col">
+      <ScoreWidget
+        gameId={gameId}
+        home={{
+          name: game.homeDetails.team.name,
+          id: game.homeDetails.team.id,
+          song: game.homeDetails.team.song?.data,
+          players: game.homeDetails.team.players
+            .filter((p) => p.membershipType === "player")
+            .sort((a, b) => a.number - b.number),
+          journeymen: game.homeDetails.team.players
+            .filter((p) => p.membershipType === "journeyman")
+            .sort((a, b) => a.number - b.number),
+        }}
+        away={{
+          name: game.awayDetails.team.name,
+          id: game.awayDetails.team.id,
+          song: game.awayDetails.team.song?.data,
+          players: game.awayDetails.team.players
+            .filter((p) => p.membershipType === "player")
+            .sort((a, b) => a.number - b.number),
+          journeymen: game.awayDetails.team.players
+            .filter((p) => p.membershipType === "journeyman")
+            .sort((a, b) => a.number - b.number),
+        }}
+      />
+
+      <div className="flex flex-1 flex-col">
         <TeamTable
           compact
           players={game.homeDetails.team.players
@@ -148,32 +173,7 @@ export default async function InProgress({ params: { gameId } }: Props) {
           </>
         )}
       </div>
-      <ScoreWidget
-        gameId={gameId}
-        home={{
-          name: game.homeDetails.team.name,
-          id: game.homeDetails.team.id,
-          song: game.homeDetails.team.song?.data,
-          players: game.homeDetails.team.players
-            .filter((p) => p.membershipType === "player")
-            .sort((a, b) => a.number - b.number),
-          journeymen: game.homeDetails.team.players
-            .filter((p) => p.membershipType === "journeyman")
-            .sort((a, b) => a.number - b.number),
-        }}
-        away={{
-          name: game.awayDetails.team.name,
-          id: game.awayDetails.team.id,
-          song: game.awayDetails.team.song?.data,
-          players: game.awayDetails.team.players
-            .filter((p) => p.membershipType === "player")
-            .sort((a, b) => a.number - b.number),
-          journeymen: game.awayDetails.team.players
-            .filter((p) => p.membershipType === "journeyman")
-            .sort((a, b) => a.number - b.number),
-        }}
-      />
-      <div className="flex w-full flex-col">
+      <div className="flex flex-1 flex-col">
         <TeamTable
           compact
           players={game.awayDetails.team.players

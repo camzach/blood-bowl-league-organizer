@@ -1,16 +1,17 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Fragment, MutableRefObject } from "react";
+import React, { MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import InjuryButton from "./injury-button";
 import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
-import { Modal } from "components/modal";
 import { end } from "../actions";
 import { useAction } from "next-safe-action/hooks";
 import type { Route } from "next";
+import classNames from "classnames";
+import PopupButton from "components/popup-button";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = Parameters<typeof end>[0];
@@ -192,100 +193,183 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   };
 
   return (
-    <div className="relative flex w-full flex-col text-center">
-      <canvas
-        ref={fireworksCanvas}
-        className="pointer-events-none absolute h-[500px] w-full"
-      />
-      <div className="flex flex-col">
-        <span className="text-lg">Touchdowns</span>
-        <span>
-          {touchdowns[0]} - {touchdowns[1]}
+    <div className="col-span-2 grid grid-cols-subgrid gap-y-3">
+      <div className="pointer-events-none fixed bottom-0 left-1/3 right-1/3 top-0">
+        <canvas ref={fireworksCanvas} className="h-full w-full" />
+      </div>
+
+      <div className="ml-auto flex flex-col items-end gap-1 leading-10">
+        <h2 className="text-3xl">{home.name}</h2>
+        <span className="text-xl">
+          <TDButton
+            className="btn-outline btn-accent btn-sm mx-2"
+            onSubmit={(player) => onTD("home", player)}
+            players={home.players}
+            journeymen={home.journeymen}
+          >
+            +1
+          </TDButton>
+          Touchdowns {touchdowns[0]}
         </span>
-      </div>
-      <div className="flex flex-col">
-        <span className="text-lg">Casualties</span>
-        <span>
-          {casualties[0]} - {casualties[1]}
+        <span className="text-xl">
+          <InjuryButton
+            className="btn-outline btn-accent btn-sm mx-2"
+            onSubmit={(options) => {
+              onInjury("home", options);
+            }}
+            actors={{ players: home.players, journeymen: home.journeymen }}
+            targets={{ players: away.players, journeymen: away.journeymen }}
+          >
+            +1
+          </InjuryButton>
+          Casualties {casualties[0]}
         </span>
+        <SPPButton
+          onSubmit={addSPP}
+          players={home.players}
+          journeymen={home.journeymen}
+          className="btn-outline btn-accent btn-sm"
+        >
+          SPP
+        </SPPButton>
+        {home.song && <audio src={`/api/songs/${home.id}`} ref={homeSongRef} />}
       </div>
-      <div className="flex">
-        {(
-          [
-            [home, "home", homeSongRef],
-            [away, "away", awaySongRef],
-          ] as const
-        ).map(([team, homeOrAway, songRef]) => (
-          <Fragment key={team.id}>
-            <TDButton
-              teamName={team.name}
-              onSubmit={(player): void => {
-                onTD(homeOrAway, player);
-              }}
-              className="flex-1"
-              players={team.players}
-              journeymen={team.journeymen}
-            />
-            {team.song && <audio src={`/api/songs/${team.id}`} ref={songRef} />}
-          </Fragment>
-        ))}
+      <div className="mr-auto flex flex-col items-start gap-1 leading-10">
+        <h2 className="text-3xl">{away.name}</h2>
+        <span className="text-xl">
+          {touchdowns[1]} Touchdowns
+          <TDButton
+            className="btn-outline btn-accent btn-sm mx-2"
+            onSubmit={(player) => onTD("away", player)}
+            players={away.players}
+            journeymen={away.journeymen}
+          >
+            +1
+          </TDButton>
+        </span>
+        <span className="text-xl">
+          {casualties[1]} Casualties
+          <InjuryButton
+            className="btn-outline btn-accent btn-sm mx-2"
+            onSubmit={(options) => {
+              onInjury("away", options);
+            }}
+            actors={{ players: away.players, journeymen: away.journeymen }}
+            targets={{ players: home.players, journeymen: home.journeymen }}
+          >
+            +1
+          </InjuryButton>
+        </span>
+        <SPPButton
+          onSubmit={addSPP}
+          players={away.players}
+          journeymen={away.journeymen}
+          className="btn-outline btn-accent btn-sm"
+        >
+          SPP
+        </SPPButton>
+        {away.song && <audio src={`/api/songs/${away.id}`} ref={awaySongRef} />}
       </div>
-      <InjuryButton onSubmit={onInjury} home={home} away={away} />
-      <SPPButton onSubmit={addSPP} home={home} away={away} />
-      <SubmitButton gameState={gameState} />
-      <PlayerUpdatesDialog playerUpdates={playerUpdates} />
+      <div className="join col-span-2 mx-auto">
+        <SubmitButton gameState={gameState} className="btn-outline join-item" />
+        <InjuryButton
+          onSubmit={(options) => {
+            onInjury("neither", options);
+          }}
+          targets={{
+            players: home.players,
+            journeymen: home.journeymen,
+          }}
+          className="btn btn-outline join-item"
+        >
+          Neutral Casualty (home)
+        </InjuryButton>
+        <InjuryButton
+          onSubmit={(options) => {
+            onInjury("neither", options);
+          }}
+          targets={{
+            players: away.players,
+            journeymen: away.journeymen,
+          }}
+          className="btn btn-outline join-item"
+        >
+          Neutral Casualty (away)
+        </InjuryButton>
+        <PopupButton
+          className="btn-outline join-item"
+          buttonText="Player Updates"
+        >
+          <table className="table table-zebra table-xs">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>TD</th>
+                <th>CAS</th>
+                <th>COMP</th>
+                <th>DEF</th>
+                <th>INT</th>
+                <th>ETC</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(playerUpdates).map(([id, player]) => (
+                <tr key={id}>
+                  <td>{player.playerName}</td>
+                  <td>{player.starPlayerPoints?.touchdowns ?? "-"}</td>
+                  <td>{player.starPlayerPoints?.casualties ?? "-"}</td>
+                  <td>{player.starPlayerPoints?.completions ?? "-"}</td>
+                  <td>{player.starPlayerPoints?.deflections ?? "-"}</td>
+                  <td>{player.starPlayerPoints?.interceptions ?? "-"}</td>
+                  <td>{player.starPlayerPoints?.otherSPP ?? "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </PopupButton>
+      </div>
     </div>
   );
 }
 
 type SubmitButtonProps = {
   gameState: GameState & { game: string };
+  className?: string;
 };
-function SubmitButton({ gameState }: SubmitButtonProps) {
+function SubmitButton({ gameState, className }: SubmitButtonProps) {
   const { execute, status } = useAction(end);
 
-  if (status === "executing") return <span>Submitting...</span>;
+  if (status === "executing")
+    return (
+      <button className={classNames("btn btn-disabled", className)} disabled>
+        Submitting...
+      </button>
+    );
   if (status === "hasErrored") {
     return (
-      <>
-        There was an error with your submission.
-        <br />
-        Click{" "}
-        <a
-          href="#"
-          onClick={(): void => {
-            void navigator.clipboard.writeText(JSON.stringify(gameState));
-          }}
-        >
-          here
-        </a>{" "}
-        to copy your submission parameters.
-      </>
+      <button
+        onClick={(): void => {
+          void navigator.clipboard.writeText(JSON.stringify(gameState));
+        }}
+        className={classNames("btn btn-error", className)}
+      >
+        There was an error with your submission. Click to copy your submission
+        parameters.
+      </button>
     );
   }
-  if (status === "hasSucceeded") return <span>Success! Good game!</span>;
+  if (status === "hasSucceeded")
+    return (
+      <button className={classNames("btn btn-success", className)}>
+        Success! Good game!
+      </button>
+    );
   return (
-    <button className="btn" onClick={() => execute(gameState)}>
+    <button
+      className={classNames("btn", className)}
+      onClick={() => execute(gameState)}
+    >
       Done
     </button>
-  );
-}
-
-type PlayerUpdatesDialogProps = {
-  playerUpdates: GameState["playerUpdates"];
-};
-function PlayerUpdatesDialog({ playerUpdates }: PlayerUpdatesDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="fixed bottom-2 right-2">
-      <button className="btn" onClick={() => setIsOpen(true)}>
-        Show player updates
-      </button>
-      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        <pre className="text-left">
-          {JSON.stringify(playerUpdates, null, 2)}
-        </pre>
-      </Modal>
-    </div>
   );
 }

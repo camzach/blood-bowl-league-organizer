@@ -1,8 +1,9 @@
 import { Modal } from "components/modal";
-import { useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { end } from "../actions";
+import classNames from "classnames";
 
 type SPPType = keyof Required<
   Parameters<typeof end>[0]["playerUpdates"][string]
@@ -19,16 +20,20 @@ type Props = {
     player: { name: string | null; id: string },
     type: SPPType,
   ) => void;
-} & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
+  players: PlayerType[];
+  journeymen: PlayerType[];
+  className?: string;
+};
 
-export default function SPPButton({ home, away, onSubmit }: Props) {
+export default function SPPButton({
+  players,
+  journeymen,
+  className,
+  children,
+  onSubmit,
+}: PropsWithChildren<Props>) {
   const [isOpen, setIsOpen] = useState(false);
-  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
-    defaultValues: { team: "home" },
-  });
-
-  const team = watch("team");
-  const { players, journeymen } = team === "home" ? home : away;
+  const { register, setValue, handleSubmit } = useForm<FormValues>();
 
   useEffect(() => {
     setValue("player", [...players, ...journeymen][0].id);
@@ -45,14 +50,6 @@ export default function SPPButton({ home, away, onSubmit }: Props) {
   return (
     <>
       <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        <label>
-          Team:
-          <select className="select" {...register("team")}>
-            <option>home</option>
-            <option>away</option>
-          </select>
-        </label>
-        <br />
         <label>
           Player:
           <select className="select" {...register("player")}>
@@ -94,8 +91,11 @@ export default function SPPButton({ home, away, onSubmit }: Props) {
           Done
         </button>
       </Modal>
-      <button className="btn btn-sm" onClick={() => setIsOpen(true)}>
-        Other SPP
+      <button
+        className={classNames("btn", className)}
+        onClick={() => setIsOpen(true)}
+      >
+        {children}
       </button>
     </>
   );

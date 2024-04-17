@@ -1,12 +1,11 @@
 import classNames from "classnames";
 import { Modal } from "components/modal";
-import { useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type NameAndId = { name: string | null; id: string };
 
 type Props = {
-  teamName: string;
   onSubmit: (player?: NameAndId) => void;
   className?: string;
 } & Record<
@@ -21,10 +20,10 @@ type FormValues = {
 export default function TDButton({
   players,
   journeymen,
-  teamName,
   onSubmit,
   className,
-}: Props) {
+  children,
+}: PropsWithChildren<Props>) {
   const { register, handleSubmit } = useForm<FormValues>();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -73,10 +72,10 @@ export default function TDButton({
         </button>
       </Modal>
       <button
-        className={classNames(["btn btn-sm", className])}
+        className={classNames("btn", className)}
         onClick={() => setIsOpen(true)}
       >
-        TD {teamName}
+        {children}
       </button>
     </>
   );
