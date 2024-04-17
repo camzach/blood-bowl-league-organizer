@@ -19,11 +19,16 @@ type Props = {
 const detailsSelect = {
   with: {
     gameDetailsToStarPlayer: true,
+    gameDetailsToInducement: true,
     team: {
       columns: {
         name: true,
         id: true,
         touchdownSong: true,
+        rerolls: true,
+        assistantCoaches: true,
+        cheerleaders: true,
+        apothecary: true,
       },
       with: {
         song: true,
@@ -110,6 +115,22 @@ export default async function InProgress({ params: { gameId } }: Props) {
           name: game.homeDetails.team.name,
           id: game.homeDetails.team.id,
           song: game.homeDetails.team.song?.data,
+          rerolls:
+            game.homeDetails.team.rerolls +
+            (game.homeDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Extra Team Training",
+            )?.count ?? 0),
+          fanFactor: game.homeDetails.fanFactor,
+          assistantCoaches:
+            game.homeDetails.team.assistantCoaches +
+            (game.homeDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Part-time Assistant Coach",
+            )?.count ?? 0),
+          cheerleaders:
+            game.homeDetails.team.cheerleaders +
+            (game.homeDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Temp Agency Cheerleader",
+            )?.count ?? 0),
           players: game.homeDetails.team.players
             .filter((p) => p.membershipType === "player")
             .sort((a, b) => a.number - b.number),
@@ -121,6 +142,22 @@ export default async function InProgress({ params: { gameId } }: Props) {
           name: game.awayDetails.team.name,
           id: game.awayDetails.team.id,
           song: game.awayDetails.team.song?.data,
+          rerolls:
+            game.awayDetails.team.rerolls +
+            (game.awayDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Extra Team Training",
+            )?.count ?? 0),
+          fanFactor: game.awayDetails.fanFactor,
+          assistantCoaches:
+            game.awayDetails.team.assistantCoaches +
+            (game.awayDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Part-time Assistant Coach",
+            )?.count ?? 0),
+          cheerleaders:
+            game.awayDetails.team.cheerleaders +
+            (game.awayDetails.gameDetailsToInducement.find(
+              (ind) => ind.inducementName === "Temp Agency Cheerleader",
+            )?.count ?? 0),
           players: game.awayDetails.team.players
             .filter((p) => p.membershipType === "player")
             .sort((a, b) => a.number - b.number),

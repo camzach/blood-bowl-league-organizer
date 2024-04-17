@@ -20,7 +20,15 @@ type Props = {
   gameId: string;
 } & Record<
   "home" | "away",
-  { id: string; name: string; song?: string } & Record<
+  {
+    id: string;
+    name: string;
+    rerolls: number;
+    fanFactor: number;
+    assistantCoaches: number;
+    cheerleaders: number;
+    song?: string;
+  } & Record<
     "players" | "journeymen",
     Array<NameAndId & { number: number; nigglingInjuries: number }>
   >
@@ -200,6 +208,12 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
 
       <div className="ml-auto flex flex-col items-end gap-1 leading-10">
         <h2 className="text-3xl">{home.name}</h2>
+        <span className="-mt-4 flex flex-row-reverse gap-2">
+          <span>Rerolls: {home.rerolls}</span>
+          <span>Coaches: {home.assistantCoaches}</span>
+          <span>Cheerleaders: {home.cheerleaders}</span>
+          <span>Fan Factor: {home.fanFactor}</span>
+        </span>
         <span className="text-xl">
           <TDButton
             className="btn-outline btn-accent btn-sm mx-2"
@@ -236,6 +250,12 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       </div>
       <div className="mr-auto flex flex-col items-start gap-1 leading-10">
         <h2 className="text-3xl">{away.name}</h2>
+        <span className="-mt-4 flex gap-2">
+          <span>Rerolls: {away.rerolls}</span>
+          <span>Coaches: {away.assistantCoaches}</span>
+          <span>Cheerleaders: {away.cheerleaders}</span>
+          <span>Fan Factor: {away.fanFactor}</span>
+        </span>
         <span className="text-xl">
           {touchdowns[1]} Touchdowns
           <TDButton
