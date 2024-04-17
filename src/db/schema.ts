@@ -424,6 +424,7 @@ export const gameDetailsRelations = relations(gameDetails, ({ one, many }) => ({
     references: [team.id],
   }),
   gameDetailsToStarPlayer: many(gameDetailsToStarPlayer),
+  gameDetailsToInducement: many(gameDetailsToInducement),
   mvp: one(player, {
     fields: [gameDetails.mvpId],
     references: [player.id],
@@ -635,6 +636,19 @@ export const gameDetailsToInducement = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.gameDetailsId, table.inducementName] }),
+  }),
+);
+export const gameDetailsToInducementRelations = relations(
+  gameDetailsToInducement,
+  ({ one }) => ({
+    details: one(gameDetails, {
+      fields: [gameDetailsToInducement.gameDetailsId],
+      references: [gameDetails.id],
+    }),
+    inducement: one(inducement, {
+      fields: [gameDetailsToInducement.inducementName],
+      references: [inducement.name],
+    }),
   }),
 );
 
