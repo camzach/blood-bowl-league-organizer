@@ -17,7 +17,10 @@ type Props = {
     player: NameAndId;
     injury: InjuryType | "bh";
   }) => void;
-  targets: Record<"players" | "journeymen", PlayerType[]>;
+  targets: Record<
+    "players" | "journeymen",
+    (PlayerType & { nigglingInjuries: number })[]
+  >;
   actors?: Record<"players" | "journeymen", PlayerType[]>;
   className?: string;
 };
@@ -80,6 +83,7 @@ export default function InjuryButton({
                   <option key={p.id} value={p.id}>
                     {p.number}
                     {p.name && ` - ${p.name}`}
+                    {p.nigglingInjuries > 0 && ` (${p.nigglingInjuries} NI)`}
                   </option>
                 ))}
               </optgroup>
@@ -89,6 +93,7 @@ export default function InjuryButton({
                     <option key={p.id} value={p.id}>
                       {p.number}
                       {p.name && ` - ${p.name}`}
+                      {p.nigglingInjuries > 0 && ` (${p.nigglingInjuries} NI)`}
                     </option>
                   ))}
                 </optgroup>

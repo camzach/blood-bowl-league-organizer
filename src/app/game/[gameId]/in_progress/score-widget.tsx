@@ -22,7 +22,7 @@ type Props = {
   "home" | "away",
   { id: string; name: string; song?: string } & Record<
     "players" | "journeymen",
-    Array<NameAndId & { number: number }>
+    Array<NameAndId & { number: number; nigglingInjuries: number }>
   >
 >;
 
