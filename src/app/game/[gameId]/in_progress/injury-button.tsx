@@ -1,8 +1,9 @@
 import { Modal } from "components/modal";
-import { useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { end } from "../actions";
+import classNames from "classnames";
 
 type InjuryType = NonNullable<
   Parameters<typeof end>[0]["playerUpdates"][number]["injury"]
@@ -11,84 +12,55 @@ type PlayerType = { id: string; name: string | null; number: number };
 
 type NameAndId = { name: string | null; id: string };
 type Props = {
-  onSubmit: (
-    team: "home" | "away" | "neither",
-    options: { by?: NameAndId; player: NameAndId; injury: InjuryType | "bh" },
-  ) => void;
-} & Record<"home" | "away", Record<"players" | "journeymen", PlayerType[]>>;
+  onSubmit: (options: {
+    by?: NameAndId;
+    player: NameAndId;
+    injury: InjuryType | "bh";
+  }) => void;
+  targets: Record<"players" | "journeymen", PlayerType[]>;
+  actors?: Record<"players" | "journeymen", PlayerType[]>;
+  className?: string;
+};
 
 type FormValues = {
-  injuredTeam: "home" | "away";
   injuredPlayer: string;
-  causingTeam: "home" | "away" | "neither";
   causingPlayer?: string;
   type: InjuryType;
 };
 
-export default function InjuryButton({ home, away, onSubmit }: Props) {
-  const { register, watch, setValue, handleSubmit } = useForm<FormValues>({
-    defaultValues: {
-      injuredTeam: "home",
-      causingTeam: "neither",
-    },
-  });
+export default function InjuryButton({
+  targets,
+  actors,
+  className,
+  children,
+  onSubmit,
+}: PropsWithChildren<Props>) {
+  const { register, setValue, handleSubmit } = useForm<FormValues>();
   const [isOpen, setIsOpen] = useState(false);
 
-  const [injuredTeam, causingTeam] = watch(["injuredTeam", "causingTeam"]);
-  const causingPlayers = (() => {
-    switch (causingTeam) {
-      case "home":
-        return { players: home.players, journeymen: home.journeymen };
-      case "away":
-        return { players: away.players, journeymen: away.journeymen };
-      default:
-        return null;
-    }
-  })();
-  const injuredPlayers =
-    injuredTeam === "home"
-      ? { players: home.players, journeymen: home.journeymen }
-      : { players: away.players, journeymen: away.journeymen };
-
   useEffect(() => {
-    if (causingTeam === "neither") {
-      setValue("causingPlayer", undefined);
-    } else {
-      const players = [
-        ...(causingPlayers?.players ?? []),
-        ...(causingPlayers?.journeymen ?? []),
-      ];
-      setValue("causingPlayer", players[0]?.id);
-    }
-  }, [
-    setValue,
-    causingTeam,
-    causingPlayers?.players,
-    causingPlayers?.journeymen,
-  ]);
+    const players = [...(actors?.players ?? []), ...(actors?.journeymen ?? [])];
+    setValue("causingPlayer", players[0]?.id);
+  }, [setValue, actors?.players, actors?.journeymen]);
 
   useEffect(() => {
     setValue(
       "injuredPlayer",
-      [...injuredPlayers.players, ...injuredPlayers.journeymen][0].id,
+      [...targets.players, ...targets.journeymen][0].id,
     );
-  }, [
-    setValue,
-    injuredTeam,
-    injuredPlayers.players,
-    injuredPlayers.journeymen,
-  ]);
+  }, [setValue, targets.players, targets.journeymen]);
 
   const onFormSubmit = handleSubmit((data) => {
-    onSubmit(data.causingTeam, {
-      player: [...injuredPlayers.journeymen, ...injuredPlayers.players].find(
+    onSubmit({
+      player: [...targets.journeymen, ...targets.players].find(
         (p) => p.id === data.injuredPlayer,
       )!,
       injury: data.type,
-      by: [
-        ...(causingPlayers?.journeymen ?? []),
-        ...(causingPlayers?.players ?? []),
-      ].find((p) => p.id === data.causingPlayer),
+      by:
+        actors &&
+        [...actors.journeymen, ...actors.players].find(
+          (p) => p.id === data.causingPlayer,
+        ),
     });
     setIsOpen(false);
   });
@@ -98,32 +70,22 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
       <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
         <div className="form-control">
           <label>
-            Injured Player&apos;s team:
-            <select
-              className="select select-bordered select-sm"
-              {...register("injuredTeam")}
-            >
-              <option>home</option>
-              <option>away</option>
-            </select>
-          </label>
-          <label>
             Injured Player:
             <select
               className="select select-bordered select-sm"
               {...register("injuredPlayer")}
             >
               <optgroup label="Rostered Players">
-                {injuredPlayers.players.map((p) => (
+                {targets.players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.number}
                     {p.name && ` - ${p.name}`}
                   </option>
                 ))}
               </optgroup>
-              {injuredPlayers.journeymen.length > 0 && (
+              {targets.journeymen.length > 0 && (
                 <optgroup label="Journeymen">
-                  {injuredPlayers.journeymen.map((p) => (
+                  {targets.journeymen.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.number}
                       {p.name && ` - ${p.name}`}
@@ -152,18 +114,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
             </select>
           </label>
           <br />
-          <label>
-            Caused by Team:
-            <select
-              className="select select-bordered select-sm"
-              {...register("causingTeam")}
-            >
-              <option>home</option>
-              <option>away</option>
-              <option>neither</option>
-            </select>
-          </label>
-          {causingPlayers && (
+          {actors && (
             <label>
               Caused By:
               <select
@@ -171,16 +122,16 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
                 {...register("causingPlayer")}
               >
                 <optgroup label="Rostered Players">
-                  {causingPlayers.players.map((p) => (
+                  {actors.players.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.number}
                       {p.name && ` - ${p.name}`}
                     </option>
                   ))}
                 </optgroup>
-                {causingPlayers.journeymen.length > 0 && (
+                {actors.journeymen.length > 0 && (
                   <optgroup label="Journeymen">
-                    {causingPlayers.journeymen.map((p) => (
+                    {actors.journeymen.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.number}
                         {p.name && ` - ${p.name}`}
@@ -191,6 +142,7 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
               </select>
             </label>
           )}
+
           <button
             className="btn"
             onClick={() => {
@@ -201,8 +153,11 @@ export default function InjuryButton({ home, away, onSubmit }: Props) {
           </button>
         </div>
       </Modal>
-      <button className="btn btn-sm" onClick={() => setIsOpen(true)}>
-        Booboo
+      <button
+        className={classNames("btn", className)}
+        onClick={() => setIsOpen(true)}
+      >
+        {children}
       </button>
     </>
   );
