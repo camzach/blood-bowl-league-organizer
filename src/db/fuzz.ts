@@ -42,6 +42,7 @@ if (!(await prompt())) {
 }
 
 await db.transaction(async (tx) => {
+  console.log("Clearing database");
   /* vv CLEAR DB vv */
   await Promise.all([
     tx.delete(schema.bracketGame),
@@ -61,6 +62,7 @@ await db.transaction(async (tx) => {
 
   const LEAGUE_NAME = "Testing";
 
+  console.log("Creating new league");
   await tx.insert(schema.league).values({ name: LEAGUE_NAME });
 
   const teamNames = new Set<string>();
@@ -73,6 +75,7 @@ await db.transaction(async (tx) => {
     .map((val) => [val, Math.random()] as const)
     .sort((a, b) => b[1] - a[1])
     .map(([val, _]) => val.name);
+  console.log("Creating new teams");
   const teams = await tx
     .insert(schema.team)
     .values(
@@ -132,6 +135,7 @@ await db.transaction(async (tx) => {
     return newPlayers;
   });
 
+  console.log("Adding players");
   await tx.insert(schema.player).values(players);
 });
 
@@ -147,4 +151,5 @@ function keyBy<
   );
 }
 
+console.log("Done!");
 process.exit(0);
