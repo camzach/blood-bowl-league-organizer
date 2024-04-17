@@ -23,7 +23,7 @@
     "@aws-sdk/signature-v4-crt": "^3.465.0",
     "@clerk/nextjs": "^4.29.3",
     "@faker-js/faker": "^8.4.1",
-    "@neondatabase/serverless": "^0.8.1",
+    "@neondatabase/serverless": "^0.9.1",
     "classnames": "^2.3.2",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.29.1",
