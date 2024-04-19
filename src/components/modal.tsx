@@ -12,12 +12,14 @@ import { createPortal } from "react-dom";
 type Props = {
   isOpen: boolean;
   onRequestClose?: () => void;
+  className?: string;
 };
 
 export function Modal({
   isOpen,
   onRequestClose,
   children,
+  className,
 }: PropsWithChildren<Props>) {
   useEffect(() => {
     if (!isOpen || !onRequestClose) return;
@@ -51,9 +53,9 @@ export function Modal({
             }
           }}
         >
-          <div className="modal-box" ref={innerRef}>
+          <div className={classNames("modal-box", className)} ref={innerRef}>
             <label
-              className="btn-sm btn-circle btn absolute right-2 top-2"
+              className="btn btn-circle btn-sm absolute right-2 top-2"
               onClick={onRequestClose}
             >
               ✕
@@ -61,7 +63,7 @@ export function Modal({
             {children}
           </div>
         </div>,
-        bodyRef.current
+        bodyRef.current,
       )
     : null;
 }

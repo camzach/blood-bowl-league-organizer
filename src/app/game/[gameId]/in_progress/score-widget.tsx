@@ -8,10 +8,9 @@ import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import { end } from "../actions";
-import { useAction } from "next-safe-action/hooks";
 import type { Route } from "next";
-import classNames from "classnames";
 import PopupButton from "components/popup-button";
+import SubmitButton from "./submit-button";
 
 type NameAndId = { id: string; name: string | null };
 type InputType = Parameters<typeof end>[0];
@@ -60,7 +59,7 @@ const gameStateParser = z
   })
   .catch({ touchdowns: [0, 0], casualties: [0, 0], playerUpdates: {} });
 
-type GameState = z.infer<typeof gameStateParser>;
+export type GameState = z.infer<typeof gameStateParser>;
 
 function safeParse(input: string): unknown {
   try {
@@ -291,7 +290,12 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         {away.song && <audio src={`/api/songs/${away.id}`} ref={awaySongRef} />}
       </div>
       <div className="join col-span-2 mx-auto">
-        <SubmitButton gameState={gameState} className="btn-outline join-item" />
+        <SubmitButton
+          gameState={gameState}
+          homeTeam={home.name}
+          awayTeam={away.name}
+          className="btn-outline join-item"
+        />
         <InjuryButton
           onSubmit={(options) => {
             onInjury("neither", options);
@@ -349,47 +353,5 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         </PopupButton>
       </div>
     </div>
-  );
-}
-
-type SubmitButtonProps = {
-  gameState: GameState & { game: string };
-  className?: string;
-};
-function SubmitButton({ gameState, className }: SubmitButtonProps) {
-  const { execute, status } = useAction(end);
-
-  if (status === "executing")
-    return (
-      <button className={classNames("btn btn-disabled", className)} disabled>
-        Submitting...
-      </button>
-    );
-  if (status === "hasErrored") {
-    return (
-      <button
-        onClick={(): void => {
-          void navigator.clipboard.writeText(JSON.stringify(gameState));
-        }}
-        className={classNames("btn btn-error", className)}
-      >
-        There was an error with your submission. Click to copy your submission
-        parameters.
-      </button>
-    );
-  }
-  if (status === "hasSucceeded")
-    return (
-      <button className={classNames("btn btn-success", className)}>
-        Success! Good game!
-      </button>
-    );
-  return (
-    <button
-      className={classNames("btn", className)}
-      onClick={() => execute(gameState)}
-    >
-      Done
-    </button>
   );
 }
