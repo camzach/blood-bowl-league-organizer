@@ -613,31 +613,43 @@ export const end = action(
       }
 
       const mvpHome =
-        mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)].id;
-      updateMap[mvpHome].mvps = sql`${player.mvps} + 1`;
+        mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)];
+      updateMap[mvpHome.id].mvps = sql`${player.mvps} + 1`;
 
       const mvpAway =
-        mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)].id;
-      updateMap[mvpAway].mvps = sql`${player.mvps} + 1`;
+        mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)];
+      updateMap[mvpAway.id].mvps = sql`${player.mvps} + 1`;
 
       const fansUpdate = (won: boolean, currentFans: number) => {
-        if (won && d6() > currentFans) return sql`${team.dedicatedFans} + 1`;
-        if (!won && d6() < currentFans) return sql`${team.dedicatedFans} - 1`;
+        const roll = d6();
+        return {
+          roll,
+          currentFans,
+          newFans:
+            won && roll > currentFans
+              ? currentFans + 1
+              : !won && roll < currentFans
+                ? currentFans - 1
+                : currentFans,
+          sql:
+            won && roll > currentFans
+              ? sql`${team.dedicatedFans} + 1`
+              : !won && roll < currentFans
+                ? sql`${team.dedicatedFans} - 1`
+                : undefined,
+        };
       };
 
-      const [homeFansUpdate, awayFansUpdate] =
-        input.touchdowns[0] === input.touchdowns[1]
-          ? [undefined, undefined]
-          : [
-              fansUpdate(
-                input.touchdowns[0] > input.touchdowns[1],
-                game.homeDetails.team.dedicatedFans,
-              ),
-              fansUpdate(
-                input.touchdowns[1] > input.touchdowns[0],
-                game.awayDetails.team.dedicatedFans,
-              ),
-            ];
+      const [homeFansUpdate, awayFansUpdate] = [
+        fansUpdate(
+          input.touchdowns[0] > input.touchdowns[1],
+          game.homeDetails.team.dedicatedFans,
+        ),
+        fansUpdate(
+          input.touchdowns[1] > input.touchdowns[0],
+          game.awayDetails.team.dedicatedFans,
+        ),
+      ];
 
       const [homeWinnings, awayWinnings] = [
         input.touchdowns[0],
@@ -663,7 +675,7 @@ export const end = action(
         .set({
           casualties: input.casualties[0],
           touchdowns: input.touchdowns[0],
-          mvpId: mvpHome,
+          mvpId: mvpHome.id,
         })
         .where(eq(gameDetails.id, game.homeDetails.id));
       const awayDetailsUpdate = tx
@@ -671,7 +683,7 @@ export const end = action(
         .set({
           casualties: input.casualties[1],
           touchdowns: input.touchdowns[1],
-          mvpId: mvpAway,
+          mvpId: mvpAway.id,
         })
         .where(eq(gameDetails.id, game.awayDetails.id));
 
@@ -679,7 +691,7 @@ export const end = action(
         .update(team)
         .set({
           state: "improving",
-          dedicatedFans: homeFansUpdate,
+          dedicatedFans: homeFansUpdate.sql,
           treasury: sql`${team.treasury} + ${homeWinnings}`,
         })
         .where(eq(team.id, game.homeDetails.teamId));
@@ -687,7 +699,7 @@ export const end = action(
         .update(team)
         .set({
           state: "improving",
-          dedicatedFans: awayFansUpdate,
+          dedicatedFans: awayFansUpdate.sql,
           treasury: sql`${team.treasury} + ${awayWinnings}`,
         })
         .where(eq(team.id, game.awayDetails.teamId));
@@ -700,6 +712,23 @@ export const end = action(
         homeTeamUpdate,
         awayTeamUpdate,
       ]);
+
+      return {
+        homeWinnings,
+        awayWinnings,
+        homeFansUpdate: {
+          roll: homeFansUpdate.roll,
+          currentFans: homeFansUpdate.currentFans,
+          newFans: homeFansUpdate.newFans,
+        },
+        awayFansUpdate: {
+          roll: awayFansUpdate.roll,
+          currentFans: awayFansUpdate.currentFans,
+          newFans: awayFansUpdate.newFans,
+        },
+        homeMVP: { name: mvpHome.name, number: mvpHome.number },
+        awayMVP: { name: mvpAway.name, number: mvpAway.number },
+      };
     });
   },
 );
