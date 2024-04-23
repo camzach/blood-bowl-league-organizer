@@ -5,23 +5,22 @@ import { useForm } from "react-hook-form";
 import type { end } from "../actions";
 import classNames from "classnames";
 
-type InjuryType = NonNullable<
-  Parameters<typeof end>[0]["playerUpdates"][number]["injury"]
->;
+type InjuryType =
+  | NonNullable<Parameters<typeof end>[0]["playerUpdates"][number]["injury"]>
+  | "regen";
 type PlayerType = { id: string; name: string | null; number: number };
 
-type NameAndId = { name: string | null; id: string };
 type Props = {
   onSubmit: (options: {
-    by?: NameAndId;
-    player: NameAndId;
+    by?: string;
+    player: string;
     injury: InjuryType | "bh";
   }) => void;
   targets: Record<
     "players" | "journeymen",
     (PlayerType & { nigglingInjuries: number })[]
-  >;
-  actors?: Record<"players" | "journeymen", PlayerType[]>;
+  > & { stars: string[] };
+  actors?: Record<"players" | "journeymen", PlayerType[]> & { stars: string[] };
   className?: string;
 };
 
@@ -54,16 +53,21 @@ export default function InjuryButton({
   }, [setValue, targets.players, targets.journeymen]);
 
   const onFormSubmit = handleSubmit((data) => {
+    console.log(data);
     onSubmit({
-      player: [...targets.journeymen, ...targets.players].find(
-        (p) => p.id === data.injuredPlayer,
-      )!,
+      player: [
+        ...targets.journeymen,
+        ...targets.players,
+        ...targets.stars.map((s) => ({ id: s })),
+      ].find((p) => p.id === data.injuredPlayer)!.id,
       injury: data.type,
       by:
         actors &&
-        [...actors.journeymen, ...actors.players].find(
-          (p) => p.id === data.causingPlayer,
-        ),
+        [
+          ...actors.journeymen,
+          ...actors.players,
+          ...actors.stars.map((s) => ({ id: s })),
+        ].find((p) => p.id === data.causingPlayer)?.id,
     });
     setIsOpen(false);
   });
@@ -98,6 +102,15 @@ export default function InjuryButton({
                   ))}
                 </optgroup>
               )}
+              {targets.stars.length > 0 && (
+                <optgroup label="Star Players">
+                  {targets.stars.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </label>
           <br />
@@ -107,6 +120,7 @@ export default function InjuryButton({
               className="select select-bordered select-sm"
               {...register("type")}
             >
+              <option value="regen">None (regenerated)</option>
               <option value="bh">Badly Hurt</option>
               <option value="mng">Miss Next Game</option>
               <option value="ni">Niggling Injury</option>
@@ -140,6 +154,15 @@ export default function InjuryButton({
                       <option key={p.id} value={p.id}>
                         {p.number}
                         {p.name && ` - ${p.name}`}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {actors.stars.length > 0 && (
+                  <optgroup label="Star Players">
+                    {actors.stars.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
                       </option>
                     ))}
                   </optgroup>
