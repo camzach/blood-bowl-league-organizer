@@ -47,7 +47,7 @@ type Props = {
 };
 export function Popup({ player, skills }: Props) {
   const [tab, setTab] = useState<SkillCategory | "stat">(
-    player.position.primary[0],
+    player.position.primary[0] ?? player.position.secondary[0],
   );
   const { status, execute } = useRefreshingAction(learnSkill);
 
@@ -117,28 +117,30 @@ export function Popup({ player, skills }: Props) {
   return (
     <>
       <div className="flex gap-2">
-        <div className="flex flex-col">
-          <span className="text-center">
-            {advancementCosts["Random Primary"][player.totalImprovements]}
-            {" / "}
-            {advancementCosts["Chosen Primary"][player.totalImprovements]}
-            {" SPP"}
-          </span>
-          <div className="tabs-boxed tabs">
-            {player.position.primary.map((category) => (
-              <div
-                key={category}
-                className={classNames([
-                  "tab [--tab-bg:var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)))]",
-                  tab === category && "tab-active",
-                ])}
-                onClick={() => setTab(category)}
-              >
-                {upperFirst(category)}
-              </div>
-            ))}
+        {player.position.primary.length > 0 && (
+          <div className="flex flex-col">
+            <span className="text-center">
+              {advancementCosts["Random Primary"][player.totalImprovements]}
+              {" / "}
+              {advancementCosts["Chosen Primary"][player.totalImprovements]}
+              {" SPP"}
+            </span>
+            <div className="tabs-boxed tabs">
+              {player.position.primary.map((category) => (
+                <div
+                  key={category}
+                  className={classNames([
+                    "tab [--tab-bg:var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)))]",
+                    tab === category && "tab-active",
+                  ])}
+                  onClick={() => setTab(category)}
+                >
+                  {upperFirst(category)}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex flex-col">
           <span className="text-center">
             {advancementCosts["Random Secondary"][player.totalImprovements]}

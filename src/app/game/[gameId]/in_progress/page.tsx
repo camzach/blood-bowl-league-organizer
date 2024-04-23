@@ -137,6 +137,9 @@ export default async function InProgress({ params: { gameId } }: Props) {
           journeymen: game.homeDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
             .sort((a, b) => a.number - b.number),
+          starPlayers: game.homeDetails.gameDetailsToStarPlayer.map(
+            (entry) => entry.starPlayerName,
+          ),
         }}
         away={{
           name: game.awayDetails.team.name,
@@ -164,6 +167,9 @@ export default async function InProgress({ params: { gameId } }: Props) {
           journeymen: game.awayDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
             .sort((a, b) => a.number - b.number),
+          starPlayers: game.awayDetails.gameDetailsToStarPlayer.map(
+            (entry) => entry.starPlayerName,
+          ),
         }}
       />
 

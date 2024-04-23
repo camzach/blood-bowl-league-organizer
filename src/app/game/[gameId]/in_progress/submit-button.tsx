@@ -3,19 +3,18 @@ import React, { useState } from "react";
 import { end } from "../actions";
 import { useAction } from "next-safe-action/hooks";
 import classNames from "classnames";
-import { GameState } from "./score-widget";
 import { Modal } from "components/modal";
 import { Die } from "components/die";
 
 type Props = {
-  gameState: GameState & { game: string };
+  submission: Parameters<typeof end>[0];
   homeTeam: string;
   awayTeam: string;
   className?: string;
 };
 
 export default function Button({
-  gameState,
+  submission,
   className,
   homeTeam,
   awayTeam,
@@ -24,7 +23,7 @@ export default function Button({
   const { execute, status, result } = useAction(end, {
     onSuccess: () => setOpen(true),
   });
-
+  console.log(submission);
   if (status === "executing")
     return (
       <button className={classNames("btn btn-disabled", className)} disabled>
@@ -35,7 +34,7 @@ export default function Button({
     return (
       <button
         onClick={(): void => {
-          void navigator.clipboard.writeText(JSON.stringify(gameState));
+          void navigator.clipboard.writeText(JSON.stringify(submission));
         }}
         className={classNames("btn btn-error", className)}
       >
@@ -108,7 +107,7 @@ export default function Button({
   return (
     <button
       className={classNames("btn", className)}
-      onClick={() => execute(gameState)}
+      onClick={() => execute(submission)}
     >
       Done
     </button>

@@ -1,13 +1,13 @@
 import classNames from "classnames";
 import { Modal } from "components/modal";
+import { startOfSecond } from "date-fns";
 import { PropsWithChildren, useState } from "react";
 import { useForm } from "react-hook-form";
 
-type NameAndId = { name: string | null; id: string };
-
 type Props = {
-  onSubmit: (player?: NameAndId) => void;
+  onSubmit: (player: string) => void;
   className?: string;
+  stars: string[];
 } & Record<
   "players" | "journeymen",
   Array<{ id: string; name: string | null; number: number }>
@@ -20,6 +20,7 @@ type FormValues = {
 export default function TDButton({
   players,
   journeymen,
+  stars,
   onSubmit,
   className,
   children,
@@ -28,8 +29,7 @@ export default function TDButton({
   const [isOpen, setIsOpen] = useState(false);
 
   const onFormSubmit = handleSubmit(({ scoredBy }: FormValues): void => {
-    const player = [...players, ...journeymen].find((p) => p.id === scoredBy);
-    onSubmit(player);
+    onSubmit(scoredBy);
     setIsOpen(false);
   });
 
@@ -56,6 +56,15 @@ export default function TDButton({
                   <option key={p.id} value={p.id}>
                     {p.number}
                     {p.name && ` - ${p.name}`}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {startOfSecond.length > 0 && (
+              <optgroup label="Star Players">
+                {stars.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
                   </option>
                 ))}
               </optgroup>

@@ -2,12 +2,9 @@ import { Modal } from "components/modal";
 import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import type { end } from "../actions";
 import classNames from "classnames";
 
-type SPPType = keyof Required<
-  Parameters<typeof end>[0]["playerUpdates"][string]
->["starPlayerPoints"];
+type SPPType = "completions" | "interceptions" | "deflections" | "otherSPP";
 type PlayerType = { id: string; name: string | null; number: number };
 type FormValues = {
   team: "home" | "away";
@@ -17,7 +14,7 @@ type FormValues = {
 
 type Props = {
   onSubmit: (
-    player: { name: string | null; id: string },
+    player: { name: string | null; id: string; number: number },
     type: SPPType,
   ) => void;
   players: PlayerType[];
@@ -75,7 +72,6 @@ export default function SPPButton({
         <label>
           Type of SPP:
           <select className="select" {...register("type")}>
-            <option value="casualties">Casualty</option>
             <option value="deflections">Deflection</option>
             <option value="interceptions">Interception</option>
             <option value="completions">Completion</option>
