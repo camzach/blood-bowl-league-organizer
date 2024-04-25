@@ -1,4 +1,4 @@
-import { currentUser, RedirectToSignIn } from "@clerk/nextjs";
+import { currentUser, auth } from "@clerk/nextjs/server";
 import fetchGames from "./fetch-games";
 import List from "./list";
 import Calendar from "./calendar";
@@ -18,7 +18,7 @@ export default async function Schedule({
   searchParams: { teamId, state = "any", month, year, mode },
 }: Props) {
   const user = await currentUser();
-  if (!user) return <RedirectToSignIn />;
+  if (!user) return auth().redirectToSignIn();
 
   const { teams, games } = await fetchGames({
     teamId,

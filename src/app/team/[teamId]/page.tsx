@@ -8,7 +8,7 @@ import EditButton from "./edit-button";
 import { db } from "utils/drizzle";
 import { eq } from "drizzle-orm";
 import { coachToTeam, team as dbTeam } from "db/schema";
-import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import fetchTeam from "./fetch-team";
 
 type Props = { params: { teamId: string } };
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TeamPage({ params: { teamId } }: Props) {
   const user = await currentUser();
-  if (!user) return <RedirectToSignIn />;
+  if (!user) return auth().redirectToSignIn();
 
   const team = await fetchTeam(decodeURIComponent(teamId), false);
 

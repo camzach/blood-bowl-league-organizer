@@ -4,12 +4,8 @@ import "./global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
 import { team as dbTeam } from "db/schema";
-import {
-  ClerkProvider,
-  RedirectToSignIn,
-  UserButton,
-  currentUser,
-} from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
 import TeamsList from "./teams-list";
 
@@ -24,7 +20,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   // TODO: investigate useId issue
   const drawerId = "_drawer_";
 
-  if (!user) return <RedirectToSignIn />;
+  if (!user) return auth().redirectToSignIn();
 
   const teams = await db.query.team.findMany({
     where: eq(dbTeam.leagueName, user.publicMetadata.league as string),

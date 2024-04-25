@@ -11,7 +11,7 @@ import { PlayerActions } from "./player-controls/action-buttons";
 import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import fetchTeam from "../fetch-team";
-import { RedirectToSignIn, currentUser } from "@clerk/nextjs";
+import { currentUser, auth } from "@clerk/nextjs/server";
 import { db } from "utils/drizzle";
 import { coachToTeam, rosterSlot, team as dbTeam } from "db/schema";
 import { eq } from "drizzle-orm";
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EditTeam({ params: { teamId } }: Props) {
   const user = await currentUser();
 
-  if (!user) return <RedirectToSignIn />;
+  if (!user) return auth().redirectToSignIn();
   const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, user.id),
   });

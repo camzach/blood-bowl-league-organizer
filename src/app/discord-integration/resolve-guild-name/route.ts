@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "utils/drizzle";

@@ -14,7 +14,7 @@ import { db } from "utils/drizzle";
 import { action } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
 import { z } from "zod";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const scheduleAction = action(z.any(), async () => {
   const user = await currentUser();

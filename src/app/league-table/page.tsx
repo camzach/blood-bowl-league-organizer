@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
 import { season } from "db/schema";
-import { currentUser, RedirectToSignIn } from "@clerk/nextjs";
+import { currentUser, auth } from "@clerk/nextjs/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "League Table" };
 
 async function getLeagueTable() {
   const user = await currentUser();
-  if (!user) return <RedirectToSignIn />;
+  if (!user) return auth().redirectToSignIn();
 
   const activeSeason = await db.query.season.findFirst({
     where: and(

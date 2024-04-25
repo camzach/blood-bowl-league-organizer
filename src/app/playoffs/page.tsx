@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { bracketGame, season } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";

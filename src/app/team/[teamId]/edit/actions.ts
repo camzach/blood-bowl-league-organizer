@@ -9,7 +9,7 @@ import {
   rosterSlot,
   player as dbPlayer,
 } from "db/schema";
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
