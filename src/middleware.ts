@@ -1,33 +1,35 @@
-import { authMiddleware, clerkClient, redirectToSignIn } from "@clerk/nextjs";
-import { NextResponse, URLPattern } from "next/server";
+import {
+  clerkMiddleware,
+  createRouteMatcher,
+  clerkClient,
+} from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export default authMiddleware({
-  async afterAuth(auth, req) {
-    // Allow access to public routes
-    if (auth.isPublicRoute) {
-      return NextResponse.next();
-    }
+const isPublicRoute = createRouteMatcher(["/"]);
+const isAdminPage = createRouteMatcher(["/admin(.*)"]);
 
-    // Handle users who aren't authenticated
-    if (!auth.userId) {
-      return redirectToSignIn({ returnBackUrl: req.url });
-    }
-
-    // Protect admin route
-    const adminPattern = new URLPattern({ pathname: "/admin" });
-    if (
-      adminPattern.test(req.url) &&
-      !(await clerkClient.users.getUser(auth.userId)).publicMetadata.isAdmin
-    ) {
-      return NextResponse.json(
-        { error: "User is not an admin" },
-        { status: 401 },
-      );
-    }
-
-    // Allow everything else through
-    return NextResponse.next();
-  },
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) {
+    return;
+  }
+  const { userId, protect } = auth();
+  protect();
+  // Handle users who aren't authenticated
+  if (!userId) {
+    return auth().redirectToSignIn({ returnBackUrl: req.url });
+  }
+  // Protect admin route
+  if (
+    isAdminPage(req) &&
+    !(await clerkClient.users.getUser(userId)).publicMetadata.isAdmin
+  ) {
+    return NextResponse.json(
+      { error: "User is not an admin" },
+      { status: 401 },
+    );
+  }
+  // Allow everything else through
+  return NextResponse.next();
 });
 
 export const config = {

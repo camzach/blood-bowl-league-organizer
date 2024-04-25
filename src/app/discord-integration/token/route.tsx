@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { league } from "db/schema";
 import { sql } from "drizzle-orm";
 import { NextRequest } from "next/server";

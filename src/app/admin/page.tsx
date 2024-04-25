@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { clearAction, scheduleAction } from "./actions";
 import { db } from "utils/drizzle";
 import { league as dbLeague } from "db/schema";
