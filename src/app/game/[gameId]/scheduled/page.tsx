@@ -15,7 +15,7 @@ export default async function Game({
   if (!game) return notFound();
 
   if (game.state !== "scheduled")
-    redirect(`game/${gameId}/${game.state.toLowerCase()}`);
+    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
 
   return <PlayButton gameId={gameId} />;
 }

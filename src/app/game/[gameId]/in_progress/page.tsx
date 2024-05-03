@@ -1,7 +1,7 @@
 import { TeamTable } from "components/team-table";
 import type { ComponentProps } from "react";
 import ScoreWidget from "./score-widget";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import StarPlayerTable from "./star-player-table";
 import {
   getPlayerStats,
@@ -85,6 +85,9 @@ export default async function InProgress({ params: { gameId } }: Props) {
     },
   });
   if (!game) return notFound();
+  if (game.state !== "in_progress") {
+    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+  }
 
   const starsToQuery = [game.homeDetails, game.awayDetails].flatMap((details) =>
     details.gameDetailsToStarPlayer.map((star) => star.starPlayerName),

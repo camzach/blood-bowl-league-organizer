@@ -1,9 +1,8 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import InducementSelector from "./inducement-selector";
 import { purchaseInducements } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useRouter } from "next/navigation";
 
 type InducementArray = Array<{ name: string; price: number; max: number }>;
 type StarsArray = Array<{ name: string; hiringFee: number }>;
@@ -26,6 +25,7 @@ export default function Content(props: Props) {
   const [homeStars, awayStars] = props.stars;
   const [homePettyCash, awayPettyCash] = props.pettyCash;
   const [homeTreasury, awayTreasury] = props.treasury;
+  const router = useRouter();
 
   const [homeChoices, setHomeChoices] = useState<ChoicesType>({
     stars: [],
@@ -67,10 +67,8 @@ export default function Content(props: Props) {
     });
   }
 
-  const { execute, status } = useRefreshingAction(purchaseInducements);
-
-  const submit = (): void => {
-    execute({
+  const submit = async () => {
+    await purchaseInducements({
       game: props.gameId,
       home: {
         stars: homeChoices.stars,
@@ -85,6 +83,7 @@ export default function Content(props: Props) {
         ),
       },
     });
+    router.replace(`/game/${props.gameId}/in_progress`);
   };
 
   const calculateTotalCost = (from: "home" | "away"): number => {
@@ -104,20 +103,6 @@ export default function Content(props: Props) {
     }, 0);
     return starCosts + inducementCosts;
   };
-
-  if (status === "hasSucceeded")
-    return (
-      <>
-        Now let&apos;s{" "}
-        <Link className="link" href={`/game/${props.gameId}/in_progress`}>
-          Play!
-        </Link>
-      </>
-    );
-
-  if (status === "executing") {
-    return "Submitting...";
-  }
 
   const homeInducementCost = calculateTotalCost("home");
   const awayInducementCost = calculateTotalCost("away");

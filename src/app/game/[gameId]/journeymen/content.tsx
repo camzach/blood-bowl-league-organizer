@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import { selectJourneymen } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useRouter } from "next/navigation";
 
 type TeamWithChoices = {
   name: string;
@@ -53,23 +52,7 @@ function ChoicesList(props: {
 export default function Journeymen({ home, away, gameId }: Props) {
   const [homeChoice, setHomeChoice] = useState<string | undefined>(undefined);
   const [awayChoice, setAwayChoice] = useState<string | undefined>(undefined);
-
-  const { execute, status } = useRefreshingAction(selectJourneymen);
-
-  if (status === "hasSucceeded") {
-    return (
-      <>
-        Now go to{" "}
-        <Link className="link" href={`/game/${gameId}/inducements`}>
-          Inducements
-        </Link>
-      </>
-    );
-  }
-
-  if (status === "executing") {
-    return "Submitting...";
-  }
+  const router = useRouter();
 
   return (
     <>
@@ -94,9 +77,14 @@ export default function Journeymen({ home, away, gameId }: Props) {
       <br />
       <button
         className="btn"
-        onClick={() =>
-          execute({ game: gameId, home: homeChoice, away: awayChoice })
-        }
+        onClick={async () => {
+          await selectJourneymen({
+            game: gameId,
+            home: homeChoice,
+            away: awayChoice,
+          });
+          router.replace(`/game/${gameId}/inducements`);
+        }}
       >
         Submit!
       </button>
