@@ -9,6 +9,7 @@ type Props = {
   showLabel?: boolean;
   min?: number;
   max?: number;
+  disabled?: boolean;
   onChange: (val: number) => void;
 };
 export function NumberInput({
@@ -19,6 +20,7 @@ export function NumberInput({
   showLabel = false,
   min,
   max,
+  disabled = false,
   onChange,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,12 +52,13 @@ export function NumberInput({
         <button
           className="btn btn-square btn-sm absolute left-0 top-0 rounded-r-none"
           onClick={handleTick("down")}
-          disabled={min !== undefined && value <= min}
+          disabled={disabled || (min !== undefined && value <= min)}
         >
           -
         </button>
         <input
-          className="input input-bordered input-sm w-full px-12 text-center"
+          disabled={disabled}
+          className="input input-sm input-bordered w-full px-12 text-center"
           style={{ appearance: "textfield" }}
           id={id}
           aria-label={label}
@@ -69,7 +72,7 @@ export function NumberInput({
         <button
           className="btn btn-square btn-sm absolute right-0 top-0 rounded-l-none"
           onClick={handleTick("up")}
-          disabled={max !== undefined && value >= max}
+          disabled={disabled || (max !== undefined && value >= max)}
         >
           +
         </button>

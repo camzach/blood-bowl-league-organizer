@@ -65,6 +65,9 @@ export default async function EditTeam({ params: { teamId } }: Props) {
       ),
   );
 
+  const hirablePlayers = team.players.filter(
+    (p) => p.membershipType !== "player",
+  );
   return (
     <>
       <h1 className="text-4xl">{team.name}</h1>
@@ -132,6 +135,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
       />
       <div className="my-2">
         <PlayerHirer
+          disabled={state !== "hiring"}
           positions={rosterSlots
             .filter(
               (slot) =>
@@ -145,12 +149,14 @@ export default async function EditTeam({ params: { teamId } }: Props) {
           teamId={team.id}
         />
       </div>
-      <HireablePlayerManager
-        players={team.players.filter((p) => p.membershipType !== "player")}
-        freeNumbers={freeNumbers}
-        skills={skills}
-        state={state}
-      />
+      {hirablePlayers.length > 0 && (
+        <HireablePlayerManager
+          players={hirablePlayers}
+          freeNumbers={freeNumbers}
+          skills={skills}
+          state={state}
+        />
+      )}
       <table>
         <thead>
           <tr>
@@ -169,6 +175,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             </td>
             <td>
               <StaffHirer
+                disabled={team.state !== "hiring"}
                 teamId={team.id}
                 type={"rerolls"}
                 title={"Rerolls"}
@@ -189,6 +196,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
+                disabled={team.state !== "hiring"}
                 teamId={team.id}
                 type={"assistantCoaches"}
                 title={"Assistant Coaches"}
@@ -205,6 +213,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
+                disabled={team.state !== "hiring"}
                 teamId={team.id}
                 type={"cheerleaders"}
                 title={"Cheerleaders"}
@@ -221,6 +230,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>50,000</td>
             <td>
               <StaffHirer
+                disabled={team.state !== "hiring"}
                 teamId={team.id}
                 type={"apothecary"}
                 title={"Apothecary"}

@@ -98,7 +98,7 @@ export const update = action(
       if (!(await canEditTeam(player.team.id, tx)))
         throw new Error("User does not have permission to modify this team");
 
-      if (player.team.state !== "draft" && player.team.state !== "hiring")
+      if (!["hiring", "improving", "draft"].includes(player.team.state))
         throw new Error("Team is not modifiable at this time");
 
       const otherPlayer =

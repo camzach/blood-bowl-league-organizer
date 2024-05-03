@@ -8,6 +8,7 @@ type Props = {
   treasury: number;
   freeNumbers: number[];
   teamId: string;
+  disabled?: boolean;
 };
 
 export function PlayerHirer({
@@ -15,6 +16,7 @@ export function PlayerHirer({
   treasury,
   freeNumbers,
   teamId,
+  disabled = false,
 }: Props) {
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
@@ -57,6 +59,7 @@ export function PlayerHirer({
         className="join-item select select-bordered"
         value={position}
         onChange={handlePositionSelect}
+        disabled={disabled}
       >
         {positions.map((p) => (
           <option disabled={p.cost > treasury} key={p.name} value={p.name}>
@@ -68,6 +71,7 @@ export function PlayerHirer({
         className="join-item select select-bordered"
         value={number}
         onChange={handleNumberSelect}
+        disabled={disabled}
       >
         {freeNumbers.map((n) => (
           <option key={n}>{n}</option>
@@ -76,6 +80,7 @@ export function PlayerHirer({
       <button
         className="btn btn-primary join-item"
         onClick={() => execute({ number, teamId, position })}
+        disabled={disabled}
       >
         HIRE!!!
       </button>
