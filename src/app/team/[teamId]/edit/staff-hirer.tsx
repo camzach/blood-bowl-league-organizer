@@ -15,6 +15,7 @@ type Props = {
   min?: number;
   max: number;
   treasury: number;
+  disabled?: boolean;
 };
 
 export default function StaffHirer({
@@ -26,6 +27,7 @@ export default function StaffHirer({
   min = 0,
   max,
   treasury,
+  disabled = false,
 }: Props) {
   const { execute: hireAction, status: hireStatus } = useRefreshingAction(
     hireStaffAction,
@@ -72,6 +74,7 @@ export default function StaffHirer({
 
   return max > 1 ? (
     <NumberInput
+      disabled={disabled}
       value={current}
       label={title}
       min={min}
@@ -83,7 +86,7 @@ export default function StaffHirer({
       type="checkbox"
       className="checkbox"
       checked={current > 0}
-      disabled={current === 0 && treasury < cost}
+      disabled={disabled || (current === 0 && treasury < cost)}
       onChange={(e): void => {
         hireStaff(Number(e.target.checked));
       }}
