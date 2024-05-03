@@ -76,8 +76,8 @@ export default function ScheduleEditor(props: Props) {
             return (
               <tr key={game.id}>
                 <td>{game.round}</td>
-                <td>{game.awayTeam}</td>
                 <td>{game.homeTeam}</td>
+                <td>{game.awayTeam}</td>
                 <td>
                   <DateTimePicker
                     className={classNames(
