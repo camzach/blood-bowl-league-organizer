@@ -121,7 +121,10 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
     const gameUpdate = tx
       .update(dbGame)
       .set({
-        state: "journeymen",
+        state:
+          homeJourneymen.count > 0 || awayJourneymen.count > 0
+            ? "journeymen"
+            : "inducements",
         weather: weatherResult,
       })
       .where(eq(dbGame.id, game.id));

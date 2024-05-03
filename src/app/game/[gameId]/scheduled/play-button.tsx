@@ -8,6 +8,11 @@ export function PlayButton({ gameId }: { gameId: string }) {
   const { execute, result, status } = useAction(start);
 
   if (status === "hasSucceeded" && result.data) {
+    const nextStep =
+      result.data.homeJourneymen.count > 0 ||
+      result.data.awayJourneymen.count > 0
+        ? "journeymen"
+        : "inducements";
     return (
       <>
         <span className="text-4xl">
@@ -29,9 +34,8 @@ export function PlayButton({ gameId }: { gameId: string }) {
           {result.data.weatherResult}
         </span>
         <br />
-        Now go to{" "}
-        <Link className="link" href={`/game/${gameId}/journeymen`}>
-          Journeymen
+        <Link className="btn" href={`/game/${gameId}/${nextStep}`}>
+          Next step — {nextStep}
         </Link>
       </>
     );
