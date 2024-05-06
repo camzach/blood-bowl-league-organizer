@@ -128,7 +128,7 @@
         "secondary": ["general", "strength"]
       },
       {
-        "position": "Halfling Treeman",
+        "position": "Altern Forest Treeman",
         "max": 2,
         "cost": 120000,
         "MA": 2,
@@ -2367,6 +2367,27 @@
         "skills": ["Block", "Dodge", "Leap"],
         "primary": ["agility", "general"],
         "secondary": ["passing", "strength"]
+      },
+      {
+        "position": "Loren Forest Treeman",
+        "max": 1,
+        "cost": 120000,
+        "MA": 2,
+        "ST": 6,
+        "AG": 5,
+        "PA": 5,
+        "AV": 11,
+        "skills": [
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Stand Firm",
+          "Strong Arm",
+          "Take Root",
+          "Thick Skull",
+          "Throw Team-mate"
+        ],
+        "primary": ["strength"],
+        "secondary": ["agility", "passing"]
       }
     ]
   },
