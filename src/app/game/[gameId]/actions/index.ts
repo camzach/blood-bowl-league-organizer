@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { action } from "utils/safe-action";
 import { db } from "utils/drizzle";
-import { and, eq, not, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, not, gte, inArray, sql, SQL } from "drizzle-orm";
 import {
   game as dbGame,
   player,
@@ -625,21 +625,20 @@ export const end = action(
 
       const fansUpdate = (won: boolean, currentFans: number) => {
         const roll = d6();
+        let newFans = currentFans;
+        let updateSql: SQL | undefined = undefined;
+        if (won && roll > currentFans) {
+          newFans += 1;
+          updateSql = sql`${team.dedicatedFans} + 1`;
+        } else if (!won && roll < currentFans) {
+          newFans -= 1;
+          updateSql = sql`${team.dedicatedFans} - 1`;
+        }
         return {
           roll,
           currentFans,
-          newFans:
-            won && roll > currentFans
-              ? currentFans + 1
-              : !won && roll < currentFans
-                ? currentFans - 1
-                : currentFans,
-          sql:
-            won && roll > currentFans
-              ? sql`${team.dedicatedFans} + 1`
-              : !won && roll < currentFans
-                ? sql`${team.dedicatedFans} - 1`
-                : undefined,
+          newFans,
+          sql: updateSql,
         };
       };
 
