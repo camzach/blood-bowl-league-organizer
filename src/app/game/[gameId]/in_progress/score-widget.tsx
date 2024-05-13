@@ -8,7 +8,6 @@ import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
 import type { end } from "../actions";
-import type { Route } from "next";
 import SubmitButton from "./submit-button";
 import PlayerUpdatesButton from "./player-updates-button";
 import { nanoid } from "nanoid";
@@ -103,7 +102,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams?.toString() ?? "");
     newParams.set("gameState", btoa(JSON.stringify(gameState)));
-    router.replace(`${pathname}?${newParams.toString()}` as Route);
+    router.replace(`?${newParams.toString()}`);
   }, [gameState, pathname, router, searchParams]);
 
   const playerToTeamMap = useMemo(() => {
