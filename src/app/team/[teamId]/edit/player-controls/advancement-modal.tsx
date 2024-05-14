@@ -4,6 +4,7 @@ import { StatList } from "./stat-list";
 import { learnSkill } from "./actions";
 import type { skill, SkillCategory } from "db/schema";
 import useRefreshingAction from "utils/use-refreshing-action";
+import { skillConflicts } from "./skillConflicts";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -12,21 +13,6 @@ export const advancementCosts = {
   "Chosen Secondary": [12, 14, 18, 22, 26, 40],
   "Characteristic Improvement": [18, 20, 24, 28, 32, 50],
 } as const;
-
-const skillConflicts: Partial<Record<string, string[]>> = {
-  "No Hands": ["Catch", "Diving Catch", "Safe Pair of Hands"],
-  Frenzy: ["Grab"],
-  Grab: ["Frenzy"],
-  Leap: ["Pogo Stick"],
-  "Pogo Stick": ["Leap"],
-  "Ball & Chain": [
-    "Grab",
-    "Leap",
-    "Multiple Block",
-    "On the Ball",
-    "Shadowing",
-  ],
-};
 
 function upperFirst(str: string) {
   return (str.charAt(0)?.toUpperCase() ?? "") + str.slice(1);

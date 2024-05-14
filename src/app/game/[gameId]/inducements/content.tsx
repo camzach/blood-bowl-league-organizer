@@ -58,8 +58,6 @@ export default function Content(props: Props) {
         if (options.choice.chosen) {
           stars.add(options.choice.star);
         } else {
-          // This is a Set, not a db connection
-          // eslint-disable-next-line drizzle/enforce-delete-with-where
           stars.delete(options.choice.star);
         }
       }

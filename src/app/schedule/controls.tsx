@@ -143,8 +143,6 @@ export default function Controls({
                               : [],
                         );
                         if (!e.target.checked) {
-                          // This isn't a drizzle query
-                          // eslint-disable-next-line drizzle/enforce-delete-with-where
                           newSelected.delete(team.id);
                         } else {
                           newSelected.add(team.id);
@@ -152,8 +150,6 @@ export default function Controls({
                         const search = new URLSearchParams(
                           window.location.search,
                         );
-                        // This isn't a drizzle query
-                        // eslint-disable-next-line drizzle/enforce-delete-with-where
                         search.delete("teamId");
                         for (const id of newSelected) {
                           search.append("teamId", id);

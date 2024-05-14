@@ -6,11 +6,16 @@
     "eslint-config-prettier",
     "plugin:drizzle/all"
   ],
-  "plugins": [
-    "drizzle"
-  ],
+  "plugins": ["drizzle"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["warn", { "destructuredArrayIgnorePattern": "^_" }]
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "destructuredArrayIgnorePattern": "^_" }
+    ],
+    "drizzle/enforce-delete-with-where": [
+      "error",
+      { "drizzleObjectName": ["db", "tx"] }
+    ]
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
