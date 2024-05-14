@@ -14,8 +14,10 @@ import {
   skill as dbSkill,
   skillCategories,
   improvement,
+  SkillCategory,
 } from "db/schema";
 import { canEditTeam } from "../actions";
+import { skillConflicts } from "./skillConflicts";
 
 export const fire = action(
   z.object({ playerId: z.string() }),
@@ -172,18 +174,42 @@ export const learnSkill = action(
       }
       if (player.team.state !== "improving")
         throw new Error("Team is not in improving state");
-      const chooseRandom = <T>(list: T[]) =>
-        list[Math.floor(Math.random() * list.length)];
+      async function chooseRandomSkill(category: SkillCategory) {
+        const skills = await tx.query.skill.findMany({
+          where: eq(dbSkill.category, category),
+        });
+        const skillMap = new Map(skills.map((s) => [s.name, s]));
+        for (const skill of player.skills) {
+          skillMap.delete(skill.name);
+          if (skill.name in skillConflicts) {
+            for (const conflict in skillConflicts[skill.name]) {
+              skillMap.delete(conflict);
+            }
+          }
+        }
+        for (const improvement of player.improvements) {
+          if (
+            !improvement.type.includes("skill") ||
+            improvement.skillName === null
+          ) {
+            continue;
+          }
+          skillMap.delete(improvement.skillName);
+          if (improvement.skillName in skillConflicts) {
+            for (const conflict in skillConflicts[improvement.skillName]) {
+              skillMap.delete(conflict);
+            }
+          }
+        }
+        const list = Object.values(skillMap);
+        return list[Math.floor(Math.random() * list.length)];
+      }
       const skill =
         "skill" in input
           ? await tx.query.skill.findFirst({
               where: eq(dbSkill.name, input.skill),
             })
-          : chooseRandom(
-              await tx.query.skill.findMany({
-                where: eq(dbSkill.category, input.category),
-              }),
-            );
+          : await chooseRandomSkill(input.category);
       if (!skill) throw new Error("Skill not recognized");
       if (
         !player.position.primary.includes(skill.category) &&
