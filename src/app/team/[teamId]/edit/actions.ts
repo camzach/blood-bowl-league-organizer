@@ -264,7 +264,7 @@ export const hireExistingPlayer = action(
       if (!player) throw new Error("Player not found");
       if (!player.team) throw new Error("Player not available for any team");
 
-      if (!(await canEditTeam(player.team.name, tx)))
+      if (!(await canEditTeam(player.team.id, tx)))
         throw new Error("User does not have permission to modify this team");
 
       const { teamValue } = getPlayerSppAndTv(player);
