@@ -8,6 +8,7 @@ import {
   position as dbPosition,
   rosterSlot,
   player as dbPlayer,
+  improvement,
 } from "db/schema";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
@@ -270,16 +271,26 @@ export const hireExistingPlayer = action(
       const { teamValue } = getPlayerSppAndTv(player);
       const cost = teamValue + player.seasonsPlayed * 20_000;
 
-      await tx
-        .update(dbTeam)
-        .set({
-          treasury: sql`${dbTeam.treasury} - ${cost}`,
-        })
-        .where(eq(dbTeam.id, player.team.id));
-      await tx
-        .update(dbPlayer)
-        .set({ membershipType: "player", number: input.number })
-        .where(eq(dbPlayer.id, player.id));
+      await Promise.all([
+        tx
+          .update(dbTeam)
+          .set({
+            treasury: sql`${dbTeam.treasury} - ${cost}`,
+          })
+          .where(eq(dbTeam.id, player.team.id)),
+        tx
+          .update(dbPlayer)
+          .set({ membershipType: "player", number: input.number })
+          .where(eq(dbPlayer.id, player.id)),
+        tx
+          .delete(improvement)
+          .where(
+            and(
+              eq(improvement.playerId, player.id),
+              eq(improvement.skillName, "Loner (2+)"),
+            ),
+          ),
+      ]);
 
       const updatedTeam = await tx.query.team.findFirst({
         where: eq(dbTeam.id, player.team.id),
