@@ -287,7 +287,7 @@ export const hireExistingPlayer = action(
           .where(
             and(
               eq(improvement.playerId, player.id),
-              eq(improvement.skillName, "Loner (2+)"),
+              eq(improvement.skillName, "Loner (4+)"),
             ),
           ),
       ]);
