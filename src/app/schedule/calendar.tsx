@@ -2,6 +2,8 @@
 import fetchGames from "./fetch-games";
 import { Metadata } from "next";
 import {
+  setMonth,
+  setYear,
   startOfMonth,
   startOfWeek,
   addDays,
@@ -27,29 +29,24 @@ export default function Calendar(props: Props) {
 
   let month = new Date();
   if (props.year !== undefined) {
-    month.setFullYear(props.year);
+    month = setYear(month, props.year);
   }
   if (props.month !== undefined) {
-    month.setMonth(props.month);
+    month = setMonth(month, props.month);
   }
   month = startOfMonth(month);
 
   const firstDay = startOfWeek(month);
 
-  const nextMonth = (firstDay.getMonth() + 1) % 12;
+  const nextMonth = addMonths(month, 1);
   const nextMonthSearch = new URLSearchParams(searchParams);
-  nextMonthSearch.set("month", nextMonth.toString());
-  if (nextMonth === 0) {
-    nextMonthSearch.set("year", (firstDay.getFullYear() + 1).toString());
-  }
+  nextMonthSearch.set("month", nextMonth.getMonth().toString());
+  nextMonthSearch.set("year", nextMonth.getFullYear().toString());
 
-  // Adding 11 is equivalent to subtracting 1 modulo 12
-  const lastMonth = (firstDay.getMonth() + 11) % 12;
+  const lastMonth = addMonths(month, -1);
   const lastMonthSearch = new URLSearchParams(searchParams);
-  nextMonthSearch.set("month", lastMonth.toString());
-  if (nextMonth === 11) {
-    nextMonthSearch.set("year", (firstDay.getFullYear() - 1).toString());
-  }
+  lastMonthSearch.set("month", lastMonth.getMonth().toString());
+  lastMonthSearch.set("year", lastMonth.getFullYear().toString());
 
   return (
     <div className="w-full">

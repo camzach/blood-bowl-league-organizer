@@ -26,8 +26,9 @@ export default async function Schedule({
     league: user.publicMetadata.league as string,
   });
 
-  const parsedMonth = (month !== undefined && parseInt(month)) || NaN;
-  const parsedYear = (year !== undefined && parseInt(year)) || NaN;
+  const parsedMonth = month !== undefined ? parseInt(month) : NaN;
+  const parsedYear = year !== undefined ? parseInt(year) : NaN;
+  console.table({month, parsedMonth, parsedYear})
 
   return (
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
