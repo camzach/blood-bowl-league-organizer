@@ -36,15 +36,20 @@ export default function Calendar(props: Props) {
 
   const firstDay = startOfWeek(month);
 
-  const nextMonth = addMonths(month, 1);
+  const nextMonth = (firstDay.getMonth() + 1) % 12;
   const nextMonthSearch = new URLSearchParams(searchParams);
-  nextMonthSearch.set("month", nextMonth.getMonth().toString());
-  nextMonthSearch.set("year", nextMonth.getFullYear().toString());
+  nextMonthSearch.set("month", nextMonth);
+  if (nextMonth === 0) {
+    nextMonthSearch.set("year", firstDay.getFullYear() + 1);
+  }
 
-  const lastMonth = addMonths(month, -1);
+  // Adding 11 is equivalent to subtracting 1 modulo 12
+  const lastMonth = (firstDay.getMonth() + 11) % 12;
   const lastMonthSearch = new URLSearchParams(searchParams);
-  lastMonthSearch.set("month", lastMonth.getMonth().toString());
-  lastMonthSearch.set("year", lastMonth.getFullYear().toString());
+  nextMonthSearch.set("month", lastMonth);
+  if (nextMonth === 11) {
+    nextMonthSearch.set("year", firstDay.getFullYear() - 1);
+  }
 
   return (
     <div className="w-full">
