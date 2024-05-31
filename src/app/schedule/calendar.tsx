@@ -38,7 +38,7 @@ export default function Calendar(props: Props) {
 
   const nextMonth = (firstDay.getMonth() + 1) % 12;
   const nextMonthSearch = new URLSearchParams(searchParams);
-  nextMonthSearch.set("month", nextMonth);
+  nextMonthSearch.set("month", nextMonth.toString());
   if (nextMonth === 0) {
     nextMonthSearch.set("year", firstDay.getFullYear() + 1);
   }
@@ -46,7 +46,7 @@ export default function Calendar(props: Props) {
   // Adding 11 is equivalent to subtracting 1 modulo 12
   const lastMonth = (firstDay.getMonth() + 11) % 12;
   const lastMonthSearch = new URLSearchParams(searchParams);
-  nextMonthSearch.set("month", lastMonth);
+  nextMonthSearch.set("month", lastMonth.toString());
   if (nextMonth === 11) {
     nextMonthSearch.set("year", firstDay.getFullYear() - 1);
   }
