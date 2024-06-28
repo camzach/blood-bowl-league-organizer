@@ -30,6 +30,10 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
           with: {
             players: {
               where: eq(player.missNextGame, false),
+              with: {
+                improvements: { with: { skill: true } },
+                position: { with: { rosterSlot: { with: { roster: true } } } },
+              },
             },
             roster: {
               with: {
@@ -42,7 +46,7 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
           },
         },
       },
-    } as const;
+    } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
     const game = await tx.query.game.findFirst({
       where: eq(dbGame.id, id),
       with: {
@@ -107,6 +111,11 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
       awayJourneymen,
     };
 
+    const homeTV = calculateTV(game.homeDetails.team);
+    const awayTV = calculateTV(game.awayDetails.team);
+    const pettyCashHome = Math.max(0, awayTV - homeTV);
+    const pettyCashAway = Math.max(0, homeTV - awayTV);
+
     const teamUpdate = tx
       .update(dbTeam)
       .set({
@@ -133,6 +142,7 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
       .set({
         journeymenRequired: homeJourneymen.count,
         fanFactor: fanFactorHome,
+        pettyCashAwarded: pettyCashHome,
       })
       .where(eq(gameDetails.id, game.homeDetails.id));
     const awayDetailsUpdate = tx
@@ -140,6 +150,7 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
       .set({
         journeymenRequired: awayJourneymen.count,
         fanFactor: fanFactorAway,
+        pettyCashAwarded: pettyCashAway,
       })
       .where(eq(gameDetails.id, game.awayDetails.id));
     return Promise.all([
@@ -270,6 +281,7 @@ export const selectJourneymen = action(
 
       const pettyCashHome = Math.max(0, awayTV - homeTV);
       const pettyCashAway = Math.max(0, homeTV - awayTV);
+      console.log(pettyCashHome, pettyCashAway);
 
       await Promise.all([
         tx
@@ -357,7 +369,7 @@ export const purchaseInducements = action(
             },
           },
         },
-      } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
+      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
         where: eq(dbGame.id, input.game),
         columns: {
