@@ -32,7 +32,13 @@ export const start = action(z.object({ id: z.string() }), async ({ id }) => {
               where: eq(player.missNextGame, false),
               with: {
                 improvements: { with: { skill: true } },
-                position: { with: { rosterSlot: { with: { roster: true } } } },
+                position: {
+                  with: {
+                    rosterSlot: {
+                      with: { roster: { with: { specialRuleToRoster: true } } },
+                    },
+                  },
+                },
               },
             },
             roster: {
