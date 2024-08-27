@@ -46,7 +46,7 @@ export async function getLeagueTable(
       homeDetails && awayDetails
         ? [
             { name: homeDetails.team.name, id: homeDetails.team.id },
-            { name: homeDetails.team.name, id: awayDetails.team.id },
+            { name: awayDetails.team.name, id: awayDetails.team.id },
           ]
         : [],
     ),
