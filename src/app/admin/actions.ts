@@ -167,7 +167,9 @@ export const seedBracket = action.schema(z.any()).action(async () => {
     }
 
     {
-      const bracketGames = await tx.query.bracketGame.findMany({});
+      const bracketGames = await tx.query.bracketGame.findMany({
+        where: eq(bracketGame.seasonId, activeSeason.id),
+      });
       const gameIds = bracketGames.map((g) => g.gameId).filter((id) => !!id);
       const games = await tx.query.game.findMany({
         where: inArray(game.id, gameIds),
@@ -263,7 +265,7 @@ export const seedBracket = action.schema(z.any()).action(async () => {
       });
       bracketGameInserts.push({
         gameId,
-        seasonId: activeSeason?.id,
+        seasonId: activeSeason.id,
         round: current.round,
         seed: current.homeSeed,
       });
