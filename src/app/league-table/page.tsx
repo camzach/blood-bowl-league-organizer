@@ -1,118 +1,9 @@
-import { and, eq } from "drizzle-orm";
-import type { Metadata } from "next";
-import { db } from "utils/drizzle";
-import { season } from "db/schema";
-import { currentUser, auth } from "@clerk/nextjs/server";
+import type { Metadata } from "next/types";
+import { getLeagueTable } from "utils/get-league-table";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "League Table" };
-
-async function getLeagueTable() {
-  const user = await currentUser();
-  if (!user) return auth().redirectToSignIn();
-
-  const activeSeason = await db.query.season.findFirst({
-    where: and(
-      eq(season.leagueName, user.publicMetadata.league as string),
-      eq(season.isActive, true),
-    ),
-    with: {
-      roundRobinGames: {
-        with: {
-          game: {
-            with: {
-              homeDetails: { with: { team: { columns: { name: true } } } },
-              awayDetails: { with: { team: { columns: { name: true } } } },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!activeSeason) {
-    return "No season currently active. Ask your league administrator when the next one begins!";
-  }
-
-  const games = activeSeason.roundRobinGames;
-
-  const teams = new Set(
-    games.flatMap(({ game: { homeDetails, awayDetails } }) => [
-      homeDetails.team.name,
-      awayDetails.team.name,
-    ]),
-  );
-
-  const table = games.reduce(
-    (prev, { game: { state, homeDetails, awayDetails } }) => {
-      if (state !== "complete") return prev;
-      const next = { ...prev };
-
-      // Win / Loss / Draw
-      if (homeDetails.touchdowns > awayDetails.touchdowns) {
-        next[homeDetails.team.name].points += 3;
-        next[homeDetails.team.name].wins += 1;
-        next[awayDetails.team.name].losses += 1;
-      }
-      if (homeDetails.touchdowns < awayDetails.touchdowns) {
-        next[awayDetails.team.name].points += 3;
-        next[awayDetails.team.name].wins += 1;
-        next[homeDetails.team.name].losses += 1;
-      }
-      if (homeDetails.touchdowns === awayDetails.touchdowns) {
-        next[homeDetails.team.name].points += 1;
-        next[awayDetails.team.name].points += 1;
-        next[homeDetails.team.name].draws += 1;
-        next[awayDetails.team.name].draws += 1;
-      }
-
-      // Casualties
-      if (homeDetails.casualties >= 3) next[homeDetails.team.name].points += 1;
-      if (awayDetails.casualties >= 3) next[awayDetails.team.name].points += 1;
-
-      // Perfect Defense
-      if (homeDetails.touchdowns === 0) next[awayDetails.team.name].points += 1;
-      if (awayDetails.touchdowns === 0) next[homeDetails.team.name].points += 1;
-
-      // Major Win
-      if (homeDetails.touchdowns >= 3) next[homeDetails.team.name].points += 1;
-      if (awayDetails.touchdowns >= 3) next[awayDetails.team.name].points += 1;
-
-      // Stats
-      next[homeDetails.team.name].td += homeDetails.touchdowns;
-      next[awayDetails.team.name].td += awayDetails.touchdowns;
-      next[homeDetails.team.name].cas += homeDetails.casualties;
-      next[awayDetails.team.name].cas += awayDetails.casualties;
-      next[homeDetails.team.name].tdDiff +=
-        homeDetails.touchdowns - awayDetails.touchdowns;
-      next[awayDetails.team.name].tdDiff +=
-        awayDetails.touchdowns - homeDetails.touchdowns;
-      next[homeDetails.team.name].casDiff +=
-        homeDetails.casualties - awayDetails.casualties;
-      next[awayDetails.team.name].casDiff +=
-        awayDetails.casualties - homeDetails.casualties;
-
-      return next;
-    },
-    Object.fromEntries(
-      Array.from(teams.values(), (team) => [
-        team,
-        {
-          points: 0,
-          wins: 0,
-          losses: 0,
-          draws: 0,
-          td: 0,
-          cas: 0,
-          tdDiff: 0,
-          casDiff: 0,
-        },
-      ]),
-    ),
-  );
-  return table;
-}
 
 export default async function Page() {
   const table = await getLeagueTable();
@@ -143,9 +34,9 @@ export default async function Page() {
               return b.tdDiff + b.casDiff - (a.tdDiff + b.casDiff);
             return 0;
           })
-          .map(([team, stats]) => (
-            <tr key={team}>
-              <td>{team}</td>
+          .map(([teamId, stats]) => (
+            <tr key={teamId}>
+              <td>{stats.name}</td>
               <td>{stats.points}</td>
               <td>{stats.wins}</td>
               <td>{stats.losses}</td>

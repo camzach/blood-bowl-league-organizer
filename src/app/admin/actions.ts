@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  bracketGame,
   game,
   gameDetails,
   gameDetailsToInducement,
@@ -15,8 +16,9 @@ import { action } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
 import { z } from "zod";
 import { currentUser } from "@clerk/nextjs/server";
+import { getLeagueTable } from "utils/get-league-table";
 
-export const scheduleAction = action(z.any(), async () => {
+export const scheduleAction = action.schema(z.any()).action(async () => {
   const user = await currentUser();
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
@@ -74,7 +76,7 @@ export const scheduleAction = action(z.any(), async () => {
   });
 });
 
-export const clearAction = action(z.any(), async () => {
+export const clearAction = action.schema(z.any()).action(async () => {
   const user = await currentUser();
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
@@ -101,7 +103,9 @@ export const clearAction = action(z.any(), async () => {
         homeDetails: game.homeDetailsId,
         awayDetails: game.awayDetailsId,
       })
-    ).flatMap((game) => [game.homeDetails, game.awayDetails]);
+    )
+      .flatMap((game) => [game.homeDetails, game.awayDetails])
+      .filter((x): x is string => !!x);
     await Promise.all([
       tx
         .delete(gameDetailsToInducement)
@@ -113,9 +117,9 @@ export const clearAction = action(z.any(), async () => {
     await tx.delete(gameDetails).where(inArray(gameDetails.id, gameDetailsIds));
   });
 });
-export const rescheduleGames = action(
-  z.array(z.object({ id: z.string(), time: z.string().datetime() })),
-  async (games) => {
+export const rescheduleGames = action
+  .schema(z.array(z.object({ id: z.string(), time: z.string().datetime() })))
+  .action(async ({ parsedInput: games }) => {
     const user = await currentUser();
     if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
       throw new Error("Not authenticated");
@@ -145,5 +149,53 @@ export const rescheduleGames = action(
 
       return "Success";
     });
-  },
-);
+  });
+export const seedBracket = action.schema(z.any()).action(async () => {
+  const user = await currentUser();
+  if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
+    throw new Error("Not authenticated");
+  }
+  return await db.transaction(async (tx) => {
+    const activeSeason = await tx.query.season.findFirst({
+      where: and(
+        eq(season.leagueName, user.publicMetadata.league as string),
+        eq(season.isActive, true),
+      ),
+    });
+    if (!activeSeason) {
+      throw new Error("No active season");
+    }
+    const leagueTable = await getLeagueTable(tx);
+    const teams = Object.keys(leagueTable).sort(
+      (a, b) => leagueTable[b].points - leagueTable[a].points,
+    );
+    const upperSeed = teams.slice(0, Math.ceil(teams.length / 2));
+    const lowerSeed = teams.slice(Math.ceil(teams.length / 2)).toReversed();
+    if (upperSeed.length != lowerSeed.length) {
+      // handle the bye
+      const [byeTeam] = upperSeed.splice(0, 1);
+      const detailsId = nanoid();
+      await tx
+        .insert(gameDetails)
+        .values({
+          id: detailsId,
+          teamId: byeTeam,
+        })
+        .returning({ id: gameDetails.id });
+      const gameId = nanoid();
+      await tx.insert(game).values({
+        id: gameId,
+        homeDetailsId: detailsId,
+      });
+      const bracketGameId = nanoid();
+      await tx.insert(bracketGame).values({
+        gameId,
+        round: 1,
+        seed: 1,
+        seasonId: activeSeason?.id,
+      });
+    }
+    const pairs = upperSeed.map((team, i) => [team, lowerSeed[i]]);
+    return JSON.stringify(teams);
+  });
+});

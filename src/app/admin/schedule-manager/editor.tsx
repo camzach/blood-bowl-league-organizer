@@ -9,8 +9,8 @@ import { rescheduleGames } from "../actions";
 type Game = {
   id: string;
   round: number;
-  homeTeam: string;
-  awayTeam: string;
+  homeTeam?: string;
+  awayTeam?: string;
   time: Date | null;
   newTime?: Date;
 };
@@ -76,8 +76,8 @@ export default function ScheduleEditor(props: Props) {
             return (
               <tr key={game.id}>
                 <td>{game.round}</td>
-                <td>{game.homeTeam}</td>
-                <td>{game.awayTeam}</td>
+                <td>{game.homeTeam ?? "BYE"}</td>
+                <td>{game.awayTeam ?? "BYE"}</td>
                 <td>
                   <DateTimePicker
                     className={classNames(

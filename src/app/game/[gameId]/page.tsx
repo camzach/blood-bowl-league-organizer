@@ -20,6 +20,7 @@ export default async function Game({
     },
   });
   if (!game) return notFound();
+  if (!game.homeDetails || !game.awayDetails) return notFound();
 
   if (game.state !== "complete")
     return redirect(`/game/${gameId}/${game.state.toLowerCase()}`);

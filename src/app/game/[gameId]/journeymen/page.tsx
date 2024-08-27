@@ -42,6 +42,7 @@ export default async function Journeymen({ params: { gameId } }: Props) {
     },
   });
   if (!game) return notFound();
+  if (!game.homeDetails || !game.awayDetails) return notFound();
 
   if (game.state !== "journeymen")
     redirect(`/game/${gameId}/${game.state.toLowerCase()}`);

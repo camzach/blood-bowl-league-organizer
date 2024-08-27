@@ -85,6 +85,8 @@ export default async function InProgress({ params: { gameId } }: Props) {
     },
   });
   if (!game) return notFound();
+  if (!game.homeDetails || !game.awayDetails) return notFound();
+
   if (game.state !== "in_progress") {
     redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
   }

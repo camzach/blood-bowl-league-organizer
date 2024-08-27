@@ -19,9 +19,9 @@ import {
 import { canEditTeam } from "../actions";
 import { skillConflicts } from "./skillConflicts";
 
-export const fire = action(
-  z.object({ playerId: z.string() }),
-  async ({ playerId }) => {
+export const fire = action
+  .schema(z.object({ playerId: z.string() }))
+  .action(async ({ parsedInput: { playerId } }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, playerId),
@@ -65,16 +65,17 @@ export const fire = action(
       }
       throw new Error("Team not in hiring state");
     });
-  },
-);
+  });
 
-export const update = action(
-  z.object({
-    player: z.string(),
-    number: z.number().min(1).max(16).optional(),
-    name: z.string(z.string().min(1)).optional(),
-  }),
-  async (input) => {
+export const update = action
+  .schema(
+    z.object({
+      player: z.string(),
+      number: z.number().min(1).max(16).optional(),
+      name: z.string(z.string().min(1)).optional(),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, input.player),
@@ -133,24 +134,25 @@ export const update = action(
 
       await Promise.all(mutations);
     });
-  },
-);
+  });
 
-export const learnSkill = action(
-  z.intersection(
-    z.object({ player: z.string() }),
-    z.discriminatedUnion("type", [
-      z.object({
-        type: z.literal("chosen"),
-        skill: z.string(),
-      }),
-      z.object({
-        type: z.literal("random"),
-        category: z.enum(skillCategories),
-      }),
-    ]),
-  ),
-  async (input) => {
+export const learnSkill = action
+  .schema(
+    z.intersection(
+      z.object({ player: z.string() }),
+      z.discriminatedUnion("type", [
+        z.object({
+          type: z.literal("chosen"),
+          skill: z.string(),
+        }),
+        z.object({
+          type: z.literal("random"),
+          category: z.enum(skillCategories),
+        }),
+      ]),
+    ),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const fetchedPlayer = await db.query.player.findFirst({
         where: eq(dbPlayer.id, input.player),
@@ -246,16 +248,17 @@ export const learnSkill = action(
       if (starPlayerPoints < 0)
         throw new Error("Player does not have enough SPP");
     });
-  },
-);
+  });
 
-export const increaseCharacteristic = action(
-  z.object({
-    player: z.string(),
-    preferences: z.array(z.enum(["ma", "av", "ag", "st", "pa"])),
-    skill: z.string(),
-  }),
-  async (input) => {
+export const increaseCharacteristic = action
+  .schema(
+    z.object({
+      player: z.string(),
+      preferences: z.array(z.enum(["ma", "av", "ag", "st", "pa"])),
+      skill: z.string(),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     await db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, input.player),
@@ -356,5 +359,4 @@ export const increaseCharacteristic = action(
           throw new Error("Stat cannot be improved further");
       }
     });
-  },
-);
+  });

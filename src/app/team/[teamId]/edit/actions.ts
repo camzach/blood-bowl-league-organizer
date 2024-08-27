@@ -32,9 +32,9 @@ export async function canEditTeam(teamId: string | string[], tx?: typeof db) {
   return editableTeams.some((e) => e.team.id === teamId);
 }
 
-export const create = action(
-  z.object({ name: z.string().min(1), roster: z.string() }),
-  async (input) => {
+export const create = action
+  .schema(z.object({ name: z.string().min(1), roster: z.string() }))
+  .action(async ({ parsedInput: input }) => {
     const user = await currentUser();
     if (!user?.publicMetadata.league) throw new Error("Not authenticated");
     const { name: teamName, roster } = input;
@@ -59,17 +59,18 @@ export const create = action(
           throw new Error("Team with this name already exists!");
       }
     }
-  },
-);
+  });
 
-export const hirePlayer = action(
-  z.object({
-    teamId: z.string(),
-    position: z.string(),
-    number: z.number().min(1).max(16),
-    name: z.string().optional(),
-  }),
-  async (input) => {
+export const hirePlayer = action
+  .schema(
+    z.object({
+      teamId: z.string(),
+      position: z.string(),
+      number: z.number().min(1).max(16),
+      name: z.string().optional(),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
@@ -143,22 +144,23 @@ export const hirePlayer = action(
       if (team.players.filter((p) => p.number === input.number).length > 1)
         throw new Error("Player with this number already exists");
     });
-  },
-);
+  });
 
-export const hireStaff = action(
-  z.object({
-    teamId: z.string(),
-    type: z.enum([
-      "apothecary",
-      "assistantCoaches",
-      "cheerleaders",
-      "rerolls",
-      "dedicatedFans",
-    ]),
-    quantity: z.number().int().gt(0).default(1),
-  }),
-  async (input) => {
+export const hireStaff = action
+  .schema(
+    z.object({
+      teamId: z.string(),
+      type: z.enum([
+        "apothecary",
+        "assistantCoaches",
+        "cheerleaders",
+        "rerolls",
+        "dedicatedFans",
+      ]),
+      quantity: z.number().int().gt(0).default(1),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
@@ -235,15 +237,16 @@ export const hireStaff = action(
 
       return updatedTeam;
     });
-  },
-);
+  });
 
-export const hireExistingPlayer = action(
-  z.object({
-    player: z.string(),
-    number: z.number().min(1).max(16),
-  }),
-  async (input) => {
+export const hireExistingPlayer = action
+  .schema(
+    z.object({
+      player: z.string(),
+      number: z.number().min(1).max(16),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
         where: and(
@@ -318,22 +321,23 @@ export const hireExistingPlayer = action(
       if (updatedTeam.treasury < 0)
         throw new Error("Team cannot afford this player");
     });
-  },
-);
+  });
 
-export const fireStaff = action(
-  z.object({
-    teamId: z.string(),
-    type: z.enum([
-      "apothecary",
-      "assistantCoaches",
-      "cheerleaders",
-      "rerolls",
-      "dedicatedFans",
-    ]),
-    quantity: z.number().int().gt(0).default(1),
-  }),
-  async (input) => {
+export const fireStaff = action
+  .schema(
+    z.object({
+      teamId: z.string(),
+      type: z.enum([
+        "apothecary",
+        "assistantCoaches",
+        "cheerleaders",
+        "rerolls",
+        "dedicatedFans",
+      ]),
+      quantity: z.number().int().gt(0).default(1),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       if (!(await canEditTeam(input.teamId, tx)))
         throw new Error("User does not have permission to modify this team");
@@ -396,153 +400,157 @@ export const fireStaff = action(
 
       return updatedTeam;
     });
-  },
-);
-
-export const doneImproving = action(z.string(), async (input) => {
-  return db.transaction(async (tx) => {
-    if (!canEditTeam(input, tx))
-      throw new Error("User does not have permission to modify this team");
-    const team = await tx.query.team.findFirst({
-      where: eq(dbTeam.id, input),
-      columns: {
-        id: true,
-        state: true,
-      },
-    });
-    if (!team) throw new Error("Team not found");
-    if (team.state !== "improving")
-      throw new Error("Team not in Improving state");
-
-    await tx
-      .update(dbTeam)
-      .set({ state: "hiring" })
-      .where(eq(dbTeam.id, team.id));
-
-    return true;
   });
-});
 
-export const ready = action(z.string(), async (input) => {
-  return db.transaction(async (tx) => {
-    if (!canEditTeam(input, tx))
-      throw new Error("User does not have permission to modify this team");
-    const team = await tx.query.team.findFirst({
-      where: eq(dbTeam.id, input),
-      columns: {
-        name: true,
-        state: true,
-        treasury: true,
-      },
-      with: { players: { where: eq(dbPlayer.membershipType, "player") } },
-    });
-    if (!team) throw new Error("Team not found");
-    if (team.state !== "draft" && team.state !== "hiring")
-      throw new Error("Team not in Draft or Hiring state");
-    if (team.state === "draft" && team.players.length < 11)
-      throw new Error("11 players required to draft a team");
+export const doneImproving = action
+  .schema(z.string())
+  .action(async ({ parsedInput: input }) => {
+    return db.transaction(async (tx) => {
+      if (!canEditTeam(input, tx))
+        throw new Error("User does not have permission to modify this team");
+      const team = await tx.query.team.findFirst({
+        where: eq(dbTeam.id, input),
+        columns: {
+          id: true,
+          state: true,
+        },
+      });
+      if (!team) throw new Error("Team not found");
+      if (team.state !== "improving")
+        throw new Error("Team not in Improving state");
 
-    const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
-      "Crisis Averted": () => 0,
-      "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
-      "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
-      Catastrophe: (g) =>
-        g -
-        (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) *
-          10_000,
-    };
-    const expensiveMistakesTable = [
-      [
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Major Incident",
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Catastrophe",
-        "Major Incident",
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-      ],
-      [
-        "Catastrophe",
-        "Catastrophe",
-        "Major Incident",
-        "Major Incident",
-        "Major Incident",
-        "Major Incident",
-      ],
-    ] as const;
-    const expensiveMistakeRoll = Math.floor(Math.random() * 6);
-    const expensiveMistake =
-      team.state === "draft"
-        ? null
-        : expensiveMistakesTable[
-            Math.min(Math.floor(team.treasury / 100_000), 6)
-          ][expensiveMistakeRoll];
-    const expensiveMistakesCost =
-      expensiveMistake !== null
-        ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
-        : 0;
-    await Promise.all([
-      tx
+      await tx
         .update(dbTeam)
-        .set({
-          state: "ready",
-          treasury: sql`${dbTeam.treasury} - ${expensiveMistakesCost}`,
-        })
-        .where(eq(dbTeam.id, input)),
-      tx
-        .update(dbPlayer)
-        .set({ membershipType: null, teamId: null })
-        .where(
-          and(
-            eq(dbPlayer.teamId, input),
-            eq(dbPlayer.membershipType, "journeyman"),
-          ),
-        ),
-    ]);
-    return {
-      expensiveMistake,
-      expensiveMistakesCost,
-      // Roll should appear to the user as 1-6 instead of 0-5
-      expensiveMistakeRoll: expensiveMistakeRoll + 1,
-    };
+        .set({ state: "hiring" })
+        .where(eq(dbTeam.id, team.id));
+
+      return true;
+    });
   });
-});
+
+export const ready = action
+  .schema(z.string())
+  .action(async ({ parsedInput: input }) => {
+    return db.transaction(async (tx) => {
+      if (!canEditTeam(input, tx))
+        throw new Error("User does not have permission to modify this team");
+      const team = await tx.query.team.findFirst({
+        where: eq(dbTeam.id, input),
+        columns: {
+          name: true,
+          state: true,
+          treasury: true,
+        },
+        with: { players: { where: eq(dbPlayer.membershipType, "player") } },
+      });
+      if (!team) throw new Error("Team not found");
+      if (team.state !== "draft" && team.state !== "hiring")
+        throw new Error("Team not in Draft or Hiring state");
+      if (team.state === "draft" && team.players.length < 11)
+        throw new Error("11 players required to draft a team");
+
+      const expensiveMistakesFunctions: Record<string, (g: number) => number> =
+        {
+          "Crisis Averted": () => 0,
+          "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
+          "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
+          Catastrophe: (g) =>
+            g -
+            (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) *
+              10_000,
+        };
+      const expensiveMistakesTable = [
+        [
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+        ],
+        [
+          "Minor Incident",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+        ],
+        [
+          "Minor Incident",
+          "Minor Incident",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+        ],
+        [
+          "Major Incident",
+          "Minor Incident",
+          "Minor Incident",
+          "Crisis Averted",
+          "Crisis Averted",
+          "Crisis Averted",
+        ],
+        [
+          "Major Incident",
+          "Major Incident",
+          "Minor Incident",
+          "Minor Incident",
+          "Crisis Averted",
+          "Crisis Averted",
+        ],
+        [
+          "Catastrophe",
+          "Major Incident",
+          "Major Incident",
+          "Minor Incident",
+          "Minor Incident",
+          "Crisis Averted",
+        ],
+        [
+          "Catastrophe",
+          "Catastrophe",
+          "Major Incident",
+          "Major Incident",
+          "Major Incident",
+          "Major Incident",
+        ],
+      ] as const;
+      const expensiveMistakeRoll = Math.floor(Math.random() * 6);
+      const expensiveMistake =
+        team.state === "draft"
+          ? null
+          : expensiveMistakesTable[
+              Math.min(Math.floor(team.treasury / 100_000), 6)
+            ][expensiveMistakeRoll];
+      const expensiveMistakesCost =
+        expensiveMistake !== null
+          ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
+          : 0;
+      await Promise.all([
+        tx
+          .update(dbTeam)
+          .set({
+            state: "ready",
+            treasury: sql`${dbTeam.treasury} - ${expensiveMistakesCost}`,
+          })
+          .where(eq(dbTeam.id, input)),
+        tx
+          .update(dbPlayer)
+          .set({ membershipType: null, teamId: null })
+          .where(
+            and(
+              eq(dbPlayer.teamId, input),
+              eq(dbPlayer.membershipType, "journeyman"),
+            ),
+          ),
+      ]);
+      return {
+        expensiveMistake,
+        expensiveMistakesCost,
+        // Roll should appear to the user as 1-6 instead of 0-5
+        expensiveMistakeRoll: expensiveMistakeRoll + 1,
+      };
+    });
+  });

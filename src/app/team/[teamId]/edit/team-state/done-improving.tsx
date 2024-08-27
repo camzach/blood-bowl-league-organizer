@@ -1,13 +1,19 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { doneImproving } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   teamId: string;
 };
 
 export default function ReadyButton({ teamId }: Props) {
-  const { execute, status } = useRefreshingAction(doneImproving);
+  const router = useRouter();
+  const { execute, status } = useAction(doneImproving, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   return status === "executing" ? (
     "Submitting..."
