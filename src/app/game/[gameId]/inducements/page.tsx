@@ -72,12 +72,15 @@ export default async function Inducements({
     },
   });
   if (!game) return notFound();
+  if (!game.homeDetails || !game.awayDetails) return notFound();
 
   if (game.state !== "inducements")
     redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
 
   function getTeamSpecialRules(
-    team: NonNullable<typeof game>[`${"home" | "away"}Details`]["team"],
+    team: NonNullable<
+      NonNullable<typeof game>[`${"home" | "away"}Details`]
+    >["team"],
   ) {
     const rules = team.roster.specialRuleToRoster.map((r) => r.specialRuleName);
     if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);

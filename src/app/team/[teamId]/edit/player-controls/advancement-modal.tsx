@@ -3,8 +3,9 @@ import classNames from "classnames";
 import { StatList } from "./stat-list";
 import { learnSkill } from "./actions";
 import type { skill, SkillCategory } from "db/schema";
-import useRefreshingAction from "utils/use-refreshing-action";
 import { skillConflicts } from "./skillConflicts";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -32,10 +33,15 @@ type Props = {
   onHide: () => void;
 };
 export function Popup({ player, skills }: Props) {
+  const router = useRouter();
   const [tab, setTab] = useState<SkillCategory | "stat">(
     player.position.primary[0] ?? player.position.secondary[0],
   );
-  const { status, execute } = useRefreshingAction(learnSkill);
+  const { status, execute } = useAction(learnSkill, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   const purchaseSkill = (skill: string) => () => {
     if (tab === "stat") return;

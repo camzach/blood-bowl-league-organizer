@@ -92,9 +92,9 @@ export default async function Playoffs() {
             >
               {game.game ? (
                 <Link className="link" href={`/game/${game.game.id}`}>
-                  {game.game.awayDetails.team.name}
+                  {game.game.awayDetails?.team.name}
                   {" @ "}
-                  {game.game.homeDetails.team.name}
+                  {game.game.homeDetails?.team.name}
                 </Link>
               ) : (
                 <>TBD</>

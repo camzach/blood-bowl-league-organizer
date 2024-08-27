@@ -1,7 +1,8 @@
 "use client";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { hirePlayer } from "./actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   positions: Array<{ name: string; cost: number }>;
@@ -18,9 +19,14 @@ export function PlayerHirer({
   teamId,
   disabled = false,
 }: Props) {
+  const router = useRouter();
   const [position, setPosition] = useState(positions[0].name);
   const [number, setNumber] = useState(freeNumbers[0]);
-  const { execute, status } = useRefreshingAction(hirePlayer);
+  const { execute, status } = useAction(hirePlayer, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   useEffect(() => {
     if (!freeNumbers.includes(number)) {

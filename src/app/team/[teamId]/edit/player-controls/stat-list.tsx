@@ -1,7 +1,8 @@
 import { SkillCategory, skill } from "db/schema";
 import { increaseCharacteristic } from "./actions";
 import { useState } from "react";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 type Stat = "ma" | "av" | "pa" | "ag" | "st";
 const stats: Stat[] = ["ma", "av", "pa", "ag", "st"];
@@ -31,9 +32,14 @@ type Props = {
 };
 
 export function StatList({ playerId, skills }: Props) {
+  const router = useRouter();
   const [chosenStats, setChosenStats] = useState<Stat[]>([]);
   const [skill, setSkill] = useState("");
-  const { execute, status } = useRefreshingAction(increaseCharacteristic);
+  const { execute, status } = useAction(increaseCharacteristic, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   const remainingItems = stats.filter((i) => !chosenStats.includes(i));
 

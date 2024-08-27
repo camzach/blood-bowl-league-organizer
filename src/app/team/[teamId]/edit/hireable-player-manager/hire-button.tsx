@@ -1,6 +1,7 @@
 "use client";
+import { useAction } from "next-safe-action/hooks";
 import { hireExistingPlayer } from "../actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useRouter } from "next/navigation";
 
 type Props = {
   player: string;
@@ -8,7 +9,12 @@ type Props = {
 };
 
 export default function PlayerHirer({ player, number }: Props) {
-  const { execute, status } = useRefreshingAction(hireExistingPlayer);
+  const router = useRouter();
+  const { execute, status } = useAction(hireExistingPlayer, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   if (status === "executing") return <>Hiring...</>;
 

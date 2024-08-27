@@ -36,13 +36,15 @@ export default async function ScheduleManager({ leagueName }: Props) {
 
   return (
     <ScheduleEditor
-      games={activeSeason.roundRobinGames.map((g) => ({
-        round: g.round,
-        id: g.gameId,
-        homeTeam: g.game.homeDetails.team.name,
-        awayTeam: g.game.awayDetails.team.name,
-        time: g.game.scheduledTime,
-      }))}
+      games={activeSeason.roundRobinGames
+        .filter((g) => g.game.homeDetails && g.game.awayDetails)
+        .map((g) => ({
+          round: g.round,
+          id: g.gameId,
+          homeTeam: g.game.homeDetails?.team.name,
+          awayTeam: g.game.awayDetails?.team.name,
+          time: g.game.scheduledTime,
+        }))}
     />
   );
 }

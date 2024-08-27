@@ -1,7 +1,8 @@
 "use client";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useRouter } from "next/navigation";
 import { update } from "./actions";
 import { useState } from "react";
+import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   id: string;
@@ -9,7 +10,13 @@ type Props = {
 };
 
 export default function PlayerNameEditor({ name: playerName, id }: Props) {
-  const { execute, status } = useRefreshingAction(update);
+  const router = useRouter();
+  const { execute, status } = useAction(update, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
+
   const [localName, setLocalName] = useState(playerName ?? "");
   const submitName = () => {
     if (localName === playerName || localName === "") return;

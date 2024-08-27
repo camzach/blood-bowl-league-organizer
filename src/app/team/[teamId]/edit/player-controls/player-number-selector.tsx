@@ -1,6 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { update } from "./actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   id: string;
@@ -8,13 +9,18 @@ type Props = {
 };
 
 export default function PlayerNumberSelector({ id, number }: Props) {
-  const { execute, status } = useRefreshingAction(update);
+  const router = useRouter();
+  const { execute, status } = useAction(update, {
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   if (status === "executing") return <>Updating...</>;
 
   return (
     <select
-      className="select-bordered select select-sm"
+      className="select select-bordered select-sm"
       value={number}
       onChange={(e): void => {
         execute({ player: id, number: parseInt(e.target.value, 10) });

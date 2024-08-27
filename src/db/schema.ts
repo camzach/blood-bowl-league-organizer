@@ -384,11 +384,9 @@ export const game = pgTable("game", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   state: gameState("state").notNull().default("scheduled"),
   awayDetailsId: varchar("away_details_id", { length: 255 })
-    .notNull()
     .unique()
     .references(() => gameDetails.id),
   homeDetailsId: varchar("home_details_id", { length: 255 })
-    .notNull()
     .unique()
     .references(() => gameDetails.id),
   weather: weather("weather"),
@@ -485,16 +483,12 @@ export const bracketGame = pgTable(
       .references(() => season.id),
     round: integer("round").notNull(),
     seed: integer("seed").notNull(),
-    gameId: varchar("game_id", { length: 255 })
-      .primaryKey()
-      .references(() => game.id),
+    gameId: varchar("game_id", { length: 255 }).references(() => game.id),
   },
   (table) => ({
-    uniqueSeedPerRound: unique("bracket_game_unique_round_seeds").on(
-      table.seasonId,
-      table.round,
-      table.seed,
-    ),
+    uniqueSeedPerRound: primaryKey({
+      columns: [table.seasonId, table.round, table.seed],
+    }),
   }),
 );
 export const bracketGameRelations = relations(bracketGame, ({ one }) => ({

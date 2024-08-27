@@ -4,7 +4,8 @@ import {
   hireStaff as hireStaffAction,
   fireStaff as fireStaffAction,
 } from "./actions";
-import useRefreshingAction from "utils/use-refreshing-action";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 type Props = {
   title: string;
@@ -29,22 +30,31 @@ export default function StaffHirer({
   treasury,
   disabled = false,
 }: Props) {
-  const { execute: hireAction, status: hireStatus } = useRefreshingAction(
-    hireStaffAction,
-    {
-      onError: (_, __, reset) => {
-        setTimeout(reset, 1500);
-      },
+  const router = useRouter();
+  const {
+    execute: hireAction,
+    status: hireStatus,
+    reset: resetHire,
+  } = useAction(hireStaffAction, {
+    onError() {
+      setTimeout(resetHire, 1500);
     },
-  );
-  const { execute: fireAction, status: fireStatus } = useRefreshingAction(
-    fireStaffAction,
-    {
-      onError: (_, __, reset) => {
-        setTimeout(reset, 1500);
-      },
+    onSuccess() {
+      router.refresh();
     },
-  );
+  });
+  const {
+    execute: fireAction,
+    status: fireStatus,
+    reset: resetFire,
+  } = useAction(fireStaffAction, {
+    onError() {
+      setTimeout(resetFire, 1500);
+    },
+    onSuccess() {
+      router.refresh();
+    },
+  });
 
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more

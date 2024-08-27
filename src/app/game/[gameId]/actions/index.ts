@@ -2,7 +2,16 @@
 import { z } from "zod";
 import { action } from "utils/safe-action";
 import { db } from "utils/drizzle";
-import { and, eq, not, gte, inArray, sql, SQL } from "drizzle-orm";
+import {
+  and,
+  eq,
+  not,
+  gte,
+  inArray,
+  sql,
+  SQL,
+  InferInsertModel,
+} from "drizzle-orm";
 import {
   game as dbGame,
   player,
@@ -22,159 +31,167 @@ import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { getPlayerStats } from "utils/get-computed-player-fields";
 import { d6 } from "utils/d6";
 
-export const start = action(z.object({ id: z.string() }), async ({ id }) => {
-  return db.transaction(async (tx) => {
-    const teamDetailsOptions = {
-      with: {
-        team: {
-          with: {
-            players: {
-              where: eq(player.missNextGame, false),
-              with: {
-                improvements: { with: { skill: true } },
-                position: {
-                  with: {
-                    rosterSlot: {
-                      with: { roster: { with: { specialRuleToRoster: true } } },
+export const start = action
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ parsedInput: { id } }) => {
+    return db.transaction(async (tx) => {
+      const teamDetailsOptions = {
+        with: {
+          team: {
+            with: {
+              players: {
+                where: eq(player.missNextGame, false),
+                with: {
+                  improvements: { with: { skill: true } },
+                  position: {
+                    with: {
+                      rosterSlot: {
+                        with: {
+                          roster: { with: { specialRuleToRoster: true } },
+                        },
+                      },
                     },
                   },
                 },
               },
-            },
-            roster: {
-              with: {
-                rosterSlots: {
-                  where: gte(rosterSlot.max, 12),
-                  with: { position: true },
+              roster: {
+                with: {
+                  rosterSlots: {
+                    where: gte(rosterSlot.max, 12),
+                    with: { position: true },
+                  },
                 },
               },
             },
           },
         },
-      },
-    } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
-    const game = await tx.query.game.findFirst({
-      where: eq(dbGame.id, id),
-      with: {
-        homeDetails: teamDetailsOptions,
-        awayDetails: teamDetailsOptions,
-      },
+      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
+      const game = await tx.query.game.findFirst({
+        where: eq(dbGame.id, id),
+        with: {
+          homeDetails: teamDetailsOptions,
+          awayDetails: teamDetailsOptions,
+        },
+      });
+      if (!game) throw new Error("Could not find game");
+      if (!game.homeDetails || !game.awayDetails)
+        throw new Error("Game does not have two teams");
+
+      if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId], tx))
+        throw new Error("User does not have permission for this game");
+
+      if (
+        game.homeDetails.team.state !== "ready" ||
+        game.awayDetails.team.state !== "ready"
+      )
+        throw new Error("Teams are not ready to start a game");
+
+      if (game.state !== "scheduled")
+        throw new Error("Game has already been started");
+
+      const weatherTable = [
+        null as never,
+        null as never,
+        "sweltering_heat",
+        "very_sunny",
+        ...Array.from(Array(7), () => "perfect" as const),
+        "pouring_rain",
+        "blizzard",
+      ] satisfies Array<(typeof weatherOpts)[number]>;
+
+      const fairweatherFansHome = Math.ceil(Math.random() * 3);
+      const fanFactorHome =
+        game.homeDetails.team.dedicatedFans + fairweatherFansHome;
+      const fairweatherFansAway = Math.ceil(Math.random() * 3);
+      const fanFactorAway =
+        game.awayDetails.team.dedicatedFans + fairweatherFansAway;
+      const weatherRoll = [d6(), d6()];
+      const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
+
+      const homeJourneymen = {
+        count: Math.max(0, 11 - game.homeDetails.team.players.length),
+        players: game.homeDetails.team.roster.rosterSlots.flatMap((slot) =>
+          slot.position.map((pos) => pos.name),
+        ),
+      };
+      const awayJourneymen = {
+        count: Math.max(0, 11 - game.awayDetails.team.players.length),
+        players: game.awayDetails.team.roster.rosterSlots.flatMap((slot) =>
+          slot.position.map((pos) => pos.name),
+        ),
+      };
+
+      const result = {
+        fairweatherFansHome,
+        fanFactorHome,
+        fairweatherFansAway,
+        fanFactorAway,
+        weatherRoll,
+        weatherResult,
+        homeJourneymen,
+        awayJourneymen,
+      };
+
+      const homeTV = calculateTV(game.homeDetails.team);
+      const awayTV = calculateTV(game.awayDetails.team);
+      const pettyCashHome = Math.max(0, awayTV - homeTV);
+      const pettyCashAway = Math.max(0, homeTV - awayTV);
+
+      const teamUpdate = tx
+        .update(dbTeam)
+        .set({
+          state: "playing",
+        })
+        .where(
+          inArray(dbTeam.id, [
+            game.homeDetails.team.id,
+            game.awayDetails.team.id,
+          ]),
+        );
+      const gameUpdate = tx
+        .update(dbGame)
+        .set({
+          state:
+            homeJourneymen.count > 0 || awayJourneymen.count > 0
+              ? "journeymen"
+              : "inducements",
+          weather: weatherResult,
+        })
+        .where(eq(dbGame.id, game.id));
+      const homeDetailsUpdate = tx
+        .update(gameDetails)
+        .set({
+          journeymenRequired: homeJourneymen.count,
+          fanFactor: fanFactorHome,
+          pettyCashAwarded: pettyCashHome,
+        })
+        .where(eq(gameDetails.id, game.homeDetails.id));
+      const awayDetailsUpdate = tx
+        .update(gameDetails)
+        .set({
+          journeymenRequired: awayJourneymen.count,
+          fanFactor: fanFactorAway,
+          pettyCashAwarded: pettyCashAway,
+        })
+        .where(eq(gameDetails.id, game.awayDetails.id));
+      return Promise.all([
+        teamUpdate,
+        gameUpdate,
+        homeDetailsUpdate,
+        awayDetailsUpdate,
+      ]).then(() => result);
     });
-    if (!game) throw new Error("Could not find game");
-
-    if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId], tx))
-      throw new Error("User does not have permission for this game");
-
-    if (
-      game.homeDetails.team.state !== "ready" ||
-      game.awayDetails.team.state !== "ready"
-    )
-      throw new Error("Teams are not ready to start a game");
-
-    if (game.state !== "scheduled")
-      throw new Error("Game has already been started");
-
-    const weatherTable = [
-      null as never,
-      null as never,
-      "sweltering_heat",
-      "very_sunny",
-      ...Array.from(Array(7), () => "perfect" as const),
-      "pouring_rain",
-      "blizzard",
-    ] satisfies Array<(typeof weatherOpts)[number]>;
-
-    const fairweatherFansHome = Math.ceil(Math.random() * 3);
-    const fanFactorHome =
-      game.homeDetails.team.dedicatedFans + fairweatherFansHome;
-    const fairweatherFansAway = Math.ceil(Math.random() * 3);
-    const fanFactorAway =
-      game.awayDetails.team.dedicatedFans + fairweatherFansAway;
-    const weatherRoll = [d6(), d6()];
-    const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
-
-    const homeJourneymen = {
-      count: Math.max(0, 11 - game.homeDetails.team.players.length),
-      players: game.homeDetails.team.roster.rosterSlots.flatMap((slot) =>
-        slot.position.map((pos) => pos.name),
-      ),
-    };
-    const awayJourneymen = {
-      count: Math.max(0, 11 - game.awayDetails.team.players.length),
-      players: game.awayDetails.team.roster.rosterSlots.flatMap((slot) =>
-        slot.position.map((pos) => pos.name),
-      ),
-    };
-
-    const result = {
-      fairweatherFansHome,
-      fanFactorHome,
-      fairweatherFansAway,
-      fanFactorAway,
-      weatherRoll,
-      weatherResult,
-      homeJourneymen,
-      awayJourneymen,
-    };
-
-    const homeTV = calculateTV(game.homeDetails.team);
-    const awayTV = calculateTV(game.awayDetails.team);
-    const pettyCashHome = Math.max(0, awayTV - homeTV);
-    const pettyCashAway = Math.max(0, homeTV - awayTV);
-
-    const teamUpdate = tx
-      .update(dbTeam)
-      .set({
-        state: "playing",
-      })
-      .where(
-        inArray(dbTeam.id, [
-          game.homeDetails.team.id,
-          game.awayDetails.team.id,
-        ]),
-      );
-    const gameUpdate = tx
-      .update(dbGame)
-      .set({
-        state:
-          homeJourneymen.count > 0 || awayJourneymen.count > 0
-            ? "journeymen"
-            : "inducements",
-        weather: weatherResult,
-      })
-      .where(eq(dbGame.id, game.id));
-    const homeDetailsUpdate = tx
-      .update(gameDetails)
-      .set({
-        journeymenRequired: homeJourneymen.count,
-        fanFactor: fanFactorHome,
-        pettyCashAwarded: pettyCashHome,
-      })
-      .where(eq(gameDetails.id, game.homeDetails.id));
-    const awayDetailsUpdate = tx
-      .update(gameDetails)
-      .set({
-        journeymenRequired: awayJourneymen.count,
-        fanFactor: fanFactorAway,
-        pettyCashAwarded: pettyCashAway,
-      })
-      .where(eq(gameDetails.id, game.awayDetails.id));
-    return Promise.all([
-      teamUpdate,
-      gameUpdate,
-      homeDetailsUpdate,
-      awayDetailsUpdate,
-    ]).then(() => result);
   });
-});
 
-export const selectJourneymen = action(
-  z.object({
-    home: z.string().optional(),
-    away: z.string().optional(),
-    game: z.string(),
-  }),
-  async (input) => {
+export const selectJourneymen = action
+  .schema(
+    z.object({
+      home: z.string().optional(),
+      away: z.string().optional(),
+      game: z.string(),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const teamFields = {
         columns: {
@@ -225,6 +242,8 @@ export const selectJourneymen = action(
         },
       });
       if (!game) throw new Error("Failed to find game");
+      if (!game.homeDetails || !game.awayDetails)
+        throw new Error("Game does not have two teams");
 
       if (!canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id]))
         throw new Error("User does not have permission to modify this game");
@@ -262,27 +281,27 @@ export const selectJourneymen = action(
       const newPlayers: Array<typeof player.$inferInsert> = [];
       if (homeChoice) {
         homeTV += homeChoice.cost * (11 - homePlayers);
-        newPlayers.push(
-          ...Array.from(Array(11 - homePlayers), (_, i) => ({
+        for (let i = 0; i < 11 - homePlayers; i++) {
+          newPlayers.push({
             id: nanoid(),
             number: 99 - i,
             positionId: homeChoice.id,
             membershipType: "journeyman" as const,
             teamId: game.homeDetails.teamId,
-          })),
-        );
+          });
+        }
       }
       if (awayChoice) {
         awayTV += awayChoice.cost * (11 - awayPlayers);
-        newPlayers.push(
-          ...Array.from(Array(11 - awayPlayers), (_, i) => ({
+        for (let i = 0; i < 11 - awayPlayers; i++) {
+          newPlayers.push({
             id: nanoid(),
             number: 99 - i,
             positionId: awayChoice.id,
             membershipType: "journeyman" as const,
             teamId: game.awayDetails.teamId,
-          })),
-        );
+          });
+        }
       }
 
       const pettyCashHome = Math.max(0, awayTV - homeTV);
@@ -332,8 +351,7 @@ export const selectJourneymen = action(
         pettyCashAway,
       };
     });
-  },
-);
+  });
 
 const inducementChoicesSchema = z.object({
   stars: z.array(z.string()).max(2),
@@ -344,13 +362,15 @@ const inducementChoicesSchema = z.object({
     }),
   ),
 });
-export const purchaseInducements = action(
-  z.object({
-    game: z.string(),
-    home: inducementChoicesSchema,
-    away: inducementChoicesSchema,
-  }),
-  async (input) => {
+export const purchaseInducements = action
+  .schema(
+    z.object({
+      game: z.string(),
+      home: inducementChoicesSchema,
+      away: inducementChoicesSchema,
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const detailsFields = {
         columns: {
@@ -388,6 +408,9 @@ export const purchaseInducements = action(
         },
       });
       if (!game) throw new Error("Game does not exist");
+      if (!game.homeDetails || !game.awayDetails)
+        throw new Error("Game does not have two teams");
+
       if (
         !canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id], tx)
       )
@@ -396,7 +419,7 @@ export const purchaseInducements = action(
         throw new Error("Game not awaiting inducements");
 
       const teamSpecialRules = (
-        team: (typeof game)[`${"home" | "away"}Details`]["team"],
+        team: (typeof game.homeDetails | typeof game.awayDetails)["team"],
       ) => {
         const rules = team.roster.specialRuleToRoster.map(
           (r) => r.specialRuleName,
@@ -405,16 +428,19 @@ export const purchaseInducements = action(
         return rules;
       };
 
-      const [homeInducementCost, awayInducementCost] = await Promise.all(
-        (["home", "away"] as const).map(async (t) =>
-          calculateInducementCosts(
-            input[t].inducements,
-            input[t].stars,
-            teamSpecialRules(game[`${t}Details`].team),
-            game[`${t}Details`].team.players.length,
-            tx,
-          ),
-        ),
+      const homeInducementCost = await calculateInducementCosts(
+        input.home.inducements,
+        input.home.stars,
+        teamSpecialRules(game.homeDetails.team),
+        game.homeDetails.team.players.length,
+        tx,
+      );
+      const awayInducementCost = await calculateInducementCosts(
+        input.away.inducements,
+        input.away.stars,
+        teamSpecialRules(game.awayDetails.team),
+        game.awayDetails.team.players.length,
+        tx,
       );
 
       const extraPettyCash = { home: 0, away: 0 };
@@ -439,6 +465,42 @@ export const purchaseInducements = action(
       )
         throw new Error("Inducements are too expensive");
 
+      const starInserts: Array<
+        InferInsertModel<typeof gameDetailsToStarPlayer>
+      > = [];
+      for (const star of input.home.stars) {
+        starInserts.push({
+          starPlayerName: star,
+          gameDetailsId: game.homeDetails.id,
+        });
+      }
+      for (const star of input.away.stars) {
+        starInserts.push({
+          starPlayerName: star,
+          gameDetailsId: game.awayDetails.id,
+        });
+      }
+
+      const inducementInserts: Array<
+        InferInsertModel<typeof gameDetailsToInducement>
+      > = [];
+      for (const inducement of input.home.inducements) {
+        if (inducement.quantity <= 0) continue;
+        inducementInserts.push({
+          inducementName: inducement.name,
+          count: inducement.quantity,
+          gameDetailsId: game.homeDetails.id,
+        });
+      }
+      for (const inducement of input.away.inducements) {
+        if (inducement.quantity <= 0) continue;
+        inducementInserts.push({
+          inducementName: inducement.name,
+          count: inducement.quantity,
+          gameDetailsId: game.awayDetails.id,
+        });
+      }
+
       await Promise.all([
         tx
           .update(team)
@@ -458,28 +520,10 @@ export const purchaseInducements = action(
             state: "in_progress",
           })
           .where(eq(dbGame.id, input.game)),
-        (input.home.stars.length > 0 || input.away.stars.length > 0) &&
-          tx.insert(gameDetailsToStarPlayer).values(
-            (["home", "away"] as const).flatMap((t) =>
-              input[t].stars.map((s) => ({
-                starPlayerName: s,
-                gameDetailsId: game[`${t}Details`].id,
-              })),
-            ),
-          ),
-        (input.home.inducements.some((i) => i.quantity > 0) ||
-          input.away.inducements.some((i) => i.quantity > 0)) &&
-          tx.insert(gameDetailsToInducement).values(
-            (["home", "away"] as const).flatMap((t) =>
-              input[t].inducements
-                .filter((i) => i.quantity > 0)
-                .map((i) => ({
-                  inducementName: i.name,
-                  count: i.quantity,
-                  gameDetailsId: game[`${t}Details`].id,
-                })),
-            ),
-          ),
+        starInserts.length > 0 &&
+          tx.insert(gameDetailsToStarPlayer).values(starInserts),
+        inducementInserts.length > 0 &&
+          tx.insert(gameDetailsToInducement).values(inducementInserts),
       ]);
 
       return {
@@ -487,34 +531,35 @@ export const purchaseInducements = action(
         treasuryCostAway,
       };
     });
-  },
-);
+  });
 
-export const end = action(
-  z.object({
-    game: z.string(),
-    playerUpdates: z.record(
-      z.string(),
-      z.object({
-        injury: z
-          .enum(["mng", "ni", "ma", "ag", "pa", "st", "av", "dead"])
-          .optional(),
-        starPlayerPoints: z
-          .object({
-            touchdowns: z.number().int().optional(),
-            casualties: z.number().int().optional(),
-            deflections: z.number().int().optional(),
-            interceptions: z.number().int().optional(),
-            completions: z.number().int().optional(),
-            otherSPP: z.number().int().optional(),
-          })
-          .optional(),
-      }),
-    ),
-    touchdowns: z.tuple([z.number().int(), z.number().int()]),
-    casualties: z.tuple([z.number().int(), z.number().int()]),
-  }),
-  async (input) => {
+export const end = action
+  .schema(
+    z.object({
+      game: z.string(),
+      playerUpdates: z.record(
+        z.string(),
+        z.object({
+          injury: z
+            .enum(["mng", "ni", "ma", "ag", "pa", "st", "av", "dead"])
+            .optional(),
+          starPlayerPoints: z
+            .object({
+              touchdowns: z.number().int().optional(),
+              casualties: z.number().int().optional(),
+              deflections: z.number().int().optional(),
+              interceptions: z.number().int().optional(),
+              completions: z.number().int().optional(),
+              otherSPP: z.number().int().optional(),
+            })
+            .optional(),
+        }),
+      ),
+      touchdowns: z.tuple([z.number().int(), z.number().int()]),
+      casualties: z.tuple([z.number().int(), z.number().int()]),
+    }),
+  )
+  .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const detailsFields = {
         with: {
@@ -542,6 +587,8 @@ export const end = action(
         },
       });
       if (!game) throw new Error("Game not found");
+      if (!game.homeDetails || !game.awayDetails)
+        throw new Error("Game does not have two teams");
 
       if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId]))
         throw new Error("User does not have permission for this game");
@@ -671,15 +718,11 @@ export const end = action(
         ),
       ];
 
-      const [homeWinnings, awayWinnings] = [
-        input.touchdowns[0],
-        input.touchdowns[1],
-      ].map(
-        (score) =>
-          (score +
-            (game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
-          10_000,
-      );
+      const sharedWinnings =
+        ((game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
+        10_000;
+      const homeWinnings = input.touchdowns[0] * 10_000 + sharedWinnings;
+      const awayWinnings = input.touchdowns[1] * 10_000 + sharedWinnings;
 
       const playerUpdates = Object.keys(updateMap).map((p) =>
         tx.update(player).set(updateMap[p]).where(eq(player.id, p)),
@@ -750,5 +793,4 @@ export const end = action(
         awayMVP: { name: mvpAway.name, number: mvpAway.number },
       };
     });
-  },
-);
+  });

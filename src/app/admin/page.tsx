@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { clearAction, scheduleAction } from "./actions";
+import { clearAction, scheduleAction, seedBracket } from "./actions";
 import { db } from "utils/drizzle";
 import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
@@ -28,6 +28,12 @@ export default async function AdminPage() {
         </button>
         <button className="btn btn-warning join-item" formAction={clearAction}>
           Clear Season
+        </button>
+        <button
+          className="btn btn-secondary join-item"
+          formAction={seedBracket}
+        >
+          Seed Bracket
         </button>
         <DiscordGuildLinker />
       </form>
