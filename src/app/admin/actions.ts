@@ -9,12 +9,12 @@ import {
   roundRobinGame,
   season,
 } from "db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, InferInsertModel, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { db } from "utils/drizzle";
 import { action } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
-import { z } from "zod";
+import { number, z } from "zod";
 import { currentUser } from "@clerk/nextjs/server";
 import { getLeagueTable } from "utils/get-league-table";
 
@@ -165,37 +165,116 @@ export const seedBracket = action.schema(z.any()).action(async () => {
     if (!activeSeason) {
       throw new Error("No active season");
     }
-    const leagueTable = await getLeagueTable(tx);
-    const teams = Object.keys(leagueTable).sort(
-      (a, b) => leagueTable[b].points - leagueTable[a].points,
-    );
-    const upperSeed = teams.slice(0, Math.ceil(teams.length / 2));
-    const lowerSeed = teams.slice(Math.ceil(teams.length / 2)).toReversed();
-    if (upperSeed.length != lowerSeed.length) {
-      // handle the bye
-      const [byeTeam] = upperSeed.splice(0, 1);
-      const detailsId = nanoid();
-      await tx
-        .insert(gameDetails)
-        .values({
-          id: detailsId,
-          teamId: byeTeam,
-        })
-        .returning({ id: gameDetails.id });
-      const gameId = nanoid();
-      await tx.insert(game).values({
-        id: gameId,
-        homeDetailsId: detailsId,
+
+    {
+      const bracketGames = await tx.query.bracketGame.findMany({});
+      const gameIds = bracketGames.map((g) => g.gameId).filter((id) => !!id);
+      const games = await tx.query.game.findMany({
+        where: inArray(game.id, gameIds),
       });
-      const bracketGameId = nanoid();
-      await tx.insert(bracketGame).values({
+      const gameDetailsIds = games
+        .flatMap((g) => [g.homeDetailsId, g.awayDetailsId])
+        .filter((id): id is string => !!id);
+
+      console.log(`Deleting ${gameIds.length} bracket games`);
+      await tx.delete(bracketGame).where(inArray(bracketGame.gameId, gameIds));
+      console.log(`Deleting ${gameIds.length} games`);
+      await tx.delete(game).where(inArray(game.id, gameIds));
+      console.log(`Deleting ${gameDetailsIds.length} game details`);
+      await tx
+        .delete(gameDetails)
+        .where(inArray(gameDetails.id, gameDetailsIds));
+    }
+    const leagueTable = await getLeagueTable(tx);
+    const TOP_CUT = 8;
+    const teams = Object.keys(leagueTable)
+      .sort((a, b) => leagueTable[b].points - leagueTable[a].points)
+      .slice(0, TOP_CUT);
+
+    const detailsInserts: Array<InferInsertModel<typeof gameDetails>> = [];
+    const gameInserts: Array<InferInsertModel<typeof game>> = [];
+    const bracketGameInserts: Array<InferInsertModel<typeof bracketGame>> = [];
+
+    type Game = {
+      homeGame?: Game;
+      homeSeed: number;
+      awayGame?: Game;
+      awaySeed: number;
+      round: number;
+    };
+    function fillBracketRecursively(
+      game: Game,
+      depth: number,
+      max_depth: number,
+    ) {
+      if (depth > max_depth) return;
+      const homePrevOpponent = Math.pow(2, depth + 1) - game.homeSeed + 1;
+      if (homePrevOpponent <= teams.length) {
+        game.homeGame = {
+          homeSeed: game.homeSeed,
+          awaySeed: homePrevOpponent,
+          round: nRounds - depth,
+        };
+        fillBracketRecursively(game.homeGame, depth + 1, max_depth);
+      }
+      const awayPrevOpponent = Math.pow(2, depth + 1) - game.awaySeed + 1;
+      if (awayPrevOpponent <= teams.length) {
+        game.awayGame = {
+          homeSeed: game.awaySeed,
+          awaySeed: awayPrevOpponent,
+          round: nRounds - depth,
+        };
+        fillBracketRecursively(game.awayGame, depth + 1, max_depth);
+      }
+    }
+
+    const nRounds = Math.ceil(Math.log2(teams.length));
+    const finals: Game = { homeSeed: 1, awaySeed: 2, round: nRounds };
+    fillBracketRecursively(finals, 1, nRounds);
+
+    const queue = [finals];
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+      let homeDetailsId, awayDetailsId;
+      if (current.homeGame) {
+        queue.push(current.homeGame);
+      } else {
+        homeDetailsId = nanoid();
+        detailsInserts.push({
+          id: homeDetailsId,
+          teamId: teams[current.homeSeed - 1],
+        });
+      }
+      if (current.awayGame) {
+        queue.push(current.awayGame);
+      } else {
+        awayDetailsId = nanoid();
+        detailsInserts.push({
+          id: awayDetailsId,
+          teamId: teams[current.awaySeed - 1],
+        });
+      }
+
+      const gameId = nanoid();
+      gameInserts.push({
+        id: gameId,
+        homeDetailsId,
+        awayDetailsId,
+      });
+      bracketGameInserts.push({
         gameId,
-        round: 1,
-        seed: 1,
         seasonId: activeSeason?.id,
+        round: current.round,
+        seed: current.homeSeed,
       });
     }
-    const pairs = upperSeed.map((team, i) => [team, lowerSeed[i]]);
-    return JSON.stringify(teams);
+
+    console.log(JSON.stringify(bracketGameInserts, null, 2));
+    console.log(JSON.stringify(finals, null, 2));
+
+    await tx.insert(gameDetails).values(detailsInserts);
+    await tx.insert(game).values(gameInserts);
+    await tx.insert(bracketGame).values(bracketGameInserts);
+    return "Success!";
   });
 });

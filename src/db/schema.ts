@@ -483,12 +483,17 @@ export const bracketGame = pgTable(
       .references(() => season.id),
     round: integer("round").notNull(),
     seed: integer("seed").notNull(),
-    gameId: varchar("game_id", { length: 255 }).references(() => game.id),
+    gameId: varchar("game_id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .references(() => game.id),
   },
   (table) => ({
-    uniqueSeedPerRound: primaryKey({
-      columns: [table.seasonId, table.round, table.seed],
-    }),
+    uniqueSeedPerRound: uniqueIndex().on(
+      table.seasonId,
+      table.round,
+      table.seed,
+    ),
   }),
 );
 export const bracketGameRelations = relations(bracketGame, ({ one }) => ({
