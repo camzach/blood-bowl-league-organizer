@@ -19,34 +19,71 @@ async function getPlayoffsBracket(seasonId: string) {
   });
 }
 
+function intersperse<T>(array: T[], value: T) {
+  return array.flatMap((el) => [el, value]).slice(0, -1);
+}
+
 function buildGrid(numRounds: number) {
-  const grid = [[`g-${numRounds}-1`]];
+  const grid = [[{ r: numRounds, home: 1, away: 2 }]];
   for (let r = numRounds - 1; r > 0; r--) {
-    const maxSeed = 2 ** (numRounds - r);
-    if (maxSeed === 2) {
-      grid.unshift([`g-${r}-1`]);
-      grid.push([`g-${r}-2`]);
-      continue;
+    const left: (typeof grid)[number] = [];
+    for (const game of grid[0]) {
+      left.push({
+        r,
+        home: game.home,
+        away: Math.pow(2, numRounds - r + 1) - game.home + 1,
+      });
+      if (r < numRounds - 1) {
+        left.push({
+          r,
+          home: game.away,
+          away: Math.pow(2, numRounds - r + 1) - game.away + 1,
+        });
+      }
     }
-    for (let i = 0; i < grid.length; i++) {
-      grid[i] = grid[i].flatMap((n) => [n, n]);
+    grid.unshift(left);
+    const right: (typeof grid)[number] = [];
+    for (const game of grid[grid.length - 1]) {
+      if (r < numRounds - 1) {
+        right.push({
+          r,
+          home: game.home,
+          away: Math.pow(2, numRounds - r + 1) - game.home + 1,
+        });
+      }
+      right.push({
+        r,
+        home: game.away,
+        away: Math.pow(2, numRounds - r + 1) - game.away + 1,
+      });
     }
-    const [left, right] = Array(maxSeed / 2)
-      .fill(0)
-      .reduce<[number[], number[]]>(
-        ([l, r], _, i) =>
-          i % 2 === 0
-            ? [[...l, i + 1, maxSeed - i], r]
-            : [l, [...r, i + 1, maxSeed - i]],
-        [[], []],
-      );
-    grid.unshift(left.map((n) => `g-${r}-${n}`));
-    grid.push(right.map((n) => `g-${r}-${n}`));
+    grid.push(right);
   }
-  return grid[0]
-    .map((_, colIndex) => grid.map((row) => row[colIndex]))
-    .map((row) => `'${row.join(" ")}'`)
-    .join("\n");
+
+  const cssGrid = grid.map((round, i) => {
+    const roundNum = numRounds - Math.abs(i - (numRounds - 1));
+    const blockHeight =
+      roundNum === numRounds
+        ? grid[0].length * 2 + 1
+        : Math.pow(2, roundNum) - 1;
+
+    const row = intersperse(
+      round.map((g) => Array(blockHeight).fill(`g-${g.r}-${g.home}`)),
+      ["."],
+    ).flat();
+    if (roundNum !== numRounds) {
+      row.push(".");
+      row.unshift(".");
+    }
+    return row;
+  });
+
+  const transposed = cssGrid[0].map((_, colIndex) =>
+    cssGrid.map((row) => row[colIndex]),
+  );
+  return transposed
+    .map((row) => '"' + row.map((cell) => cell).join(" ") + '"')
+    .join(" ");
 }
 
 export default async function Playoffs() {
@@ -75,10 +112,10 @@ export default async function Playoffs() {
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${(rounds.length - 1) * 2 + 1}, 1fr)`,
-        gridTemplateRows: `repeat(${2 ** (rounds.length - 2)}, 1fr)`,
+        gridTemplateRows: `repeat(${Math.pow(2, rounds.length - 1) + 1}, 1fr)`,
         gridTemplateAreas: buildGrid(rounds.length),
-        gap: "0.5rem",
       }}
+      className="mx-auto grid max-h-full w-3/4 gap-6"
     >
       {rounds.flatMap((round) =>
         round.map((game) => {
