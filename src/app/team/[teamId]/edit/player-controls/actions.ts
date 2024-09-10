@@ -203,7 +203,7 @@ export const learnSkill = action
             }
           }
         }
-        const list = Object.values(skillMap);
+        const list = Array.from(skillMap.values());
         return list[Math.floor(Math.random() * list.length)];
       }
       const skill =
