@@ -11,6 +11,7 @@ import {
   sql,
   SQL,
   InferInsertModel,
+  SQLWrapper,
 } from "drizzle-orm";
 import {
   game as dbGame,
@@ -23,6 +24,8 @@ import {
   team,
   gameDetailsToStarPlayer,
   gameDetailsToInducement,
+  bracketGame,
+  season,
 } from "db/schema";
 import { canEditTeam } from "app/team/[teamId]/edit/actions";
 import calculateTV from "utils/calculate-tv";
@@ -30,6 +33,7 @@ import { nanoid } from "nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { getPlayerStats } from "utils/get-computed-player-fields";
 import { d6 } from "utils/d6";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const start = action
   .schema(z.object({ id: z.string() }))
@@ -561,6 +565,10 @@ export const end = action
   )
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
+      const user = await currentUser();
+      if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
+        throw new Error("Not authenticated");
+      }
       const detailsFields = {
         with: {
           team: {
@@ -767,14 +775,72 @@ export const end = action
         })
         .where(eq(team.id, game.awayDetails.teamId));
 
-      await Promise.all([
-        Promise.all(playerUpdates),
+      const allUpdates: Array<SQLWrapper> = [
+        ...playerUpdates,
         gameUpdate,
         homeDetailsUpdate,
         awayDetailsUpdate,
         homeTeamUpdate,
         awayTeamUpdate,
-      ]);
+      ];
+      const relatedBracketGame = (
+        await tx
+          .select({
+            round: bracketGame.round,
+            seed: bracketGame.seed,
+            seasonId: bracketGame.seasonId,
+          })
+          .from(bracketGame)
+          .innerJoin(season, eq(bracketGame.seasonId, season.id))
+          .where(
+            and(
+              eq(season.leagueName, user.publicMetadata.league as string),
+              eq(season.isActive, true),
+              eq(bracketGame.gameId, game.id),
+            ),
+          )
+          .limit(1)
+      ).at(0);
+      if (relatedBracketGame && relatedBracketGame.round > 1) {
+        if (input.touchdowns[0] === input.touchdowns[1]) {
+          throw new Error("Ties are not allowed in the playoffs");
+        }
+        const gamesInRound = Math.pow(2, relatedBracketGame.round - 1);
+        const nextSeed =
+          relatedBracketGame.seed > gamesInRound / 2
+            ? gamesInRound - relatedBracketGame.seed + 1
+            : relatedBracketGame.seed;
+        const detailsId = nanoid();
+        const newDetails = tx.insert(gameDetails).values({
+          teamId: (input.touchdowns[0] > input.touchdowns[1]
+            ? game.homeDetails
+            : game.awayDetails
+          ).teamId,
+          id: detailsId,
+        });
+        const nextGame = await tx.query.bracketGame.findFirst({
+          where: and(
+            eq(bracketGame.round, relatedBracketGame.round - 1),
+            eq(bracketGame.seed, nextSeed),
+            eq(bracketGame.seasonId, relatedBracketGame.seasonId),
+          ),
+        });
+        if (!nextGame) {
+          throw new Error("Couldn't find next bracket round");
+        }
+        const updateNextGame = tx
+          .update(dbGame)
+          .set({
+            [relatedBracketGame.seed <= gamesInRound / 2
+              ? "homeDetailsId"
+              : "awayDetailsId"]: detailsId,
+          })
+          .where(eq(dbGame.id, nextGame.gameId));
+
+        allUpdates.push(newDetails, updateNextGame);
+      }
+
+      await Promise.all(allUpdates);
 
       return {
         homeWinnings,
