@@ -135,7 +135,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
       />
       <div className="my-2">
         <PlayerHirer
-          disabled={state !== "hiring"}
+          disabled={state !== "hiring" && state !== "draft"}
           positions={rosterSlots
             .filter(
               (slot) =>
