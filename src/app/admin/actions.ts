@@ -14,7 +14,7 @@ import nanoid from "utils/nanoid";
 import { db } from "utils/drizzle";
 import { action } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
-import { number, z } from "zod";
+import { z } from "zod";
 import { currentUser } from "@clerk/nextjs/server";
 import { getLeagueTable } from "utils/get-league-table";
 
@@ -210,29 +210,29 @@ export const seedBracket = action.schema(z.any()).action(async () => {
       max_depth: number,
     ) {
       if (depth > max_depth) return;
-      const homePrevOpponent = Math.pow(2, depth + 1) - game.homeSeed + 1;
+      const homePrevOpponent = Math.pow(2, depth) - game.homeSeed + 1;
       if (homePrevOpponent <= teams.length) {
         game.homeGame = {
           homeSeed: game.homeSeed,
           awaySeed: homePrevOpponent,
-          round: nRounds - depth,
+          round: depth,
         };
         fillBracketRecursively(game.homeGame, depth + 1, max_depth);
       }
-      const awayPrevOpponent = Math.pow(2, depth + 1) - game.awaySeed + 1;
+      const awayPrevOpponent = Math.pow(2, depth) - game.awaySeed + 1;
       if (awayPrevOpponent <= teams.length) {
         game.awayGame = {
           homeSeed: game.awaySeed,
           awaySeed: awayPrevOpponent,
-          round: nRounds - depth,
+          round: depth,
         };
         fillBracketRecursively(game.awayGame, depth + 1, max_depth);
       }
     }
 
     const nRounds = Math.ceil(Math.log2(teams.length));
-    const finals: Game = { homeSeed: 1, awaySeed: 2, round: nRounds };
-    fillBracketRecursively(finals, 1, nRounds);
+    const finals: Game = { homeSeed: 1, awaySeed: 2, round: 1 };
+    fillBracketRecursively(finals, 2, nRounds);
 
     const queue = [finals];
     while (queue.length > 0) {
