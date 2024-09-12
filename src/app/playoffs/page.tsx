@@ -24,37 +24,37 @@ function intersperse<T>(array: T[], value: T) {
 }
 
 function buildGrid(numRounds: number) {
-  const grid = [[{ r: numRounds, home: 1, away: 2 }]];
-  for (let r = numRounds - 1; r > 0; r--) {
+  const grid = [[{ r: 1, home: 1, away: 2 }]];
+  for (let r = 2; r <= numRounds; r++) {
     const left: (typeof grid)[number] = [];
     for (const game of grid[0]) {
       left.push({
         r,
         home: game.home,
-        away: Math.pow(2, numRounds - r + 1) - game.home + 1,
+        away: Math.pow(2, r) - game.home + 1,
       });
-      if (r < numRounds - 1) {
+      if (r > 2) {
         left.push({
           r,
           home: game.away,
-          away: Math.pow(2, numRounds - r + 1) - game.away + 1,
+          away: Math.pow(2, r) - game.away + 1,
         });
       }
     }
     grid.unshift(left);
     const right: (typeof grid)[number] = [];
     for (const game of grid[grid.length - 1]) {
-      if (r < numRounds - 1) {
+      if (r > 2) {
         right.push({
           r,
           home: game.home,
-          away: Math.pow(2, numRounds - r + 1) - game.home + 1,
+          away: Math.pow(2, r) - game.home + 1,
         });
       }
       right.push({
         r,
         home: game.away,
-        away: Math.pow(2, numRounds - r + 1) - game.away + 1,
+        away: Math.pow(2, r) - game.away + 1,
       });
     }
     grid.push(right);
