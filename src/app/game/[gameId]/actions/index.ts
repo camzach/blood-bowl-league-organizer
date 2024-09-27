@@ -566,8 +566,8 @@ export const end = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const user = await currentUser();
-      if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
-        throw new Error("Not authenticated");
+      if (!user?.publicMetadata.league) {
+        throw new Error("No league currently active 💀");
       }
       const detailsFields = {
         with: {
