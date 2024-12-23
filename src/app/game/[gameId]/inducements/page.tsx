@@ -56,11 +56,17 @@ const detailsSelection = {
   },
 } as const;
 
-export default async function Inducements({
-  params: { gameId },
-}: {
-  params: { gameId: string };
-}) {
+export default async function Inducements(
+  props: {
+    params: Promise<{ gameId: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    gameId
+  } = params;
+
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
     columns: {

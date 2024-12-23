@@ -5,7 +5,7 @@ import Link from "next/link";
 import { db } from "utils/drizzle";
 
 export default async function Home() {
-  const { userId, redirectToSignIn } = auth();
+  const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
 
   const myTeam = await db.query.coachToTeam.findFirst({

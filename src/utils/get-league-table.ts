@@ -8,7 +8,7 @@ export async function getLeagueTable(
 ) {
   const db = tx ?? drizzle;
   const user = await currentUser();
-  if (!user) return auth().redirectToSignIn();
+  if (!user) return (await auth()).redirectToSignIn();
 
   const activeSeason = await db.query.season.findFirst({
     where: and(

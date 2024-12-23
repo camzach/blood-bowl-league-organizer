@@ -12,16 +12,17 @@ export default clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) {
     return;
   }
-  const { userId, protect } = auth();
-  protect();
+  const { userId, redirectToSignIn } = await auth();
+  const { users } = await clerkClient();
+  auth.protect();
   // Handle users who aren't authenticated
   if (!userId) {
-    return auth().redirectToSignIn({ returnBackUrl: req.url });
+    return redirectToSignIn({ returnBackUrl: req.url });
   }
   // Protect admin route
   if (
     isAdminPage(req) &&
-    !(await clerkClient.users.getUser(userId)).publicMetadata.isAdmin
+    !(await users.getUser(userId)).publicMetadata.isAdmin
   ) {
     return NextResponse.json(
       { error: "User is not an admin" },
