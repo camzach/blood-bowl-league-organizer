@@ -86,6 +86,26 @@ function buildGrid(numRounds: number) {
     .join(" ");
 }
 
+function gradient(round: number, totalRounds: number) {
+  const green = { l: 46, c: 72, h: 136 };
+  const yellow = { l: 97, c: 97, h: 103 };
+  const red = { l: 53, c: 105, h: 40 };
+
+  if (round / totalRounds < 0.5) {
+    const percentage = round / (totalRounds / 2);
+    const l = (red.l - yellow.l) * percentage + yellow.l;
+    const c = (red.c - yellow.c) * percentage + yellow.c;
+    const h = (red.h - yellow.h) * percentage + yellow.h;
+    return `lch(${l} ${c} ${h})`;
+  } else {
+    const percentage = (round - totalRounds / 2) / totalRounds / 2;
+    const l = (yellow.l - green.l) * percentage + green.l;
+    const c = (yellow.c - green.c) * percentage + green.c;
+    const h = (yellow.h - green.h) * percentage + green.h;
+    return `lch(${l} ${c} ${h})`;
+  }
+}
+
 export default async function Playoffs() {
   const user = await currentUser();
   if (!user?.publicMetadata.league) return notFound();
@@ -122,9 +142,10 @@ export default async function Playoffs() {
           return (
             <div
               key={`${game.round}/${game.seed}`}
-              className="grid place-items-center rounded-md border border-accent bg-base-300 leading-10 text-base-content"
+              className="grid place-items-center rounded-md border bg-base-300 leading-10 text-base-content"
               style={{
                 gridArea: `g-${game.round}-${game.seed}`,
+                borderColor: gradient(game.round - 1, rounds.length - 1),
               }}
             >
               {game.game ? (

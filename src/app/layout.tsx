@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   // TODO: investigate useId issue
   const drawerId = "_drawer_";
 
-  if (!user) return auth().redirectToSignIn();
+  if (!user) return (await auth()).redirectToSignIn();
 
   const teams = await db.query.team.findMany({
     where: eq(dbTeam.leagueName, user.publicMetadata.league as string),

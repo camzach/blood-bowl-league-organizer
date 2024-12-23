@@ -13,7 +13,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { game as dbGame, player, starPlayer } from "db/schema";
 
 type Props = {
-  params: { gameId: string };
+  params: Promise<{ gameId: string }>;
 };
 
 const detailsSelect = {
@@ -76,7 +76,13 @@ const journeymanCols = [
   "pa",
 ] satisfies ComponentProps<typeof TeamTable>["cols"];
 
-export default async function InProgress({ params: { gameId } }: Props) {
+export default async function InProgress(props: Props) {
+  const params = await props.params;
+
+  const {
+    gameId
+  } = params;
+
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
     with: {
