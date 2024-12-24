@@ -8,8 +8,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { db } from "utils/drizzle";
 
-export async function GET(req: NextRequest, props: { params: Promise<{ teamId: string }> }) {
-  const params = await props.params;
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { teamId: string } },
+) {
   const team = await db.query.team.findFirst({
     where: eq(dbTeam.id, decodeURIComponent(params.teamId)),
     with: { song: true },
@@ -47,8 +49,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ teamId: s
   }
 }
 
-export async function POST(req: NextRequest, props: { params: Promise<{ teamId: string }> }) {
-  const params = await props.params;
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { teamId: string } },
+) {
   if (!canEditTeam(decodeURIComponent(params.teamId)))
     return new NextResponse("Unauthorized", { status: 503 });
 

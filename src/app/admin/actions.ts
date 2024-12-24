@@ -18,7 +18,7 @@ import { z } from "zod";
 import { currentUser } from "@clerk/nextjs/server";
 import { getLeagueTable } from "utils/get-league-table";
 
-export const scheduleAction = async () => {
+export const scheduleAction = action.schema(z.any()).action(async () => {
   const user = await currentUser();
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
@@ -74,9 +74,9 @@ export const scheduleAction = async () => {
       }
     }
   });
-};
+});
 
-export const clearAction = async () => {
+export const clearAction = action.schema(z.any()).action(async () => {
   const user = await currentUser();
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
@@ -116,8 +116,7 @@ export const clearAction = async () => {
     ]);
     await tx.delete(gameDetails).where(inArray(gameDetails.id, gameDetailsIds));
   });
-};
-
+});
 export const rescheduleGames = action
   .schema(z.array(z.object({ id: z.string(), time: z.string().datetime() })))
   .action(async ({ parsedInput: games }) => {
@@ -151,8 +150,7 @@ export const rescheduleGames = action
       return "Success";
     });
   });
-
-export const seedBracket = async () => {
+export const seedBracket = action.schema(z.any()).action(async () => {
   const user = await currentUser();
   if (!user?.publicMetadata.league || !user.publicMetadata.isAdmin) {
     throw new Error("Not authenticated");
@@ -279,5 +277,6 @@ export const seedBracket = async () => {
     await tx.insert(gameDetails).values(detailsInserts);
     await tx.insert(game).values(gameInserts);
     await tx.insert(bracketGame).values(bracketGameInserts);
+    return "Success!";
   });
-};
+});

@@ -13,7 +13,7 @@ import RosterSelector from "./roster-selector";
 import { nanoid } from "nanoid";
 
 export default async function NewTeam() {
-  const { userId } = await auth();
+  const { userId } = auth();
   if (!userId) return redirect("/");
 
   const teams = await db
@@ -43,7 +43,7 @@ export default async function NewTeam() {
           const user = await currentUser();
 
           if (!name || !roster || !coachId || !user?.publicMetadata.league)
-            return;
+            return null;
           const ruleOptions =
             await db.query.optionalSpecialRuleToRoster.findMany({
               where: eq(optionalSpecialRuleToRoster.rosterName, roster),
@@ -51,7 +51,7 @@ export default async function NewTeam() {
           const option = ruleOptions.find(
             (opt) => opt.specialRuleName === optionalRule,
           );
-          if (ruleOptions.length > 0 && !option) return;
+          if (ruleOptions.length > 0 && !option) return null;
 
           const teamId = nanoid();
           await db.transaction(async (tx) => {
@@ -97,7 +97,7 @@ export default async function NewTeam() {
               const teamId = input.get("teamId")?.toString();
               const coachId = input.get("userId")?.toString();
 
-              if (!teamId || !coachId) return;
+              if (!teamId || !coachId) return null;
 
               await db.insert(coachToTeam).values({
                 coachId,

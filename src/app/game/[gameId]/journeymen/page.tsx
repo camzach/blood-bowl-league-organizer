@@ -30,16 +30,10 @@ const detailsFeilds = {
 } satisfies Parameters<typeof db.query.gameDetails.findMany>[0];
 
 type Props = {
-  params: Promise<{ gameId: string }>;
+  params: { gameId: string };
 };
 
-export default async function Journeymen(props: Props) {
-  const params = await props.params;
-
-  const {
-    gameId
-  } = params;
-
+export default async function Journeymen({ params: { gameId } }: Props) {
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, gameId),
     with: {

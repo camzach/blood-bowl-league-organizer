@@ -1,16 +1,6 @@
 import * as schema from "../db/schema";
-import { drizzle, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
 import { neonConfig, Pool } from "@neondatabase/serverless";
-import { PgTransaction } from "drizzle-orm/pg-core";
-import { ExtractTablesWithRelations } from "drizzle-orm";
-
-export type TX = PgTransaction<
-  NeonQueryResultHKT,
-  typeof import("/home/cameron/blood-bowl-league-organizer/src/db/schema"),
-  ExtractTablesWithRelations<
-    typeof import("/home/cameron/blood-bowl-league-organizer/src/db/schema")
-  >
->;
 
 // @ts-expect-error typescript issues but it's chill
 let db: ReturnType<typeof drizzle<typeof schema>> = global.db;

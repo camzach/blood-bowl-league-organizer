@@ -5,22 +5,20 @@ import Calendar from "./calendar";
 import Controls from "./controls";
 
 type Props = {
-  searchParams: Promise<{
+  searchParams: {
     teamId?: string | string[];
     state?: string;
     month?: string;
     year?: string;
     mode?: string;
-  }>;
+  };
 };
 
-export default async function Schedule(props: Props) {
-  const searchParams = await props.searchParams;
-
-  const { teamId, state = "any", month, year, mode } = searchParams;
-
+export default async function Schedule({
+  searchParams: { teamId, state = "any", month, year, mode },
+}: Props) {
   const user = await currentUser();
-  if (!user) return (await auth()).redirectToSignIn();
+  if (!user) return auth().redirectToSignIn();
 
   const { teams, games } = await fetchGames({
     teamId,
@@ -30,7 +28,7 @@ export default async function Schedule(props: Props) {
 
   const parsedMonth = month !== undefined ? parseInt(month) : NaN;
   const parsedYear = year !== undefined ? parseInt(year) : NaN;
-  console.table({ month, parsedMonth, parsedYear });
+  console.table({month, parsedMonth, parsedYear})
 
   return (
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">

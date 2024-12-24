@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { action } from "utils/safe-action";
-import { db, TX } from "utils/drizzle";
+import { db } from "utils/drizzle";
 import {
   coachToTeam,
   team as dbTeam,
@@ -15,8 +15,8 @@ import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
 
-async function getUserTeams(tx?: TX) {
-  const { userId } = await auth();
+async function getUserTeams(tx?: typeof db) {
+  const { userId } = auth();
   if (!userId) throw new Error("Not authenticated");
 
   return (tx ?? db).query.coachToTeam.findMany({
@@ -25,7 +25,7 @@ async function getUserTeams(tx?: TX) {
   });
 }
 
-export async function canEditTeam(teamId: string | string[], tx?: TX) {
+export async function canEditTeam(teamId: string | string[], tx?: typeof db) {
   const editableTeams = await getUserTeams(tx);
   if (Array.isArray(teamId))
     return teamId.some((t) => editableTeams.some((e) => e.team.id === t));

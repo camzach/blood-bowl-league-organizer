@@ -1,6 +1,6 @@
 import { inducement, starPlayer } from "db/schema";
 import { inArray } from "drizzle-orm";
-import type { db, TX } from "utils/drizzle";
+import type { db } from "utils/drizzle";
 
 function getInducementPrice(
   inducement: {
@@ -25,7 +25,7 @@ export async function calculateInducementCosts(
   stars: Array<string>,
   specialRules: string[],
   playerCount: number,
-  tx: TX,
+  tx: typeof db,
 ): Promise<number> {
   if (stars.length > 2)
     throw new InducementError("Only 2 star players permitted");
