@@ -3,17 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 import { game as dbGame } from "db/schema";
 
-export default async function Game(
-  props: {
-    params: Promise<{ gameId: string }>;
-  }
-) {
-  const params = await props.params;
-
-  const {
-    gameId
-  } = params;
-
+export default async function Game({
+  params: { gameId },
+}: {
+  params: { gameId: string };
+}) {
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
     with: {

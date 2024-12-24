@@ -11,10 +11,9 @@ import { coachToTeam, team as dbTeam } from "db/schema";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import fetchTeam from "./fetch-team";
 
-type Props = { params: Promise<{ teamId: string }> };
+type Props = { params: { teamId: string } };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const routeTeam = await db.query.team.findFirst({
     where: eq(dbTeam.id, params.teamId),
     columns: { name: true },
@@ -22,13 +21,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return { title: routeTeam?.name ?? "Unknown Team" };
 }
 
-export default async function TeamPage(props: Props) {
-  const params = await props.params;
-
-  const { teamId } = params;
-
+export default async function TeamPage({ params: { teamId } }: Props) {
   const user = await currentUser();
-  if (!user) return (await auth()).redirectToSignIn();
+  if (!user) return auth().redirectToSignIn();
 
   const team = await fetchTeam(decodeURIComponent(teamId), false);
 

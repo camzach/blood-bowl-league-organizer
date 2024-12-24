@@ -17,10 +17,9 @@ import { coachToTeam, rosterSlot, team as dbTeam } from "db/schema";
 import { eq } from "drizzle-orm";
 import TeamState from "./team-state";
 
-type Props = { params: Promise<{ teamId: string }> };
+type Props = { params: { teamId: string } };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const routeTeam = await db.query.team.findFirst({
     where: eq(dbTeam.id, params.teamId),
     columns: { name: true },
@@ -28,14 +27,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return { title: routeTeam?.name ?? "Unknown Team" };
 }
 
-export default async function EditTeam(props: Props) {
-  const params = await props.params;
-
-  const { teamId } = params;
-
+export default async function EditTeam({ params: { teamId } }: Props) {
   const user = await currentUser();
 
-  if (!user) return (await auth()).redirectToSignIn();
+  if (!user) return auth().redirectToSignIn();
   const editableTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, user.id),
   });

@@ -16,10 +16,10 @@ import {
   specialRuleToStarPlayer,
   starPlayer,
 } from "./schema";
-import rosterSeed from "./seeds/rosters.json" with { type: "json" };
-import skillSeed from "./seeds/skills.json" with { type: "json" };
-import inducementSeed from "./seeds/inducements.json" with { type: "json" };
-import starPlayerSeed from "./seeds/starPlayers.json" with { type: "json" };
+import rosterSeed from "./seeds/rosters.json" assert { type: "json" };
+import skillSeed from "./seeds/skills.json" assert { type: "json" };
+import inducementSeed from "./seeds/inducements.json" assert { type: "json" };
+import starPlayerSeed from "./seeds/starPlayers.json" assert { type: "json" };
 import readline from "node:readline/promises";
 import { config } from "dotenv";
 import { neonConfig } from "@neondatabase/serverless";
