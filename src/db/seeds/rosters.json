@@ -2478,5 +2478,107 @@
         "secondary": ["agility", "general"]
       }
     ]
+  },
+  {
+    "name": "Chaos Dwarf",
+    "specialRules": [
+      "Badlands Brawl",
+      "Favoured of Hashut",
+      "Apothecary Allowed"
+    ],
+    "rerollCost": 70000,
+    "tier": 1,
+    "players": [
+      {
+        "position": "Hobgoblin Lineman",
+        "max": 16,
+        "cost": 40000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 4,
+        "AV": 8,
+        "skills": [],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Hobgoblin Sneaky Staba",
+        "max": 2,
+        "cost": 70000,
+        "MA": 6,
+        "ST": 3,
+        "AG": 3,
+        "PA": 5,
+        "AV": 8,
+        "skills": ["Shadowing", "Stab"],
+        "primary": ["general"],
+        "secondary": ["agility", "strength"]
+      },
+      {
+        "position": "Chaos Dwarf Blocker",
+        "max": 4,
+        "cost": 70000,
+        "MA": 4,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": ["Block", "Iron Hard Skin", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "mutation"]
+      },
+      {
+        "position": "Chaos Dwarf Flamesmith",
+        "max": 2,
+        "cost": 80000,
+        "MA": 5,
+        "ST": 3,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": [
+          "Brawler",
+          "Breathe Fire",
+          "Disturbing Presence",
+          "Thick Skull"
+        ],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "mutation"]
+      },
+      {
+        "position": "Bull Centaur Blitzer",
+        "max": 2,
+        "cost": 130000,
+        "MA": 6,
+        "ST": 4,
+        "AG": 4,
+        "PA": 6,
+        "AV": 10,
+        "skills": ["Sprint", "Sure Feet", "Thick Skull"],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "mutation"]
+      },
+      {
+        "position": "Minotaur",
+        "max": 1,
+        "cost": 150000,
+        "MA": 5,
+        "ST": 5,
+        "AG": 4,
+        "PA": null,
+        "AV": 9,
+        "skills": [
+          "Frenzy",
+          "Horns",
+          "Loner (4+)",
+          "Mighty Blow (+1)",
+          "Thick Skull",
+          "Unchannelled Fury"
+        ],
+        "primary": ["general", "strength"],
+        "secondary": ["agility", "general", "mutation"]
+      }
+    ]
   }
 ]
