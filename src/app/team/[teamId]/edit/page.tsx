@@ -175,7 +175,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             </td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring"}
+                disabled={team.state !== "hiring" && state !== "draft"}
                 teamId={team.id}
                 type={"rerolls"}
                 title={"Rerolls"}
@@ -196,7 +196,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring"}
+                disabled={team.state !== "hiring" && state !== "draft"}
                 teamId={team.id}
                 type={"assistantCoaches"}
                 title={"Assistant Coaches"}
@@ -213,7 +213,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>10,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring"}
+                disabled={team.state !== "hiring" && state !== "draft"}
                 teamId={team.id}
                 type={"cheerleaders"}
                 title={"Cheerleaders"}
@@ -230,7 +230,7 @@ export default async function EditTeam({ params: { teamId } }: Props) {
             <td>50,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring"}
+                disabled={team.state !== "hiring" && state !== "draft"}
                 teamId={team.id}
                 type={"apothecary"}
                 title={"Apothecary"}
