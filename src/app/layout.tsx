@@ -3,10 +3,10 @@ import type { PropsWithChildren } from "react";
 import "./global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
-import { team as dbTeam } from "db/schema";
+import { team as dbTeam, season } from "db/schema";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { ClerkProvider, UserButton } from "@clerk/nextjs";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import TeamsList from "./teams-list";
 
 export const metadata: Metadata = {
@@ -26,6 +26,17 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     where: eq(dbTeam.leagueName, user.publicMetadata.league as string),
   });
 
+  const activeSeason = await db.query.season.findFirst({
+    where: and(
+      eq(season.leagueName, user.publicMetadata.league as string),
+      eq(season.isActive, true),
+    ),
+    with: {
+      bracketGames: {
+        extras: { _: sql<never>`'_'`.as("_") },
+      },
+    },
+  });
   return (
     <ClerkProvider>
       <html data-theme="dark">
@@ -45,6 +56,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 <nav className="navbar-center hidden gap-3 md:flex">
                   <NavLinks
                     teams={teams}
+                    showPlayoffsLink={
+                      (activeSeason?.bracketGames?.length ?? 0) > 0
+                    }
                     isAdmin={!!user?.publicMetadata.isAdmin}
                   />
                 </nav>
@@ -63,6 +77,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               <nav className="menu min-h-full w-fit bg-base-200 p-4 text-base-content">
                 <NavLinks
                   teams={teams}
+                  showPlayoffsLink={
+                    (activeSeason?.bracketGames?.length ?? 0) > 0
+                  }
                   isAdmin={!!user?.publicMetadata.isAdmin}
                 />
               </nav>
@@ -76,6 +93,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
 function NavLinks(props: {
   teams: Array<{ name: string; id: string }>;
+  showPlayoffsLink: boolean;
   isAdmin: boolean;
 }) {
   return (
@@ -89,9 +107,11 @@ function NavLinks(props: {
       <li>
         <Link href="/league-table">League Table</Link>
       </li>
-      <li>
-        <Link href="/playoffs">Playoffs</Link>
-      </li>
+      {props.showPlayoffsLink && (
+        <li>
+          <Link href="/playoffs">Playoffs</Link>
+        </li>
+      )}
       {props.isAdmin && (
         <li>
           <Link href="/admin">Admin</Link>
