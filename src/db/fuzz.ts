@@ -63,7 +63,9 @@ await db.transaction(async (tx) => {
   const LEAGUE_NAME = "Testing";
 
   console.log("Creating new league");
-  await tx.insert(schema.league).values({ name: LEAGUE_NAME });
+  await tx
+    .insert(schema.league)
+    .values({ id: nanoid(), name: "Testing", createdAt: new Date() });
 
   const teamNames = new Set<string>();
   while (teamNames.size < 4) {

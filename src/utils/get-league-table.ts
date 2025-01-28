@@ -1,18 +1,24 @@
-import { currentUser, auth } from "@clerk/nextjs/server";
 import { season } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import { db as drizzle } from "./drizzle";
+import { auth } from "auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function getLeagueTable(
   tx?: Parameters<Parameters<typeof drizzle.transaction>[0]>[0],
 ) {
   const db = tx ?? drizzle;
-  const user = await currentUser();
-  if (!user) return auth().redirectToSignIn();
+  const session = await auth.api.getSession({
+    headers: headers(),
+  });
+  if (!session?.user) {
+    return redirect("/");
+  }
 
   const activeSeason = await db.query.season.findFirst({
     where: and(
-      eq(season.leagueName, user.publicMetadata.league as string),
+      eq(season.leagueName, session.session.activeOrganizationId ?? ""),
       eq(season.isActive, true),
     ),
     with: {

@@ -1,5 +1,5 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { canEditTeam } from "app/team/[teamId]/edit/actions";
+import { canEditTeam } from "app/(app)/team/[teamId]/edit/actions";
 import { randomUUID } from "crypto";
 import { team as dbTeam, song as dbSong } from "db/schema";
 import { eq } from "drizzle-orm";
