@@ -15,13 +15,13 @@ export async function GET() {
     throw new Error("Not authenticated");
   }
 
-  const leagueName = session.activeOrganizationId || undefined;
-  if (!leagueName) {
+  const leagueId = session.activeOrganizationId || undefined;
+  if (!leagueId) {
     return;
   }
 
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.name, leagueName),
+    where: eq(dbLeague.name, leagueId),
   });
   if (!league?.discordGuildId) return Response.json(null);
 

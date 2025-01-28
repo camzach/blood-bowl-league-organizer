@@ -31,7 +31,7 @@ export default async function TeamPage({ params: { teamId } }: Props) {
 
   const team = await fetchTeam(decodeURIComponent(teamId), false);
 
-  if (!team || team.leagueName !== (session.activeOrganizationId as string)) {
+  if (!team || team.leagueId !== (session.activeOrganizationId as string)) {
     return notFound();
   }
 

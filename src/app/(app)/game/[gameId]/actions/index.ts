@@ -796,7 +796,7 @@ export const end = action
           .innerJoin(season, eq(bracketGame.seasonId, season.id))
           .where(
             and(
-              eq(season.leagueName, session.activeOrganizationId),
+              eq(season.leagueId, session.activeOrganizationId),
               eq(season.isActive, true),
               eq(bracketGame.gameId, game.id),
             ),

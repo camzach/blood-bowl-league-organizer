@@ -18,7 +18,7 @@ export async function getLeagueTable(
 
   const activeSeason = await db.query.season.findFirst({
     where: and(
-      eq(season.leagueName, session.session.activeOrganizationId ?? ""),
+      eq(season.leagueId, session.session.activeOrganizationId ?? ""),
       eq(season.isActive, true),
     ),
     with: {

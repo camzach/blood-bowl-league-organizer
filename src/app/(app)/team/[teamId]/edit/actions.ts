@@ -50,7 +50,7 @@ export const create = action
           name: teamName,
           id: teamId,
           rosterName: roster,
-          leagueName: activeLeague,
+          leagueId: activeLeague,
         });
         await tx.insert(coachToTeam).values({
           teamId,

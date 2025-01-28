@@ -63,7 +63,7 @@ export default async function NewTeam() {
               id: teamId,
               rosterName: roster,
               chosenSpecialRuleName: option?.specialRuleName,
-              leagueName: activeLeague,
+              leagueId: activeLeague,
             });
             await tx.insert(coachToTeam).values({
               coachId,

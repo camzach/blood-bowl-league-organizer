@@ -42,7 +42,7 @@ export default async function AdminPage() {
         </button>
         <DiscordGuildLinker />
       </form>
-      <ScheduleManager leagueName={league.name} />
+      <ScheduleManager leagueId={league.name} />
     </div>
   );
 }

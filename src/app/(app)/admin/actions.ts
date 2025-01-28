@@ -33,7 +33,7 @@ export const scheduleAction = action.schema(z.any()).action(async () => {
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: and(
-        eq(season.leagueName, session.activeOrganizationId ?? ""),
+        eq(season.leagueId, session.activeOrganizationId ?? ""),
         eq(season.isActive, true),
       ),
       with: {
@@ -96,7 +96,7 @@ export const clearAction = action.schema(z.any()).action(async () => {
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: and(
-        eq(season.leagueName, session.activeOrganizationId ?? ""),
+        eq(season.leagueId, session.activeOrganizationId ?? ""),
         eq(season.isActive, true),
       ),
     });
@@ -144,7 +144,7 @@ export const rescheduleGames = action
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
         where: and(
-          eq(season.leagueName, session.activeOrganizationId ?? ""),
+          eq(season.leagueId, session.activeOrganizationId ?? ""),
           eq(season.isActive, true),
         ),
         with: {
@@ -180,7 +180,7 @@ export const seedBracket = action.schema(z.any()).action(async () => {
   return await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: and(
-        eq(season.leagueName, session.activeOrganizationId ?? ""),
+        eq(season.leagueId, session.activeOrganizationId ?? ""),
         eq(season.isActive, true),
       ),
     });

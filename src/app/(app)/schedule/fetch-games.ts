@@ -18,7 +18,7 @@ export default async function fetchGames({
   const awayTeam = alias(team, "away_team");
 
   const teamsQuery = db.query.team.findMany({
-    where: and(eq(team.leagueName, league)),
+    where: and(eq(team.leagueId, league)),
     columns: { name: true, id: true },
     orderBy: sql`LOWER(${team.name})`,
   });
@@ -68,7 +68,7 @@ export default async function fetchGames({
       and(
         gameTeamFilter,
         gameStateFilter,
-        eq(season.leagueName, league),
+        eq(season.leagueId, league),
         eq(season.isActive, true),
       ),
     );

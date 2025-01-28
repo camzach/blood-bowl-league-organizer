@@ -1,4 +1,6 @@
+import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { season } from "./bblo";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -13,6 +15,11 @@ export const user = pgTable("user", {
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
 });
+export const userRelations = relations(user, ({ many }) => ({
+  memberships: many(member),
+  sessions: many(session),
+  accounts: many(account),
+}));
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -28,6 +35,13 @@ export const session = pgTable("session", {
   impersonatedBy: text("impersonated_by"),
   activeOrganizationId: text("active_league_id"),
 });
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, { fields: [session.userId], references: [user.id] }),
+  league: one(league, {
+    fields: [session.activeOrganizationId],
+    references: [league.id],
+  }),
+}));
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
@@ -46,6 +60,9 @@ export const account = pgTable("account", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, { fields: [account.userId], references: [user.id] }),
+}));
 
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
@@ -65,6 +82,10 @@ export const league = pgTable("league", {
   discordGuildId: text("discord_guild_id"),
   metadata: text("metadata"),
 });
+export const leagueRelations = relations(league, ({ many }) => ({
+  members: many(member),
+  seasons: many(season),
+}));
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),
@@ -77,6 +98,10 @@ export const member = pgTable("member", {
   role: text("role").notNull(),
   createdAt: timestamp("created_at").notNull(),
 });
+export const memberRelations = relations(member, ({ one }) => ({
+  user: one(user, { fields: [member.userId], references: [user.id] }),
+  league: one(league, { fields: [member.leagueId], references: [league.id] }),
+}));
 
 export const invitation = pgTable("invitation", {
   id: text("id").primaryKey(),
@@ -91,3 +116,10 @@ export const invitation = pgTable("invitation", {
     .notNull()
     .references(() => user.id),
 });
+export const invitationRelations = relations(invitation, ({ one }) => ({
+  league: one(league, {
+    fields: [invitation.leagueId],
+    references: [league.id],
+  }),
+  inviter: one(user, { fields: [invitation.inviterId], references: [user.id] }),
+}));

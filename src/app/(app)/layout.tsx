@@ -27,12 +27,12 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const drawerId = "_drawer_";
 
   const teams = await db.query.team.findMany({
-    where: eq(dbTeam.leagueName, session.activeOrganizationId ?? ""),
+    where: eq(dbTeam.leagueId, session.activeOrganizationId ?? ""),
   });
 
   const activeSeason = await db.query.season.findFirst({
     where: and(
-      eq(season.leagueName, session.activeOrganizationId ?? ""),
+      eq(season.leagueId, session.activeOrganizationId ?? ""),
       eq(season.isActive, true),
     ),
     with: {

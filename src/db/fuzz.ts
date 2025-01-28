@@ -61,11 +61,12 @@ await db.transaction(async (tx) => {
   /* ^^ CLEAR DB ^^ */
 
   const LEAGUE_NAME = "Testing";
+  const LEAGUE_ID = nanoid();
 
   console.log("Creating new league");
   await tx
     .insert(schema.league)
-    .values({ id: nanoid(), name: "Testing", createdAt: new Date() });
+    .values({ id: LEAGUE_ID, name: LEAGUE_NAME, createdAt: new Date() });
 
   const teamNames = new Set<string>();
   while (teamNames.size < 4) {
@@ -85,7 +86,7 @@ await db.transaction(async (tx) => {
         name,
         rosterName: rosterNames[i],
         id: nanoid(),
-        leagueName: LEAGUE_NAME,
+        leagueId: LEAGUE_ID,
       })),
     )
     .returning({ id: schema.team.id, rosterName: schema.team.rosterName });

@@ -87,9 +87,7 @@ export const team = pgTable(
   {
     id: varchar("id", { length: 25 }).notNull().primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
-    leagueName: varchar("league_name", { length: 255 })
-      .notNull()
-      .references(() => league.name),
+    leagueId: text("league_id").references(() => league.id),
     treasury: integer("treasury").notNull().default(1_000_000),
     state: teamState("state").notNull().default("draft"),
     rosterName: varchar("roster_name", { length: 255 })
@@ -108,7 +106,7 @@ export const team = pgTable(
     ),
   },
   (table) => ({
-    uniqueTeamNamePerLeague: unique("name").on(table.name, table.leagueName),
+    uniqueTeamNamePerLeague: unique("name").on(table.name, table.leagueId),
   }),
 );
 export const teamRelations = relations(team, ({ one, many }) => ({
@@ -435,14 +433,14 @@ export const season = pgTable(
   {
     id: varchar("id", { length: 25 }).primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
-    leagueName: varchar("league_name")
+    leagueId: varchar("league_id")
       .notNull()
-      .references(() => league.name),
+      .references(() => league.id),
     isActive: boolean("is_active").notNull().default(false),
   },
   (table) => ({
     oneActiveSeason: uniqueIndex()
-      .on(table.leagueName)
+      .on(table.leagueId)
       .where(eq(table.isActive, true)),
   }),
 );
@@ -450,12 +448,9 @@ export const seasonRelations = relations(season, ({ one, many }) => ({
   roundRobinGames: many(roundRobinGame),
   bracketGames: many(bracketGame),
   season: one(league, {
-    fields: [season.leagueName],
-    references: [league.name],
+    fields: [season.leagueId],
+    references: [league.id],
   }),
-}));
-export const leagueRelations = relations(league, ({ many }) => ({
-  seasons: many(season),
 }));
 
 export const roundRobinGame = pgTable("round_robin_game", {

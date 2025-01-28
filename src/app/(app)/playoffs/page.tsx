@@ -95,7 +95,7 @@ export default async function Playoffs() {
 
   const activeSeason = await db.query.season.findFirst({
     where: and(
-      eq(season.leagueName, session.activeOrganizationId ?? ""),
+      eq(season.leagueId, session.activeOrganizationId ?? ""),
       eq(season.isActive, true),
     ),
   });
