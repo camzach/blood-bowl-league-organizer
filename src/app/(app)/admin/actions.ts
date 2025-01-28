@@ -293,9 +293,6 @@ export const seedBracket = action.schema(z.any()).action(async () => {
       });
     }
 
-    console.log(JSON.stringify(bracketGameInserts, null, 2));
-    console.log(JSON.stringify(finals, null, 2));
-
     await tx.insert(gameDetails).values(detailsInserts);
     await tx.insert(game).values(gameInserts);
     await tx.insert(bracketGame).values(bracketGameInserts);

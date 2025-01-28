@@ -311,7 +311,6 @@ export const selectJourneymen = action
 
       const pettyCashHome = Math.max(0, awayTV - homeTV);
       const pettyCashAway = Math.max(0, homeTV - awayTV);
-      console.log(pettyCashHome, pettyCashAway);
 
       await Promise.all([
         tx

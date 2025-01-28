@@ -23,7 +23,6 @@ export default function Button({
   const { execute, status, result } = useAction(end, {
     onSuccess: () => setOpen(true),
   });
-  console.log(submission);
   if (status === "executing")
     return (
       <button className={classNames("btn btn-disabled", className)} disabled>

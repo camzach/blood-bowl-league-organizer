@@ -53,7 +53,6 @@ export default function InjuryButton({
   }, [setValue, targets.players, targets.journeymen]);
 
   const onFormSubmit = handleSubmit((data) => {
-    console.log(data);
     onSubmit({
       player: [
         ...targets.journeymen,

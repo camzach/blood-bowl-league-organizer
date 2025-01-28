@@ -364,7 +364,6 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           <InjuryButton
             className="btn-outline btn-accent btn-sm mx-2"
             onSubmit={(options) => {
-              console.log(options);
               dispatchEvent({
                 type: "casualty",
                 player: options.player,
