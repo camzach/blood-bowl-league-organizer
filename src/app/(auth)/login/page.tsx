@@ -14,6 +14,7 @@ export default function LoginPage() {
     authClient.signIn.email({
       email,
       password,
+      callbackURL: "/",
     });
   };
   const handleDiscordSignin = () => {
