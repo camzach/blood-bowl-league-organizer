@@ -18,8 +18,9 @@ export default async function AdminPage() {
   }
 
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.name, session.activeOrganizationId ?? ""),
+    where: eq(dbLeague.id, session.activeOrganizationId ?? ""),
   });
+  console.log(league);
   if (!league) return notFound();
 
   return (
@@ -42,7 +43,7 @@ export default async function AdminPage() {
         </button>
         <DiscordGuildLinker />
       </form>
-      <ScheduleManager leagueId={league.name} />
+      <ScheduleManager leagueId={league.id} />
     </div>
   );
 }

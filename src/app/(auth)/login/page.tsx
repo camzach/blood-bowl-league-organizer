@@ -1,7 +1,6 @@
 "use client";
 
 import { authClient } from "auth-client";
-import { redirect } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 type Inputs = {

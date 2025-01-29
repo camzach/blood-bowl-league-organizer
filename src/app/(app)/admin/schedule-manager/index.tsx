@@ -15,7 +15,7 @@ type Props = {
 };
 export default async function ScheduleManager({ leagueId }: Props) {
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.name, leagueId),
+    where: eq(dbLeague.id, leagueId),
     with: {
       seasons: {
         where: eq(season.isActive, true),
