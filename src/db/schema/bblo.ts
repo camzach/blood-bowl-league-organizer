@@ -1,4 +1,4 @@
-import { eq, relations } from "drizzle-orm";
+import { eq, relations, sql } from "drizzle-orm";
 import {
   integer,
   pgEnum,
@@ -230,6 +230,7 @@ export const rosterRelations = relations(roster, ({ many }) => ({
 
 export const specialRule = pgTable("special_rule", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
+  visible: boolean("visible").notNull().default(true),
   description: text("description"),
 });
 export const specialRuleRelations = relations(specialRule, ({ many }) => ({
@@ -441,7 +442,7 @@ export const season = pgTable(
   (table) => ({
     oneActiveSeason: uniqueIndex()
       .on(table.leagueId)
-      .where(eq(table.isActive, true)),
+      .where(sql`${table.isActive} = true`),
   }),
 );
 export const seasonRelations = relations(season, ({ one, many }) => ({
