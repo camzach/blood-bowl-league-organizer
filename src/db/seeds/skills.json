@@ -1097,6 +1097,8 @@
   },
   {
     "name": "Breathe Fire",
-    "rules": "Once per activation, instead of performing a Block action (either on its own or as part of a Blitz action), this player may perform a Breath Fire special action. When a player makes a Breathe Fire special action they may choose one standing opposition player they are marking and roll a D6, applying a -1 modifier if the target has a strength of 5 or higher. On a 1, the player gets overeager, engulfing themself in flame and is immediately Knocked Down. On a 2-3, the opposition player ducks the gout of flame and nothing happens. On a 4+ the opposition player takes a ball of fire straigth to the face and is immediately placed Prone. However, if the roll is a natural 6, the potent pyro has taken its toll and the opposition player is knocked down instead. After the Breath Fire special action has been resolved, this player's activation immediately ends."
+    "rules": "Once per activation, instead of performing a Block action (either on its own or as part of a Blitz action), this player may perform a Breath Fire special action. When a player makes a Breathe Fire special action they may choose one standing opposition player they are marking and roll a D6, applying a -1 modifier if the target has a strength of 5 or higher. On a 1, the player gets overeager, engulfing themself in flame and is immediately Knocked Down. On a 2-3, the opposition player ducks the gout of flame and nothing happens. On a 4+ the opposition player takes a ball of fire straigth to the face and is immediately placed Prone. However, if the roll is a natural 6, the potent pyro has taken its toll and the opposition player is knocked down instead. After the Breath Fire special action has been resolved, this player's activation immediately ends.",
+    "category": "trait",
+    "purchasable": "false"
   }
 ]

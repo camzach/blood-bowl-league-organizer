@@ -176,7 +176,12 @@ const transaction = db.transaction(async (tx) => {
     .then(() => console.log("skills inserted"));
   const specialRuleInsert = tx
     .insert(specialRule)
-    .values(Array.from(specialRules, (r) => ({ name: r })))
+    .values(
+      Array.from(specialRules, (r) => ({
+        name: r,
+        visible: r !== "Apothecary Allowed" && r !== "Low Cost Halfling Chef",
+      })),
+    )
     .then(() => console.log("special rules inserted"));
   const rosterInsert = tx
     .insert(roster)
