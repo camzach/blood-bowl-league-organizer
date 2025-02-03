@@ -8,6 +8,16 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { db } from "utils/drizzle";
 
+const s3 = new S3({
+  region: process.env.S3_REGION ?? "",
+  credentials: {
+    accessKeyId: process.env.S3_KEY_ID ?? "",
+    secretAccessKey: process.env.S3_KEY ?? "",
+  },
+  endpoint: process.env.S3_ENDPOINT,
+  forcePathStyle: true,
+});
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { teamId: string } },
@@ -24,13 +34,6 @@ export async function GET(
   if (!team.song) return new NextResponse("Team has no songs", { status: 404 });
 
   try {
-    const s3 = new S3({
-      region: process.env.S3_REGION ?? "",
-      credentials: {
-        accessKeyId: process.env.S3_KEY_ID ?? "",
-        secretAccessKey: process.env.S3_KEY ?? "",
-      },
-    });
     const object = await s3.getObject({
       Bucket: process.env.S3_BUCKET ?? "",
       Key: team.song.data,
@@ -71,14 +74,6 @@ export async function POST(
 
   if (!type || !type.mime.startsWith("audio"))
     return new NextResponse("Audio files only", { status: 400 });
-
-  const s3 = new S3({
-    region: process.env.S3_REGION ?? "",
-    credentials: {
-      accessKeyId: process.env.S3_KEY_ID ?? "",
-      secretAccessKey: process.env.S3_KEY ?? "",
-    },
-  });
 
   try {
     const team = await db.query.team.findFirst({
