@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
               >
                 <li>
-                  <SignoutButton />
+                  <SignoutButton impersonating={"impersonatedBy" in session} />
                 </li>
               </ul>
             </div>
