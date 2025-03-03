@@ -3,21 +3,13 @@
 import { authClient } from "auth-client";
 import { useRouter } from "next/navigation";
 
-type Props = {
-  impersonating: boolean;
-};
-
-export default function SignoutButton({ impersonating }: Props) {
+export default function SignoutButton() {
   const router = useRouter();
   return (
     <button
       className="btn btn-outline btn-primary"
       onClick={() => {
-        if (impersonating) {
-          authClient.admin.stopImpersonating();
-        } else {
-          authClient.signOut().then(() => router.push("/login"));
-        }
+        authClient.signOut().then(() => router.push("/login"));
       }}
     >
       Sign Out
