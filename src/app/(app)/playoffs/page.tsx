@@ -88,7 +88,7 @@ function buildGrid(numRounds: number) {
 }
 
 export default async function Playoffs() {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
 
   const { session } = apiSession;

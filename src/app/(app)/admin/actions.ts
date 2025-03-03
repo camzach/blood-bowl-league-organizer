@@ -20,7 +20,7 @@ import { auth } from "auth";
 import { headers } from "next/headers";
 
 export const scheduleAction = action.schema(z.any()).action(async () => {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {
     throw new Error("Not authenticated");
   }
@@ -83,7 +83,7 @@ export const scheduleAction = action.schema(z.any()).action(async () => {
 });
 
 export const clearAction = action.schema(z.any()).action(async () => {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {
     throw new Error("Not authenticated");
   }
@@ -131,7 +131,7 @@ export const clearAction = action.schema(z.any()).action(async () => {
 export const rescheduleGames = action
   .schema(z.array(z.object({ id: z.string(), time: z.string().datetime() })))
   .action(async ({ parsedInput: games }) => {
-    const apiSession = await auth.api.getSession({ headers: headers() });
+    const apiSession = await auth.api.getSession({ headers: await headers() });
     if (!apiSession) {
       throw new Error("Not authenticated");
     }
@@ -168,7 +168,7 @@ export const rescheduleGames = action
     });
   });
 export const seedBracket = action.schema(z.any()).action(async () => {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {
     throw new Error("Not authenticated");
   }

@@ -47,7 +47,7 @@ export default function Button({
       <>
         <Modal
           isOpen={open}
-          className="w-fit max-w-screen-sm"
+          className="w-fit max-w-(--breakpoint-sm)"
           onRequestClose={() => setOpen(false)}
         >
           <span className="block w-full text-center text-lg">

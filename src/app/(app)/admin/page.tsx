@@ -10,7 +10,7 @@ import { headers } from "next/headers";
 import Impersonate from "./impersonate";
 
 export default async function AdminPage() {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
 
   const { user, session } = apiSession;
@@ -43,26 +43,23 @@ export default async function AdminPage() {
       />
       <div role="tabpanel" className="tab-content p-10">
         <div className="flex flex-col">
-          <form className="join mb-5">
+          <div className="join mb-5">
             <button
               className="btn btn-primary join-item"
-              formAction={scheduleAction}
+              onClick={scheduleAction}
             >
               Begin Season
             </button>
-            <button
-              className="btn btn-warning join-item"
-              formAction={clearAction}
-            >
+            <button className="btn btn-warning join-item" onClick={clearAction}>
               Clear Season
             </button>
             <button
               className="btn btn-secondary join-item"
-              formAction={seedBracket}
+              onClick={seedBracket}
             >
               Seed Bracket
             </button>
-          </form>
+          </div>
           <ScheduleManager leagueId={league.id} />
         </div>
       </div>

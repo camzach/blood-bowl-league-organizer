@@ -54,7 +54,7 @@ export default function SongControls({
         <input
           {...register("songName", { required: true })}
           placeholder="Song name"
-          className="input join-item input-bordered"
+          className="input join-item"
         />
         <input
           name={fileControl.name}
@@ -65,7 +65,7 @@ export default function SongControls({
           }}
           type="file"
           accept="audio/*"
-          className="file-input join-item file-input-bordered"
+          className="file-input join-item"
         />
         <button className="btn join-item" type="submit">
           Submit

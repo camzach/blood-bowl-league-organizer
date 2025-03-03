@@ -50,7 +50,7 @@ export function NumberInput({
       </label>
       <span className="relative w-28">
         <button
-          className="btn btn-square btn-sm absolute left-0 top-0 rounded-r-none"
+          className="btn btn-square btn-sm absolute top-0 left-0 rounded-r-none"
           onClick={handleTick("down")}
           disabled={disabled || (min !== undefined && value <= min)}
         >
@@ -58,7 +58,7 @@ export function NumberInput({
         </button>
         <input
           disabled={disabled}
-          className="input input-sm input-bordered w-full px-12 text-center"
+          className="input input-sm w-full px-12 text-center"
           style={{ appearance: "textfield" }}
           id={id}
           aria-label={label}
@@ -70,7 +70,7 @@ export function NumberInput({
           ref={inputRef}
         />
         <button
-          className="btn btn-square btn-sm absolute right-0 top-0 rounded-l-none"
+          className="btn btn-square btn-sm absolute top-0 right-0 rounded-l-none"
           onClick={handleTick("up")}
           disabled={disabled || (max !== undefined && value >= max)}
         >

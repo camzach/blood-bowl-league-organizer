@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const apiSession = await auth.api.getSession({
-    headers: headers(),
+    headers: await headers(),
   });
   if (!apiSession) return redirect("/login");
   const { user, session } = apiSession;
@@ -52,7 +52,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               ≡
             </label>
           </div>
-          <span className="text-3xl max-sm:navbar-center md:navbar-start">
+          <span className="max-sm:navbar-center md:navbar-start text-3xl">
             BBLO
           </span>
           <nav className="navbar-center hidden gap-3 md:flex">
@@ -73,7 +73,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               </div>
               <ul
                 tabIndex={0}
-                className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
+                className="menu dropdown-content rounded-box bg-base-100 z-1 w-52 p-2 shadow-sm"
               >
                 <li>
                   <SignoutButton impersonating={"impersonatedBy" in session} />
@@ -90,7 +90,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <nav className="menu min-h-full w-fit bg-base-200 p-4 text-base-content">
+        <nav className="menu bg-base-200 text-base-content min-h-full w-fit p-4">
           <NavLinks
             teams={teams}
             showPlayoffsLink={(activeSeason?.bracketGames?.length ?? 0) > 0}
@@ -108,7 +108,7 @@ function NavLinks(props: {
   isAdmin: boolean;
 }) {
   return (
-    <ul className="menu text-xl md:menu-horizontal">
+    <ul className="menu md:menu-horizontal text-xl">
       <li>
         <TeamsList teams={props.teams} />
       </li>

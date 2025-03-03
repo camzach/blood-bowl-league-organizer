@@ -10,7 +10,7 @@ export default function Skill({ skill }: Props) {
   return (
     <>
       <a
-        className="whitespace-nowrap [&:nth-of-type(2n)]:text-accent"
+        className="whitespace-nowrap nth-of-type-[2n]:text-accent"
         data-tooltip-id={tooltipId}
         data-tooltip-position-strategy="fixed"
       >

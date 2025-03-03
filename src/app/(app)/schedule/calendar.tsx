@@ -79,7 +79,7 @@ export default function Calendar(props: Props) {
             return (
               <div
                 className={classNames(
-                  "flex aspect-[1/2] min-w-20 flex-col overflow-clip rounded-xl border bg-base-200 shadow-xl lg:aspect-square",
+                  "flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border bg-base-200 shadow-xl lg:aspect-square",
                   isSameDay(new Date(), date)
                     ? "border-accent"
                     : "border-neutral",

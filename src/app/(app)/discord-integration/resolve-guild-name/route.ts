@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { db } from "utils/drizzle";
 
 export async function GET() {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {
     throw new Error("Not authenticated");
   }

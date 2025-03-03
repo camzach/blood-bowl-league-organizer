@@ -12,9 +12,10 @@ import fetchTeam from "./fetch-team";
 import { auth } from "auth";
 import { headers } from "next/headers";
 
-type Props = { params: { teamId: string } };
+type Props = { params: Promise<{ teamId: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const routeTeam = await db.query.team.findFirst({
     where: eq(dbTeam.id, params.teamId),
     columns: { name: true },
@@ -22,8 +23,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: routeTeam?.name ?? "Unknown Team" };
 }
 
-export default async function TeamPage({ params: { teamId } }: Props) {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+export default async function TeamPage(props: Props) {
+  const params = await props.params;
+
+  const {
+    teamId
+  } = params;
+
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {
     return redirect("/login");
   }

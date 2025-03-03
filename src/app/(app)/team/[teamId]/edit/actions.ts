@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { action } from "utils/safe-action";
-import { db } from "utils/drizzle";
+import { db, Transaction } from "utils/drizzle";
 import {
   coachToTeam,
   team as dbTeam,
@@ -16,8 +16,8 @@ import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
 import { auth } from "auth";
 import { headers } from "next/headers";
 
-async function getUserTeams(tx?: typeof db) {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+async function getUserTeams(tx?: Transaction) {
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) throw new Error("Not authenticated");
   const { user } = apiSession;
 
@@ -27,7 +27,7 @@ async function getUserTeams(tx?: typeof db) {
   });
 }
 
-export async function canEditTeam(teamId: string | string[], tx?: typeof db) {
+export async function canEditTeam(teamId: string | string[], tx?: Transaction) {
   const editableTeams = await getUserTeams(tx);
   if (Array.isArray(teamId))
     return teamId.some((t) => editableTeams.some((e) => e.team.id === t));
@@ -37,7 +37,7 @@ export async function canEditTeam(teamId: string | string[], tx?: typeof db) {
 export const create = action
   .schema(z.object({ name: z.string().min(1), roster: z.string() }))
   .action(async ({ parsedInput: input }) => {
-    const apiSession = await auth.api.getSession({ headers: headers() });
+    const apiSession = await auth.api.getSession({ headers: await headers() });
     if (!apiSession) throw new Error("Not authenticated");
     const { user, session } = apiSession;
     if (!session.activeOrganizationId) throw new Error("No active league");

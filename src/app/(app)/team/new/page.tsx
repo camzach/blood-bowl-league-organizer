@@ -14,7 +14,7 @@ import { auth } from "auth";
 import { headers } from "next/headers";
 
 export default async function NewTeam() {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
 
   const { user, session } = apiSession;
@@ -45,7 +45,7 @@ export default async function NewTeam() {
           const optionalRule = data.get("optionalRule")?.toString();
 
           if (!name || !roster || !coachId || !session.activeOrganizationId)
-            return null;
+            return;
           const ruleOptions =
             await db.query.optionalSpecialRuleToRoster.findMany({
               where: eq(optionalSpecialRuleToRoster.rosterName, roster),
@@ -53,7 +53,7 @@ export default async function NewTeam() {
           const option = ruleOptions.find(
             (opt) => opt.specialRuleName === optionalRule,
           );
-          if (ruleOptions.length > 0 && !option) return null;
+          if (ruleOptions.length > 0 && !option) return;
 
           const activeLeague = session.activeOrganizationId;
           const teamId = nanoid();
@@ -84,7 +84,7 @@ export default async function NewTeam() {
         </button>
         <div className="join join-item join-vertical">
           <input
-            className="input join-item input-bordered"
+            className="input join-item"
             placeholder="Team Name"
             name="name"
           />
@@ -100,7 +100,7 @@ export default async function NewTeam() {
               const teamId = input.get("teamId")?.toString();
               const coachId = input.get("userId")?.toString();
 
-              if (!teamId || !coachId) return null;
+              if (!teamId || !coachId) return;
 
               await db.insert(coachToTeam).values({
                 coachId,

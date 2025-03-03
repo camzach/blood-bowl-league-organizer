@@ -10,7 +10,7 @@ export async function getLeagueTable(
 ) {
   const db = tx ?? drizzle;
   const session = await auth.api.getSession({
-    headers: headers(),
+    headers: await headers(),
   });
   if (!session?.user) {
     return redirect("/");

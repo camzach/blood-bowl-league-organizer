@@ -27,7 +27,7 @@ export default function PlayerNameEditor({ name: playerName, id }: Props) {
 
   return (
     <input
-      className="input input-sm input-bordered"
+      className="input input-sm"
       value={localName}
       onChange={(e): void => {
         setLocalName(e.target.value);

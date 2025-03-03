@@ -565,7 +565,7 @@ export const end = action
   )
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      const apiSession = await auth.api.getSession({ headers: headers() });
+      const apiSession = await auth.api.getSession({ headers: await headers() });
       if (!apiSession) throw new Error("Not authenticated");
       const { session } = apiSession;
       if (!session.activeOrganizationId) {

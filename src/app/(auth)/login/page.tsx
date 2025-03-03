@@ -24,14 +24,14 @@ export default function LoginPage() {
   };
   return (
     <div className="grid h-screen w-full place-content-center">
-      <div className="card w-96 bg-base-100 shadow-xl">
+      <div className="card bg-base-100 w-96 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">Sign In to BBLO</h2>
           <form
             className="flex flex-col gap-2"
             onSubmit={loginForm.handleSubmit(handleLogin)}
           >
-            <label className="input input-bordered flex items-center gap-2">
+            <label className="input flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"
@@ -48,7 +48,7 @@ export default function LoginPage() {
                 {...loginForm.register("email")}
               />
             </label>
-            <label className="input input-bordered flex items-center gap-2">
+            <label className="input flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 16 16"

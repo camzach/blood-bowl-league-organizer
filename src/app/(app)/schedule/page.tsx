@@ -7,19 +7,27 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     teamId?: string | string[];
     state?: string;
     month?: string;
     year?: string;
     mode?: string;
-  };
+  }>;
 };
 
-export default async function Schedule({
-  searchParams: { teamId, state = "any", month, year, mode },
-}: Props) {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+export default async function Schedule(props: Props) {
+  const searchParams = await props.searchParams;
+
+  const {
+    teamId,
+    state = "any",
+    month,
+    year,
+    mode
+  } = searchParams;
+
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
   const { session } = apiSession;
 

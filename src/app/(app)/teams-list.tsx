@@ -26,7 +26,7 @@ export default function TeamsList({ teams }: Props) {
   return (
     <details ref={ref}>
       <summary>Teams</summary>
-      <ul className="z-[1] w-max max-w-xs bg-base-200 p-2 shadow-xl">
+      <ul className="z-1 w-max max-w-xs bg-base-200 p-2 shadow-xl">
         {teams.map((team) => (
           <li key={team.id}>
             <Link href={`/team/${team.id}`}>{team.name}</Link>

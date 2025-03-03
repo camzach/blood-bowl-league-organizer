@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import { db } from "utils/drizzle";
 
 export async function GET(request: NextRequest) {
-  const apiSession = await auth.api.getSession({ headers: headers() });
+  const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return Response.json("Not authenticated");
 
   const { user } = apiSession;
