@@ -1,7 +1,6 @@
 import { inducement, starPlayer } from "db/schema";
 import { inArray } from "drizzle-orm";
-import { PgTransaction } from "drizzle-orm/pg-core";
-import type { db, Transaction } from "utils/drizzle";
+import type { Transaction } from "utils/drizzle";
 
 function getInducementPrice(
   inducement: {

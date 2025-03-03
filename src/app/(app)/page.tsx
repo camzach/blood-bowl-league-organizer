@@ -1,16 +1,21 @@
+import { auth } from "auth";
 import { coachToTeam } from "db/schema";
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 
 export default async function Home() {
-  // const { userId, redirectToSignIn } = auth();
-  // if (!userId) return redirectToSignIn();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session?.user) return redirect("/login");
 
-  // const myTeam = await db.query.coachToTeam.findFirst({
-  //   where: eq(coachToTeam.coachId, userId),
-  //   with: { team: { columns: { id: true } } },
-  // });
+  const myTeam = await db.query.coachToTeam.findFirst({
+    where: eq(coachToTeam.coachId, session.user.id),
+    with: { team: { columns: { id: true } } },
+  });
 
   return (
     <>
@@ -20,13 +25,11 @@ export default async function Home() {
             View schedule
           </Link>
         </li>
-        {/*
-          <li>
-            <Link className="link" href={`/team/${myTeam?.team.id ?? "new"}`}>
-              View your team
-            </Link>
-          </li>
-        */}
+        <li>
+          <Link className="link" href={`/team/${myTeam?.team.id ?? "new"}`}>
+            View your team
+          </Link>
+        </li>
         <li>
           <Link className="link" href="/league-table">
             View league table
