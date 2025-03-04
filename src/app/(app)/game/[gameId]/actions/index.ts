@@ -698,14 +698,14 @@ export const end = action
         mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)];
       updateMap[mvpAway.id].mvps = sql`${player.mvps} + 1`;
 
-      const fansUpdate = (won: boolean, currentFans: number) => {
+      const fansUpdate = (wlt: 'won' | 'lost' | 'tied', currentFans: number) => {
         const roll = d6();
         let newFans = currentFans;
         let updateSql: SQL | undefined = undefined;
-        if (won && roll > currentFans) {
+        if (wlt === 'won' && roll > currentFans) {
           newFans += 1;
           updateSql = sql`${team.dedicatedFans} + 1`;
-        } else if (!won && roll < currentFans) {
+        } else if (wlt === 'lost' && roll < currentFans) {
           newFans -= 1;
           updateSql = sql`${team.dedicatedFans} - 1`;
         }
@@ -717,13 +717,19 @@ export const end = action
         };
       };
 
+      function wlt(myScore: number, yourScore: number) {
+        if (myScore > yourScore) return 'won';
+        if (yourScore > myScore) return 'lost';
+        return 'tied';
+      }
+    
       const [homeFansUpdate, awayFansUpdate] = [
         fansUpdate(
-          input.touchdowns[0] > input.touchdowns[1],
+          wlt(input.touchdowns[0], input.touchdowns[1]),
           game.homeDetails.team.dedicatedFans,
         ),
         fansUpdate(
-          input.touchdowns[1] > input.touchdowns[0],
+          wlt(input.touchdowns[1], input.touchdowns[0]),
           game.awayDetails.team.dedicatedFans,
         ),
       ];
