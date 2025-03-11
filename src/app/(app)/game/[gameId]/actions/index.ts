@@ -45,7 +45,10 @@ export const start = action
           team: {
             with: {
               players: {
-                where: eq(player.missNextGame, false),
+                where: and(
+                  inArray(player.membershipType, ["player", "journeyman"]),
+                  eq(player.missNextGame, false),
+                ),
                 with: {
                   improvements: { with: { skill: true } },
                   position: {
@@ -565,7 +568,9 @@ export const end = action
   )
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      const apiSession = await auth.api.getSession({ headers: await headers() });
+      const apiSession = await auth.api.getSession({
+        headers: await headers(),
+      });
       if (!apiSession) throw new Error("Not authenticated");
       const { session } = apiSession;
       if (!session.activeOrganizationId) {
@@ -698,14 +703,17 @@ export const end = action
         mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)];
       updateMap[mvpAway.id].mvps = sql`${player.mvps} + 1`;
 
-      const fansUpdate = (wlt: 'won' | 'lost' | 'tied', currentFans: number) => {
+      const fansUpdate = (
+        wlt: "won" | "lost" | "tied",
+        currentFans: number,
+      ) => {
         const roll = d6();
         let newFans = currentFans;
         let updateSql: SQL | undefined = undefined;
-        if (wlt === 'won' && roll > currentFans) {
+        if (wlt === "won" && roll > currentFans) {
           newFans += 1;
           updateSql = sql`${team.dedicatedFans} + 1`;
-        } else if (wlt === 'lost' && roll < currentFans) {
+        } else if (wlt === "lost" && roll < currentFans) {
           newFans -= 1;
           updateSql = sql`${team.dedicatedFans} - 1`;
         }
@@ -718,11 +726,11 @@ export const end = action
       };
 
       function wlt(myScore: number, yourScore: number) {
-        if (myScore > yourScore) return 'won';
-        if (yourScore > myScore) return 'lost';
-        return 'tied';
+        if (myScore > yourScore) return "won";
+        if (yourScore > myScore) return "lost";
+        return "tied";
       }
-    
+
       const [homeFansUpdate, awayFansUpdate] = [
         fansUpdate(
           wlt(input.touchdowns[0], input.touchdowns[1]),
