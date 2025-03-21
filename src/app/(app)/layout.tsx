@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import "../global.css";
 import type { Metadata } from "next";
 import { db } from "utils/drizzle";
 import { team as dbTeam, season } from "db/schema";
