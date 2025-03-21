@@ -20,8 +20,8 @@ export function PlayerHirer({
   disabled = false,
 }: Props) {
   const router = useRouter();
-  const [position, setPosition] = useState(positions[0].name);
-  const [number, setNumber] = useState(freeNumbers[0]);
+  const [position, setPosition] = useState(positions[0]?.name ?? "");
+  const [number, setNumber] = useState(freeNumbers[0] ?? 0);
   const { execute, status } = useAction(hirePlayer, {
     onSuccess() {
       router.refresh();
@@ -29,7 +29,7 @@ export function PlayerHirer({
   });
 
   useEffect(() => {
-    if (!freeNumbers.includes(number)) {
+    if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
       setNumber(freeNumbers[0]);
     }
   }, [freeNumbers, number]);
