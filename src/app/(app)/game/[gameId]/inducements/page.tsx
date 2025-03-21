@@ -56,16 +56,12 @@ const detailsSelection = {
   },
 } as const;
 
-export default async function Inducements(
-  props: {
-    params: Promise<{ gameId: string }>;
-  }
-) {
+export default async function Inducements(props: {
+  params: Promise<{ gameId: string }>;
+}) {
   const params = await props.params;
 
-  const {
-    gameId
-  } = params;
+  const { gameId } = params;
 
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
@@ -113,6 +109,7 @@ export default async function Inducements(
         game.awayDetails.team.treasury,
       ]}
       gameId={gameId}
+      teams={[game.homeDetails.team.name, game.awayDetails.team.name]}
     />
   );
 }

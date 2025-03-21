@@ -13,6 +13,7 @@ type Props = {
   pettyCash: [number, number];
   treasury: [number, number];
   gameId: string;
+  teams: [string, string];
 };
 
 type ChoicesType = {
@@ -25,6 +26,7 @@ export default function Content(props: Props) {
   const [homeStars, awayStars] = props.stars;
   const [homePettyCash, awayPettyCash] = props.pettyCash;
   const [homeTreasury, awayTreasury] = props.treasury;
+  const [homeTeam, awayTeam] = props.teams;
   const router = useRouter();
 
   const [homeChoices, setHomeChoices] = useState<ChoicesType>({
@@ -132,14 +134,21 @@ export default function Content(props: Props) {
       style={{ placeItems: "start center" }}
     >
       <div>
-        petty cash:{" "}
-        {Math.max(0, homeFinalPettyCash - calculateTotalCost("home"))}
+        <h2 className="text-bold text-2xl">{homeTeam}</h2>
+        {homePettyCash > 0 ? (
+          <>
+            Petty Cash:{" "}
+            {Math.max(0, homeFinalPettyCash - calculateTotalCost("home"))}
+          </>
+        ) : (
+          <>
+            Treasury:{" "}
+            {homeTreasury -
+              Math.max(0, calculateTotalCost("home") - homeFinalPettyCash)}
+          </>
+        )}
         <br />
-        treasury:{" "}
-        {homeTreasury -
-          Math.max(0, calculateTotalCost("home") - homeFinalPettyCash)}
-        <br />
-        total cost: {calculateTotalCost("home")}
+        Total Cost: {calculateTotalCost("home")}
       </div>
       <div>
         Treasury Transfer
@@ -149,14 +158,21 @@ export default function Content(props: Props) {
         {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
       </div>
       <div>
-        petty cash:{" "}
-        {Math.max(0, awayFinalPettyCash - calculateTotalCost("away"))}
+        <h2 className="text-bold text-2xl">{awayTeam}</h2>
+        {awayPettyCash > 0 ? (
+          <>
+            Petty Cash:{" "}
+            {Math.max(0, awayFinalPettyCash - calculateTotalCost("away"))}
+          </>
+        ) : (
+          <>
+            Treasury:{" "}
+            {awayTreasury -
+              Math.max(0, calculateTotalCost("away") - awayFinalPettyCash)}
+          </>
+        )}
         <br />
-        treasury:{" "}
-        {awayTreasury -
-          Math.max(0, calculateTotalCost("away") - awayFinalPettyCash)}
-        <br />
-        total cost: {calculateTotalCost("away")}
+        Total Cost: {calculateTotalCost("away")}
       </div>
       <div>
         <InducementSelector
