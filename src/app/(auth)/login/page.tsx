@@ -1,6 +1,8 @@
 "use client";
 
 import { authClient } from "auth-client";
+import { useState } from "react";
+import cx from "classnames";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 type Inputs = {
@@ -9,12 +11,24 @@ type Inputs = {
 };
 export default function LoginPage() {
   const loginForm = useForm<Inputs>();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
   const handleLogin: SubmitHandler<Inputs> = ({ email, password }) => {
-    authClient.signIn.email({
-      email,
-      password,
-      callbackURL: "/",
-    });
+    setIsSigningIn(true);
+    setError(undefined);
+    authClient.signIn
+      .email({
+        email,
+        password,
+        callbackURL: "/",
+      })
+      .then((response) => {
+        if (response.error) {
+          setIsSigningIn(false);
+          setError(response.error.message);
+          setTimeout(() => setError(undefined), 2000);
+        }
+      });
   };
   const handleDiscordSignin = () => {
     authClient.signIn.social({
@@ -68,8 +82,18 @@ export default function LoginPage() {
                 {...loginForm.register("password")}
               />
             </label>
-            <button type="submit" className="btn btn-primary btn-block">
-              Log In with Email
+            <button
+              type="submit"
+              className={cx(
+                "btn btn-block",
+                (error && "btn-error") || "btn-primary",
+              )}
+            >
+              {isSigningIn ? (
+                <div className="loading loading-spinner" />
+              ) : (
+                (error ?? "Log In with Email")
+              )}
             </button>
             <div className="divider">OR</div>
           </form>
