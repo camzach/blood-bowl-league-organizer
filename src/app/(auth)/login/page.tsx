@@ -4,15 +4,22 @@ import { authClient } from "auth-client";
 import { useState } from "react";
 import cx from "classnames";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { redirect } from "next/navigation";
 
 type Inputs = {
   email: string;
   password: string;
+  name: string;
 };
+
 export default function LoginPage() {
   const loginForm = useForm<Inputs>();
+  const signupForm = useForm<Inputs>();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+
   const handleLogin: SubmitHandler<Inputs> = ({ email, password }) => {
     setIsSigningIn(true);
     setError(undefined);
@@ -30,21 +37,73 @@ export default function LoginPage() {
         }
       });
   };
+
+  const handleSignup: SubmitHandler<Inputs> = ({ email, password, name }) => {
+    if (!name) {
+      setError("Name is required");
+      setTimeout(() => setError(undefined), 2000);
+      return;
+    }
+    setIsSigningUp(true);
+    setError(undefined);
+    authClient.signUp
+      .email({
+        email,
+        password,
+        name,
+        callbackURL: "/",
+      })
+      .then((response) => {
+        if (response.error) {
+          setIsSigningUp(false);
+          setError(response.error.message);
+          setTimeout(() => setError(undefined), 2000);
+        } else {
+          redirect("/");
+        }
+      });
+  };
+
   const handleDiscordSignin = () => {
     authClient.signIn.social({
       provider: "discord",
       callbackURL: "/",
     });
   };
+
   return (
     <div className="grid h-screen w-full place-content-center">
       <div className="card bg-base-100 w-96 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title">Sign In to BBLO</h2>
+          <h2 className="card-title">
+            {isLoginMode ? "Sign In to BBLO" : "Create Account"}
+          </h2>
           <form
             className="flex flex-col gap-2"
-            onSubmit={loginForm.handleSubmit(handleLogin)}
+            onSubmit={
+              isLoginMode
+                ? loginForm.handleSubmit(handleLogin)
+                : signupForm.handleSubmit(handleSignup)
+            }
           >
+            {!isLoginMode && (
+              <label className="input flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="h-4 w-4 opacity-70"
+                >
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c0 .618-.484 1.125-1.08 1.125H4.345c-.596 0-1.08-.507-1.08-1.125 0-.618.484-1.125 1.08-1.125h7.31c.596 0 1.08.507 1.08 1.125Z" />
+                </svg>
+                <input
+                  type="text"
+                  className="grow"
+                  placeholder="Name"
+                  {...signupForm.register("name")}
+                />
+              </label>
+            )}
             <label className="input flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +118,9 @@ export default function LoginPage() {
                 type="text"
                 className="grow"
                 placeholder="Email"
-                {...loginForm.register("email")}
+                {...(isLoginMode
+                  ? loginForm.register("email")
+                  : signupForm.register("email"))}
               />
             </label>
             <label className="input flex items-center gap-2">
@@ -79,7 +140,9 @@ export default function LoginPage() {
                 type="password"
                 placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;"
                 className="grow"
-                {...loginForm.register("password")}
+                {...(isLoginMode
+                  ? loginForm.register("password")
+                  : signupForm.register("password"))}
               />
             </label>
             <button
@@ -89,10 +152,11 @@ export default function LoginPage() {
                 (error && "btn-error") || "btn-primary",
               )}
             >
-              {isSigningIn ? (
+              {isSigningIn || isSigningUp ? (
                 <div className="loading loading-spinner" />
               ) : (
-                (error ?? "Log In with Email")
+                (error ??
+                (isLoginMode ? "Log In with Email" : "Sign Up with Email"))
               )}
             </button>
             <div className="divider">OR</div>
@@ -118,6 +182,16 @@ export default function LoginPage() {
             </svg>
             <span>Continue with Discord</span>
           </button>
+          <div className="mt-4 text-center">
+            <button
+              className="link link-hover text-sm"
+              onClick={() => setIsLoginMode(!isLoginMode)}
+            >
+              {isLoginMode
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Log in"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
