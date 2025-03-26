@@ -30,6 +30,7 @@
     "eslint-plugin-drizzle": "^0.2.3",
     "file-type": "^20.4.0",
     "fireworks-js": "^2.10.8",
+    "ical-generator": "^8.1.1",
     "mime-types": "^2.1.35",
     "nanoid": "^5.1.2",
     "next": "15.2.0",
