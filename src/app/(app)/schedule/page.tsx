@@ -5,7 +5,6 @@ import Controls from "./controls";
 import { auth } from "auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import CopyText from "./copy-text";
 import Link from "next/link";
 
 type Props = {
@@ -38,10 +37,9 @@ export default async function Schedule(props: Props) {
 
   const baseURL =
     process.env.NODE_ENV === "production"
-      ? process.env.PRODUCTION_BASE_URL
-      : typeof window !== "undefined"
-        ? window.location.origin
-        : "http://localhost:" + process.env.PORT;
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : "http://localhost:" + process.env.PORT;
+
   const exportLink = new URL(
     `/api/calendar/${session.activeOrganizationId}/calendar.ics`,
     baseURL,
