@@ -8,6 +8,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ leagueId: string }> },
 ) {
+  const teamId = req.nextUrl.searchParams.getAll("teamId");
+
   const league = await db.query.league.findFirst({
     where: eq(dbLeague.id, (await params).leagueId),
     with: {
@@ -32,7 +34,20 @@ export async function GET(
   const cal = ical({ name: "Blood Bowl" });
   league.seasons.forEach((season) =>
     season.roundRobinGames.forEach((game) => {
-      if (!game.game.scheduledTime) return;
+      if (
+        teamId.length > 0 &&
+        !(
+          (game.game.homeDetails?.teamId &&
+            teamId.includes(game.game.homeDetails.teamId)) ||
+          (game.game.awayDetails?.teamId &&
+            teamId.includes(game.game.awayDetails.teamId))
+        )
+      ) {
+        return;
+      }
+      if (!game.game.scheduledTime) {
+        return;
+      }
       cal.createEvent({
         summary: `${game.game.homeDetails?.team.name ?? "TBD"} @ ${game.game.awayDetails?.team.name ?? "TBD"}`,
         start: game.game.scheduledTime,
