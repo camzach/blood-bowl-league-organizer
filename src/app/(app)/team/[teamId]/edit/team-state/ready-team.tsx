@@ -96,16 +96,25 @@ export default function ReadyButton({ teamId, treasury }: Props) {
           </button>
         </div>
       </Modal>
-      {/* {status === "executing" ? (
+      {status === "executing" ? (
         "Submitting..."
-      ) : ( */}
-      <button
-        className={cx("btn", treasury > 100000 ? "btn-warning" : "btn-primary")}
-        onClick={() => setWarningOpen(true)}
-      >
-        Ready for next game
-      </button>
-      {/* )} */}
+      ) : (
+        <button
+          className={cx(
+            "btn",
+            treasury > 100000 ? "btn-warning" : "btn-primary",
+          )}
+          onClick={() => {
+            if (treasury > 100000) {
+              setWarningOpen(true);
+            } else {
+              execute(teamId);
+            }
+          }}
+        >
+          Ready for next game
+        </button>
+      )}
     </>
   );
 }
