@@ -5,9 +5,10 @@ import ReadyTeam from "./ready-team";
 type Props = {
   state: "draft" | "improving" | "hiring";
   id: string;
+  treasury: number;
 };
 
-export default function TeamState({ state, id }: Props) {
+export default function TeamState({ state, id, treasury }: Props) {
   return (
     <div className="my-2 inline-flex flex-col gap-2">
       <ol className="steps">
@@ -34,7 +35,7 @@ export default function TeamState({ state, id }: Props) {
       {state === "improving" ? (
         <DoneImproving teamId={id} />
       ) : (
-        <ReadyTeam teamId={id} showResult={state !== "draft"} />
+        <ReadyTeam teamId={id} treasury={state === "draft" ? 0 : treasury} />
       )}
     </div>
   );

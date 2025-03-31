@@ -32,9 +32,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function EditTeam(props: Props) {
   const params = await props.params;
 
-  const {
-    teamId
-  } = params;
+  const { teamId } = params;
 
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
@@ -83,7 +81,7 @@ export default async function EditTeam(props: Props) {
       {(team.state === "draft" ||
         team.state === "hiring" ||
         team.state === "improving") && (
-        <TeamState state={team.state} id={team.id} />
+        <TeamState state={team.state} id={team.id} treasury={team.treasury} />
       )}
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
