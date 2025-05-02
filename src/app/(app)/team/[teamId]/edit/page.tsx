@@ -72,8 +72,10 @@ export default async function EditTeam(props: Props) {
       ),
   );
 
-  const hirablePlayers = team.players.filter(
-    (p) => p.membershipType !== "player",
+  const hirablePlayers = team.players.filter((p) =>
+    team.state === "draft"
+      ? p.membershipType === "retired"
+      : p.membershipType === "journeyman",
   );
   return (
     <>
