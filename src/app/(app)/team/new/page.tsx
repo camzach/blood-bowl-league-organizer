@@ -39,6 +39,12 @@ export default async function NewTeam() {
         className="join flex"
         action={async (data: FormData) => {
           "use server";
+          const apiSession = await auth.api.getSession({
+            headers: await headers(),
+          });
+          if (!apiSession) return redirect("/login");
+          const { session } = apiSession;
+
           const name = data.get("name")?.toString();
           const roster = data.get("roster")?.toString();
           const coachId = data.get("userId")?.toString();
