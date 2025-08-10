@@ -45,10 +45,10 @@ export function TeamTable<T extends PlayerType>({
       rows={players.sort((a, b) => a.number - b.number)}
       columns={displayCols
         .map((col) =>
-          typeof col === "string" ? cols.find((c) => c.id === col) : col
+          typeof col === "string" ? cols.find((c) => c.id === col) : col,
         )
         .filter(
-          (x): x is ComponentProps<typeof Table<T>>["columns"][number] => !!x
+          (x): x is ComponentProps<typeof Table<T>>["columns"][number] => !!x,
         )}
     />
   );

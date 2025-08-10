@@ -61,7 +61,7 @@ export default function ScheduleEditor(props: Props) {
           }[status]
         }
       </button>
-      <table className={classNames("table table-zebra-zebra")}>
+      <table className={classNames("table-zebra-zebra table")}>
         <thead>
           <tr>
             <th>round</th>

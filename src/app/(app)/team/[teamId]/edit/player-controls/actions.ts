@@ -1,6 +1,6 @@
 "use server";
 import { z } from "zod";
-import { action } from "utils/safe-action";
+import { action, playerPermissionMiddleware } from "utils/safe-action";
 import {
   getPlayerSkills,
   getPlayerSppAndTv,
@@ -16,11 +16,16 @@ import {
   improvement,
   SkillCategory,
 } from "db/schema";
-import { canEditTeam } from "../actions";
+
 import { skillConflicts } from "./skillConflicts";
 
 export const fire = action
   .schema(z.object({ playerId: z.string() }))
+  .use(async ({ next, clientInput }) => {
+    const { playerId } = z.object({ playerId: z.string() }).parse(clientInput);
+    return next({ ctx: { authParams: { playerId: playerId } } });
+  })
+  .use(playerPermissionMiddleware)
   .action(async ({ parsedInput: { playerId } }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
@@ -28,18 +33,17 @@ export const fire = action
         columns: {
           membershipType: true,
           id: true,
+          teamId: true,
         },
         with: {
           position: { columns: { cost: true } },
-          team: { columns: { state: true, id: true } },
+          team: { columns: { state: true, id: true, treasury: true } },
         },
       });
       if (!player) throw new Error("Player does not exist");
       if (player.team === null) throw new Error("Player is not on any team");
       if (player.membershipType !== "player")
         throw new Error("Player is not fireable");
-      if (!(await canEditTeam(player.team.id, tx)))
-        throw new Error("User does not have permission to modify this team");
 
       if (player.team.state === "draft") {
         await Promise.all([
@@ -51,9 +55,7 @@ export const fire = action
             })
             .where(eq(dbTeam.id, player.team.id)),
         ]);
-        return true;
-      }
-      if (player.team.state === "hiring") {
+      } else if (player.team.state === "hiring") {
         await tx
           .update(dbPlayer)
           .set({
@@ -61,9 +63,11 @@ export const fire = action
             membershipType: null,
           })
           .where(eq(dbPlayer.id, playerId));
-        return true;
+      } else {
+        throw new Error("Team not in hiring state");
       }
-      throw new Error("Team not in hiring state");
+
+      return true;
     });
   });
 
@@ -75,6 +79,13 @@ export const update = action
       name: z.string(z.string().min(1)).optional(),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { player: playerId } = z
+      .object({ player: z.string() })
+      .parse(clientInput);
+    return next({ ctx: { authParams: { playerId: playerId } } });
+  })
+  .use(playerPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
@@ -82,6 +93,7 @@ export const update = action
         columns: {
           membershipType: true,
           number: true,
+          name: true, // Include name to log old value
         },
         with: {
           team: { columns: { state: true, id: true } },
@@ -97,9 +109,6 @@ export const update = action
 
       if (player.team === null || player.membershipType !== "player")
         throw new Error("Player is not on any team");
-
-      if (!(await canEditTeam(player.team.id, tx)))
-        throw new Error("User does not have permission to modify this team");
 
       if (!["hiring", "improving", "draft"].includes(player.team.state))
         throw new Error("Team is not modifiable at this time");
@@ -133,6 +142,20 @@ export const update = action
       ];
 
       await Promise.all(mutations);
+
+      const auditLogOldValue: { number?: number | null; name?: string | null } =
+        {};
+      const auditLogNewValue: { number?: number | null; name?: string | null } =
+        {};
+
+      if (input.number !== undefined && input.number !== player.number) {
+        auditLogOldValue.number = player.number;
+        auditLogNewValue.number = input.number;
+      }
+      if (input.name !== undefined && input.name !== player.name) {
+        auditLogOldValue.name = player.name;
+        auditLogNewValue.name = input.name;
+      }
     });
   });
 
@@ -152,9 +175,16 @@ export const learnSkill = action
       ]),
     ),
   )
+  .use(async ({ next, clientInput }) => {
+    const { player: playerId } = z
+      .object({ player: z.string() })
+      .parse(clientInput);
+    return next({ ctx: { authParams: { playerId: playerId } } });
+  })
+  .use(playerPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      const fetchedPlayer = await db.query.player.findFirst({
+      const fetchedPlayer = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, input.player),
         with: {
           team: { columns: { state: true, id: true } },
@@ -171,9 +201,6 @@ export const learnSkill = action
 
       if (player.team === null) throw new Error("Player is not on any team");
 
-      if (!(await canEditTeam(player.team.id, tx))) {
-        throw new Error("User does not have permission to modify this team");
-      }
       if (player.team.state !== "improving")
         throw new Error("Team is not in improving state");
       async function chooseRandomSkill(category: SkillCategory) {
@@ -258,6 +285,13 @@ export const increaseCharacteristic = action
       skill: z.string(),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { player: playerId } = z
+      .object({ player: z.string() })
+      .parse(clientInput);
+    return next({ ctx: { authParams: { playerId: playerId } } });
+  })
+  .use(playerPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     await db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
@@ -322,11 +356,7 @@ export const increaseCharacteristic = action
           position: {
             with: {
               rosterSlot: {
-                with: {
-                  roster: {
-                    with: { specialRuleToRoster: true },
-                  },
-                },
+                with: { roster: { with: { specialRuleToRoster: true } } },
               },
             },
           },

@@ -53,7 +53,7 @@ export default function Button({
           <span className="block w-full text-center text-lg">
             Post-Game Sequence
           </span>
-          <table className="table table-sm">
+          <table className="table-sm table">
             <thead>
               <tr>
                 <th>Team</th>

@@ -3,16 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 import { game as dbGame } from "db/schema";
 
-export default async function Game(
-  props: {
-    params: Promise<{ gameId: string }>;
-  }
-) {
+export default async function Game(props: {
+  params: Promise<{ gameId: string }>;
+}) {
   const params = await props.params;
 
-  const {
-    gameId
-  } = params;
+  const { gameId } = params;
 
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),
@@ -33,7 +29,7 @@ export default async function Game(
 
   return (
     <div className="grid w-full place-items-center">
-      <table className="table w-1/4 bg-base-300">
+      <table className="bg-base-300 table w-1/4">
         <thead>
           <tr>
             <th className="border-0" />

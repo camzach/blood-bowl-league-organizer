@@ -79,9 +79,7 @@ const journeymanCols = [
 export default async function InProgress(props: Props) {
   const params = await props.params;
 
-  const {
-    gameId
-  } = params;
+  const { gameId } = params;
 
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, decodeURIComponent(gameId)),

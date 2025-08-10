@@ -55,7 +55,7 @@ export function Modal({
         >
           <div className={classNames("modal-box", className)} ref={innerRef}>
             <label
-              className="btn btn-circle btn-sm absolute right-2 top-2"
+              className="btn btn-circle btn-sm absolute top-2 right-2"
               onClick={onRequestClose}
             >
               ✕

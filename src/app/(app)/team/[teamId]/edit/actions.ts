@@ -1,7 +1,11 @@
 "use server";
 import { z } from "zod";
-import { action } from "utils/safe-action";
-import { db, Transaction } from "utils/drizzle";
+import {
+  action,
+  teamPermissionMiddleware,
+  playerPermissionMiddleware,
+} from "utils/safe-action";
+import { db } from "utils/drizzle";
 import {
   coachToTeam,
   team as dbTeam,
@@ -13,33 +17,10 @@ import {
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
-import { auth } from "auth";
-import { headers } from "next/headers";
-
-async function getUserTeams(tx?: Transaction) {
-  const apiSession = await auth.api.getSession({ headers: await headers() });
-  if (!apiSession) throw new Error("Not authenticated");
-  const { user } = apiSession;
-
-  return (tx ?? db).query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, user.id),
-    with: { team: { columns: { id: true } } },
-  });
-}
-
-export async function canEditTeam(teamId: string | string[], tx?: Transaction) {
-  const editableTeams = await getUserTeams(tx);
-  if (Array.isArray(teamId))
-    return teamId.some((t) => editableTeams.some((e) => e.team.id === t));
-  return editableTeams.some((e) => e.team.id === teamId);
-}
 
 export const create = action
   .schema(z.object({ name: z.string().min(1), roster: z.string() }))
-  .action(async ({ parsedInput: input }) => {
-    const apiSession = await auth.api.getSession({ headers: await headers() });
-    if (!apiSession) throw new Error("Not authenticated");
-    const { user, session } = apiSession;
+  .action(async ({ parsedInput: input, ctx: { user, session } }) => {
     if (!session.activeOrganizationId) throw new Error("No active league");
     const activeLeague = session.activeOrganizationId;
     const { name: teamName, roster } = input;
@@ -75,11 +56,13 @@ export const hirePlayer = action
       name: z.string().optional(),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { teamId } = z.object({ teamId: z.string() }).parse(clientInput);
+    return next({ ctx: { authParams: { teamId: teamId } } });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.teamId, tx)))
-        throw new Error("User does not have permission to modify this team");
-
       const positionQuery = await db
         .select({
           ...getTableColumns(dbPosition),
@@ -103,8 +86,9 @@ export const hirePlayer = action
         .set({ treasury: sql`${dbTeam.treasury} - ${position.cost}` })
         .where(eq(dbTeam.id, input.teamId));
 
+      const newPlayerId = nanoid();
       await tx.insert(dbPlayer).values({
-        id: nanoid(),
+        id: newPlayerId,
         name: input.name,
         number: input.number,
         positionId: position.id,
@@ -165,10 +149,13 @@ export const hireStaff = action
       quantity: z.number().int().gt(0).default(1),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { teamId } = z.object({ teamId: z.string() }).parse(clientInput);
+    return next({ ctx: { authParams: { teamId: teamId } } });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.teamId, tx)))
-        throw new Error("User does not have permission to modify this team");
       const team = await db.query.team.findFirst({
         where: eq(dbTeam.id, input.teamId),
         with: {
@@ -177,7 +164,15 @@ export const hireStaff = action
             with: { specialRuleToRoster: true },
           },
         },
-        columns: { state: true },
+        columns: {
+          state: true,
+          treasury: true,
+          rerolls: true,
+          apothecary: true,
+          cheerleaders: true,
+          assistantCoaches: true,
+          dedicatedFans: true,
+        },
       });
       if (!team) throw new Error("Team not found");
 
@@ -218,10 +213,10 @@ export const hireStaff = action
         where: eq(dbTeam.id, input.teamId),
         columns: {
           treasury: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
           rerolls: true,
+          apothecary: true,
+          cheerleaders: true,
+          assistantCoaches: true,
           dedicatedFans: true,
         },
       });
@@ -251,6 +246,13 @@ export const hireExistingPlayer = action
       number: z.number().min(1).max(16),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { player: playerId } = z
+      .object({ player: z.string() })
+      .parse(clientInput);
+    return next({ ctx: { authParams: { playerId: playerId } } });
+  })
+  .use(playerPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
@@ -273,11 +275,16 @@ export const hireExistingPlayer = action
       if (!player) throw new Error("Player not found");
       if (!player.team) throw new Error("Player not available for any team");
 
-      if (!(await canEditTeam(player.team.id, tx)))
-        throw new Error("User does not have permission to modify this team");
-
       const { teamValue } = getPlayerSppAndTv(player);
       const cost = teamValue + player.seasonsPlayed * 20_000;
+
+      const oldTeam = await tx.query.team.findFirst({
+        where: eq(dbTeam.id, player.team.id),
+        columns: {
+          treasury: true,
+        },
+      });
+      if (!oldTeam) throw new Error("Team not found");
 
       await Promise.all([
         tx
@@ -302,6 +309,7 @@ export const hireExistingPlayer = action
 
       const updatedTeam = await tx.query.team.findFirst({
         where: eq(dbTeam.id, player.team.id),
+        columns: { treasury: true },
         with: {
           players: {
             where: eq(dbPlayer.membershipType, "player"),
@@ -342,13 +350,25 @@ export const fireStaff = action
       quantity: z.number().int().gt(0).default(1),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { teamId } = z.object({ teamId: z.string() }).parse(clientInput);
+    return next({ ctx: { authParams: { teamId: teamId } } });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      if (!(await canEditTeam(input.teamId, tx)))
-        throw new Error("User does not have permission to modify this team");
       const team = await tx.query.team.findFirst({
         where: eq(dbTeam.id, input.teamId),
-        columns: { state: true, name: true },
+        columns: {
+          state: true,
+          name: true,
+          treasury: true,
+          dedicatedFans: true,
+          rerolls: true,
+          cheerleaders: true,
+          apothecary: true,
+          assistantCoaches: true,
+        },
         with: {
           roster: { columns: { rerollCost: true } },
         },
@@ -363,7 +383,7 @@ export const fireStaff = action
         dedicatedFans: 10_000,
       };
 
-      await tx
+      const [updatedTeam] = await tx
         .update(dbTeam)
         .set({
           [input.type]:
@@ -377,19 +397,16 @@ export const fireStaff = action
                 }`
               : undefined,
         })
-        .where(eq(dbTeam.id, input.teamId));
+        .where(eq(dbTeam.id, input.teamId))
+        .returning({
+          state: dbTeam.state,
+          apothecary: dbTeam.apothecary,
+          assistantCoaches: dbTeam.assistantCoaches,
+          cheerleaders: dbTeam.cheerleaders,
+          dedicatedFans: dbTeam.dedicatedFans,
+          rerolls: dbTeam.rerolls,
+        });
 
-      const updatedTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input.teamId),
-        columns: {
-          state: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          dedicatedFans: true,
-          rerolls: true,
-        },
-      });
       if (!updatedTeam) throw new Error("Failed to select team after update");
 
       if (updatedTeam.state !== "draft" && updatedTeam.state !== "hiring")
@@ -409,10 +426,13 @@ export const fireStaff = action
 
 export const doneImproving = action
   .schema(z.string())
+  .use(async ({ next, clientInput }) => {
+    const teamId = z.string().parse(clientInput);
+    return next({ ctx: { authParams: { teamId: teamId } } });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      if (!canEditTeam(input, tx))
-        throw new Error("User does not have permission to modify this team");
       const team = await tx.query.team.findFirst({
         where: eq(dbTeam.id, input),
         columns: {
@@ -435,10 +455,13 @@ export const doneImproving = action
 
 export const ready = action
   .schema(z.string())
+  .use(async ({ next, clientInput }) => {
+    const teamId = z.string().parse(clientInput);
+    return next({ ctx: { authParams: { teamId: teamId } } });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      if (!canEditTeam(input, tx))
-        throw new Error("User does not have permission to modify this team");
       const team = await tx.query.team.findFirst({
         where: eq(dbTeam.id, input),
         columns: {
@@ -533,6 +556,7 @@ export const ready = action
         expensiveMistake !== null
           ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
           : 0;
+
       await Promise.all([
         tx
           .update(dbTeam)
@@ -551,6 +575,7 @@ export const ready = action
             ),
           ),
       ]);
+
       return {
         expensiveMistake,
         expensiveMistakesCost,

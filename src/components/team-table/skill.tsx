@@ -10,7 +10,7 @@ export default function Skill({ skill }: Props) {
   return (
     <>
       <a
-        className="whitespace-nowrap nth-of-type-[2n]:text-accent"
+        className="nth-of-type-[2n]:text-accent whitespace-nowrap"
         data-tooltip-id={tooltipId}
         data-tooltip-position-strategy="fixed"
       >
@@ -18,15 +18,7 @@ export default function Skill({ skill }: Props) {
       </a>
       <Tooltip
         clickable
-        className={`
-          max-h-64
-          max-w-xl
-          overflow-auto
-          whitespace-pre-wrap
-          leading-6
-          [&:has(p+p)>p]:ps-4
-          [&:has(p+p)>p]:-indent-4
-        `}
+        className={`max-h-64 max-w-xl overflow-auto leading-6 whitespace-pre-wrap [&:has(p+p)>p]:ps-4 [&:has(p+p)>p]:-indent-4`}
       >
         {skill.rules.split("\n").map((text, i) => (
           <p className="mt-2" key={i}>

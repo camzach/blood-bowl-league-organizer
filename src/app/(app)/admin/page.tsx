@@ -1,6 +1,6 @@
 import { clearAction, scheduleAction, seedBracket } from "./actions";
 import { db } from "utils/drizzle";
-import { league as dbLeague, member } from "db/schema";
+import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import DiscordGuildLinker from "./discord-guild-linker";
@@ -22,13 +22,6 @@ export default async function AdminPage() {
   });
 
   if (!league) return notFound();
-
-  const members = await db.query.member.findMany({
-    where: eq(member.leagueId, league.id),
-    with: {
-      user: true,
-    },
-  });
 
   return (
     <div role="tablist" className="tabs tabs-bordered">

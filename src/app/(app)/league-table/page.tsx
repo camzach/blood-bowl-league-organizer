@@ -9,7 +9,7 @@ export default async function Page() {
   const table = await getLeagueTable();
 
   return (
-    <table className="table table-zebra mx-auto w-3/5">
+    <table className="table-zebra mx-auto table w-3/5">
       <thead>
         <tr>
           <th>Team</th>

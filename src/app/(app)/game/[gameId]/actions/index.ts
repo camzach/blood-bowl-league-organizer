@@ -1,6 +1,6 @@
 "use server";
 import { z } from "zod";
-import { action } from "utils/safe-action";
+import { action, teamPermissionMiddleware } from "utils/safe-action";
 import { db } from "utils/drizzle";
 import {
   and,
@@ -27,7 +27,7 @@ import {
   bracketGame,
   season,
 } from "db/schema";
-import { canEditTeam } from "app/(app)/team/[teamId]/edit/actions";
+
 import calculateTV from "utils/calculate-tv";
 import { nanoid } from "nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
@@ -38,6 +38,28 @@ import { headers } from "next/headers";
 
 export const start = action
   .schema(z.object({ id: z.string() }))
+  .use(async ({ next, clientInput }) => {
+    const { id } = z.object({ id: z.string() }).parse(clientInput);
+    const game = await db.query.game.findFirst({
+      where: eq(dbGame.id, id),
+      with: {
+        homeDetails: { columns: { teamId: true } },
+        awayDetails: { columns: { teamId: true } },
+      },
+    });
+    if (!game) throw new Error("Could not find game");
+    if (!game.homeDetails || !game.awayDetails)
+      throw new Error("Game does not have two teams");
+
+    return next({
+      ctx: {
+        authParams: {
+          teamId: [game.homeDetails.teamId, game.awayDetails.teamId],
+        },
+      },
+    });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: { id } }) => {
     return db.transaction(async (tx) => {
       const teamDetailsOptions = {
@@ -74,6 +96,7 @@ export const start = action
           },
         },
       } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
+
       const game = await tx.query.game.findFirst({
         where: eq(dbGame.id, id),
         with: {
@@ -84,9 +107,6 @@ export const start = action
       if (!game) throw new Error("Could not find game");
       if (!game.homeDetails || !game.awayDetails)
         throw new Error("Game does not have two teams");
-
-      if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId], tx))
-        throw new Error("User does not have permission for this game");
 
       if (
         game.homeDetails.team.state !== "ready" ||
@@ -182,6 +202,7 @@ export const start = action
           pettyCashAwarded: pettyCashAway,
         })
         .where(eq(gameDetails.id, game.awayDetails.id));
+
       return Promise.all([
         teamUpdate,
         gameUpdate,
@@ -199,6 +220,28 @@ export const selectJourneymen = action
       game: z.string(),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
+    const game = await db.query.game.findFirst({
+      where: eq(dbGame.id, gameId),
+      with: {
+        homeDetails: { with: { team: { columns: { id: true } } } },
+        awayDetails: { with: { team: { columns: { id: true } } } },
+      },
+    });
+    if (!game) throw new Error("Failed to find game");
+    if (!game.homeDetails || !game.awayDetails)
+      throw new Error("Game does not have two teams");
+
+    return next({
+      ctx: {
+        authParams: {
+          teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+        },
+      },
+    });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const teamFields = {
@@ -238,6 +281,7 @@ export const selectJourneymen = action
           },
         },
       } satisfies Parameters<typeof tx.query.team.findFirst>[0];
+
       const game = await tx.query.game.findFirst({
         where: eq(dbGame.id, input.game),
         columns: {
@@ -252,9 +296,6 @@ export const selectJourneymen = action
       if (!game) throw new Error("Failed to find game");
       if (!game.homeDetails || !game.awayDetails)
         throw new Error("Game does not have two teams");
-
-      if (!canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id]))
-        throw new Error("User does not have permission to modify this game");
 
       if (game.state !== "journeymen")
         throw new Error("Game not awaiting journeymen choice");
@@ -377,6 +418,28 @@ export const purchaseInducements = action
       away: inducementChoicesSchema,
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
+    const game = await db.query.game.findFirst({
+      where: eq(dbGame.id, gameId),
+      with: {
+        homeDetails: { with: { team: { columns: { id: true } } } },
+        awayDetails: { with: { team: { columns: { id: true } } } },
+      },
+    });
+    if (!game) throw new Error("Game does not exist");
+    if (!game.homeDetails || !game.awayDetails)
+      throw new Error("Game does not have two teams");
+
+    return next({
+      ctx: {
+        authParams: {
+          teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+        },
+      },
+    });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const detailsFields = {
@@ -418,10 +481,6 @@ export const purchaseInducements = action
       if (!game.homeDetails || !game.awayDetails)
         throw new Error("Game does not have two teams");
 
-      if (
-        !canEditTeam([game.homeDetails.team.id, game.awayDetails.team.id], tx)
-      )
-        throw new Error("User does not have permission for this game");
       if (game.state !== "inducements")
         throw new Error("Game not awaiting inducements");
 
@@ -566,6 +625,28 @@ export const end = action
       casualties: z.tuple([z.number().int(), z.number().int()]),
     }),
   )
+  .use(async ({ next, clientInput }) => {
+    const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
+    const game = await db.query.game.findFirst({
+      where: eq(dbGame.id, gameId),
+      with: {
+        homeDetails: { with: { team: { columns: { id: true } } } },
+        awayDetails: { with: { team: { columns: { id: true } } } },
+      },
+    });
+    if (!game) throw new Error("Game not found");
+    if (!game.homeDetails || !game.awayDetails)
+      throw new Error("Game does not have two teams");
+
+    return next({
+      ctx: {
+        authParams: {
+          teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+        },
+      },
+    });
+  })
+  .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const apiSession = await auth.api.getSession({
@@ -604,9 +685,6 @@ export const end = action
       if (!game) throw new Error("Game not found");
       if (!game.homeDetails || !game.awayDetails)
         throw new Error("Game does not have two teams");
-
-      if (!canEditTeam([game.homeDetails.teamId, game.awayDetails.teamId]))
-        throw new Error("User does not have permission for this game");
 
       const statMinMax = {
         ma: [1, 9],
@@ -685,10 +763,15 @@ export const end = action
           }
         }
         if (update.starPlayerPoints !== undefined) {
+          const oldSPP: typeof update.starPlayerPoints = {};
+          const newSPP: typeof update.starPlayerPoints = {};
+
           for (const [_type, amount] of Object.entries(
             update.starPlayerPoints,
           )) {
             const type = _type as keyof typeof update.starPlayerPoints;
+            oldSPP[type] = fetchedPlayer[type];
+            newSPP[type] = (fetchedPlayer[type] || 0) + amount;
             mappedUpdate[type as keyof typeof update.starPlayerPoints] =
               sql`${player[type]} + ${amount}`;
           }

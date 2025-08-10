@@ -51,7 +51,7 @@ export default function PlayerUpdatesButton({
   }
   return (
     <PopupButton className="btn-outline join-item" buttonText="History">
-      <ul className="leading-8 [&_li:nth-of-type(2n)]:bg-base-300">
+      <ul className="[&_li:nth-of-type(2n)]:bg-base-300 leading-8">
         {events.map((e) => (
           <li key={e.eventId} className="p-2">
             <label

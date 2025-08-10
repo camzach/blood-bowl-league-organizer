@@ -2,6 +2,7 @@
 import classNames from "classnames";
 import { useState, useTransition } from "react";
 import { useController, useForm } from "react-hook-form";
+import { uploadTouchdownSong } from "../../../api/songs/actions"; // Import the server action
 
 type Props = { teamId: string; currentSong?: string; isEditable: boolean };
 
@@ -19,15 +20,24 @@ export default function SongControls({
   const { field: fileControl } = useController({ control, name: "file" });
   const onSubmit = handleSubmit((data: FormValues) => {
     const formData = new FormData();
-    Object.entries(data).forEach(([k, v]) => {
-      formData.set(k, v);
-    });
+    formData.append("teamId", teamId); // Add teamId to FormData
+    formData.append("songName", data.songName);
+    formData.append("file", data.file);
+
     startTransition(async () => {
       setShowForm(false);
-      await fetch(`/api/songs/${teamId}`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        // Directly call the action with FormData
+        await uploadTouchdownSong({
+          teamId,
+          songName: data.songName,
+          file: data.file,
+        });
+        // Handle success, e.g., revalidate path if needed
+      } catch (error) {
+        console.error("Error uploading song:", error);
+        // Handle error, e.g., show an error message to the user
+      }
     });
   });
 

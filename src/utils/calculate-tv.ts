@@ -16,11 +16,11 @@ export default function calculateTV(team: Team): number {
   return (
     team.players.reduce(
       (sum, player) => sum + getPlayerSppAndTv(player).teamValue,
-      0
+      0,
     ) +
     (team.journeymen ?? []).reduce(
       (sum, player) => sum + getPlayerSppAndTv(player).teamValue,
-      0
+      0,
     ) +
     Number(team.apothecary) * 50_000 +
     (team.assistantCoaches + team.cheerleaders) * 10_000 +

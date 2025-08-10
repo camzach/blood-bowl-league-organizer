@@ -6,11 +6,9 @@ import { db } from "utils/drizzle";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata(
-  props: {
-    params: Promise<{ gameId: string }>;
-  }
-) {
+export async function generateMetadata(props: {
+  params: Promise<{ gameId: string }>;
+}) {
   const params = await props.params;
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, params.gameId),

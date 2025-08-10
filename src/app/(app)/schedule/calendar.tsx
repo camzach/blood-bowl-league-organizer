@@ -79,7 +79,7 @@ export default function Calendar(props: Props) {
             return (
               <div
                 className={classNames(
-                  "flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border bg-base-200 shadow-xl lg:aspect-square",
+                  "bg-base-200 flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border shadow-xl lg:aspect-square",
                   isSameDay(new Date(), date)
                     ? "border-accent"
                     : "border-neutral",
@@ -87,7 +87,7 @@ export default function Calendar(props: Props) {
                 )}
                 key={date.toString()}
               >
-                <span className="w-full bg-neutral pb-1 text-center text-neutral-content">
+                <span className="bg-neutral text-neutral-content w-full pb-1 text-center">
                   {date.toLocaleDateString("default", { day: "numeric" })}
                 </span>
                 <div className="flex flex-1 flex-col gap-1 overflow-y-scroll p-2">
@@ -113,7 +113,7 @@ function Game({
     <Link
       href={`/game/${game.id}`}
       className={classNames(
-        " w-full rounded-lg text-center",
+        "w-full rounded-lg text-center",
         game.state === "scheduled"
           ? "bg-accent text-accent-content"
           : "bg-success text-success-content",

@@ -20,7 +20,7 @@ export function getPlayerStats(
     "agInjuries" | "stInjuries" | "avInjuries" | "maInjuries"
   > & { position: Pick<Position, "ag" | "av" | "ma" | "pa" | "st"> } & {
     improvements: Pick<Improvement, "type">[];
-  }
+  },
 ) {
   const stats = player.improvements.reduce(
     (curr, next) => {
@@ -46,7 +46,7 @@ export function getPlayerStats(
       av: player.position.av - player.avInjuries,
       ma: player.position.ma - player.maInjuries,
       pa: player.position.pa,
-    }
+    },
   );
 
   return stats;
@@ -83,7 +83,7 @@ export function getPlayerSppAndTv(
         };
       };
     };
-  }
+  },
 ) {
   const tvCostTable = {
     random_primary: 10_000,
@@ -153,10 +153,10 @@ export function getPlayerSppAndTv(
         player.touchdowns * 3 +
         player.mvps * 4,
       teamValue: player.position.rosterSlot.roster.specialRuleToRoster.some(
-        (rule) => rule.specialRuleName === "Low Cost Linemen"
+        (rule) => rule.specialRuleName === "Low Cost Linemen",
       )
         ? 0
         : player.position.cost,
-    }
+    },
   );
 }

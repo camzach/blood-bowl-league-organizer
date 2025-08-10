@@ -25,7 +25,7 @@ export default function Schedule({ games }: Props) {
       {games.length === 0 ? (
         "No games currently scheduled. Ask your league administrator when the next season begins!"
       ) : (
-        <table className="table table-zebra">
+        <table className="table-zebra table">
           <thead>
             <tr>
               <th>Round</th>

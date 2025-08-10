@@ -75,7 +75,7 @@ export function StatList({ playerId, skills }: Props) {
     <>
       <div className="form-control">
         <span className="text-lg">Stat preferences:</span>
-        <table className="table table-zebra my-2 w-fit">
+        <table className="table-zebra my-2 table w-fit">
           <thead>
             <tr>
               <th></th>

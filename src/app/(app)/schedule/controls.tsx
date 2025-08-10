@@ -21,7 +21,7 @@ export default function Controls({
   const router = useRouter();
 
   return (
-    <details className="collapse bg-base-200 [&_input[type=checkbox]]:checkbox [&_input[type=radio]]:radio [&_label]:label [&_input]:mr-2 [&_label]:w-fit">
+    <details className="bg-base-200 [&_input[type=checkbox]]:checkbox [&_input[type=radio]]:radio [&_label]:label collapse [&_input]:mr-2 [&_label]:w-fit">
       <summary className="collapse-title">Filters</summary>
       <div className="collapse-content">
         <ul className="flex w-full flex-row lg:flex-col">

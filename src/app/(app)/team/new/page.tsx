@@ -1,23 +1,17 @@
-import {
-  coachToTeam,
-  optionalSpecialRuleToRoster,
-  roster,
-  team,
-} from "db/schema";
+import { coachToTeam, roster, team } from "db/schema";
 import { getTableColumns, eq, isNull, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "utils/drizzle";
 import RosterSelector from "./roster-selector";
-import { nanoid } from "nanoid";
 import { auth } from "auth";
 import { headers } from "next/headers";
+import { createNewTeamAction, redraftTeam } from "./actions";
 
 export default async function NewTeam() {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
 
-  const { user, session } = apiSession;
+  const { user } = apiSession;
 
   const teams = await db
     .select(getTableColumns(team))
@@ -37,48 +31,9 @@ export default async function NewTeam() {
       <br />
       <form
         className="join flex"
-        action={async (data: FormData) => {
+        action={async (data) => {
           "use server";
-          const apiSession = await auth.api.getSession({
-            headers: await headers(),
-          });
-          if (!apiSession) return redirect("/login");
-          const { session } = apiSession;
-
-          const name = data.get("name")?.toString();
-          const roster = data.get("roster")?.toString();
-          const coachId = data.get("userId")?.toString();
-          const optionalRule = data.get("optionalRule")?.toString();
-
-          if (!name || !roster || !coachId || !session.activeOrganizationId)
-            return;
-          const ruleOptions =
-            await db.query.optionalSpecialRuleToRoster.findMany({
-              where: eq(optionalSpecialRuleToRoster.rosterName, roster),
-            });
-          const option = ruleOptions.find(
-            (opt) => opt.specialRuleName === optionalRule,
-          );
-          if (ruleOptions.length > 0 && !option) return;
-
-          const activeLeague = session.activeOrganizationId;
-          const teamId = nanoid();
-          await db.transaction(async (tx) => {
-            await tx.insert(team).values({
-              name,
-              id: teamId,
-              rosterName: roster,
-              chosenSpecialRuleName: option?.specialRuleName,
-              leagueId: activeLeague,
-            });
-            await tx.insert(coachToTeam).values({
-              coachId,
-              teamId,
-            });
-          });
-
-          revalidatePath("/");
-          return redirect(`/team/${teamId}/edit`);
+          createNewTeamAction(data);
         }}
       >
         <input hidden readOnly value={user.id} name="userId" />
@@ -101,19 +56,9 @@ export default async function NewTeam() {
         <>
           <div className="divider">OR</div>
           <form
-            action={async (input: FormData) => {
+            action={async (data) => {
               "use server";
-              const teamId = input.get("teamId")?.toString();
-              const coachId = input.get("userId")?.toString();
-
-              if (!teamId || !coachId) return;
-
-              await db.insert(coachToTeam).values({
-                coachId,
-                teamId,
-              });
-              revalidatePath("/");
-              return redirect(`/team/${teamId}/edit`);
+              redraftTeam(data);
             }}
           >
             <input hidden readOnly value={user.id} name="userId" />

@@ -12,15 +12,7 @@ export function SpecialRuleColumn({ specialAbility }: SpecialRuleColumnProps) {
     <>
       <a data-tooltip-id={tooltipId}>{ruleName}</a>
       <Tooltip
-        className={`
-            max-h-64
-            max-w-xl
-            overflow-auto
-            whitespace-pre-wrap
-            text-start
-            font-sans
-            leading-6
-          `}
+        className={`max-h-64 max-w-xl overflow-auto text-start font-sans leading-6 whitespace-pre-wrap`}
       >
         {ruleText}
       </Tooltip>

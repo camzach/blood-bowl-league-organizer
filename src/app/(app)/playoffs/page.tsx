@@ -126,7 +126,7 @@ export default async function Playoffs() {
           return (
             <div
               key={`${game.round}/${game.seed}`}
-              className="grid place-items-center rounded-md border border-accent bg-base-300 leading-10 text-base-content"
+              className="border-accent bg-base-300 text-base-content grid place-items-center rounded-md border leading-10"
               style={{
                 gridArea: `g-${game.round}-${game.seed}`,
               }}

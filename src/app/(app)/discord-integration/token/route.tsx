@@ -1,16 +1,15 @@
 import { auth } from "auth";
-import { league } from "db/schema";
-import { sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
-import { db } from "utils/drizzle";
+import { updateDiscordGuildId } from "../actions"; // Import the new action
 
 export async function GET(request: NextRequest) {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return Response.json("Not authenticated");
 
-  const { user } = apiSession;
+  const { user, session } = apiSession; // Get session to access activeOrganizationId
   if (user.role !== "admin") return Response.json("Not an admin");
+  if (!session.activeOrganizationId) return Response.json("No active league"); // Ensure active league is set
 
   const params = request.nextUrl.searchParams;
   const code = params.get("code");
@@ -39,14 +38,23 @@ export async function GET(request: NextRequest) {
 
     const token = await response.json();
     guild_id = token.guild.id;
-  } catch {
-    return Response.json({ success: false });
+  } catch (error) {
+    console.error("Error exchanging Discord token:", error);
+    return Response.json({ success: false, error: "Failed to exchange token" });
   }
 
-  await db
-    .update(league)
-    .set({ discordGuildId: guild_id })
-    .where(sql`1=1`);
+  try {
+    await updateDiscordGuildId({
+      guildId: guild_id,
+      leagueId: session.activeOrganizationId,
+    });
+  } catch (error) {
+    console.error("Error updating Discord Guild ID:", error);
+    return Response.json({
+      success: false,
+      error: "Failed to update Discord Guild ID",
+    });
+  }
 
   return Response.json({ success: true, guild_id });
 }

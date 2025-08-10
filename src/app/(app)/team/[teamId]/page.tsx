@@ -26,9 +26,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function TeamPage(props: Props) {
   const params = await props.params;
 
-  const {
-    teamId
-  } = params;
+  const { teamId } = params;
 
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) {

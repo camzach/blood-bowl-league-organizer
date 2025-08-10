@@ -36,9 +36,7 @@ type Props = {
 export default async function Journeymen(props: Props) {
   const params = await props.params;
 
-  const {
-    gameId
-  } = params;
+  const { gameId } = params;
 
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, gameId),
