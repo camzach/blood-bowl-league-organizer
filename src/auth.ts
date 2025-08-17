@@ -40,6 +40,11 @@ export const auth = betterAuth({
             organizationId: "leagueId",
           },
         },
+        invitation: {
+          fields: {
+            organizationId: "leagueId",
+          },
+        },
       },
     }),
   ],

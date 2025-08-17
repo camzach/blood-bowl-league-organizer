@@ -4,6 +4,7 @@ import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import DiscordGuildLinker from "./discord-guild-linker";
+import InviteManager from "./invite-manager";
 import ScheduleManager from "./schedule-manager";
 import { auth } from "auth";
 import { headers } from "next/headers";
@@ -69,6 +70,17 @@ export default async function AdminPage() {
       />
       <div role="tabpanel" className="tab-content p-10">
         <DiscordGuildLinker />
+      </div>
+
+      <input
+        type="radio"
+        name="my_tabs_1"
+        role="tab"
+        className="tab"
+        aria-label="Invites"
+      />
+      <div role="tabpanel" className="tab-content p-10">
+        <InviteManager />
       </div>
     </div>
   );
