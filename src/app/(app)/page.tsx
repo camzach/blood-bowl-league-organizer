@@ -9,7 +9,12 @@ import fetchGames from "./schedule/fetch-games";
 
 interface GameData {
   round: number;
-  state: "scheduled" | "journeymen" | "inducements" | "in_progress" | "complete";
+  state:
+    | "scheduled"
+    | "journeymen"
+    | "inducements"
+    | "in_progress"
+    | "complete";
   time: Date | null;
   homeDetails: {
     teamName: string;
@@ -42,6 +47,11 @@ export default async function Home() {
   });
   if (!session?.user) return redirect("/login");
 
+  const myLeagues = await auth.api.listOrganizations({
+    headers: await headers(),
+  });
+  const activeLeague = session.session.activeOrganizationId;
+
   const myTeams = await db.query.coachToTeam.findMany({
     where: eq(coachToTeam.coachId, session.user.id),
     with: { team: { columns: { id: true, name: true, leagueId: true } } },
@@ -59,13 +69,63 @@ export default async function Home() {
     });
   }
 
+  if (!activeLeague && myLeagues.length === 0) {
+    return (
+      <div
+        className="mb-4 border-yellow-500 bg-yellow-100 p-4 text-yellow-700"
+        role="alert"
+      >
+        <strong className="font-bold">Warning!</strong>
+        <span className="block sm:inline">
+          You are not currently part of any leagues. Ask an admin to be added,
+          or create your own.
+        </span>
+        <form
+          action={async (data) => {
+            "use server";
+            const leagueName = data.get("leagueName") as string;
+            try {
+              await auth.api.createOrganization({
+                body: {
+                  name: leagueName,
+                  slug: encodeURIComponent(
+                    leagueName.toLowerCase().replace(" ", "-"),
+                  ),
+                },
+                headers: await headers(),
+              });
+            } catch (e) {
+              console.log(e);
+            }
+            redirect("/");
+          }}
+        >
+          <input
+            type="text"
+            name="leagueName"
+            placeholder="League Name"
+            className="input input-bordered w-full max-w-xs"
+          />
+          <button type="submit" className="btn btn-primary">
+            Create League
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">Your Teams</h1>
+      <h1 className="mb-4 text-2xl font-bold">Your Teams</h1>
       {myTeams.length === 0 ? (
-        <p>You don&apos;t have any teams yet. <Link className="link" href="/team/new">Create one!</Link></p>
+        <p>
+          You don&apos;t have any teams yet.{" "}
+          <Link className="link" href="/team/new">
+            Create one!
+          </Link>
+        </p>
       ) : (
-        <ul className="list-disc list-inside mb-8">
+        <ul className="mb-8 list-inside list-disc">
           {myTeams.map((coachTeam) => (
             <li key={coachTeam.team.id}>
               <Link className="link" href={`/team/${coachTeam.team.id}`}>
@@ -76,22 +136,23 @@ export default async function Home() {
         </ul>
       )}
 
-      <h1 className="text-2xl font-bold mb-4">Upcoming Games</h1>
+      <h1 className="mb-4 text-2xl font-bold">Upcoming Games</h1>
       {upcomingGames.games.length === 0 ? (
         <p>No upcoming games.</p>
       ) : (
-        <ul className="list-disc list-inside">
+        <ul className="list-inside list-disc">
           {upcomingGames.games.map((game) => (
             <li key={game.id}>
               <Link className="link" href={`/game/${game.id}/scheduled`}>
-                {game.homeDetails.teamName} vs {game.awayDetails.teamName} on {game.time ? new Date(game.time).toLocaleDateString() : 'TBD'}
+                {game.homeDetails.teamName} vs {game.awayDetails.teamName} on{" "}
+                {game.time ? new Date(game.time).toLocaleDateString() : "TBD"}
               </Link>
             </li>
           ))}
         </ul>
       )}
 
-      <h1 className="text-2xl font-bold mt-8 mb-4">Quick Links</h1>
+      <h1 className="mt-8 mb-4 text-2xl font-bold">Quick Links</h1>
       <ul>
         <li>
           <Link className="link" href="/schedule">
