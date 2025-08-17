@@ -33,7 +33,12 @@ export const auth = betterAuth({
     organization({
       schema: {
         organization: {
-          modelName: "leauge",
+          modelName: "league",
+        },
+        member: {
+          fields: {
+            organizationId: "leagueId",
+          },
         },
       },
     }),

@@ -3,6 +3,7 @@ import { league as dbLeague } from "db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "utils/drizzle";
+import { isLeagueAdmin } from "utils/is-league-admin";
 
 export async function GET() {
   const apiSession = await auth.api.getSession({ headers: await headers() });
@@ -11,7 +12,10 @@ export async function GET() {
   }
   const { user, session } = apiSession;
 
-  if (!session.activeOrganizationId || user.role !== "admin") {
+  if (
+    !session.activeOrganizationId ||
+    !(await isLeagueAdmin(user.id, session.activeOrganizationId))
+  ) {
     return Response.json({ error: "Not authorized" }, { status: 403 });
   }
 

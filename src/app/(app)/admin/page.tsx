@@ -7,13 +7,17 @@ import DiscordGuildLinker from "./discord-guild-linker";
 import ScheduleManager from "./schedule-manager";
 import { auth } from "auth";
 import { headers } from "next/headers";
+import { isLeagueAdmin } from "utils/is-league-admin";
 
 export default async function AdminPage() {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return redirect("/login");
 
   const { user, session } = apiSession;
-  if (user.role !== "admin") {
+  if (
+    !session.activeOrganizationId ||
+    !(await isLeagueAdmin(user.id, session.activeOrganizationId))
+  ) {
     return notFound();
   }
 

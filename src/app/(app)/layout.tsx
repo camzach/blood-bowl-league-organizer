@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { and, eq, sql } from "drizzle-orm";
 import SignoutButton from "components/signout-button";
+import { isLeagueAdmin } from "utils/is-league-admin";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -58,7 +59,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <NavLinks
               teams={teams}
               showPlayoffsLink={(activeSeason?.bracketGames?.length ?? 0) > 0}
-              isAdmin={user.role === "admin"}
+              isAdmin={await isLeagueAdmin(
+                user.id,
+                session.activeOrganizationId ?? "",
+              )}
             />
           </nav>
           <span className="navbar-end">
@@ -93,7 +97,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           <NavLinks
             teams={teams}
             showPlayoffsLink={(activeSeason?.bracketGames?.length ?? 0) > 0}
-            isAdmin={user.role === "admin"}
+            isAdmin={await isLeagueAdmin(
+              user.id,
+              session.activeOrganizationId ?? "",
+            )}
           />
         </nav>
       </div>

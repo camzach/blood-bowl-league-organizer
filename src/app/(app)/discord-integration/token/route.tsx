@@ -1,15 +1,17 @@
 import { auth } from "auth";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
-import { updateDiscordGuildId } from "../actions"; // Import the new action
+import { updateDiscordGuildId } from "../actions";
+import { isLeagueAdmin } from "utils/is-league-admin";
 
 export async function GET(request: NextRequest) {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   if (!apiSession) return Response.json("Not authenticated");
 
   const { user, session } = apiSession; // Get session to access activeOrganizationId
-  if (user.role !== "admin") return Response.json("Not an admin");
   if (!session.activeOrganizationId) return Response.json("No active league"); // Ensure active league is set
+  if (!(await isLeagueAdmin(user.id, session.activeOrganizationId)))
+    return Response.json("Not an admin");
 
   const params = request.nextUrl.searchParams;
   const code = params.get("code");
