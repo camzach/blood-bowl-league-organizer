@@ -76,7 +76,7 @@ export const update = action
     z.object({
       player: z.string(),
       number: z.number().min(1).max(16).optional(),
-      name: z.string(z.string().min(1)).optional(),
+      name: z.string().min(1).optional(),
     }),
   )
   .use(async ({ next, clientInput }) => {
