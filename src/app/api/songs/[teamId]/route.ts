@@ -1,9 +1,9 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { team as dbTeam } from "db/schema";
+import { team as dbTeam } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 
 const s3 = new S3({
   region: process.env.S3_REGION ?? "",

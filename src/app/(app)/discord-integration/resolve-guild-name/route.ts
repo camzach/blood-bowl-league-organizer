@@ -1,9 +1,9 @@
-import { auth } from "auth";
-import { league as dbLeague } from "db/schema";
+import { auth } from "~/auth";
+import { league as dbLeague } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { db } from "utils/drizzle";
-import { isLeagueAdmin } from "utils/is-league-admin";
+import { db } from "~/utils/drizzle";
+import { isLeagueAdmin } from "~/utils/is-league-admin";
 
 export async function GET() {
   const apiSession = await auth.api.getSession({ headers: await headers() });

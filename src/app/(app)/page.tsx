@@ -1,10 +1,10 @@
-import { auth } from "auth";
-import { coachToTeam } from "db/schema";
+import { auth } from "~/auth";
+import { coachToTeam } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 import fetchGames from "./schedule/fetch-games";
 
 interface GameData {

@@ -5,7 +5,7 @@ import {
   roster,
   skill,
   specialRuleToRoster,
-} from "db/schema";
+} from "~/db/schema";
 
 type Player = typeof player.$inferSelect;
 type Position = typeof position.$inferSelect;

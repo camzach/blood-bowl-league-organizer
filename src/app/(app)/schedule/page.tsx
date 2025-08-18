@@ -2,7 +2,7 @@ import fetchGames from "./fetch-games";
 import List from "./list";
 import Calendar from "./calendar";
 import Controls from "./controls";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";

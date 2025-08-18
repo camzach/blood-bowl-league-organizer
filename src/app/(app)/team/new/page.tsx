@@ -1,9 +1,9 @@
-import { coachToTeam, roster, team } from "db/schema";
+import { coachToTeam, roster, team } from "~/db/schema";
 import { getTableColumns, eq, isNull, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 import RosterSelector from "./roster-selector";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 import { createNewTeamAction, redraftTeam } from "./actions";
 

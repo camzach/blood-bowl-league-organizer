@@ -1,4 +1,4 @@
-import { TeamTable } from "components/team-table";
+import { TeamTable } from "~/components/team-table";
 import type { ComponentProps } from "react";
 import ScoreWidget from "./score-widget";
 import { notFound, redirect } from "next/navigation";
@@ -7,10 +7,10 @@ import {
   getPlayerStats,
   getPlayerSkills,
   getPlayerSppAndTv,
-} from "utils/get-computed-player-fields";
-import { db } from "utils/drizzle";
+} from "~/utils/get-computed-player-fields";
+import { db } from "~/utils/drizzle";
 import { and, eq, inArray } from "drizzle-orm";
-import { game as dbGame, player, starPlayer } from "db/schema";
+import { game as dbGame, player, starPlayer } from "~/db/schema";
 
 type Props = {
   params: Promise<{ gameId: string }>;

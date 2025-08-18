@@ -1,4 +1,4 @@
-import { NumberInput } from "components/number-input";
+import { NumberInput } from "~/components/number-input";
 
 type Props = {
   inducements: Array<{ name: string; max: number; price: number }>;

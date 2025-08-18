@@ -1,5 +1,5 @@
 "use client";
-import { Die } from "components/die";
+import { Die } from "~/components/die";
 import Link from "next/link";
 import { start } from "../actions";
 import { useAction } from "next-safe-action/hooks";

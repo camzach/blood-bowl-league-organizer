@@ -1,12 +1,12 @@
 "use server";
 import { z } from "zod";
-import { action, playerPermissionMiddleware } from "utils/safe-action";
+import { action, playerPermissionMiddleware } from "~/utils/safe-action";
 import {
   getPlayerSkills,
   getPlayerSppAndTv,
   getPlayerStats,
-} from "utils/get-computed-player-fields";
-import { db } from "utils/drizzle";
+} from "~/utils/get-computed-player-fields";
+import { db } from "~/utils/drizzle";
 import { and, eq, sql } from "drizzle-orm";
 import {
   player as dbPlayer,
@@ -15,7 +15,7 @@ import {
   skillCategories,
   improvement,
   SkillCategory,
-} from "db/schema";
+} from "~/db/schema";
 
 import { skillConflicts } from "./skillConflicts";
 

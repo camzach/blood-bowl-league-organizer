@@ -2,11 +2,11 @@
 
 import { S3 } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
-import { team as dbTeam, song as dbSong } from "db/schema";
+import { team as dbTeam, song as dbSong } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
-import { db } from "utils/drizzle";
-import { action, teamPermissionMiddleware } from "utils/safe-action";
+import { db } from "~/utils/drizzle";
+import { action, teamPermissionMiddleware } from "~/utils/safe-action";
 import { z } from "zod";
 
 const s3 = new S3({

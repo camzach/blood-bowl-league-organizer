@@ -1,14 +1,14 @@
 import { clearAction, scheduleAction, seedBracket } from "./actions";
-import { db } from "utils/drizzle";
-import { league as dbLeague } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { league as dbLeague } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import DiscordGuildLinker from "./discord-guild-linker";
 import InviteManager from "./invite-manager";
 import ScheduleManager from "./schedule-manager";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
-import { isLeagueAdmin } from "utils/is-league-admin";
+import { isLeagueAdmin } from "~/utils/is-league-admin";
 
 export default async function AdminPage() {
   const apiSession = await auth.api.getSession({ headers: await headers() });

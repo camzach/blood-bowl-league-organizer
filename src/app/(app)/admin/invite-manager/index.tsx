@@ -1,4 +1,4 @@
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { revalidatePath } from "next/cache";
 import { headers as getHeaders } from "next/headers";
 import { redirect } from "next/navigation";

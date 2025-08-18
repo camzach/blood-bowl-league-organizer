@@ -4,8 +4,8 @@ import {
   action,
   teamPermissionMiddleware,
   playerPermissionMiddleware,
-} from "utils/safe-action";
-import { db } from "utils/drizzle";
+} from "~/utils/safe-action";
+import { db } from "~/utils/drizzle";
 import {
   coachToTeam,
   team as dbTeam,
@@ -13,10 +13,10 @@ import {
   rosterSlot,
   player as dbPlayer,
   improvement,
-} from "db/schema";
+} from "~/db/schema";
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
-import nanoid from "utils/nanoid";
-import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
+import nanoid from "~/utils/nanoid";
+import { getPlayerSppAndTv } from "~/utils/get-computed-player-fields";
 
 export const create = action
   .inputSchema(z.object({ name: z.string().min(1), roster: z.string() }))

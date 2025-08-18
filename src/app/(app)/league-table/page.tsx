@@ -1,5 +1,5 @@
 import type { Metadata } from "next/types";
-import { getLeagueTable } from "utils/get-league-table";
+import { getLeagueTable } from "~/utils/get-league-table";
 
 export const dynamic = "force-dynamic";
 

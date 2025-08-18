@@ -1,5 +1,5 @@
 "use client";
-import useTooltip from "components/tooltip";
+import useTooltip from "~/components/tooltip";
 
 type Props = {
   skill: { name: string; rules: string; faq?: Array<{ q: string; a: string }> };

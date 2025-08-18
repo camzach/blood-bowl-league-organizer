@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { Modal } from "components/modal";
+import { Modal } from "~/components/modal";
 import { startOfSecond } from "date-fns";
 import { PropsWithChildren, useState } from "react";
 import { useForm } from "react-hook-form";

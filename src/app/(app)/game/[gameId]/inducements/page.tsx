@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import Content from "./content";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 import {
   game as dbGame,
   inducement,
   specialRuleToStarPlayer,
   starPlayer,
-} from "db/schema";
+} from "~/db/schema";
 import { eq, getTableColumns, inArray, isNotNull, or } from "drizzle-orm";
 
 function getChoicesForSpecialRules(rules: string[]) {

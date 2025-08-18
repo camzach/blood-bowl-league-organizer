@@ -1,7 +1,8 @@
 "use server";
 import { z } from "zod";
-import { action, teamPermissionMiddleware } from "utils/safe-action";
-import { db } from "utils/drizzle";
+import { action, teamPermissionMiddleware } from "~/utils/safe-action";
+import { prepareGameAuthMiddleware } from "./middlewares";
+import { db } from "~/utils/drizzle";
 import {
   and,
   eq,
@@ -26,14 +27,14 @@ import {
   gameDetailsToInducement,
   bracketGame,
   season,
-} from "db/schema";
+} from "~/db/schema";
 
-import calculateTV from "utils/calculate-tv";
+import calculateTV from "~/utils/calculate-tv";
 import { nanoid } from "nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
-import { getPlayerStats } from "utils/get-computed-player-fields";
-import { d6 } from "utils/d6";
-import { auth } from "auth";
+import { getPlayerStats } from "~/utils/get-computed-player-fields";
+import { d6 } from "~/utils/d6";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 
 export const start = action

@@ -1,7 +1,7 @@
-import { season } from "db/schema";
+import { season } from "~/db/schema";
 import { and, eq } from "drizzle-orm";
 import { db as drizzle } from "./drizzle";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

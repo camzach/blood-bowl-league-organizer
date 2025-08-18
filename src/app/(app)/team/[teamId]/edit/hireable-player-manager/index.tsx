@@ -1,10 +1,10 @@
 "use client";
-import type { TeamTableProps } from "components/team-table";
-import { TeamTable } from "components/team-table";
+import type { TeamTableProps } from "~/components/team-table";
+import { TeamTable } from "~/components/team-table";
 import { useState, useCallback } from "react";
 import fetchTeam from "../../fetch-team";
 import { PlayerActions } from "./action-buttons";
-import { skill } from "db/schema";
+import { skill } from "~/db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
 

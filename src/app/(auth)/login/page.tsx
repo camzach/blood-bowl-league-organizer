@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "auth-client";
+import { authClient } from "~/auth-client";
 import { useState } from "react";
 import cx from "classnames";
 import { SubmitHandler, useForm } from "react-hook-form";

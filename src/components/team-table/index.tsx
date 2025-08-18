@@ -1,6 +1,6 @@
 import { ComponentProps } from "react";
 import { cols } from "./cols";
-import Table from "components/table";
+import Table from "~/components/table";
 
 export type PlayerType = {
   id: string;

@@ -1,5 +1,5 @@
 "use client";
-import useTooltip from "components/tooltip";
+import useTooltip from "~/components/tooltip";
 
 type SpecialRuleColumnProps = {
   specialAbility: string;

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Content from "./content";
-import { db } from "utils/drizzle";
-import { game as dbGame, player, rosterSlot } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { game as dbGame, player, rosterSlot } from "~/db/schema";
 import { and, eq, gte } from "drizzle-orm";
 
 const detailsFeilds = {

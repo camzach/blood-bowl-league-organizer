@@ -8,14 +8,14 @@ import {
   gameDetailsToStarPlayer,
   roundRobinGame,
   season,
-} from "db/schema";
+} from "~/db/schema";
 import { and, eq, inArray, InferInsertModel, sql } from "drizzle-orm";
-import nanoid from "utils/nanoid";
-import { db } from "utils/drizzle";
-import { action, requireRole } from "utils/safe-action";
-import { generateSchedule } from "utils/schedule-generator";
+import nanoid from "~/utils/nanoid";
+import { db } from "~/utils/drizzle";
+import { action, requireRole } from "~/utils/safe-action";
+import { generateSchedule } from "~/utils/schedule-generator";
 import { z } from "zod";
-import { getLeagueTable } from "utils/get-league-table";
+import { getLeagueTable } from "~/utils/get-league-table";
 
 export const scheduleAction = action
   .use(async ({ next }) => {

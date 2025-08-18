@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import ical from "ical-generator";
-import { db } from "utils/drizzle";
-import { league as dbLeague } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { league as dbLeague } from "~/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(

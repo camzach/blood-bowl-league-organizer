@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
-import { db } from "utils/drizzle";
-import { team as dbTeam, player } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { team as dbTeam, player } from "~/db/schema";
 import {
   getPlayerStats,
   getPlayerSppAndTv,
   getPlayerSkills,
-} from "utils/get-computed-player-fields";
+} from "~/utils/get-computed-player-fields";
 
 export default async function fetchTeam(
   id: string,

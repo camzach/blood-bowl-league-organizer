@@ -1,10 +1,10 @@
-import { auth } from "auth";
-import { bracketGame, season } from "db/schema";
+import { auth } from "~/auth";
+import { bracketGame, season } from "~/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 
 async function getPlayoffsBracket(seasonId: string) {
   return db.query.bracketGame.findMany({

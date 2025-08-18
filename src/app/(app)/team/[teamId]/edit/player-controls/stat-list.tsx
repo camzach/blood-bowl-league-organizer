@@ -1,4 +1,4 @@
-import { SkillCategory, skill } from "db/schema";
+import { SkillCategory, skill } from "~/db/schema";
 import { increaseCharacteristic } from "./actions";
 import { useState } from "react";
 import { useAction } from "next-safe-action/hooks";

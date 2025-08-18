@@ -1,4 +1,4 @@
-import { Modal } from "components/modal";
+import { Modal } from "~/components/modal";
 import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";

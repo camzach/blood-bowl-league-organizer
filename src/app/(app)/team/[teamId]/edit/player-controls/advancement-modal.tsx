@@ -2,7 +2,7 @@ import { useState } from "react";
 import classNames from "classnames";
 import { StatList } from "./stat-list";
 import { learnSkill } from "./actions";
-import type { skill, SkillCategory } from "db/schema";
+import type { skill, SkillCategory } from "~/db/schema";
 import { skillConflicts } from "./skillConflicts";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";

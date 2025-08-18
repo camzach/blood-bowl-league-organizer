@@ -1,8 +1,8 @@
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 import { updateDiscordGuildId } from "../actions";
-import { isLeagueAdmin } from "utils/is-league-admin";
+import { isLeagueAdmin } from "~/utils/is-league-admin";
 
 export async function GET(request: NextRequest) {
   const apiSession = await auth.api.getSession({ headers: await headers() });

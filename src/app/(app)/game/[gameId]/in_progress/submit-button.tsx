@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { end } from "../actions";
 import { useAction } from "next-safe-action/hooks";
 import classNames from "classnames";
-import { Modal } from "components/modal";
-import { Die } from "components/die";
+import { Modal } from "~/components/modal";
+import { Die } from "~/components/die";
 
 type Props = {
   submission: Parameters<typeof end>[0];

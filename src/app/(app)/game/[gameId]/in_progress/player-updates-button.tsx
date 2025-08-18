@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import PopupButton from "components/popup-button";
+import PopupButton from "~/components/popup-button";
 import { GameState } from "./score-widget";
 
 type Props = {

@@ -1,6 +1,6 @@
-import { league as dbLeague, roundRobinGame, season } from "db/schema";
+import { league as dbLeague, roundRobinGame, season } from "~/db/schema";
 import { eq } from "drizzle-orm";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 import ScheduleEditor from "./editor";
 
 const gameFields = {

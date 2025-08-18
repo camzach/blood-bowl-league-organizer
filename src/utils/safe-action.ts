@@ -1,8 +1,8 @@
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { createMiddleware, createSafeActionClient } from "next-safe-action";
 import { headers } from "next/headers";
 import { db } from "./drizzle";
-import { coachToTeam, player } from "db/schema/bblo";
+import { coachToTeam, player } from "~/db/schema/bblo";
 import { and, eq, inArray } from "drizzle-orm";
 
 type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;

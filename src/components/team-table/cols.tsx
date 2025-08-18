@@ -1,4 +1,4 @@
-import Table from "components/table";
+import Table from "~/components/table";
 import { ComponentProps, Fragment } from "react";
 import { PlayerType } from ".";
 import Skill from "./skill";

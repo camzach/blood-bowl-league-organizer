@@ -1,7 +1,7 @@
-import { gameDetails, team, game, roundRobinGame, season } from "db/schema";
+import { gameDetails, team, game, roundRobinGame, season } from "~/db/schema";
 import { or, eq, and, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 
 export default async function fetchGames({
   league,

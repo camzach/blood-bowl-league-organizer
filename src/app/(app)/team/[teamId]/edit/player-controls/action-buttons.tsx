@@ -2,8 +2,8 @@
 import FireButton from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
-import { Modal } from "components/modal";
-import { skill } from "db/schema";
+import { Modal } from "~/components/modal";
+import { skill } from "~/db/schema";
 import type fetchTeam from "../../fetch-team";
 
 type Props = {

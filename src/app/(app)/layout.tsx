@@ -1,15 +1,15 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { Metadata } from "next";
-import { db } from "utils/drizzle";
-import { team as dbTeam, season } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { team as dbTeam, season } from "~/db/schema";
 import TeamsList from "./teams-list";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { and, eq, sql } from "drizzle-orm";
-import SignoutButton from "components/signout-button";
-import { isLeagueAdmin } from "utils/is-league-admin";
+import SignoutButton from "~/components/signout-button";
+import { isLeagueAdmin } from "~/utils/is-league-admin";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },

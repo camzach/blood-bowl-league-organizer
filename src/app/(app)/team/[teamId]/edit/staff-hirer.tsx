@@ -1,5 +1,5 @@
 "use client";
-import { NumberInput } from "components/number-input";
+import { NumberInput } from "~/components/number-input";
 import {
   hireStaff as hireStaffAction,
   fireStaff as fireStaffAction,

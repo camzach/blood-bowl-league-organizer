@@ -1,15 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import React from "react";
-import calculateTV from "utils/calculate-tv";
+import calculateTV from "~/utils/calculate-tv";
 import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
-import { TeamTable } from "components/team-table";
+import { TeamTable } from "~/components/team-table";
 import EditButton from "./edit-button";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 import { eq } from "drizzle-orm";
-import { coachToTeam, team as dbTeam } from "db/schema";
+import { coachToTeam, team as dbTeam } from "~/db/schema";
 import fetchTeam from "./fetch-team";
-import { auth } from "auth";
+import { auth } from "~/auth";
 import { headers } from "next/headers";
 
 type Props = { params: Promise<{ teamId: string }> };

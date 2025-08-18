@@ -5,7 +5,7 @@ import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 import readline from "node:readline/promises";
 import { faker } from "@faker-js/faker";
-import nanoid from "utils/nanoid";
+import nanoid from "~/utils/nanoid";
 import { inArray } from "drizzle-orm";
 
 config();

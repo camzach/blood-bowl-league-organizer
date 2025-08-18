@@ -1,9 +1,9 @@
 "use server";
 
-import { action, requireRole } from "utils/safe-action";
+import { action, requireRole } from "~/utils/safe-action";
 import { z } from "zod";
-import { db } from "utils/drizzle";
-import { league } from "db/schema";
+import { db } from "~/utils/drizzle";
+import { league } from "~/db/schema";
 import { eq } from "drizzle-orm";
 
 export const updateDiscordGuildId = action

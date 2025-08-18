@@ -1,8 +1,8 @@
-import { game as dbGame } from "db/schema";
+import { game as dbGame } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
-import { db } from "utils/drizzle";
+import { db } from "~/utils/drizzle";
 
 export const dynamic = "force-dynamic";
 

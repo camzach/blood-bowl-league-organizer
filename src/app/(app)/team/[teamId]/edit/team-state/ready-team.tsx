@@ -1,12 +1,12 @@
 "use client";
-import { Die } from "components/die";
-import { Modal } from "components/modal";
+import { Die } from "~/components/die";
+import { Modal } from "~/components/modal";
 import { useRouter } from "next/navigation";
 import { ready } from "../actions";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import cx from "classnames";
-import useTooltip from "components/tooltip";
+import useTooltip from "~/components/tooltip";
 
 type Props = {
   teamId: string;
