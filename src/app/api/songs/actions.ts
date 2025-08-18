@@ -20,7 +20,7 @@ const s3 = new S3({
 });
 
 export const uploadTouchdownSong = action
-  .schema(
+  .inputSchema(
     z.object({
       teamId: z.string(),
       songName: z.string(),

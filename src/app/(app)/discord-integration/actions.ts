@@ -7,7 +7,7 @@ import { league } from "db/schema";
 import { eq } from "drizzle-orm";
 
 export const updateDiscordGuildId = action
-  .schema(
+  .inputSchema(
     z.object({
       guildId: z.string(),
       leagueId: z.string(),

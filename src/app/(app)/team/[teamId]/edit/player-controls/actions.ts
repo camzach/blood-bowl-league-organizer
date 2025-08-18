@@ -20,7 +20,7 @@ import {
 import { skillConflicts } from "./skillConflicts";
 
 export const fire = action
-  .schema(z.object({ playerId: z.string() }))
+  .inputSchema(z.object({ playerId: z.string() }))
   .use(async ({ next, clientInput }) => {
     const { playerId } = z.object({ playerId: z.string() }).parse(clientInput);
     return next({ ctx: { authParams: { playerId: playerId } } });
@@ -72,7 +72,7 @@ export const fire = action
   });
 
 export const update = action
-  .schema(
+  .inputSchema(
     z.object({
       player: z.string(),
       number: z.number().min(1).max(16).optional(),
@@ -160,7 +160,7 @@ export const update = action
   });
 
 export const learnSkill = action
-  .schema(
+  .inputSchema(
     z.intersection(
       z.object({ player: z.string() }),
       z.discriminatedUnion("type", [
@@ -278,7 +278,7 @@ export const learnSkill = action
   });
 
 export const increaseCharacteristic = action
-  .schema(
+  .inputSchema(
     z.object({
       player: z.string(),
       preferences: z.array(z.enum(["ma", "av", "ag", "st", "pa"])),

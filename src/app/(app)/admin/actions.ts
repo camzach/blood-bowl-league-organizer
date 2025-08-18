@@ -14,8 +14,6 @@ import nanoid from "utils/nanoid";
 import { db } from "utils/drizzle";
 import { action, requireRole } from "utils/safe-action";
 import { generateSchedule } from "utils/schedule-generator";
-import { auth } from "auth";
-import { headers } from "next/headers";
 import { z } from "zod";
 import { getLeagueTable } from "utils/get-league-table";
 
@@ -24,7 +22,7 @@ export const scheduleAction = action
     return next({ ctx: { authParams: { role: "admin" } } });
   })
   .use(requireRole)
-  .schema(z.any())
+  .inputSchema(z.any())
   .action(async ({ ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
@@ -83,7 +81,7 @@ export const clearAction = action
     return next({ ctx: { authParams: { role: "admin" } } });
   })
   .use(requireRole)
-  .schema(z.any())
+  .inputSchema(z.any())
   .action(async ({ ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
@@ -135,7 +133,9 @@ export const rescheduleGames = action
     return next({ ctx: { authParams: { role: "admin" } } });
   })
   .use(requireRole)
-  .schema(z.array(z.object({ id: z.string(), time: z.string().datetime() })))
+  .inputSchema(
+    z.array(z.object({ id: z.string(), time: z.string().datetime() })),
+  )
   .action(async ({ parsedInput: games, ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
@@ -169,7 +169,7 @@ export const seedBracket = action
     return next({ ctx: { authParams: { role: "admin" } } });
   })
   .use(requireRole)
-  .schema(z.any())
+  .inputSchema(z.any())
   .action(async ({ ctx: { session } }) => {
     return await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({

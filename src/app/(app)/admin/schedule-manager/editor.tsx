@@ -55,9 +55,11 @@ export default function ScheduleEditor(props: Props) {
         {
           {
             executing: "Submitting changes...",
+            transitioning: "Submitting changes...",
             hasErrored: "Failed to submit",
             hasSucceeded: "Success!",
             idle: "Submit schedule changes",
+            hasNavigated: "Redirecting...",
           }[status]
         }
       </button>
@@ -99,11 +101,9 @@ export default function ScheduleEditor(props: Props) {
                 </td>
                 <td>
                   <ul>
-                    {blockedBy
-                      .get(game)
-                      ?.map((g) => (
-                        <li key={g.id}>{`${g.awayTeam} @ ${g.homeTeam}`}</li>
-                      ))}
+                    {blockedBy.get(game)?.map((g) => (
+                      <li key={g.id}>{`${g.awayTeam} @ ${g.homeTeam}`}</li>
+                    ))}
                   </ul>
                 </td>
               </tr>

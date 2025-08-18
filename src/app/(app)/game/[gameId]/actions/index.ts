@@ -37,7 +37,7 @@ import { auth } from "auth";
 import { headers } from "next/headers";
 
 export const start = action
-  .schema(z.object({ id: z.string() }))
+  .inputSchema(z.object({ id: z.string() }))
   .use(async ({ next, clientInput }) => {
     const { id } = z.object({ id: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
@@ -213,7 +213,7 @@ export const start = action
   });
 
 export const selectJourneymen = action
-  .schema(
+  .inputSchema(
     z.object({
       home: z.string().optional(),
       away: z.string().optional(),
@@ -411,7 +411,7 @@ const inducementChoicesSchema = z.object({
   ),
 });
 export const purchaseInducements = action
-  .schema(
+  .inputSchema(
     z.object({
       game: z.string(),
       home: inducementChoicesSchema,
@@ -600,7 +600,7 @@ export const purchaseInducements = action
   });
 
 export const end = action
-  .schema(
+  .inputSchema(
     z.object({
       game: z.string(),
       playerUpdates: z.record(

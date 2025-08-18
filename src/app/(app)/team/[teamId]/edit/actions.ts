@@ -19,7 +19,7 @@ import nanoid from "utils/nanoid";
 import { getPlayerSppAndTv } from "utils/get-computed-player-fields";
 
 export const create = action
-  .schema(z.object({ name: z.string().min(1), roster: z.string() }))
+  .inputSchema(z.object({ name: z.string().min(1), roster: z.string() }))
   .action(async ({ parsedInput: input, ctx: { user, session } }) => {
     if (!session.activeOrganizationId) throw new Error("No active league");
     const activeLeague = session.activeOrganizationId;
@@ -48,7 +48,7 @@ export const create = action
   });
 
 export const hirePlayer = action
-  .schema(
+  .inputSchema(
     z.object({
       teamId: z.string(),
       position: z.string(),
@@ -136,7 +136,7 @@ export const hirePlayer = action
   });
 
 export const hireStaff = action
-  .schema(
+  .inputSchema(
     z.object({
       teamId: z.string(),
       type: z.enum([
@@ -240,7 +240,7 @@ export const hireStaff = action
   });
 
 export const hireExistingPlayer = action
-  .schema(
+  .inputSchema(
     z.object({
       player: z.string(),
       number: z.number().min(1).max(16),
@@ -337,7 +337,7 @@ export const hireExistingPlayer = action
   });
 
 export const fireStaff = action
-  .schema(
+  .inputSchema(
     z.object({
       teamId: z.string(),
       type: z.enum([
@@ -425,7 +425,7 @@ export const fireStaff = action
   });
 
 export const doneImproving = action
-  .schema(z.string())
+  .inputSchema(z.string())
   .use(async ({ next, clientInput }) => {
     const teamId = z.string().parse(clientInput);
     return next({ ctx: { authParams: { teamId: teamId } } });
@@ -454,7 +454,7 @@ export const doneImproving = action
   });
 
 export const ready = action
-  .schema(z.string())
+  .inputSchema(z.string())
   .use(async ({ next, clientInput }) => {
     const teamId = z.string().parse(clientInput);
     return next({ ctx: { authParams: { teamId: teamId } } });

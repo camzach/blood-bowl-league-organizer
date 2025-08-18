@@ -8,21 +8,18 @@ import { db } from "utils/drizzle";
 import nanoid from "utils/nanoid";
 import { action } from "utils/safe-action";
 import { z } from "zod";
-import { zfd } from "zod-form-data";
 
 export const createNewTeamAction = action
-  .schema(
-    zfd.formData(
-      z.object({
-        name: zfd.text(z.string().min(1)),
-        roster: zfd.text(z.string()),
-        userId: zfd.text(z.string()), // This will be passed from the hidden input
-        optionalRule: zfd.text(z.string().optional()),
-      }),
-    ),
-  )
+  .inputSchema(z.instanceof(FormData))
   .action(async ({ parsedInput: input, ctx: { session } }) => {
-    const { name, roster, userId, optionalRule } = input;
+    const { name, roster, userId, optionalRule } = z
+      .object({
+        name: z.string().min(1),
+        roster: z.string(),
+        userId: z.string(), // This will be passed from the hidden input
+        optionalRule: z.string().optional(),
+      })
+      .parse(Object.fromEntries(input.entries()));
 
     if (!session.activeOrganizationId) throw new Error("No active league");
 
@@ -52,20 +49,18 @@ export const createNewTeamAction = action
     });
 
     revalidatePath("/");
-    return redirect(`/team/${teamId}/edit`);
+    redirect(`/team/${teamId}/edit`);
   });
 
 export const redraftTeam = action
-  .schema(
-    zfd.formData(
-      z.object({
-        teamId: zfd.text(z.string()),
-        userId: zfd.text(z.string()),
-      }),
-    ),
-  )
+  .inputSchema(z.instanceof(FormData))
   .action(async ({ parsedInput: input }) => {
-    const { teamId, userId } = input;
+    const { teamId, userId } = z
+      .object({
+        teamId: z.string(),
+        userId: z.string(),
+      })
+      .parse(input);
 
     await db.insert(coachToTeam).values({
       coachId: userId,
@@ -73,5 +68,5 @@ export const redraftTeam = action
     });
 
     revalidatePath("/");
-    return redirect(`/team/${teamId}/edit`);
+    redirect(`/team/${teamId}/edit`);
   });
