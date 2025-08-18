@@ -53,7 +53,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             </label>
           </div>
           <span className="max-sm:navbar-center md:navbar-start text-3xl">
-            BBLO
+            <Link href={"/"}>BBLO</Link>
           </span>
           <nav className="navbar-center hidden gap-3 md:flex">
             <NavLinks
