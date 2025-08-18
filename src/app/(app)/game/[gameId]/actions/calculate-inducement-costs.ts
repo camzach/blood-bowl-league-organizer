@@ -1,4 +1,4 @@
-import { inducement, starPlayer } from "~/db/schema";
+import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
 import { inArray } from "drizzle-orm";
 import type { Transaction } from "~/utils/drizzle";
 
@@ -20,27 +20,27 @@ function getInducementPrice(
 
 class InducementError extends Error {}
 
-export async function calculateInducementCosts(
+export function calculateInducementCostsFromData(
   inducements: Array<{ name: string; quantity: number }>,
   stars: Array<string>,
   specialRules: string[],
   playerCount: number,
-  tx: Transaction,
-): Promise<number> {
+  starPlayersData: Array<
+    typeof starPlayer.$inferSelect & {
+      specialRuleToStarPlayer: Array<
+        typeof specialRuleToStarPlayer.$inferSelect
+      >;
+    }
+  >,
+  inducementsData: Array<typeof inducement.$inferSelect>,
+): number {
   if (stars.length > 2)
     throw new InducementError("Only 2 star players permitted");
   if (stars.length + playerCount > 16)
     throw new InducementError("Star players take the team above 16 players");
 
-  const starPlayers =
-    stars.length > 0
-      ? await tx.query.starPlayer.findMany({
-          where: inArray(starPlayer.name, stars),
-          with: {
-            specialRuleToStarPlayer: true,
-          },
-        })
-      : [];
+  const starPlayers = starPlayersData.filter((sp) => stars.includes(sp.name));
+
   if (starPlayers.length !== stars.length)
     throw new InducementError("Star player not recognized");
 
@@ -61,7 +61,45 @@ export async function calculateInducementCosts(
     starPlayerCost += player.hiringFee;
   }
 
-  const chosenInducements =
+  let inducementCost = 0;
+  const inducementCounts: Record<string, number> = {};
+  for (const inducement of inducements) {
+    const foundInducement = inducementsData.find(
+      (ind) => ind.name === inducement.name,
+    );
+    if (!foundInducement)
+      throw new InducementError("Unknown inducement specified");
+
+    if (!(inducement.name in inducementCounts))
+      inducementCounts[inducement.name] = 0;
+    inducementCounts[inducement.name] += inducement.quantity;
+
+    if (inducementCounts[inducement.name] > foundInducement.max)
+      throw new InducementError("Inducement maximum exceeded");
+
+    const cost = getInducementPrice(foundInducement, specialRules);
+    if (cost === null)
+      throw new InducementError("Team cannot take the specified inducement");
+    inducementCost += cost * inducement.quantity;
+  }
+  return inducementCost + starPlayerCost;
+}
+
+export async function calculateInducementCosts(
+  inducements: Array<{ name: string; quantity: number }>,
+  stars: Array<string>,
+  specialRules: string[],
+  playerCount: number,
+  tx: Transaction,
+): Promise<number> {
+  const starPlayersData = await tx.query.starPlayer.findMany({
+    where: inArray(starPlayer.name, stars),
+    with: {
+      specialRuleToStarPlayer: true,
+    },
+  });
+
+  const inducementsData =
     inducements.length > 0
       ? await tx.query.inducement.findMany({
           where: inArray(
@@ -71,26 +109,12 @@ export async function calculateInducementCosts(
         })
       : [];
 
-  let inducementCost = 0;
-  const inducementCounts: Record<string, number> = {};
-  for (const inducement of inducements) {
-    const foundInducement = chosenInducements.find(
-      (ind) => ind.name === inducement.name,
-    );
-    if (!foundInducement)
-      throw new InducementError("Unknown inducement specified");
-
-    if (!(inducement.name in inducementCounts))
-      inducementCounts[inducement.name] = 0;
-    inducementCounts[inducement.name] += 1;
-
-    if (inducementCounts[inducement.name] > foundInducement.max)
-      throw new InducementError("Inducement maximum exceeded");
-
-    const cost = getInducementPrice(foundInducement, specialRules);
-    if (cost === null)
-      throw new InducementError("Team cannot take the specified inducement");
-    inducementCost += cost;
-  }
-  return inducementCost + starPlayerCost;
+  return calculateInducementCostsFromData(
+    inducements,
+    stars,
+    specialRules,
+    playerCount,
+    starPlayersData,
+    inducementsData,
+  );
 }

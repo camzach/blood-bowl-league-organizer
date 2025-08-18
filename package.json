@@ -14,7 +14,9 @@
     "lint": "next lint && tsc --noEmit",
     "vercel-build": "next build",
     "seed": "tsx src/db/seed.ts",
-    "fuzz": "tsx src/db/fuzz.ts"
+    "fuzz": "tsx src/db/fuzz.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "author": "",
   "license": "ISC",
@@ -58,6 +60,8 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
+    "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/ui": "^3.2.4",
     "daisyui": "^5.0.50",
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
@@ -74,6 +78,8 @@
     "tailwindcss": "^4.1.12",
     "tsx": "^4.20.4",
     "typescript": "5.9.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4",
     "ws": "^8.18.3"
   },
   "pnpm": {
