@@ -1,4 +1,7 @@
 export function generateSchedule(teams: string[]) {
+  if (teams.length < 2) {
+    return [];
+  }
   const localTeams: Array<string | null> = [...teams];
   const rounds: [string, string][][] = [];
   const homeAwayCounts = Object.fromEntries(
