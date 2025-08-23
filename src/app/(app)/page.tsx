@@ -1,6 +1,6 @@
 import { auth } from "~/auth";
-import { coachToTeam } from "~/db/schema";
-import { eq } from "drizzle-orm";
+import { coachToTeam, team } from "~/db/schema";
+import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -52,10 +52,11 @@ export default async function Home() {
   });
   const activeLeague = session.session.activeOrganizationId;
 
-  const myTeams = await db.query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, session.user.id),
-    with: { team: { columns: { id: true, name: true, leagueId: true } } },
-  });
+  const myTeams = await db
+    .select()
+    .from(team)
+    .leftJoin(coachToTeam, eq(coachToTeam.coachId, session.user.id))
+    .where(activeLeague ? eq(team.leagueId, activeLeague) : sql`1=0`);
 
   const leagueId = myTeams[0]?.team.leagueId;
   const teamIds = myTeams.map((mt) => mt.team.id);

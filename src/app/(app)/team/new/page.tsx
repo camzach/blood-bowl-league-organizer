@@ -33,7 +33,7 @@ export default async function NewTeam() {
         className="join flex"
         action={async (data) => {
           "use server";
-          createNewTeamAction(data);
+          await createNewTeamAction(data);
         }}
       >
         <input hidden readOnly value={user.id} name="userId" />

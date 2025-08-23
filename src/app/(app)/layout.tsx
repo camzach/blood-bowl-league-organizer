@@ -10,6 +10,7 @@ import { headers } from "next/headers";
 import { and, eq, sql } from "drizzle-orm";
 import SignoutButton from "~/components/signout-button";
 import { isLeagueAdmin } from "~/utils/is-league-admin";
+import LeagueSelector from "~/components/league-selector";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -22,6 +23,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   });
   if (!apiSession) return redirect("/login");
   const { user, session } = apiSession;
+
+  const userLeagues = await auth.api.listOrganizations({
+    headers: await headers(),
+  });
 
   // TODO: investigate useId issue
   const drawerId = "_drawer_";
@@ -78,6 +83,20 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 tabIndex={0}
                 className="menu dropdown-content rounded-box bg-base-100 z-1 w-52 p-2 shadow-sm"
               >
+                <li>
+                  <LeagueSelector
+                    leagues={userLeagues.map((league) => ({
+                      id: league.id,
+                      name: league.name,
+                    }))}
+                    activeLeagueName={
+                      userLeagues.find(
+                        (league) => league.id === session.activeOrganizationId,
+                      )?.name ?? "No Active League"
+                    }
+                    activeLeagueId={session.activeOrganizationId ?? ""}
+                  />
+                </li>
                 <li>
                   <SignoutButton />
                 </li>
