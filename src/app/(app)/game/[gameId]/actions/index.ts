@@ -1,7 +1,6 @@
 "use server";
 import { z } from "zod";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
-import { prepareGameAuthMiddleware } from "./middlewares";
 import { db } from "~/utils/drizzle";
 import {
   and,
