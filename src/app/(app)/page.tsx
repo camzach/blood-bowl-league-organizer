@@ -55,7 +55,7 @@ export default async function Home() {
   const myTeams = await db
     .select()
     .from(team)
-    .leftJoin(coachToTeam, eq(coachToTeam.coachId, session.user.id))
+    .innerJoin(coachToTeam, eq(coachToTeam.coachId, session.user.id))
     .where(activeLeague ? eq(team.leagueId, activeLeague) : sql`1=0`);
 
   const leagueId = myTeams[0]?.team.leagueId;
