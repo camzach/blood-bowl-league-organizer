@@ -54,6 +54,7 @@ export default async function Schedule(props: Props) {
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
       <div className="lg:mt-16">
         <Controls teams={teams} mode={mode} state={state} selected={teamId} />
+        {/* @ts-expect-error export link not detected by typedRoutes */}
         <Link href={exportLink.toString()}>Export Calendar</Link>
       </div>
       <div className="basis-full">
