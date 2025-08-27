@@ -32,7 +32,10 @@
     "src",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "vitest.config.ts"
+    "*.config.js",
+    "*.config.mjs",
+    "*.config.cjs",
+    "*.config.ts"
   ],
   "exclude": ["node_modules"]
 }

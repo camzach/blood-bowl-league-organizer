@@ -13,7 +13,16 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default [
+const config = [
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+    ],
+  },
   ...compat.extends(
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -54,3 +63,4 @@ export default [
   },
 ];
 
+export default config;

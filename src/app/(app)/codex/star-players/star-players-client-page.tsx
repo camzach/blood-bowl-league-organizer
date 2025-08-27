@@ -5,7 +5,6 @@ import { SearchFilter } from "../search-filter";
 import Table from "~/components/table";
 import type { skill, starPlayer } from "~/db/schema";
 import Skill from "~/components/team-table/skill";
-import { NumberInput } from "~/components/number-input";
 
 type StarPlayer = typeof starPlayer.$inferSelect & {
   skills: Array<typeof skill.$inferSelect>;

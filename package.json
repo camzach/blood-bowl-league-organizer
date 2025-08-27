@@ -11,7 +11,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint && tsc --noEmit",
+    "lint": "eslint . && tsc --noEmit",
     "vercel-build": "next build",
     "seed": "tsx src/db/seed.ts",
     "fuzz": "tsx src/db/fuzz.ts",

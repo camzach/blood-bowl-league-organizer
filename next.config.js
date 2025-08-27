@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
-export default {
+const config = {
   reactStrictMode: true,
   typedRoutes: true,
 };
+
+export default config;

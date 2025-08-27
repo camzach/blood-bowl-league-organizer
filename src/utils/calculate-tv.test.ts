@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import calculateTV from "./calculate-tv";
 import { getPlayerSppAndTv } from "./get-computed-player-fields";
-import { w } from "@faker-js/faker/dist/airline-CLphikKp";
 
 type Player = Parameters<typeof getPlayerSppAndTv>[0];
 type Team = Parameters<typeof calculateTV>[0];
