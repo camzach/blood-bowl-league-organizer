@@ -757,6 +757,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
+      "Favoured of Hashut",
       "Favoured of Chaos Undivided"
     ],
     "rerollCost": 70000,
@@ -929,6 +930,7 @@
       "Favoured of Nurgle",
       "Favoured of Tzeentch",
       "Favoured of Slaanesh",
+      "Favoured of Hashut",
       "Favoured of Chaos Undivided"
     ],
     "rerollCost": 60000,
@@ -2498,7 +2500,7 @@
           "Thick Skull",
           "Unchannelled Fury"
         ],
-        "primary": ["general", "strength"],
+        "primary": [ "strength"],
         "secondary": ["agility", "general", "mutation"]
       }
     ]
