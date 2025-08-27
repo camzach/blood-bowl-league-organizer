@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 import type { Metadata } from "next";
 import { db } from "~/utils/drizzle";
 import { team as dbTeam, season } from "~/db/schema";
-import TeamsList from "./teams-list";
 import { auth } from "~/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -11,6 +10,7 @@ import { and, eq, sql } from "drizzle-orm";
 import SignoutButton from "~/components/signout-button";
 import { isLeagueAdmin } from "~/utils/is-league-admin";
 import LeagueSelector from "~/components/league-selector";
+import NavLinks from "./nav-links";
 
 export const metadata: Metadata = {
   title: { template: "%s | BBLO", absolute: "BBLO" },
@@ -127,32 +127,4 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   );
 }
 
-function NavLinks(props: {
-  teams: Array<{ name: string; id: string }>;
-  showPlayoffsLink: boolean;
-  isAdmin: boolean;
-}) {
-  return (
-    <ul className="menu md:menu-horizontal text-xl">
-      <li>
-        <TeamsList teams={props.teams} />
-      </li>
-      <li>
-        <Link href="/schedule">Schedule</Link>
-      </li>
-      <li>
-        <Link href="/league-table">League Table</Link>
-      </li>
-      {props.showPlayoffsLink && (
-        <li>
-          <Link href="/playoffs">Playoffs</Link>
-        </li>
-      )}
-      {props.isAdmin && (
-        <li>
-          <Link href="/admin">Admin</Link>
-        </li>
-      )}
-    </ul>
-  );
-}
+
