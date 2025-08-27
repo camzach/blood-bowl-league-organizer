@@ -24,8 +24,11 @@ export default async function Game(props: {
   if (!game) return notFound();
   if (!game.homeDetails || !game.awayDetails) return notFound();
 
-  if (game.state !== "complete")
-    return redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+  if (game.state !== "complete") {
+    redirect(
+      `/game/${gameId}/${game.state.toLowerCase() as typeof game.state}`,
+    );
+  }
 
   return (
     <div className="grid w-full place-items-center">

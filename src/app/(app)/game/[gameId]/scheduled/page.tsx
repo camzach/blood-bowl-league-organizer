@@ -16,8 +16,15 @@ export default async function Game(props: {
   });
   if (!game) return notFound();
 
-  if (game.state !== "scheduled")
-    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+  if (game.state !== "scheduled") {
+    if (game.state === "complete") {
+      redirect(`/game/${gameId}`);
+    } else {
+      redirect(
+        `/game/${gameId}/${game.state.toLowerCase() as typeof game.state}`,
+      );
+    }
+  }
 
   return <PlayButton gameId={gameId} />;
 }

@@ -92,7 +92,13 @@ export default async function InProgress(props: Props) {
   if (!game.homeDetails || !game.awayDetails) return notFound();
 
   if (game.state !== "in_progress") {
-    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+    if (game.state === "complete") {
+      redirect(`/game/${gameId}`);
+    } else {
+      redirect(
+        `/game/${gameId}/${game.state.toLowerCase() as typeof game.state}`,
+      );
+    }
   }
 
   const starsToQuery = [game.homeDetails, game.awayDetails].flatMap((details) =>

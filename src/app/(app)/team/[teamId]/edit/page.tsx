@@ -49,7 +49,7 @@ export default async function EditTeam(props: Props) {
         entry.coachId === user.id,
     )
   ) {
-    return redirect(`/teams/${teamId}`);
+    return redirect(`/team/${teamId}`);
   }
   const team = await fetchTeam(decodeURIComponent(teamId), true);
   const skills = await db.query.skill.findMany({});

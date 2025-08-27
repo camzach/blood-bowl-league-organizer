@@ -76,8 +76,15 @@ export default async function Inducements(props: {
   if (!game) return notFound();
   if (!game.homeDetails || !game.awayDetails) return notFound();
 
-  if (game.state !== "inducements")
-    redirect(`/game/${gameId}/${game.state.toLowerCase()}`);
+  if (game.state !== "inducements") {
+    if (game.state === "complete") {
+      redirect(`/game/${gameId}`);
+    } else {
+      redirect(
+        `/game/${gameId}/${game.state.toLowerCase() as typeof game.state}`,
+      );
+    }
+  }
 
   function getTeamSpecialRules(
     team: NonNullable<
