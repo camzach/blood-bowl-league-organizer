@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { Metadata } from "next";
 import { db } from "~/utils/drizzle";
-import { team as dbTeam, season } from "~/db/schema";
+import { team as dbTeam, season, team } from "~/db/schema";
 import { auth } from "~/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -33,6 +33,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   const teams = await db.query.team.findMany({
     where: eq(dbTeam.leagueId, session.activeOrganizationId ?? ""),
+    orderBy: team.name,
   });
 
   const activeSeason = await db.query.season.findFirst({
@@ -126,5 +127,3 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     </div>
   );
 }
-
-

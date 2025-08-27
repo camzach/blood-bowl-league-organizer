@@ -2,7 +2,7 @@ import { db } from "~/utils/drizzle";
 import StarPlayersClientPage from "./star-players-client-page";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
-import { team } from "~/db/schema/bblo";
+import { starPlayer, team } from "~/db/schema/bblo";
 import { eq } from "drizzle-orm";
 
 export default async function StarPlayersPage() {
@@ -22,6 +22,7 @@ export default async function StarPlayersPage() {
         },
       },
     },
+    orderBy: starPlayer.name,
   });
 
   const teams = leagueId
@@ -39,6 +40,7 @@ export default async function StarPlayersPage() {
           },
           specialRuleChoice: true,
         },
+        orderBy: team.name,
       })
     : [];
 
@@ -61,3 +63,4 @@ export default async function StarPlayersPage() {
     />
   );
 }
+
