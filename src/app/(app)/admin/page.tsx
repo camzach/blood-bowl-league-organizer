@@ -1,4 +1,4 @@
-import { clearAction, scheduleAction, seedBracket } from "./actions";
+import { clearAction, scheduleAction, seedBracket, endSeason } from "./actions";
 import { db } from "~/utils/drizzle";
 import { league as dbLeague } from "~/db/schema";
 import { eq } from "drizzle-orm";
@@ -55,6 +55,9 @@ export default async function AdminPage() {
               onClick={seedBracket}
             >
               Seed Bracket
+            </button>
+            <button className="btn btn-accent join-item" onClick={endSeason}>
+              End Season
             </button>
           </div>
           <ScheduleManager leagueId={league.id} />

@@ -8,6 +8,7 @@ import {
   gameDetailsToStarPlayer,
   roundRobinGame,
   season,
+  team,
 } from "~/db/schema";
 import { and, eq, inArray, InferInsertModel, sql } from "drizzle-orm";
 import nanoid from "~/utils/nanoid";
@@ -295,5 +296,113 @@ export const seedBracket = action
       await tx.insert(bracketGame).values(bracketGameInserts);
 
       return "Success!";
+    });
+  });
+
+export const endSeason = action
+  .use(async ({ next }) => {
+    return next({ ctx: { authParams: { role: "admin" } } });
+  })
+  .use(requireRole)
+  .inputSchema(z.any())
+  .action(async ({ ctx: { session } }) => {
+    await db.transaction(async (tx) => {
+      const activeSeason = await tx.query.season.findFirst({
+        where: and(
+          eq(season.leagueId, session.activeOrganizationId ?? ""),
+          eq(season.isActive, true),
+        ),
+        with: {
+          roundRobinGames: true,
+          bracketGames: true,
+        },
+      });
+      if (!activeSeason) throw new Error("No active season");
+
+      const teams = await tx.query.team.findMany({
+        where: eq(team.leagueId, session.activeOrganizationId),
+      });
+      if (teams.some((t) => t.state !== "ready")) {
+        throw new Error("Not all teams are ready");
+      }
+
+      const gameIds = [
+        ...activeSeason.roundRobinGames.map((g) => g.gameId),
+        ...activeSeason.bracketGames.map((g) => g.gameId),
+      ];
+      const games = await tx.query.game.findMany({
+        where: inArray(game.id, gameIds),
+      });
+      if (games.some((g) => g.state !== "complete")) {
+        throw new Error("Not all games have been played");
+      }
+
+      const leagueTable = await getLeagueTable(tx);
+      const teamUpdates: Record<string, number> = {};
+
+      const final = await tx.query.bracketGame.findFirst({
+        where: and(
+          eq(bracketGame.seasonId, activeSeason.id),
+          eq(bracketGame.round, 1),
+        ),
+        with: {
+          game: { with: { homeDetails: true, awayDetails: true } },
+        },
+      });
+      if (final?.game?.homeDetails && final.game.awayDetails) {
+        const winner =
+          final.game.homeDetails.touchdowns >
+          final.game.awayDetails.touchdowns
+            ? final.game.homeDetails.teamId
+            : final.game.awayDetails.teamId;
+        const runnerUp =
+          final.game.homeDetails.touchdowns >
+          final.game.awayDetails.touchdowns
+            ? final.game.awayDetails.teamId
+            : final.game.homeDetails.teamId;
+
+        teamUpdates[winner] = (teamUpdates[winner] ?? 0) + 100_000;
+        teamUpdates[runnerUp] = (teamUpdates[runnerUp] ?? 0) + 60_000;
+      }
+
+      const semiFinals = await tx.query.bracketGame.findMany({
+        where: and(
+          eq(bracketGame.seasonId, activeSeason.id),
+          eq(bracketGame.round, 2),
+        ),
+        with: {
+          game: { with: { homeDetails: true, awayDetails: true } },
+        },
+      });
+      for (const semiFinal of semiFinals) {
+        if (semiFinal?.game?.homeDetails && semiFinal.game.awayDetails) {
+          const loser =
+            semiFinal.game.homeDetails.touchdowns <
+            semiFinal.game.awayDetails.touchdowns
+              ? semiFinal.game.homeDetails.teamId
+              : semiFinal.game.awayDetails.teamId;
+          teamUpdates[loser] = (teamUpdates[loser] ?? 0) + 30_000;
+        }
+      }
+
+      for (const teamId in leagueTable) {
+        const teamStats = leagueTable[teamId];
+        teamUpdates[teamId] =
+          (teamUpdates[teamId] ?? 0) +
+          teamStats.wins * 40_000 +
+          teamStats.draws * 30_000 +
+          teamStats.losses * 20_000;
+      }
+
+      await Promise.all(
+        Object.entries(teamUpdates).map(([teamId, winnings]) =>
+          tx
+            .update(team)
+            .set({
+              treasury: sql`LEAST(${team.treasury} + ${winnings}, 1300000)`,
+            })
+            .where(eq(team.id, teamId)),
+        ),
+      );
     });
   });
