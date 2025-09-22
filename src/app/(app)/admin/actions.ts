@@ -134,9 +134,7 @@ export const rescheduleGames = action
     return next({ ctx: { authParams: { role: "admin" } } });
   })
   .use(requireRole)
-  .inputSchema(
-    z.array(z.object({ id: z.string(), time: z.string().datetime() })),
-  )
+  .inputSchema(z.array(z.object({ id: z.string(), time: z.iso.datetime() })))
   .action(async ({ parsedInput: games, ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
@@ -320,7 +318,7 @@ export const endSeason = action
       if (!activeSeason) throw new Error("No active season");
 
       const teams = await tx.query.team.findMany({
-        where: eq(team.leagueId, session.activeOrganizationId),
+        where: eq(team.leagueId, session.activeOrganizationId ?? ""),
       });
       if (teams.some((t) => t.state !== "ready")) {
         throw new Error("Not all teams are ready");
@@ -351,13 +349,11 @@ export const endSeason = action
       });
       if (final?.game?.homeDetails && final.game.awayDetails) {
         const winner =
-          final.game.homeDetails.touchdowns >
-          final.game.awayDetails.touchdowns
+          final.game.homeDetails.touchdowns > final.game.awayDetails.touchdowns
             ? final.game.homeDetails.teamId
             : final.game.awayDetails.teamId;
         const runnerUp =
-          final.game.homeDetails.touchdowns >
-          final.game.awayDetails.touchdowns
+          final.game.homeDetails.touchdowns > final.game.awayDetails.touchdowns
             ? final.game.awayDetails.teamId
             : final.game.homeDetails.teamId;
 
@@ -406,3 +402,4 @@ export const endSeason = action
       );
     });
   });
+

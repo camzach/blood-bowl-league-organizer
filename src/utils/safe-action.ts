@@ -5,7 +5,7 @@ import { db } from "./drizzle";
 import { coachToTeam, player } from "~/db/schema/bblo";
 import { and, eq, inArray } from "drizzle-orm";
 
-type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
+type Session = typeof auth.$Infer.Session;
 
 export const authMiddleware = createMiddleware().define(async ({ next }) => {
   const session = await auth.api.getSession({ headers: await headers() });
