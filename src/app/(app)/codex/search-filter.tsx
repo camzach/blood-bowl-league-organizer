@@ -1,10 +1,15 @@
+"use client";
 
-'use client';
+import { useState } from "react";
 
-import { useState } from 'react';
-
-export function SearchFilter({ placeholder, onSearch }: { placeholder: string; onSearch: (term: string) => void }) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function SearchFilter({
+  placeholder,
+  onSearch,
+}: {
+  placeholder: string;
+  onSearch: (term: string) => void;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <div className="relative flex flex-1 flex-shrink-0">
@@ -25,4 +30,3 @@ export function SearchFilter({ placeholder, onSearch }: { placeholder: string; o
     </div>
   );
 }
-

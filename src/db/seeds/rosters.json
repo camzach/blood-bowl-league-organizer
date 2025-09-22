@@ -2500,7 +2500,7 @@
           "Thick Skull",
           "Unchannelled Fury"
         ],
-        "primary": [ "strength"],
+        "primary": ["strength"],
         "secondary": ["agility", "general", "mutation"]
       }
     ]

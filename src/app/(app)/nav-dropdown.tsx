@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRef, useEffect, type PropsWithChildren } from "react";
 
@@ -6,7 +6,10 @@ type Props = {
   title: string;
 };
 
-export default function NavDropdown({ title, children }: PropsWithChildren<Props>) {
+export default function NavDropdown({
+  title,
+  children,
+}: PropsWithChildren<Props>) {
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const listener = (e: MouseEvent) => {

@@ -83,4 +83,3 @@ export default function SkillsClientPage({ skills }: { skills: Skill[] }) {
     </div>
   );
 }
-
