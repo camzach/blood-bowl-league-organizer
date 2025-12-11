@@ -3,8 +3,10 @@ import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import classNames from "classnames";
+import { gameEvent } from "../actions/game-events";
+import z from "zod";
 
-type SPPType = "completions" | "interceptions" | "deflections" | "otherSPP";
+type SPPType = "completion" | "interception" | "safeLanding" | "otherSPP";
 type PlayerType = { id: string; name: string | null; number: number };
 type FormValues = {
   team: "home" | "away";
@@ -13,10 +15,7 @@ type FormValues = {
 };
 
 type Props = {
-  onSubmit: (
-    player: { name: string | null; id: string; number: number },
-    type: SPPType,
-  ) => void;
+  onSubmit: (ev: z.infer<typeof gameEvent>) => void;
   players: PlayerType[];
   journeymen: PlayerType[];
   className?: string;
@@ -37,10 +36,7 @@ export default function SPPButton({
   }, [journeymen, players, setValue]);
 
   const onSubmitForm = handleSubmit(({ player, type }) => {
-    const targetPlayer = [...journeymen, ...players].find(
-      (p) => p.id === player,
-    )!;
-    onSubmit(targetPlayer, type);
+    onSubmit({ type, player });
     setIsOpen(false);
   });
 

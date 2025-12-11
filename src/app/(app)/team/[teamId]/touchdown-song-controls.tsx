@@ -67,7 +67,10 @@ export default function SongControls({
           className="input join-item"
         />
         <input
+          // Eslint thinks that fileControl is a ref since it's being passed to the ref prop
+          // eslint-disable-next-line react-hooks/refs
           name={fileControl.name}
+          // eslint-disable-next-line react-hooks/refs
           ref={fileControl.ref}
           onChange={(e) => {
             if (!e.target.files) return;

@@ -1,26 +1,33 @@
 import { Modal } from "~/components/modal";
 import { PropsWithChildren, useState } from "react";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import type { end } from "../actions";
+import { useForm, useWatch } from "react-hook-form";
 import classNames from "classnames";
+import { casualtyEvent, injuryType } from "../actions/game-events";
+import z from "zod";
 
-type InjuryType =
-  | NonNullable<Parameters<typeof end>[0]["playerUpdates"][number]["injury"]>
-  | "regen";
-type PlayerType = { id: string; name: string | null; number: number };
+type InjuryType = z.infer<typeof injuryType>;
+
+type PlayerType = {
+  id: string;
+  name: string | null;
+  number: number;
+  keywords: { name: string; canBeHated: boolean }[];
+};
+
+type StarPlayerType = {
+  name: string;
+  keywords: { name: string; canBeHated: boolean }[];
+};
 
 type Props = {
-  onSubmit: (options: {
-    by?: string;
-    player: string;
-    injury: InjuryType | "bh";
-  }) => void;
+  onSubmit: (ev: z.infer<typeof casualtyEvent>) => void;
   targets: Record<
     "players" | "journeymen",
-    (PlayerType & { nigglingInjuries: number })[]
-  > & { stars: string[] };
-  actors?: Record<"players" | "journeymen", PlayerType[]> & { stars: string[] };
+    (Omit<PlayerType, "keywords"> & { nigglingInjuries: number })[]
+  > & { stars: StarPlayerType[] };
+  actors?: Record<"players" | "journeymen", PlayerType[]> & {
+    stars: StarPlayerType[];
+  };
   className?: string;
 };
 
@@ -28,6 +35,7 @@ type FormValues = {
   injuredPlayer: string;
   causingPlayer?: string;
   type: InjuryType;
+  keyword?: string;
 };
 
 export default function InjuryButton({
@@ -37,37 +45,60 @@ export default function InjuryButton({
   children,
   onSubmit,
 }: PropsWithChildren<Props>) {
-  const { register, setValue, handleSubmit } = useForm<FormValues>();
+  const { register, handleSubmit, control } = useForm<FormValues>({
+    defaultValues: {
+      type: "bh",
+      causingPlayer:
+        actors?.players[0]?.id ??
+        actors?.journeymen[0]?.id ??
+        actors?.stars[0]?.name,
+      injuredPlayer:
+        targets.players[0]?.id ??
+        targets.journeymen[0]?.id ??
+        targets.stars[0]?.name,
+      keyword: (actors?.players[0] ?? actors?.journeymen[0] ?? actors?.stars[0])
+        ?.keywords[0]?.name,
+    },
+  });
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const players = [...(actors?.players ?? []), ...(actors?.journeymen ?? [])];
-    setValue("causingPlayer", players[0]?.id);
-  }, [setValue, actors?.players, actors?.journeymen]);
+  const causingPlayerId = useWatch({ control, name: "causingPlayer" });
 
-  useEffect(() => {
-    setValue(
-      "injuredPlayer",
-      [...targets.players, ...targets.journeymen][0].id,
-    );
-  }, [setValue, targets.players, targets.journeymen]);
+  const allActors = actors ? [...actors.players, ...actors.journeymen] : [];
+  const allStars = actors ? actors.stars : [];
+
+  const causingPlayer =
+    allActors.find((p) => p.id === causingPlayerId) ??
+    allStars.find((p) => p.name === causingPlayerId);
+
+  const causingPlayerKeywords = causingPlayer?.keywords ?? [];
 
   const onFormSubmit = handleSubmit((data) => {
-    onSubmit({
-      player: [
-        ...targets.journeymen,
-        ...targets.players,
-        ...targets.stars.map((s) => ({ id: s })),
-      ].find((p) => p.id === data.injuredPlayer)!.id,
-      injury: data.type,
-      by:
-        actors &&
-        [
-          ...actors.journeymen,
-          ...actors.players,
-          ...actors.stars.map((s) => ({ id: s })),
-        ].find((p) => p.id === data.causingPlayer)?.id,
-    });
+    const keyword = data.keyword;
+    if (data.causingPlayer && keyword) {
+      onSubmit({
+        type: "casualty",
+        player: data.injuredPlayer,
+        injury: {
+          type: data.type,
+          causedBy: {
+            player: data.causingPlayer,
+            type: allStars.some((s) => s.name === data.causingPlayer)
+              ? "star"
+              : "player",
+            hatredKeyword: keyword,
+          },
+        },
+      });
+    } else if (!data.causingPlayer) {
+      onSubmit({
+        type: "casualty",
+        player: data.injuredPlayer,
+        injury: { type: data.type },
+      });
+    } else {
+      return;
+    }
     setIsOpen(false);
   });
 
@@ -104,8 +135,8 @@ export default function InjuryButton({
               {targets.stars.length > 0 && (
                 <optgroup label="Star Players">
                   {targets.stars.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
+                    <option key={p.name} value={p.name}>
+                      {p.name}
                     </option>
                   ))}
                 </optgroup>
@@ -133,41 +164,60 @@ export default function InjuryButton({
           </label>
           <br />
           {actors && (
-            <label>
-              Caused By:
-              <select
-                className="select select-bordered select-sm"
-                {...register("causingPlayer")}
-              >
-                <optgroup label="Rostered Players">
-                  {actors.players.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.number}
-                      {p.name && ` - ${p.name}`}
-                    </option>
-                  ))}
-                </optgroup>
-                {actors.journeymen.length > 0 && (
-                  <optgroup label="Journeymen">
-                    {actors.journeymen.map((p) => (
+            <>
+              <label>
+                Caused By:
+                <select
+                  className="select select-bordered select-sm"
+                  {...register("causingPlayer")}
+                >
+                  <optgroup label="Rostered Players">
+                    {actors.players.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.number}
                         {p.name && ` - ${p.name}`}
                       </option>
                     ))}
                   </optgroup>
-                )}
-                {actors.stars.length > 0 && (
-                  <optgroup label="Star Players">
-                    {actors.stars.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
-              </select>
-            </label>
+                  {actors.journeymen.length > 0 && (
+                    <optgroup label="Journeymen">
+                      {actors.journeymen.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.number}
+                          {p.name && ` - ${p.name}`}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {actors.stars.length > 0 && (
+                    <optgroup label="Star Players">
+                      {actors.stars.map((p) => (
+                        <option key={p.name} value={p.name}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </label>
+              {causingPlayerKeywords.length > 0 && (
+                <label>
+                  Keyword:
+                  <select
+                    className="select select-bordered select-sm"
+                    {...register("keyword")}
+                  >
+                    {causingPlayerKeywords
+                      .filter((kw) => kw.canBeHated)
+                      .map((kw) => (
+                        <option key={kw.name} value={kw.name}>
+                          {kw.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+            </>
           )}
 
           <button

@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useState } from "react";
 import { hirePlayer } from "./actions";
 import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
@@ -28,16 +28,12 @@ export function PlayerHirer({
     },
   });
 
-  useEffect(() => {
-    if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
-      setNumber(freeNumbers[0]);
-    }
-  }, [freeNumbers, number]);
+  if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
+    setNumber(freeNumbers[0]);
+  }
 
-  useEffect(() => {
-    if (!positions.some((pos) => pos.name === position))
-      setPosition(positions[0]?.name);
-  }, [position, positions]);
+  if (!positions.some((pos) => pos.name === position))
+    setPosition(positions[0]?.name);
 
   const handlePositionSelect = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {

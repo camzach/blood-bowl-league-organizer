@@ -6,11 +6,13 @@ import {
   gameDetails,
   gameDetailsToInducement,
   gameDetailsToStarPlayer,
+  improvement,
+  player,
   roundRobinGame,
   season,
   team,
 } from "~/db/schema";
-import { and, eq, inArray, InferInsertModel, sql } from "drizzle-orm";
+import { and, eq, inArray, InferInsertModel, like, lt, sql } from "drizzle-orm";
 import nanoid from "~/utils/nanoid";
 import { db } from "~/utils/drizzle";
 import { action, requireRole } from "~/utils/safe-action";
@@ -43,7 +45,13 @@ export const scheduleAction = action
         throw new Error("Schedule already generated");
 
       const teams = (
-        await tx.query.team.findMany({ columns: { id: true } })
+        await tx.query.team.findMany({
+          where: and(
+            eq(team.leagueId, session.activeOrganizationId ?? ""),
+            eq(team.state, "ready"),
+          ),
+          columns: { id: true },
+        })
       ).map((t) => t.id);
 
       const rounds = generateSchedule(teams).map((round, i) => ({
@@ -319,6 +327,9 @@ export const endSeason = action
 
       const teams = await tx.query.team.findMany({
         where: eq(team.leagueId, session.activeOrganizationId ?? ""),
+        with: {
+          players: true,
+        },
       });
       if (teams.some((t) => t.state !== "ready")) {
         throw new Error("Not all teams are ready");
@@ -335,9 +346,35 @@ export const endSeason = action
         throw new Error("Not all games have been played");
       }
 
+      const playerIds = teams.flatMap((t) => t.players.map((p) => p.id));
+
+      if (playerIds.length > 0) {
+        await tx
+          .update(player)
+          .set({
+            membershipType: "retired",
+            missNextGame: false,
+            seasonsPlayed: sql`${player.seasonsPlayed} + 1`,
+            nigglingInjuries: sql`GREATEST(0, ${player.nigglingInjuries} - (SELECT COUNT(*)::int FROM generate_series(1, ${player.nigglingInjuries}) WHERE random() < 0.5))`,
+          })
+          .where(inArray(player.id, playerIds));
+
+        await tx
+          .delete(improvement)
+          .where(
+            and(
+              inArray(improvement.playerId, playerIds),
+              lt(improvement.order, 0),
+              like(improvement.skillName, "Hatred (%)"),
+              sql`random() < 0.5`,
+            ),
+          );
+      }
+
       const leagueTable = await getLeagueTable(tx);
       const teamUpdates: Record<string, number> = {};
 
+      let winnerId: string | undefined;
       const final = await tx.query.bracketGame.findFirst({
         where: and(
           eq(bracketGame.seasonId, activeSeason.id),
@@ -348,7 +385,7 @@ export const endSeason = action
         },
       });
       if (final?.game?.homeDetails && final.game.awayDetails) {
-        const winner =
+        winnerId =
           final.game.homeDetails.touchdowns > final.game.awayDetails.touchdowns
             ? final.game.homeDetails.teamId
             : final.game.awayDetails.teamId;
@@ -357,7 +394,7 @@ export const endSeason = action
             ? final.game.awayDetails.teamId
             : final.game.homeDetails.teamId;
 
-        teamUpdates[winner] = (teamUpdates[winner] ?? 0) + 100_000;
+        teamUpdates[winnerId] = (teamUpdates[winnerId] ?? 0) + 100_000;
         teamUpdates[runnerUp] = (teamUpdates[runnerUp] ?? 0) + 60_000;
       }
 
@@ -395,10 +432,22 @@ export const endSeason = action
           tx
             .update(team)
             .set({
-              treasury: sql`LEAST(${team.treasury} + ${winnings}, 1300000)`,
+              treasury: sql`LEAST(${team.treasury} + ${winnings} + 1000000, 1300000)`,
+              rerolls: winnerId
+                ? sql`case when ${team.id} = ${winnerId} then 1 else 0 end`
+                : 0,
+              assistantCoaches: 0,
+              cheerleaders: 0,
+              apothecary: false,
+              state: 'draft',
             })
             .where(eq(team.id, teamId)),
         ),
       );
+
+      await tx
+        .update(season)
+        .set({ isActive: false })
+        .where(eq(season.id, activeSeason.id));
     });
   });

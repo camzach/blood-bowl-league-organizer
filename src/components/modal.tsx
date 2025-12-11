@@ -1,12 +1,6 @@
 "use client";
 import classNames from "classnames";
-import {
-  MutableRefObject,
-  PropsWithChildren,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Props = {
@@ -30,40 +24,40 @@ export function Modal({
     return () => removeEventListener("keydown", handler);
   }, [isOpen, onRequestClose]);
 
-  const innerRef = useRef<HTMLDivElement>(null);
-  const outerRef = useRef<HTMLDivElement>(null);
-
-  const bodyRef: MutableRefObject<HTMLElement | null> = useRef(null);
-  const [, setMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    bodyRef.current = document?.body;
-    setMounted(true);
+    // This effect is okay because it will always run exactly once.
+    // It is necessary to prevent hydration issues between server and client.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true);
   }, []);
 
-  return bodyRef.current
-    ? createPortal(
-        <div
-          className={classNames(["modal", isOpen && "modal-open"])}
-          aria-hidden={!isOpen}
-          ref={outerRef}
-          onClick={(e) => {
-            if (!innerRef.current?.contains(e.target as Node)) {
-              onRequestClose?.();
-            }
-          }}
+  const innerRef = useRef<HTMLDivElement>(null);
+  if (!isMounted) {
+    return;
+  }
+
+  return createPortal(
+    <div
+      className={classNames(["modal", isOpen && "modal-open"])}
+      aria-hidden={!isOpen}
+      onClick={(e) => {
+        if (!innerRef.current?.contains(e.target as Node)) {
+          onRequestClose?.();
+        }
+      }}
+    >
+      <div className={classNames("modal-box", className)} ref={innerRef}>
+        <label
+          className="btn btn-circle btn-sm absolute top-2 right-2"
+          onClick={onRequestClose}
         >
-          <div className={classNames("modal-box", className)} ref={innerRef}>
-            <label
-              className="btn btn-circle btn-sm absolute top-2 right-2"
-              onClick={onRequestClose}
-            >
-              ✕
-            </label>
-            {children}
-          </div>
-        </div>,
-        bodyRef.current,
-      )
-    : null;
+          ✕
+        </label>
+        {children}
+      </div>
+    </div>,
+    document.body,
+  );
 }

@@ -53,6 +53,7 @@ export default async function EditTeam(props: Props) {
   }
   const team = await fetchTeam(decodeURIComponent(teamId), true);
   const skills = await db.query.skill.findMany({});
+  const skillRelations = await db.query.skillRelation.findMany({});
 
   if (!team) return notFound();
 
@@ -77,13 +78,27 @@ export default async function EditTeam(props: Props) {
       ? p.membershipType === "retired"
       : p.membershipType === "journeyman",
   );
+
+  const hasCaptainRule = team.roster.specialRuleToRoster.some(
+    (r) => r.specialRuleName === "Team Captain",
+  );
+
+  const currentCaptain = team.players.find((p) => p.isCaptain);
+
   return (
     <>
       <h1 className="text-4xl">{team.name}</h1>
       {(team.state === "draft" ||
         team.state === "hiring" ||
         team.state === "improving") && (
-        <TeamState state={team.state} id={team.id} treasury={team.treasury} />
+        <TeamState
+          state={team.state}
+          id={team.id}
+          treasury={team.treasury}
+          blocked={team.players.some(
+            (p) => p.pendingRandomStat || p.pendingRandomSkill,
+          )}
+        />
       )}
       <div className="my-4 flex flex-col text-lg">
         <span>TV - {calculateTV(team).toLocaleString()}</span>
@@ -137,7 +152,14 @@ export default async function EditTeam(props: Props) {
             id: "Actions",
             name: "Actions",
             Component: (player) => (
-              <PlayerActions player={player} skills={skills} state={state} />
+              <PlayerActions
+                player={player}
+                skills={skills}
+                state={state}
+                skillRelations={skillRelations}
+                hasCaptainRule={hasCaptainRule}
+                currentCaptainId={currentCaptain?.id}
+              />
             ),
           },
         ]}
@@ -163,6 +185,7 @@ export default async function EditTeam(props: Props) {
           players={hirablePlayers}
           freeNumbers={freeNumbers}
           skills={skills}
+          skillRelations={skillRelations}
           state={state}
         />
       )}

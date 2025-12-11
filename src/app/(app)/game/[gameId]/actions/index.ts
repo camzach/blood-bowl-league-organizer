@@ -6,7 +6,6 @@ import {
   and,
   eq,
   not,
-  gte,
   inArray,
   sql,
   SQL,
@@ -16,7 +15,6 @@ import {
 import {
   game as dbGame,
   player,
-  rosterSlot,
   team as dbTeam,
   weatherOpts,
   gameDetails,
@@ -26,15 +24,18 @@ import {
   gameDetailsToInducement,
   bracketGame,
   season,
+  skill,
+  keywordToPosition,
 } from "~/db/schema";
 
 import calculateTV from "~/utils/calculate-tv";
 import { nanoid } from "nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
-import { getPlayerStats } from "~/utils/get-computed-player-fields";
 import { d6 } from "~/utils/d6";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
+import { gameEvent } from "./game-events";
+import { getPlayerStats } from "~/utils/get-computed-player-fields";
 
 export const start = action
   .inputSchema(z.object({ id: z.string() }))
@@ -80,6 +81,9 @@ export const start = action
                           roster: { with: { specialRuleToRoster: true } },
                         },
                       },
+                      keywordToPosition: {
+                        with: { keyword: true },
+                      },
                     },
                   },
                 },
@@ -87,8 +91,15 @@ export const start = action
               roster: {
                 with: {
                   rosterSlots: {
-                    where: gte(rosterSlot.max, 12),
-                    with: { position: true },
+                    with: {
+                      position: {
+                        with: {
+                          keywordToPosition: {
+                            where: eq(keywordToPosition.keywordName, "Lineman"),
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -258,8 +269,15 @@ export const selectJourneymen = action
             with: {
               specialRuleToRoster: true,
               rosterSlots: {
-                where: gte(rosterSlot.max, 12),
-                with: { position: true },
+                with: {
+                  position: {
+                    with: {
+                      keywordToPosition: {
+                        where: eq(keywordToPosition.keywordName, "Lineman"),
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -384,7 +402,7 @@ export const selectJourneymen = action
                   tx.insert(improvement).values(
                     newPlayers.map((p) => ({
                       playerId: p.id,
-                      type: "chosen_skill" as const,
+                      type: "automatic_skill" as const,
                       order: -1,
                       skillName: "Loner (4+)",
                     })),
@@ -455,7 +473,9 @@ export const purchaseInducements = action
               chosenSpecialRuleName: true,
             },
             with: {
-              roster: { with: { specialRuleToRoster: true } },
+              roster: {
+                with: { specialRuleToRoster: true },
+              },
               players: {
                 where: and(
                   eq(player.missNextGame, false),
@@ -499,6 +519,7 @@ export const purchaseInducements = action
         input.home.stars,
         teamSpecialRules(game.homeDetails.team),
         game.homeDetails.team.players.length,
+        game.homeDetails.team.roster.name,
         tx,
       );
       const awayInducementCost = await calculateInducementCosts(
@@ -506,6 +527,7 @@ export const purchaseInducements = action
         input.away.stars,
         teamSpecialRules(game.awayDetails.team),
         game.awayDetails.team.players.length,
+        game.awayDetails.team.roster.name,
         tx,
       );
 
@@ -603,26 +625,9 @@ export const end = action
   .inputSchema(
     z.object({
       game: z.string(),
-      playerUpdates: z.record(
-        z.string(),
-        z.object({
-          injury: z
-            .enum(["mng", "ni", "ma", "ag", "pa", "st", "av", "dead"])
-            .optional(),
-          starPlayerPoints: z
-            .object({
-              touchdowns: z.number().int().optional(),
-              casualties: z.number().int().optional(),
-              deflections: z.number().int().optional(),
-              interceptions: z.number().int().optional(),
-              completions: z.number().int().optional(),
-              otherSPP: z.number().int().optional(),
-            })
-            .optional(),
-        }),
-      ),
-      touchdowns: z.tuple([z.number().int(), z.number().int()]),
-      casualties: z.tuple([z.number().int(), z.number().int()]),
+      events: z.array(gameEvent),
+      homeMvpNominees: z.array(z.string()).length(6),
+      awayMvpNominees: z.array(z.string()).length(6),
     }),
   )
   .use(async ({ next, clientInput }) => {
@@ -663,12 +668,15 @@ export const end = action
             with: {
               players: {
                 with: {
-                  position: true,
+                  position: {
+                    with: { keywordToPosition: { with: { keyword: true } } },
+                  },
                   improvements: true,
                 },
               },
             },
           },
+          gameDetailsToStarPlayer: true,
         },
       } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
@@ -686,105 +694,238 @@ export const end = action
       if (!game.homeDetails || !game.awayDetails)
         throw new Error("Game does not have two teams");
 
-      const statMinMax = {
-        ma: [1, 9],
-        st: [1, 8],
-        ag: [1, 6],
-        pa: [1, 6],
-        av: [3, 11],
-      };
-
       if (game.state !== "in_progress") throw new Error("Game not in progress");
+
+      const playerToTeamMap = new Map<string, "home" | "away">();
+      for (const player of game.homeDetails.team.players) {
+        playerToTeamMap.set(player.id, "home");
+      }
+      for (const player of game.homeDetails.gameDetailsToStarPlayer) {
+        playerToTeamMap.set(player.starPlayerName, "home");
+      }
+      for (const player of game.awayDetails.team.players) {
+        playerToTeamMap.set(player.id, "away");
+      }
+      for (const player of game.awayDetails.gameDetailsToStarPlayer) {
+        playerToTeamMap.set(player.starPlayerName, "away");
+      }
+
+      const [touchdowns, casualties] = input.events.reduce(
+        (acc, curr) => {
+          const [touchdowns, casualties] = acc;
+
+          if (curr.type === "touchdown") {
+            const team = playerToTeamMap.get(curr.player) === "home" ? 0 : 1;
+            touchdowns[team] += 1;
+          }
+          if (
+            curr.type === "casualty" &&
+            curr.injury.causedBy?.type === "player"
+          ) {
+            const team =
+              playerToTeamMap.get(curr.injury.causedBy.player) === "home"
+                ? 0
+                : 1;
+            casualties[team] += 1;
+          }
+
+          return acc;
+        },
+        [
+          [0, 0],
+          [0, 0],
+        ],
+      );
 
       const players = [
         ...game.homeDetails.team.players,
         ...game.awayDetails.team.players,
       ];
-      let mvpChoicesHome = [
-        ...game.homeDetails.team.players.filter((p) => !p.missNextGame),
-      ];
-      let mvpChoicesAway = [
-        ...game.awayDetails.team.players.filter((p) => !p.missNextGame),
-      ];
-      const updateMap: Record<
+      const playerUpdates: Record<
         string,
-        Parameters<ReturnType<typeof tx.update<typeof player>>["set"]>[0]
+        Partial<{
+          touchdowns: number;
+          casualties: number;
+          mvps: number;
+          interceptions: number;
+          safeLandings: number;
+          missNextGame: boolean;
+          otherSPP: number;
+          completions: number;
+          dead: boolean;
+          maInjuries: number;
+          avInjuries: number;
+          stInjuries: number;
+          agInjuries: number;
+          paInjuries: number;
+          nigglingInjuries: number;
+          teamId: string | null;
+          membershipType: typeof player.membershipType._.data | null;
+        }>
       > = Object.fromEntries(
         players.map(({ id }) => [id, { missNextGame: false }]),
       );
-      for (const [playerId, update] of Object.entries(input.playerUpdates)) {
-        const fetchedPlayer = players.find((p) => p.id === playerId);
-        if (!fetchedPlayer) throw new Error("Player not found");
-        const updatedPlayer = {
-          ...fetchedPlayer,
-          ...getPlayerStats(fetchedPlayer),
-        };
 
-        const mappedUpdate = updateMap[playerId];
-        if (update.injury !== undefined) {
-          mappedUpdate.missNextGame = true;
-          if (
-            update.injury === "ma" ||
-            update.injury === "st" ||
-            update.injury === "av"
-          ) {
-            if (updatedPlayer[update.injury] - 1 < statMinMax[update.injury][0])
-              throw new Error(
-                "Invalid injury, stat cannot be reduced any more",
-              );
-            mappedUpdate[`${update.injury}Injuries`] = sql`${
-              player[`${update.injury}Injuries`]
-            } + 1`;
-          }
-          if (update.injury === "pa" || update.injury === "ag") {
-            if (
-              (updatedPlayer[update.injury] ?? 6) + 1 >
-              statMinMax[update.injury][1]
-            )
-              throw new Error(
-                "Invalid injury, stat cannot be increased any more",
-              );
-            mappedUpdate[`${update.injury}Injuries`] = sql`${
-              player[`${update.injury}Injuries`]
-            } + 1`;
-          }
-          if (update.injury === "ni")
-            mappedUpdate.nigglingInjuries = sql`${player.nigglingInjuries} + 1`;
-          if (update.injury === "dead") {
-            mappedUpdate.teamId = null;
-            mappedUpdate.membershipType = null;
-            mappedUpdate.dead = true;
-            mvpChoicesAway = mvpChoicesAway.filter(
-              (p) => p.id !== updatedPlayer.id,
-            );
-            mvpChoicesHome = mvpChoicesHome.filter(
-              (p) => p.id !== updatedPlayer.id,
-            );
-          }
+      const newImprovements: Array<InferInsertModel<typeof improvement>> = [];
+      const improvementsToDelete: Array<{ playerId: string; order: number }> =
+        [];
+
+      for (const ev of input.events) {
+        if (playerToTeamMap.get(ev.player) === undefined) {
+          throw new Error("Event references a player not on any team");
         }
-        if (update.starPlayerPoints !== undefined) {
-          const oldSPP: typeof update.starPlayerPoints = {};
-          const newSPP: typeof update.starPlayerPoints = {};
+        switch (ev.type) {
+          case "touchdown":
+            if (ev.playerType === "player") {
+              playerUpdates[ev.player].touchdowns =
+                (playerUpdates[ev.player]?.touchdowns ?? 0) + 1;
+            }
+            break;
+          case "completion":
+            playerUpdates[ev.player].completions =
+              (playerUpdates[ev.player]?.completions ?? 0) + 1;
+            break;
+          case "interception":
+            playerUpdates[ev.player].interceptions =
+              (playerUpdates[ev.player]?.interceptions ?? 0) + 1;
+            break;
+          case "safeLanding":
+            playerUpdates[ev.player].safeLandings =
+              (playerUpdates[ev.player]?.safeLandings ?? 0) + 1;
+            break;
+          case "otherSPP":
+            playerUpdates[ev.player].otherSPP =
+              (playerUpdates[ev.player]?.otherSPP ?? 0) + 1;
+            break;
+          case "casualty": {
+            const injury = ev.injury;
+            const playerUpdate = playerUpdates[ev.player];
 
-          for (const [_type, amount] of Object.entries(
-            update.starPlayerPoints,
-          )) {
-            const type = _type as keyof typeof update.starPlayerPoints;
-            oldSPP[type] = fetchedPlayer[type];
-            newSPP[type] = (fetchedPlayer[type] || 0) + amount;
-            mappedUpdate[type as keyof typeof update.starPlayerPoints] =
-              sql`${player[type]} + ${amount}`;
+            if (
+              injury.type === "ma" ||
+              injury.type === "st" ||
+              injury.type === "ag" ||
+              injury.type === "pa" ||
+              injury.type === "av"
+            ) {
+              playerUpdate.missNextGame = true;
+              playerUpdate[`${injury.type}Injuries`] =
+                (playerUpdate[`${injury.type}Injuries`] ?? 0) + 1;
+            }
+            if (injury.type === "ni") {
+              playerUpdate.missNextGame = true;
+              playerUpdate.nigglingInjuries =
+                (playerUpdate.nigglingInjuries ?? 0) + 1;
+            }
+            if (injury.type === "dead") {
+              playerUpdate.teamId = null;
+              playerUpdate.membershipType = null;
+              playerUpdate.dead = true;
+            }
+
+            if (injury.causedBy) {
+              let offenderKeywords: string[];
+              const causedByPlayer = injury.causedBy.player;
+
+              if (injury.causedBy.type === "player") {
+                playerUpdates[ev.player].casualties =
+                  (playerUpdates[ev.player]?.casualties ?? 0) + 1;
+
+                const offender = players.find((p) => p.id === causedByPlayer);
+                if (!offender) {
+                  throw new Error("Offending player does not exist");
+                }
+                offenderKeywords = offender.position.keywordToPosition
+                  .filter((k) => k.keyword.canBeHated)
+                  .map((k) => k.keyword.name);
+              } else {
+                const offender = await tx.query.starPlayer.findFirst({
+                  where: (starPlayer) => eq(starPlayer.name, causedByPlayer),
+                  with: {
+                    keywordToStarPlayer: { with: { keyword: true } },
+                  },
+                });
+                if (!offender) {
+                  throw new Error("Offending player does not exist");
+                }
+                offenderKeywords = offender.keywordToStarPlayer
+                  .filter((k) => k.keyword.canBeHated)
+                  .map((k) => k.keyword.name);
+              }
+
+              if (d6() >= 4) {
+                if (!offenderKeywords.includes(injury.causedBy.hatredKeyword)) {
+                  throw new Error("Invalid keyword chosen for Hatred");
+                }
+                const hatredSkillName = `Hatred (${injury.causedBy.hatredKeyword})`;
+                const existingSkill = await tx.query.skill.findFirst({
+                  where: eq(skill.name, hatredSkillName),
+                });
+                if (!existingSkill) {
+                  await tx.insert(skill).values({
+                    name: hatredSkillName,
+                    rules:
+                      "HATRED RULES TEXT HATRED RULES TEXT HATRED RULES TEXT",
+                    category: "trait",
+                  });
+                }
+                const fetchedPlayer = players.find((p) => p.id === ev.player);
+                if (!fetchedPlayer) {
+                  throw new Error("Injured player does not exist");
+                }
+                const nextNegativeOrder =
+                  Math.min(
+                    0,
+                    ...fetchedPlayer.improvements.map((i) => i.order),
+                  ) - 1;
+
+                newImprovements.push({
+                  playerId: ev.player,
+                  type: "automatic_skill",
+                  order: nextNegativeOrder,
+                  skillName: hatredSkillName,
+                });
+              }
+            }
+
+            break;
           }
         }
       }
 
-      const mvpHome =
-        mvpChoicesHome[Math.floor(Math.random() * mvpChoicesHome.length)];
-      updateMap[mvpHome.id].mvps = sql`${player.mvps} + 1`;
+      const eligibleHome = game.homeDetails.team.players
+        .filter((p) => !p.missNextGame && !playerUpdates[p.id]?.dead)
+        .map((p) => p.id);
+      const eligibleAway = game.awayDetails.team.players
+        .filter((p) => !p.missNextGame && !playerUpdates[p.id]?.dead)
+        .map((p) => p.id);
 
-      const mvpAway =
-        mvpChoicesAway[Math.floor(Math.random() * mvpChoicesAway.length)];
-      updateMap[mvpAway.id].mvps = sql`${player.mvps} + 1`;
+      if (!input.homeMvpNominees.every((id) => eligibleHome.includes(id))) {
+        throw new Error("Invalid MVP nominee for home team");
+      }
+      if (!input.awayMvpNominees.every((id) => eligibleAway.includes(id))) {
+        throw new Error("Invalid MVP nominee for away team");
+      }
+
+      const mvpHomeId =
+        input.homeMvpNominees[
+          Math.floor(Math.random() * input.homeMvpNominees.length)
+        ];
+      const mvpHome = game.homeDetails.team.players.find(
+        (p) => p.id === mvpHomeId,
+      )!;
+      playerUpdates[mvpHome.id].mvps =
+        (playerUpdates[mvpHome.id].mvps ?? 0) + 1;
+
+      const mvpAwayId =
+        input.awayMvpNominees[
+          Math.floor(Math.random() * input.awayMvpNominees.length)
+        ];
+      const mvpAway = game.awayDetails.team.players.find(
+        (p) => p.id === mvpAwayId,
+      )!;
+      playerUpdates[mvpAway.id].mvps =
+        (playerUpdates[mvpAway.id].mvps ?? 0) + 1;
 
       const fansUpdate = (
         wlt: "won" | "lost" | "tied",
@@ -816,11 +957,11 @@ export const end = action
 
       const [homeFansUpdate, awayFansUpdate] = [
         fansUpdate(
-          wlt(input.touchdowns[0], input.touchdowns[1]),
+          wlt(touchdowns[0], touchdowns[1]),
           game.homeDetails.team.dedicatedFans,
         ),
         fansUpdate(
-          wlt(input.touchdowns[1], input.touchdowns[0]),
+          wlt(touchdowns[1], touchdowns[0]),
           game.awayDetails.team.dedicatedFans,
         ),
       ];
@@ -828,11 +969,56 @@ export const end = action
       const sharedWinnings =
         ((game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
         10_000;
-      const homeWinnings = input.touchdowns[0] * 10_000 + sharedWinnings;
-      const awayWinnings = input.touchdowns[1] * 10_000 + sharedWinnings;
+      const homeWinnings = touchdowns[0] * 10_000 + sharedWinnings;
+      const awayWinnings = touchdowns[1] * 10_000 + sharedWinnings;
 
-      const playerUpdates = Object.keys(updateMap).map((p) =>
-        tx.update(player).set(updateMap[p]).where(eq(player.id, p)),
+      const playerUpdateQueries = Object.entries(playerUpdates).map(
+        ([id, update]) =>
+          tx
+            .update(player)
+            .set({
+              touchdowns:
+                update.touchdowns &&
+                sql`${player.touchdowns} + ${update.touchdowns}`,
+              casualties:
+                update.casualties &&
+                sql`${player.casualties} + ${update.casualties}`,
+              mvps: update.mvps && sql`${player.mvps} + ${update.mvps}`,
+              interceptions:
+                update.interceptions &&
+                sql`${player.interceptions} + ${update.interceptions}`,
+              safeLandings:
+                update.safeLandings &&
+                sql`${player.safeLandings} + ${update.safeLandings}`,
+              otherSPP:
+                update.otherSPP && sql`${player.otherSPP} + ${update.otherSPP}`,
+              completions:
+                update.completions &&
+                sql`${player.completions} + ${update.completions}`,
+              missNextGame: update.missNextGame,
+              dead: update.dead,
+              maInjuries:
+                update.maInjuries &&
+                sql`${player.maInjuries} + ${update.maInjuries}`,
+              avInjuries:
+                update.avInjuries &&
+                sql`${player.avInjuries} + ${update.avInjuries}`,
+              stInjuries:
+                update.stInjuries &&
+                sql`${player.stInjuries} + ${update.stInjuries}`,
+              agInjuries:
+                update.agInjuries &&
+                sql`${player.agInjuries} + ${update.agInjuries}`,
+              paInjuries:
+                update.paInjuries &&
+                sql`${player.paInjuries} + ${update.paInjuries}`,
+              nigglingInjuries:
+                update.nigglingInjuries &&
+                sql`${player.nigglingInjuries} + ${update.nigglingInjuries}`,
+              teamId: update.teamId,
+              membershipType: update.membershipType,
+            })
+            .where(eq(player.id, id)),
       );
       const gameUpdate = tx
         .update(dbGame)
@@ -843,16 +1029,16 @@ export const end = action
       const homeDetailsUpdate = tx
         .update(gameDetails)
         .set({
-          casualties: input.casualties[0],
-          touchdowns: input.touchdowns[0],
+          casualties: casualties[0],
+          touchdowns: touchdowns[0],
           mvpId: mvpHome.id,
         })
         .where(eq(gameDetails.id, game.homeDetails.id));
       const awayDetailsUpdate = tx
         .update(gameDetails)
         .set({
-          casualties: input.casualties[1],
-          touchdowns: input.touchdowns[1],
+          casualties: casualties[1],
+          touchdowns: touchdowns[1],
           mvpId: mvpAway.id,
         })
         .where(eq(gameDetails.id, game.awayDetails.id));
@@ -875,13 +1061,30 @@ export const end = action
         .where(eq(team.id, game.awayDetails.teamId));
 
       const allUpdates: Array<SQLWrapper> = [
-        ...playerUpdates,
+        ...playerUpdateQueries,
         gameUpdate,
         homeDetailsUpdate,
         awayDetailsUpdate,
         homeTeamUpdate,
         awayTeamUpdate,
       ];
+      if (newImprovements.length > 0) {
+        allUpdates.push(tx.insert(improvement).values(newImprovements));
+      }
+      if (improvementsToDelete.length > 0) {
+        allUpdates.push(
+          ...improvementsToDelete.map((imp) =>
+            tx
+              .delete(improvement)
+              .where(
+                and(
+                  eq(improvement.playerId, imp.playerId),
+                  eq(improvement.order, imp.order),
+                ),
+              ),
+          ),
+        );
+      }
       const relatedBracketGame = (
         await tx
           .select({
@@ -901,7 +1104,7 @@ export const end = action
           .limit(1)
       ).at(0);
       if (relatedBracketGame && relatedBracketGame.round > 1) {
-        if (input.touchdowns[0] === input.touchdowns[1]) {
+        if (touchdowns[0] === touchdowns[1]) {
           throw new Error("Ties are not allowed in the playoffs");
         }
         const gamesInRound = Math.pow(2, relatedBracketGame.round - 1);
@@ -911,7 +1114,7 @@ export const end = action
             : relatedBracketGame.seed;
         const detailsId = nanoid();
         const newDetails = tx.insert(gameDetails).values({
-          teamId: (input.touchdowns[0] > input.touchdowns[1]
+          teamId: (touchdowns[0] > touchdowns[1]
             ? game.homeDetails
             : game.awayDetails
           ).teamId,
@@ -940,6 +1143,37 @@ export const end = action
       }
 
       await Promise.all(allUpdates);
+
+      const statMinMax = {
+        ma: [1, 9],
+        st: [1, 8],
+        ag: [1, 6],
+        pa: [1, 6],
+        av: [3, 11],
+      };
+      const updatedPlayers = await tx.query.player.findMany({
+        where: inArray(player.id, Object.keys(playerUpdates)),
+        with: { position: true, improvements: true },
+      });
+      for (const updatedPlayer of updatedPlayers) {
+        const updatedPlayerStats = getPlayerStats(updatedPlayer);
+        for (const [stat, value] of Object.entries(updatedPlayerStats) as [
+          keyof typeof updatedPlayerStats,
+          number | null,
+        ][]) {
+          if (updatedPlayer[`${stat}Injuries`] > 2) {
+            throw new Error(
+              "Player cannot have any more injuries of this type",
+            );
+          }
+          if (
+            (value ?? 1) < statMinMax[stat][0] ||
+            (value ?? 1) > statMinMax[stat][1]
+          ) {
+            throw new Error("A player's stat is now out of bounds");
+          }
+        }
+      }
 
       return {
         homeWinnings,

@@ -13,7 +13,7 @@
     "noEmit": true,
     "incremental": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "next"
@@ -35,7 +35,8 @@
     "*.config.js",
     "*.config.mjs",
     "*.config.cjs",
-    "*.config.ts"
+    "*.config.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

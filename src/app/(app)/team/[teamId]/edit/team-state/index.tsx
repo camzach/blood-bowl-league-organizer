@@ -6,9 +6,15 @@ type Props = {
   state: "draft" | "improving" | "hiring";
   id: string;
   treasury: number;
+  blocked: boolean;
 };
 
-export default function TeamState({ state, id, treasury }: Props) {
+export default function TeamState({
+  state,
+  id,
+  treasury,
+  blocked = false,
+}: Props) {
   return (
     <div className="my-2 inline-flex flex-col gap-2">
       <ol className="steps">
@@ -33,7 +39,7 @@ export default function TeamState({ state, id, treasury }: Props) {
       </ol>
 
       {state === "improving" ? (
-        <DoneImproving teamId={id} />
+        <DoneImproving teamId={id} blocked={blocked} />
       ) : (
         <ReadyTeam teamId={id} treasury={state === "draft" ? 0 : treasury} />
       )}

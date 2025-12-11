@@ -5,23 +5,50 @@ import { useAction } from "next-safe-action/hooks";
 import classNames from "classnames";
 import { Modal } from "~/components/modal";
 import { Die } from "~/components/die";
+import { MvpModal } from "./mvp-modal";
+import { gameEvent } from "../actions/game-events";
+import z from "zod";
+
+type BasePlayer = {
+  id: string;
+  name: string | null;
+  number: number;
+  missNextGame: boolean;
+};
+type TeamProps = {
+  id: string;
+  name: string;
+  rerolls: number;
+  fanFactor: number;
+  assistantCoaches: number;
+  cheerleaders: number;
+  song?: string;
+  players: Array<BasePlayer & { nigglingInjuries: number }>;
+  journeymen: Array<BasePlayer & { nigglingInjuries: number }>;
+};
 
 type Props = {
-  submission: Parameters<typeof end>[0];
-  homeTeam: string;
-  awayTeam: string;
+  events: Array<z.infer<typeof gameEvent>>;
+  gameId: string;
+  homeTeam: TeamProps;
+  awayTeam: TeamProps;
   className?: string;
 };
 
 export default function Button({
-  submission,
+  events,
+  gameId,
   className,
   homeTeam,
   awayTeam,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [mvpModalOpen, setMvpModalOpen] = useState(false);
   const { execute, status, result } = useAction(end, {
-    onSuccess: () => setOpen(true),
+    onSuccess: () => {
+      setMvpModalOpen(false); // Close MVP modal
+      setOpen(true); // Open post-game summary modal
+    },
   });
   if (status === "executing")
     return (
@@ -33,7 +60,7 @@ export default function Button({
     return (
       <button
         onClick={(): void => {
-          void navigator.clipboard.writeText(JSON.stringify(submission));
+          void navigator.clipboard.writeText(JSON.stringify(events));
         }}
         className={classNames("btn btn-error", className)}
       >
@@ -66,7 +93,7 @@ export default function Button({
             </thead>
             <tbody>
               <tr>
-                <td>{homeTeam}</td>
+                <td>{homeTeam.name}</td>
                 <td className="text-right">
                   {result.data.homeFansUpdate.currentFans}{" "}
                 </td>
@@ -81,7 +108,7 @@ export default function Button({
                 </td>
               </tr>
               <tr>
-                <td>{awayTeam}</td>
+                <td>{awayTeam.name}</td>
                 <td className="text-right">
                   {result.data.awayFansUpdate.currentFans}
                 </td>
@@ -104,11 +131,51 @@ export default function Button({
       </>
     );
   return (
-    <button
-      className={classNames("btn", className)}
-      onClick={() => execute(submission)}
-    >
-      Done
-    </button>
+    <>
+      {mvpModalOpen && (
+        <MvpModal
+          isOpen={mvpModalOpen}
+          onRequestClose={() => setMvpModalOpen(false)}
+          homePlayers={homeTeam.players
+            .concat(homeTeam.journeymen)
+            .filter(
+              (p) =>
+                !p.missNextGame &&
+                !events.some(
+                  (ev) =>
+                    ev.type === "casualty" &&
+                    ev.player === p.id &&
+                    ev.injury.type === "dead",
+                ),
+            )}
+          awayPlayers={awayTeam.players
+            .concat(awayTeam.journeymen)
+            .filter(
+              (p) =>
+                !p.missNextGame &&
+                !events.some(
+                  (ev) =>
+                    ev.type === "casualty" &&
+                    ev.player === p.id &&
+                    ev.injury.type === "dead",
+                ),
+            )}
+          onMvpSubmit={(homeNominees, awayNominees) => {
+            execute({
+              game: gameId,
+              events,
+              homeMvpNominees: homeNominees,
+              awayMvpNominees: awayNominees,
+            });
+          }}
+        />
+      )}
+      <button
+        className={classNames("btn", className)}
+        onClick={() => setMvpModalOpen(true)}
+      >
+        Done
+      </button>
+    </>
   );
 }

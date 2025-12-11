@@ -6,6 +6,7 @@ export type PlayerType = {
   id: string;
   name: string | null;
   number: number;
+  isCaptain: boolean;
   ma: number;
   av: number;
   st: number;

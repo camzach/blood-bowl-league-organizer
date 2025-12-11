@@ -10,7 +10,7 @@ import {
 } from "~/utils/get-computed-player-fields";
 import { db } from "~/utils/drizzle";
 import { and, eq, inArray } from "drizzle-orm";
-import { game as dbGame, player, starPlayer } from "~/db/schema";
+import { game as dbGame, player, skill, starPlayer } from "~/db/schema";
 
 type Props = {
   params: Promise<{ gameId: string }>;
@@ -44,6 +44,7 @@ const detailsSelect = {
                   with: { roster: { with: { specialRuleToRoster: true } } },
                 },
                 skillToPosition: { with: { skill: true } },
+                keywordToPosition: { with: { keyword: true } },
               },
             },
             improvements: { with: { skill: true } },
@@ -88,6 +89,9 @@ export default async function InProgress(props: Props) {
       awayDetails: detailsSelect,
     },
   });
+  const proSkill = await db.query.skill.findFirst({
+    where: eq(skill.name, "Pro"),
+  });
   if (!game) return notFound();
   if (!game.homeDetails || !game.awayDetails) return notFound();
 
@@ -111,7 +115,10 @@ export default async function InProgress(props: Props) {
       ? (
           await db.query.starPlayer.findMany({
             where: inArray(starPlayer.name, starsToQuery),
-            with: { skillToStarPlayer: { with: { skill: true } } },
+            with: {
+              skillToStarPlayer: { with: { skill: true } },
+              keywordToStarPlayer: { with: { keyword: true } },
+            },
           })
         ).map((star) => ({
           ...star,
@@ -148,12 +155,26 @@ export default async function InProgress(props: Props) {
             )?.count ?? 0),
           players: game.homeDetails.team.players
             .filter((p) => p.membershipType === "player")
-            .sort((a, b) => a.number - b.number),
+            .sort((a, b) => a.number - b.number)
+            .map((p) => ({
+              ...p,
+              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+            })),
           journeymen: game.homeDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
-            .sort((a, b) => a.number - b.number),
+            .sort((a, b) => a.number - b.number)
+            .map((p) => ({
+              ...p,
+              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+            })),
           starPlayers: game.homeDetails.gameDetailsToStarPlayer.map(
-            (entry) => entry.starPlayerName,
+            ({ starPlayerName }) => {
+              const star = stars.find((star) => star.name === starPlayerName)!;
+              return {
+                ...star,
+                keywords: star.keywordToStarPlayer.map((k) => k.keyword),
+              };
+            },
           ),
         }}
         away={{
@@ -178,12 +199,26 @@ export default async function InProgress(props: Props) {
             )?.count ?? 0),
           players: game.awayDetails.team.players
             .filter((p) => p.membershipType === "player")
-            .sort((a, b) => a.number - b.number),
+            .sort((a, b) => a.number - b.number)
+            .map((p) => ({
+              ...p,
+              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+            })),
           journeymen: game.awayDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
-            .sort((a, b) => a.number - b.number),
+            .sort((a, b) => a.number - b.number)
+            .map((p) => ({
+              ...p,
+              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+            })),
           starPlayers: game.awayDetails.gameDetailsToStarPlayer.map(
-            (entry) => entry.starPlayerName,
+            ({ starPlayerName }) => {
+              const star = stars.find((star) => star.name === starPlayerName)!;
+              return {
+                ...star,
+                keywords: star.keywordToStarPlayer.map((k) => k.keyword),
+              };
+            },
           ),
         }}
       />
@@ -197,7 +232,7 @@ export default async function InProgress(props: Props) {
               ...player,
               ...getPlayerStats(player),
               ...getPlayerSppAndTv(player),
-              skills: getPlayerSkills(player),
+              skills: getPlayerSkills(player, proSkill),
             }))}
           cols={cols}
         />
@@ -214,7 +249,7 @@ export default async function InProgress(props: Props) {
                   ...player,
                   ...getPlayerStats(player),
                   ...getPlayerSppAndTv(player),
-                  skills: getPlayerSkills(player),
+                  skills: getPlayerSkills(player, proSkill),
                 }))}
               cols={journeymanCols}
             />
@@ -240,7 +275,7 @@ export default async function InProgress(props: Props) {
               ...player,
               ...getPlayerStats(player),
               ...getPlayerSppAndTv(player),
-              skills: getPlayerSkills(player),
+              skills: getPlayerSkills(player, proSkill),
             }))}
           cols={cols}
         />
@@ -257,7 +292,7 @@ export default async function InProgress(props: Props) {
                   ...player,
                   ...getPlayerStats(player),
                   ...getPlayerSppAndTv(player),
-                  skills: getPlayerSkills(player),
+                  skills: getPlayerSkills(player, proSkill),
                 }))}
               cols={journeymanCols}
             />

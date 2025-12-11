@@ -1,5 +1,5 @@
 import { gameDetails, team, game, roundRobinGame, season } from "~/db/schema";
-import { or, eq, and, sql } from "drizzle-orm";
+import { or, eq, and } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/utils/drizzle";
 
@@ -17,12 +17,6 @@ export default async function fetchGames({
   const homeTeam = alias(team, "home_team");
   const awayTeam = alias(team, "away_team");
 
-  const teamsQuery = db.query.team.findMany({
-    where: and(eq(team.leagueId, league)),
-    columns: { name: true, id: true },
-    orderBy: sql`LOWER(${team.name})`,
-  });
-
   const gameTeamFilter = Array.isArray(teamId)
     ? or(
         ...teamId.flatMap((id) => [
@@ -38,7 +32,7 @@ export default async function fetchGames({
     scheduled: eq(game.state, "scheduled"),
   }[state ?? "any"];
 
-  const gamesQuery = db
+  const games = await db
     .select({
       round: roundRobinGame.round,
       state: game.state,
@@ -73,6 +67,13 @@ export default async function fetchGames({
       ),
     );
 
-  const [games, teams] = await Promise.all([gamesQuery, teamsQuery]);
+  const teamMap = new Map();
+  for (const game of games) {
+    teamMap.set(game.homeDetails.teamId, game.homeDetails.teamName);
+    teamMap.set(game.awayDetails.teamId, game.awayDetails.teamName);
+  }
+  const teams = Array.from(
+    teamMap.entries().map(([id, name]) => ({ name, id })),
+  );
   return { teams, games };
 }

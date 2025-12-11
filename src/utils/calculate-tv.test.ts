@@ -5,57 +5,82 @@ import { getPlayerSppAndTv } from "./get-computed-player-fields";
 type Player = Parameters<typeof getPlayerSppAndTv>[0];
 type Team = Parameters<typeof calculateTV>[0];
 
-const mockPlayer = {
-  mvps: 1,
-  touchdowns: 1,
-  completions: 1,
-  casualties: 1,
-  deflections: 1,
-  interceptions: 1,
-  improvements: [],
-  position: {
-    cost: 50000,
-    primary: ["G"],
-    secondary: ["A", "S", "P"],
-    rosterSlot: {
-      max: 16,
-      roster: {
-        specialRuleToRoster: [],
+function mockPlayer(opts: {
+  mvps?: number;
+  touchdowns?: number;
+  completions?: number;
+  casualties?: number;
+  safeLandings?: number;
+  interceptions?: number;
+  otherSPP?: number;
+  specialRules?: string[];
+}) {
+  return {
+    mvps: opts.mvps ?? 0,
+    touchdowns: opts.touchdowns ?? 0,
+    completions: opts.completions ?? 0,
+    casualties: opts.casualties ?? 0,
+    safeLandings: opts.safeLandings ?? 0,
+    interceptions: opts.interceptions ?? 0,
+    otherSPP: opts.otherSPP ?? 0,
+    improvements: [],
+    position: {
+      cost: 50000,
+      primary: ["G"],
+      secondary: ["A", "S", "P"],
+      rosterSlot: {
+        max: 16,
+        roster: {
+          specialRuleToRoster:
+            opts.specialRules?.map((r) => ({ specialRuleName: r })) ?? [],
+        },
       },
     },
-  },
-} as unknown as Player;
+  } as unknown as Player;
+}
 
 describe("getPlayerSppAndTv", () => {
   it("calculates SPP correctly", () => {
-    const { starPlayerPoints } = getPlayerSppAndTv(mockPlayer);
-    expect(starPlayerPoints).toBe(1 + 1 + 1 + 2 + 3 + 4);
+    const { starPlayerPoints } = getPlayerSppAndTv(
+      mockPlayer({
+        mvps: 1,
+        touchdowns: 1,
+        completions: 1,
+        casualties: 1,
+        safeLandings: 1,
+        interceptions: 1,
+        otherSPP: 1,
+      }),
+    );
+    expect(starPlayerPoints).toBe(4 + 3 + 1 + 2 + 1 + 2 + 1);
+  });
+
+  it("calculates SPP correctly for Brawlin Brutes", () => {
+    const { starPlayerPoints } = getPlayerSppAndTv(
+      mockPlayer({
+        touchdowns: 2,
+        casualties: 3,
+        specialRules: ["Brawlin Brutes"],
+      }),
+    );
+    expect(starPlayerPoints).toBe(2 * 2 + 3 * 3);
   });
 
   it("calculates team value correctly for a player with no improvements", () => {
-    const { teamValue } = getPlayerSppAndTv(mockPlayer);
+    const { teamValue } = getPlayerSppAndTv(mockPlayer({}));
     expect(teamValue).toBe(50000);
   });
 
   it("handles Low Cost Linemen rule", () => {
-    const playerWithRule = {
-      ...mockPlayer,
-      position: {
-        ...mockPlayer.position,
-        rosterSlot: {
-          roster: {
-            specialRuleToRoster: [{ specialRuleName: "Low Cost Linemen" }],
-          },
-        },
-      },
-    } as Player;
-    const { teamValue } = getPlayerSppAndTv(playerWithRule);
+    const { teamValue } = getPlayerSppAndTv(
+      mockPlayer({ specialRules: ["Low Cost Linemen"] }),
+    );
     expect(teamValue).toBe(0);
   });
 
   it("calculates team value and SPP cost for a chosen secondary skill", () => {
     const playerWithImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "chosen_skill",
@@ -68,12 +93,12 @@ describe("getPlayerSppAndTv", () => {
       playerWithImprovement,
     );
     expect(teamValue).toBe(50000 + 40000);
-    expect(starPlayerPoints).toBe(1 + 1 + 1 + 2 + 3 + 4 - 12);
+    expect(starPlayerPoints).toBe(-12);
   });
 
   it("calculates team value and SPP cost for a random primary skill", () => {
     const playerWithImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "random_skill",
@@ -85,14 +110,29 @@ describe("getPlayerSppAndTv", () => {
     const { teamValue, starPlayerPoints } = getPlayerSppAndTv(
       playerWithImprovement,
     );
-    expect(teamValue).toBe(50000 + 10000);
-    expect(starPlayerPoints).toBe(1 + 1 + 1 + 2 + 3 + 4 - 3);
+    expect(teamValue).toBe(50000 + 20000);
+    expect(starPlayerPoints).toBe(-3);
+  });
+
+  it("includes extra TV for an elite skill", () => {
+    const playerWithImprovement = {
+      ...mockPlayer({}),
+      improvements: [
+        {
+          type: "random_skill",
+          skill: { category: "G", elite: true },
+          order: 0,
+        },
+      ],
+    } as unknown as Player;
+    const { teamValue } = getPlayerSppAndTv(playerWithImprovement);
+    expect(teamValue).toBe(50000 + 20000 + 10000);
   });
 
   it("calculates team value and SPP cost for a stat increase", () => {
-    const expectedSPP = 1 + 1 + 1 + 2 + 3 + 4 - 18;
+    const expectedSPP = -18;
     const playerWithMAImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "ma",
@@ -106,7 +146,7 @@ describe("getPlayerSppAndTv", () => {
     expect(sppMA).toBe(expectedSPP);
 
     const playerWithSTImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "st",
@@ -120,7 +160,7 @@ describe("getPlayerSppAndTv", () => {
     expect(sppST).toBe(expectedSPP);
 
     const playerWithAGImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "ag",
@@ -134,7 +174,7 @@ describe("getPlayerSppAndTv", () => {
     expect(sppAG).toBe(expectedSPP);
 
     const playerWithPAImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "pa",
@@ -148,7 +188,7 @@ describe("getPlayerSppAndTv", () => {
     expect(sppPA).toBe(expectedSPP);
 
     const playerWithAVImprovement = {
-      ...mockPlayer,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "av",
@@ -164,8 +204,7 @@ describe("getPlayerSppAndTv", () => {
 
   it("calculates team value and SPP cost for multiple improvements", () => {
     const playerWithImprovements = {
-      ...mockPlayer,
-      mvps: 5,
+      ...mockPlayer({}),
       improvements: [
         {
           type: "chosen_skill",
@@ -182,12 +221,12 @@ describe("getPlayerSppAndTv", () => {
       playerWithImprovements,
     );
     expect(teamValue).toBe(50000 + 20000 + 20000);
-    expect(starPlayerPoints).toBe(1 + 1 + 1 + 2 + 3 + 4 * 5 - 6 - 20);
+    expect(starPlayerPoints).toBe(-6 - 20);
   });
 });
 
 const mockTeam = {
-  players: [mockPlayer],
+  players: [mockPlayer({})],
   journeymen: [],
   apothecary: true,
   assistantCoaches: 1,
@@ -207,9 +246,9 @@ describe("calculateTV", () => {
       ...mockTeam,
       journeymen: [
         {
-          ...mockPlayer,
+          ...mockPlayer({}),
           position: {
-            ...mockPlayer.position,
+            ...mockPlayer({}).position,
             cost: 60000,
           },
         },

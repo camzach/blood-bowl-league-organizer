@@ -5,7 +5,7 @@ import { PropsWithChildren, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type Props = {
-  onSubmit: (player: string) => void;
+  onSubmit: (player: string, type: "player" | "star") => void;
   className?: string;
   stars: string[];
 } & Record<
@@ -25,11 +25,14 @@ export default function TDButton({
   className,
   children,
 }: PropsWithChildren<Props>) {
-  const { register, handleSubmit } = useForm<FormValues>();
+  const { register, handleSubmit } = useForm<FormValues>({
+    defaultValues: { scoredBy: players[0].id },
+  });
   const [isOpen, setIsOpen] = useState(false);
 
   const onFormSubmit = handleSubmit(({ scoredBy }: FormValues): void => {
-    onSubmit(scoredBy);
+    const type = stars.some((p) => p === scoredBy) ? "star" : "player";
+    onSubmit(scoredBy, type);
     setIsOpen(false);
   });
 

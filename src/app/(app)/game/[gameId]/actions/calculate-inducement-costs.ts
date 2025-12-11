@@ -7,9 +7,17 @@ function getInducementPrice(
     price: number | null;
     specialPrice: number | null;
     specialPriceRule: string | null;
+    specialPriceRoster: string | null;
   },
   specialRules: string[],
+  rosterName: string,
 ): number | null {
+  if (
+    inducement.specialPriceRoster &&
+    inducement.specialPriceRoster === rosterName
+  ) {
+    return inducement.specialPrice;
+  }
   if (
     inducement.specialPriceRule !== null &&
     specialRules.includes(inducement.specialPriceRule)
@@ -25,6 +33,7 @@ export function calculateInducementCostsFromData(
   stars: Array<string>,
   specialRules: string[],
   playerCount: number,
+  rosterName: string,
   starPlayersData: Array<
     typeof starPlayer.$inferSelect & {
       specialRuleToStarPlayer: Array<
@@ -74,10 +83,18 @@ export function calculateInducementCostsFromData(
       inducementCounts[inducement.name] = 0;
     inducementCounts[inducement.name] += inducement.quantity;
 
-    if (inducementCounts[inducement.name] > foundInducement.max)
+    let max = foundInducement.max;
+    if (
+      foundInducement.specialMaxRule &&
+      specialRules.includes(foundInducement.specialMaxRule)
+    ) {
+      max = foundInducement.specialMax as number;
+    }
+
+    if (inducementCounts[inducement.name] > max)
       throw new InducementError("Inducement maximum exceeded");
 
-    const cost = getInducementPrice(foundInducement, specialRules);
+    const cost = getInducementPrice(foundInducement, specialRules, rosterName);
     if (cost === null)
       throw new InducementError("Team cannot take the specified inducement");
     inducementCost += cost * inducement.quantity;
@@ -90,6 +107,7 @@ export async function calculateInducementCosts(
   stars: Array<string>,
   specialRules: string[],
   playerCount: number,
+  rosterName: string,
   tx: Transaction,
 ): Promise<number> {
   const starPlayersData = await tx.query.starPlayer.findMany({
@@ -114,6 +132,7 @@ export async function calculateInducementCosts(
     stars,
     specialRules,
     playerCount,
+    rosterName,
     starPlayersData,
     inducementsData,
   );

@@ -9,6 +9,7 @@ import {
   roster,
   rosterSlot,
   skill,
+  skillRelation,
   skillToPosition,
   skillToStarPlayer,
   specialRule,
@@ -20,6 +21,7 @@ import rosterSeed from "./seeds/rosters.json" with { type: "json" };
 import skillSeed from "./seeds/skills.json" with { type: "json" };
 import inducementSeed from "./seeds/inducements.json" with { type: "json" };
 import starPlayerSeed from "./seeds/starPlayers.json" with { type: "json" };
+import skillRelationsSeed from "./seeds/skillRelations.json" with { type: "json" };
 import readline from "node:readline/promises";
 import { config } from "dotenv";
 import { neonConfig } from "@neondatabase/serverless";
@@ -72,14 +74,17 @@ const starPlayers: (typeof starPlayer.$inferInsert)[] = [];
 const skillsToStarPlayers: (typeof skillToStarPlayer.$inferInsert)[] = [];
 const specialRulesToStarPlayers: (typeof specialRuleToStarPlayer.$inferInsert)[] =
   [];
+const skillRelations: (typeof skillRelation.$inferInsert)[] = [];
 
 type NotArray<T> = T extends Array<infer R> ? R : T;
 
 for (const s of skillSeed) {
   skills.push({
     name: s.name,
-    category: s.category as SkillCategory,
-    rules: s.rules,
+    category: s.category.toLowerCase() as SkillCategory,
+    rules: s.description,
+    active: s.type === "ACTIVE" ? true : s.type === "PASSIVE" ? false : null,
+    elite: s.elite ?? false,
   });
 }
 
@@ -92,7 +97,7 @@ function createPosition(
     id: posId,
     rosterSlotId: slotId,
 
-    name: p.position,
+    name: p.name,
     cost: p.cost,
     ma: p.MA,
     st: p.ST,
@@ -169,11 +174,22 @@ for (const s of starPlayerSeed) {
   }
 }
 
+for (const sr of skillRelationsSeed) {
+  skillRelations.push({
+    skillNameA: sr.skillNameA,
+    skillNameB: sr.skillNameB,
+    type: sr.type as "conflicts" | "requires",
+  });
+}
+
 const transaction = db.transaction(async (tx) => {
   const skillInsert = tx
     .insert(skill)
     .values(skills)
     .then(() => console.log("skills inserted"));
+  const skillRelationInsert = skillInsert
+    .then(() => tx.insert(skillRelation).values(skillRelations))
+    .then(() => console.log("skillRelations inserted"));
   const specialRuleInsert = tx
     .insert(specialRule)
     .values(
@@ -234,6 +250,7 @@ const transaction = db.transaction(async (tx) => {
 
   await Promise.all([
     skillInsert,
+    skillRelationInsert,
     specialRuleInsert,
     rosterInsert,
     rosterSlotInsert,

@@ -3,16 +3,28 @@ import FireButton from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
 import { Modal } from "~/components/modal";
-import { skill } from "~/db/schema";
+import { skill, skillRelation } from "~/db/schema";
 import type fetchTeam from "../../fetch-team";
+import classNames from "classnames";
+import CaptainButton from "./captain-button";
 
 type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
   skills: Array<typeof skill.$inferSelect>;
+  skillRelations: Array<typeof skillRelation.$inferSelect>;
   state: "hiring" | "improving" | "draft";
+  hasCaptainRule: boolean;
+  currentCaptainId: string | undefined;
 };
 
-export function PlayerActions({ player, skills, state }: Props) {
+export function PlayerActions({
+  player,
+  skills,
+  skillRelations,
+  state,
+  hasCaptainRule,
+  currentCaptainId,
+}: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
     Object.values(advancementCosts).some(
@@ -23,7 +35,12 @@ export function PlayerActions({ player, skills, state }: Props) {
     <>
       {state === "improving" ? (
         <button
-          className="btn btn-accent btn-sm"
+          className={classNames(
+            "btn btn-sm",
+            player.pendingRandomStat || player.pendingRandomSkill
+              ? "btn-warning"
+              : "btn-accent",
+          )}
           onClick={() => setOpen(true)}
           disabled={!canAdvance}
         >
@@ -32,12 +49,20 @@ export function PlayerActions({ player, skills, state }: Props) {
       ) : (
         <FireButton id={player.id} />
       )}
+      {hasCaptainRule &&
+        (currentCaptainId === undefined || state === "draft") && (
+          <CaptainButton
+            playerId={player.id}
+            disabled={currentCaptainId === player.id}
+          />
+        )}
       {canAdvance && (
         <Modal isOpen={isOpen} onRequestClose={() => setOpen(false)}>
           <div className="whitespace-pre-wrap">
             <Popup
               player={player}
               skills={skills}
+              skillRelations={skillRelations}
               onHide={() => setOpen(false)}
             />
           </div>

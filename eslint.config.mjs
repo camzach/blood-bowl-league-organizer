@@ -1,19 +1,16 @@
 import drizzle from "eslint-plugin-drizzle";
 import tsParser from "@typescript-eslint/parser";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import prettier from "eslint-config-prettier/flat";
+import tseslint from "typescript-eslint";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-const config = [
+const config = defineConfig([
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...nextVitals,
+  prettier,
   {
     ignores: [
       "node_modules/**",
@@ -22,23 +19,15 @@ const config = [
       "build/**",
       "next-env.d.ts",
     ],
-  },
-  ...compat.extends(
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "next/core-web-vitals",
-    "eslint-config-prettier",
-    "plugin:drizzle/all",
-  ),
-  {
+
     plugins: {
       drizzle,
     },
 
     languageOptions: {
       parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: "script",
+      ecmaVersion: "latest",
+      sourceType: "module",
 
       parserOptions: {
         project: "./tsconfig.json",
@@ -53,6 +42,7 @@ const config = [
         },
       ],
 
+      ...drizzle.configs.recommended.rules,
       "drizzle/enforce-delete-with-where": [
         "error",
         {
@@ -61,6 +51,34 @@ const config = [
       ],
     },
   },
-];
+
+  {
+    files: ["**/*.cjs"],
+
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "commonjs",
+
+      globals: {
+        // Node.js CommonJS globals
+        module: "writable",
+        exports: "writable",
+        require: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly",
+        console: "readonly",
+        Buffer: "readonly",
+        global: "readonly",
+      },
+    },
+
+    rules: {
+      // Disable TypeScript rules for .cjs files
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+]);
 
 export default config;

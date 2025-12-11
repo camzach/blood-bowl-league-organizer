@@ -4,7 +4,7 @@ import { TeamTable } from "~/components/team-table";
 import { useState, useCallback } from "react";
 import fetchTeam from "../../fetch-team";
 import { PlayerActions } from "./action-buttons";
-import { skill } from "~/db/schema";
+import { skill, skillRelation } from "~/db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
 
@@ -12,10 +12,12 @@ type Props = {
   players: FetchedTeamType["players"];
   freeNumbers: number[];
   skills: Array<typeof skill.$inferSelect>;
+  skillRelations: Array<typeof skillRelation.$inferSelect>;
   state: "draft" | "hiring" | "improving";
 };
 export function HireablePlayerManager({
   skills,
+  skillRelations,
   state,
   players,
   freeNumbers,
@@ -82,6 +84,7 @@ export function HireablePlayerManager({
         <PlayerActions
           player={player}
           skills={skills}
+          skillRelations={skillRelations}
           state={state}
           number={numbers[player.id]}
         />

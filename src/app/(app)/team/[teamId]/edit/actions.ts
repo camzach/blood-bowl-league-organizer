@@ -439,10 +439,26 @@ export const doneImproving = action
           id: true,
           state: true,
         },
+        with: {
+          players: {
+            with: {
+              pendingRandomSkill: true,
+              pendingRandomStat: true,
+            },
+          },
+        },
       });
       if (!team) throw new Error("Team not found");
       if (team.state !== "improving")
         throw new Error("Team not in Improving state");
+
+      if (
+        team.players.some((p) => p.pendingRandomSkill || p.pendingRandomStat)
+      ) {
+        throw new Error(
+          "One or more players has pending improvements that must be confirmed",
+        );
+      }
 
       await tx
         .update(dbTeam)

@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { league } from "./auth";
+import { league, user } from "./auth";
 
 export const teamStates = [
   "draft",
@@ -52,6 +52,7 @@ export const improvementTypes = [
   "chosen_skill",
   "random_skill",
   "fallback_skill",
+  "automatic_skill",
 ] as const;
 export const improvementType = pgEnum("improvement_type", improvementTypes);
 
@@ -65,6 +66,7 @@ export const skillCategories = [
   "passing",
   "strength",
   "trait",
+  "devious",
 ] as const;
 export type SkillCategory = (typeof skillCategory.enumValues)[number];
 export const skillCategory = pgEnum("skill_category", skillCategories);
@@ -126,36 +128,45 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   players: many(player),
 }));
 
-export const player = pgTable("player", {
-  id: varchar("id", { length: 25 }).notNull().primaryKey(),
-  name: varchar("name", { length: 255 }),
-  number: integer("number").notNull(),
-  nigglingInjuries: integer("niggling_injuries").notNull().default(0),
-  missNextGame: boolean("miss_next_game").notNull().default(false),
-  dead: boolean("dead").notNull().default(false),
-  agInjuries: integer("ag_injuries").notNull().default(0),
-  maInjuries: integer("ma_injuries").notNull().default(0),
-  paInjuries: integer("pa_injuries").notNull().default(0),
-  stInjuries: integer("st_injuries").notNull().default(0),
-  avInjuries: integer("av_injuries").notNull().default(0),
-  touchdowns: integer("touchdowns").notNull().default(0),
-  completions: integer("completions").notNull().default(0),
-  deflections: integer("deflections").notNull().default(0),
-  interceptions: integer("interceptions").notNull().default(0),
-  casualties: integer("casualties").notNull().default(0),
-  mvps: integer("mvps").notNull().default(0),
-  otherSPP: integer("other_spp").notNull().default(0),
-  seasonsPlayed: integer("seasons_played").notNull().default(0),
-  positionId: varchar("position_id", { length: 25 })
-    .notNull()
-    .references(() => position.id),
-  // The following two fields should be either BOTH null, or BOTH not null
-  // integer player_team_membership_nullity CHECK
-  //   ((team_id IS NULL AND membership_type IS NULL) OR
-  //    (team_id IS NOT NULL AND membership_type IS NOT NULL))
-  teamId: varchar("team_id", { length: 255 }).references(() => team.id),
-  membershipType: membershipType("membership_type"),
-});
+export const player = pgTable(
+  "player",
+  {
+    id: varchar("id", { length: 25 }).notNull().primaryKey(),
+    name: varchar("name", { length: 255 }),
+    number: integer("number").notNull(),
+    isCaptain: boolean("is_captain").notNull().default(false),
+    nigglingInjuries: integer("niggling_injuries").notNull().default(0),
+    missNextGame: boolean("miss_next_game").notNull().default(false),
+    dead: boolean("dead").notNull().default(false),
+    agInjuries: integer("ag_injuries").notNull().default(0),
+    maInjuries: integer("ma_injuries").notNull().default(0),
+    paInjuries: integer("pa_injuries").notNull().default(0),
+    stInjuries: integer("st_injuries").notNull().default(0),
+    avInjuries: integer("av_injuries").notNull().default(0),
+    touchdowns: integer("touchdowns").notNull().default(0),
+    completions: integer("completions").notNull().default(0),
+    interceptions: integer("interceptions").notNull().default(0),
+    casualties: integer("casualties").notNull().default(0),
+    safeLandings: integer("safe_landings").notNull().default(0),
+    mvps: integer("mvps").notNull().default(0),
+    otherSPP: integer("other_spp").notNull().default(0),
+    seasonsPlayed: integer("seasons_played").notNull().default(0),
+    positionId: varchar("position_id", { length: 25 })
+      .notNull()
+      .references(() => position.id),
+    // The following two fields should be either BOTH null, or BOTH not null
+    // integer player_team_membership_nullity CHECK
+    //   ((team_id IS NULL AND membership_type IS NULL) OR
+    //    (team_id IS NOT NULL AND membership_type IS NOT NULL))
+    teamId: varchar("team_id", { length: 255 }).references(() => team.id),
+    membershipType: membershipType("membership_type"),
+  },
+  (table) => [
+    uniqueIndex()
+      .on(table.teamId)
+      .where(sql`${table.isCaptain} = true`),
+  ],
+);
 export const playerRelations = relations(player, ({ one, many }) => ({
   position: one(position, {
     fields: [player.positionId],
@@ -166,6 +177,8 @@ export const playerRelations = relations(player, ({ one, many }) => ({
     references: [team.id],
   }),
   improvements: many(improvement),
+  pendingRandomSkill: one(pendingRandomSkill),
+  pendingRandomStat: one(pendingRandomStat),
 }));
 
 export const improvement = pgTable(
@@ -195,6 +208,56 @@ export const improvementRelations = relations(improvement, ({ one }) => ({
   }),
 }));
 
+export const pendingRandomSkill = pgTable("pending_random_skill", {
+  playerId: varchar("player_id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .references(() => player.id),
+  skillName1: varchar("skill_name_1", { length: 255 })
+    .notNull()
+    .references(() => skill.name),
+  skillName2: varchar("skill_name_2", { length: 255 })
+    .notNull()
+    .references(() => skill.name),
+  category: skillCategory("category").notNull(),
+});
+
+export const pendingRandomSkillRelations = relations(
+  pendingRandomSkill,
+  ({ one }) => ({
+    player: one(player, {
+      fields: [pendingRandomSkill.playerId],
+      references: [player.id],
+    }),
+    skill1: one(skill, {
+      fields: [pendingRandomSkill.skillName1],
+      references: [skill.name],
+    }),
+    skill2: one(skill, {
+      fields: [pendingRandomSkill.skillName2],
+      references: [skill.name],
+    }),
+  }),
+);
+
+export const pendingRandomStat = pgTable("pending_random_stat", {
+  playerId: varchar("player_id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .references(() => player.id),
+  roll: integer("roll").notNull(),
+});
+
+export const pendingRandomStatRelations = relations(
+  pendingRandomStat,
+  ({ one }) => ({
+    player: one(player, {
+      fields: [pendingRandomStat.playerId],
+      references: [player.id],
+    }),
+  }),
+);
+
 export const song = pgTable("song", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   data: varchar("data", { length: 255 }).notNull(),
@@ -203,7 +266,9 @@ export const song = pgTable("song", {
 export const coachToTeam = pgTable(
   "coach_to_team",
   {
-    coachId: varchar("coach_id", { length: 255 }).notNull(),
+    coachId: varchar("coach_id", { length: 255 })
+      .notNull()
+      .references(() => user.id),
     teamId: varchar("team_id", { length: 255 })
       .notNull()
       .references(() => team.id),
@@ -214,6 +279,10 @@ export const coachToTeamRelations = relations(coachToTeam, ({ one }) => ({
   team: one(team, {
     fields: [coachToTeam.teamId],
     references: [team.id],
+  }),
+  user: one(user, {
+    fields: [coachToTeam.coachId],
+    references: [user.id],
   }),
 }));
 
@@ -235,6 +304,7 @@ export const specialRule = pgTable("special_rule", {
 });
 export const specialRuleRelations = relations(specialRule, ({ many }) => ({
   specialRuleToRoster: many(specialRuleToRoster),
+  specialRuleToInducement: many(inducement),
 }));
 
 export const specialRuleToRoster = pgTable(
@@ -331,6 +401,7 @@ export const position = pgTable("position", {
 });
 export const positionRelations = relations(position, ({ many, one }) => ({
   skillToPosition: many(skillToPosition),
+  keywordToPosition: many(keywordToPosition),
   rosterSlot: one(rosterSlot, {
     fields: [position.rosterSlotId],
     references: [rosterSlot.id],
@@ -341,16 +412,31 @@ export const skill = pgTable("skill", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   rules: text("rules").notNull(),
   category: skillCategory("category").notNull(),
+  active: boolean("active"),
+  elite: boolean("elite").notNull().default(false),
 });
 
-export const skillToPosition = pgTable("skill_to_position", {
-  skillName: varchar("skill_name", { length: 255 })
-    .notNull()
-    .references(() => skill.name),
-  positionId: varchar("position_id", { length: 25 })
-    .notNull()
-    .references(() => position.id),
-});
+export const skillRelations = relations(skill, ({ many }) => ({
+  improvements: many(improvement),
+  pendingRandomSkill: many(pendingRandomSkill),
+  skillToPosition: many(skillToPosition),
+  skillToStarPlayer: many(skillToStarPlayer),
+}));
+
+export const skillToPosition = pgTable(
+  "skill_to_position",
+  {
+    skillName: varchar("skill_name", { length: 255 })
+      .notNull()
+      .references(() => skill.name),
+    positionId: varchar("position_id", { length: 25 })
+      .notNull()
+      .references(() => position.id),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.skillName, table.positionId] }),
+  }),
+);
 export const skillToPositionRelations = relations(
   skillToPosition,
   ({ one }) => ({
@@ -365,20 +451,78 @@ export const skillToPositionRelations = relations(
   }),
 );
 
+export const skillRelationType = pgEnum("skill_relation_type", [
+  "conflicts",
+  "requires",
+]);
+
+export const skillRelation = pgTable(
+  "skill_relation",
+  {
+    skillNameA: varchar("skill_name_a", { length: 255 })
+      .notNull()
+      .references(() => skill.name),
+    skillNameB: varchar("skill_name_b", { length: 255 })
+      .notNull()
+      .references(() => skill.name),
+    type: skillRelationType("type").notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.skillNameA, table.skillNameB, table.type],
+    }),
+    orderCheck: sql`("type" != 'conflicts') OR ("skill_name_a" < "skill_name_b")`,
+  }),
+);
+
+export const skillRelationRelations = relations(skillRelation, ({ one }) => ({
+  skillA: one(skill, {
+    fields: [skillRelation.skillNameA],
+    references: [skill.name],
+    relationName: "skill_a",
+  }),
+  skillB: one(skill, {
+    fields: [skillRelation.skillNameB],
+    references: [skill.name],
+    relationName: "skill_b",
+  }),
+}));
+
 export const faq = pgTable("faq", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   q: text("q").notNull(),
   a: text("a").notNull(),
 });
 
-export const faqToSkill = pgTable("faq_to_skill", {
-  skillName: varchar("skill_name", { length: 255 })
-    .notNull()
-    .references(() => skill.name),
-  faqId: varchar("faq_id", { length: 255 })
-    .notNull()
-    .references(() => faq.id),
-});
+export const faqRelations = relations(faq, ({ many }) => ({
+  faqToSkill: many(faqToSkill),
+}));
+
+export const faqToSkill = pgTable(
+  "faq_to_skill",
+  {
+    skillName: varchar("skill_name", { length: 255 })
+      .notNull()
+      .references(() => skill.name),
+    faqId: varchar("faq_id", { length: 255 })
+      .notNull()
+      .references(() => faq.id),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.skillName, table.faqId] }),
+  }),
+);
+
+export const faqToSkillRelations = relations(faqToSkill, ({ one }) => ({
+  skill: one(skill, {
+    fields: [faqToSkill.skillName],
+    references: [skill.name],
+  }),
+  faq: one(faq, {
+    fields: [faqToSkill.faqId],
+    references: [faq.id],
+  }),
+}));
 
 export const game = pgTable("game", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -519,7 +663,26 @@ export const inducement = pgTable("inducement", {
   specialPriceRule: varchar("special_price_rule", { length: 255 }).references(
     () => specialRule.name,
   ),
+  specialPriceRoster: text("special_price_roster").references(
+    () => roster.name,
+  ),
+  specialMax: integer("special_max"),
+  specialMaxRule: text("special_max_rule").references(() => specialRule.name),
 });
+export const inducementRelations = relations(inducement, ({ one }) => ({
+  specialPriceRule: one(specialRule, {
+    fields: [inducement.specialPriceRule],
+    references: [specialRule.name],
+  }),
+  specialMaxRule: one(specialRule, {
+    fields: [inducement.specialMaxRule],
+    references: [specialRule.name],
+  }),
+  specialPriceRoster: one(roster, {
+    fields: [inducement.specialPriceRoster],
+    references: [roster.name],
+  }),
+}));
 
 export const starPlayer = pgTable(
   "star_player",
@@ -544,20 +707,27 @@ export const starPlayer = pgTable(
 export const starPlayerRelations = relations(starPlayer, ({ one, many }) => ({
   skillToStarPlayer: many(skillToStarPlayer),
   specialRuleToStarPlayer: many(specialRuleToStarPlayer),
+  keywordToStarPlayer: many(keywordToStarPlayer),
   partner: one(starPlayer, {
     fields: [starPlayer.partnerName],
     references: [starPlayer.name],
   }),
 }));
 
-export const skillToStarPlayer = pgTable("skill_to_star_player", {
-  skillName: varchar("skill_name", { length: 255 })
-    .notNull()
-    .references(() => skill.name),
-  starPlayerName: varchar("star_player_name", { length: 255 })
-    .notNull()
-    .references(() => starPlayer.name),
-});
+export const skillToStarPlayer = pgTable(
+  "skill_to_star_player",
+  {
+    skillName: varchar("skill_name", { length: 255 })
+      .notNull()
+      .references(() => skill.name),
+    starPlayerName: varchar("star_player_name", { length: 255 })
+      .notNull()
+      .references(() => starPlayer.name),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.skillName, table.starPlayerName] }),
+  }),
+);
 export const skillToStarPlayerRelations = relations(
   skillToStarPlayer,
   ({ one }) => ({
@@ -572,14 +742,20 @@ export const skillToStarPlayerRelations = relations(
   }),
 );
 
-export const specialRuleToStarPlayer = pgTable("sr_to_sp", {
-  starPlayerName: varchar("star_player_name", { length: 255 })
-    .notNull()
-    .references(() => starPlayer.name),
-  specialRuleName: varchar("special_rule_name", { length: 255 })
-    .notNull()
-    .references(() => specialRule.name),
-});
+export const specialRuleToStarPlayer = pgTable(
+  "sr_to_sp",
+  {
+    starPlayerName: varchar("star_player_name", { length: 255 })
+      .notNull()
+      .references(() => starPlayer.name),
+    specialRuleName: varchar("special_rule_name", { length: 255 })
+      .notNull()
+      .references(() => specialRule.name),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.starPlayerName, table.specialRuleName] }),
+  }),
+);
 export const specialRuleToStarPlayerRelations = relations(
   specialRuleToStarPlayer,
   ({ one }) => ({
@@ -647,6 +823,59 @@ export const gameDetailsToInducementRelations = relations(
     inducement: one(inducement, {
       fields: [gameDetailsToInducement.inducementName],
       references: [inducement.name],
+    }),
+  }),
+);
+
+export const keyword = pgTable("keyword", {
+  name: text("name").primaryKey(),
+  canBeHated: boolean("can_be_hated").notNull(),
+});
+export const keywordRelations = relations(keyword, ({ many }) => ({
+  keywordToPosition: many(keywordToPosition),
+  keywordToStarPlayer: many(keywordToStarPlayer),
+}));
+
+export const keywordToPosition = pgTable("keyword_to_position", {
+  keywordName: text("keyword_name")
+    .notNull()
+    .references(() => keyword.name),
+  positionId: text("position_id")
+    .notNull()
+    .references(() => position.id),
+});
+export const keywordToPositionRelations = relations(
+  keywordToPosition,
+  ({ one }) => ({
+    position: one(position, {
+      fields: [keywordToPosition.positionId],
+      references: [position.id],
+    }),
+    keyword: one(keyword, {
+      fields: [keywordToPosition.keywordName],
+      references: [keyword.name],
+    }),
+  }),
+);
+
+export const keywordToStarPlayer = pgTable("keyword_to_star_player", {
+  keywordName: text("keyword_name")
+    .notNull()
+    .references(() => keyword.name),
+  starPlayerName: text("star_player_name")
+    .notNull()
+    .references(() => starPlayer.name),
+});
+export const keywordToStarPlayerRelations = relations(
+  keywordToStarPlayer,
+  ({ one }) => ({
+    starPlayer: one(starPlayer, {
+      fields: [keywordToStarPlayer.starPlayerName],
+      references: [starPlayer.name],
+    }),
+    keyword: one(keyword, {
+      fields: [keywordToStarPlayer.keywordName],
+      references: [keyword.name],
     }),
   }),
 );

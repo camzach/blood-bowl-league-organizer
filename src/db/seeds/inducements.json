@@ -31,14 +31,16 @@
     "name": "Bribe",
     "price": 100000,
     "specialPriceRule": "Bribery and Corruption",
-    "specialPrice": 50000
+    "specialPrice": 50000,
+    "specialMax": 6,
+    "specialMaxRule": "Bribery and Corruption"
   },
   {
     "max": 1,
     "name": "Halfling Master Chef",
     "price": 300000,
-    "specialPriceRule": "Halfling Thimble Cup",
-    "specialPrice": 100000
+    "specialPrice": 100000,
+    "specialPriceRoster": "Halfling"
   },
   {
     "max": 1,

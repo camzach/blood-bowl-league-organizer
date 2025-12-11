@@ -48,25 +48,24 @@ export const createNewTeamAction = action
       });
     });
 
-    revalidatePath("/");
     redirect(`/team/${teamId}/edit`);
   });
 
 export const redraftTeam = action
   .inputSchema(z.instanceof(FormData))
   .action(async ({ parsedInput: input }) => {
+    const inputObject = Object.fromEntries(input.entries());
     const { teamId, userId } = z
       .object({
         teamId: z.string(),
         userId: z.string(),
       })
-      .parse(input);
+      .parse(inputObject);
 
     await db.insert(coachToTeam).values({
       coachId: userId,
       teamId,
     });
 
-    revalidatePath("/");
     redirect(`/team/${teamId}/edit`);
   });

@@ -1,18 +1,29 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { MutableRefObject, useMemo } from "react";
+import React, { RefObject, useMemo } from "react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import InjuryButton from "./injury-button";
 import SPPButton from "./spp-button";
 import TDButton from "./touchdown-button";
 import { Fireworks } from "fireworks-js";
-import type { end } from "../actions";
 import SubmitButton from "./submit-button";
 import PlayerUpdatesButton from "./player-updates-button";
 import { nanoid } from "nanoid";
+import { gameEvent } from "../actions/game-events";
 
-type BasePlayer = { id: string; name: string | null; number: number };
+type BasePlayer = {
+  id: string;
+  name: string | null;
+  number: number;
+  missNextGame: boolean;
+  keywords: { name: string; canBeHated: boolean }[];
+};
+
+type StarPlayer = {
+  name: string;
+  keywords: { name: string; canBeHated: boolean }[];
+};
 
 type Props = {
   gameId: string;
@@ -26,47 +37,17 @@ type Props = {
     assistantCoaches: number;
     cheerleaders: number;
     song?: string;
-    starPlayers: string[];
+    starPlayers: StarPlayer[];
   } & Record<
     "players" | "journeymen",
     Array<BasePlayer & { nigglingInjuries: number }>
   >
 >;
 
-const touchdownEvent = z.object({
-  type: z.literal("touchdown"),
-  player: z.string(),
-});
-const injuryEvent = z.object({
-  type: z.literal("casualty"),
-  player: z.string(),
-  awardedTo: z.string().optional(),
-  injury: z.enum([
-    "regen",
-    "bh",
-    "mng",
-    "ni",
-    "st",
-    "ma",
-    "ag",
-    "av",
-    "pa",
-    "dead",
-  ]),
-});
-const sppEvent = z.object({
-  type: z.literal("spp"),
-  player: z.string(),
-  spp: z.enum(["completions", "deflections", "interceptions", "otherSPP"]),
-});
-
 const gameStateParser = z
   .object({
     events: z.array(
-      z.intersection(
-        z.discriminatedUnion("type", [touchdownEvent, injuryEvent, sppEvent]),
-        z.object({ eventId: z.string() }),
-      ),
+      z.intersection(gameEvent, z.object({ eventId: z.string() })),
     ),
   })
   .catch({ events: [] });
@@ -111,13 +92,13 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       map.set(player.id, "home");
     }
     for (const player of home.starPlayers) {
-      map.set(player, "home");
+      map.set(player.name, "home");
     }
     for (const player of [...away.players, ...away.journeymen]) {
       map.set(player.id, "away");
     }
     for (const player of away.starPlayers) {
-      map.set(player, "away");
+      map.set(player.name, "away");
     }
     return map;
   }, [
@@ -133,18 +114,19 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
     for (const player of [
       ...home.players,
       ...home.journeymen,
-      ...home.starPlayers,
       ...away.players,
       ...away.journeymen,
-      ...away.starPlayers,
     ]) {
-      if (typeof player === "string") {
-        // It's a star player
-        map.set(player, { name: player, id: player, number: 0 });
-      } else {
-        // It's a regular player
-        map.set(player.id, player);
-      }
+      map.set(player.id, player);
+    }
+    for (const player of [...home.starPlayers, ...away.starPlayers]) {
+      map.set(player.name, {
+        name: player.name,
+        id: player.name,
+        number: 0,
+        missNextGame: false,
+        keywords: player.keywords,
+      });
     }
     return map;
   }, [
@@ -156,78 +138,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
     home.starPlayers,
   ]);
 
-  const { touchdowns, casualties, playerUpdates } = gameState.events.reduce(
-    (prev, ev) => {
-      function mergePlayerUpdates(
-        id: string,
-        update: Partial<(typeof prev)["playerUpdates"][string]>,
-      ) {
-        if (home.starPlayers.includes(id) || away.starPlayers.includes(id)) {
-          return;
-        }
-        prev.playerUpdates[id] ??= {};
-        const prevUpdate = prev.playerUpdates[id];
-        if (update.injury) {
-          prevUpdate.injury = update.injury;
-        }
-        if (update.starPlayerPoints) {
-          prevUpdate.starPlayerPoints ??= {};
-          for (const [key, val] of Object.entries(update.starPlayerPoints)) {
-            prevUpdate.starPlayerPoints[
-              key as keyof typeof update.starPlayerPoints
-            ] ??= 0;
-            prevUpdate.starPlayerPoints[
-              key as keyof typeof update.starPlayerPoints
-            ]! += val ?? 0;
-          }
-        }
-      }
-      if (ev.type === "touchdown") {
-        if (playerToTeamMap.get(ev.player) === "home") {
-          prev.touchdowns[0] += 1;
-        } else {
-          prev.touchdowns[1] += 1;
-        }
-        mergePlayerUpdates(ev.player, { starPlayerPoints: { touchdowns: 1 } });
-      }
-      if (ev.type === "casualty") {
-        if (ev.awardedTo) {
-          if (
-            playerToTeamMap.get(ev.awardedTo) === "home" &&
-            !home.starPlayers.includes(ev.awardedTo)
-          ) {
-            prev.casualties[0] += 1;
-          } else if (
-            playerToTeamMap.get(ev.awardedTo) === "away" &&
-            !away.starPlayers.includes(ev.awardedTo)
-          ) {
-            prev.casualties[1] += 1;
-          }
-          mergePlayerUpdates(ev.awardedTo, {
-            starPlayerPoints: { casualties: 1 },
-          });
-        }
-        if (ev.injury !== "bh" && ev.injury !== "regen") {
-          mergePlayerUpdates(ev.player, { injury: ev.injury });
-        }
-      }
-      if (ev.type === "spp") {
-        mergePlayerUpdates(ev.player, { starPlayerPoints: { [ev.spp]: 1 } });
-      }
-
-      return prev;
-    },
-    {
-      touchdowns: [0, 0] as [number, number],
-      casualties: [0, 0] as [number, number],
-      playerUpdates: {},
-    } as Parameters<typeof end>[0],
-  );
-  function dispatchEvent<
-    T extends z.infer<
-      typeof touchdownEvent | typeof injuryEvent | typeof sppEvent
-    >,
-  >(e: T) {
+  function dispatchEvent(e: z.infer<typeof gameEvent>) {
     setGameState((old) => ({
       ...old,
       events: [...old.events, { ...e, eventId: nanoid() }],
@@ -235,16 +146,21 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   }
 
   const fireworksCanvas = useRef<HTMLCanvasElement>(null);
-  const fireworks: MutableRefObject<Fireworks | null> = useRef(null);
+  const fireworks: RefObject<Fireworks | null> = useRef(null);
   useEffect(() => {
     if (!fireworksCanvas.current) return;
     fireworks.current = new Fireworks(fireworksCanvas.current);
   }, []);
 
-  const onTD = (team: "home" | "away", player: string): void => {
+  const onTD = (
+    team: "home" | "away",
+    player: string,
+    playerType: "player" | "star",
+  ): void => {
     dispatchEvent({
       type: "touchdown",
       player: player,
+      playerType,
     });
 
     const fw = fireworks.current;
@@ -271,6 +187,28 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
     if (player === undefined) return;
   };
 
+  const [touchdowns, casualties] = gameState.events.reduce(
+    (acc, curr) => {
+      const [touchdowns, casualties] = acc;
+
+      if (curr.type === "touchdown") {
+        const team = playerToTeamMap.get(curr.player) === "home" ? 0 : 1;
+        touchdowns[team] += 1;
+      }
+      if (curr.type === "casualty" && curr.injury.causedBy?.type === "player") {
+        const team =
+          playerToTeamMap.get(curr.injury.causedBy.player) === "home" ? 0 : 1;
+        casualties[team] += 1;
+      }
+
+      return acc;
+    },
+    [
+      [0, 0],
+      [0, 0],
+    ],
+  );
+
   return (
     <div className="col-span-2 grid grid-cols-subgrid gap-y-3">
       <div className="pointer-events-none fixed top-0 right-1/3 bottom-0 left-1/3">
@@ -288,10 +226,10 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         <span className="text-xl">
           <TDButton
             className="btn-outline btn-accent btn-sm mx-2"
-            onSubmit={(player) => onTD("home", player)}
+            onSubmit={(player, type) => onTD("home", player, type)}
             players={home.players}
             journeymen={home.journeymen}
-            stars={home.starPlayers}
+            stars={home.starPlayers.map((p) => p.name)}
           >
             +1
           </TDButton>
@@ -300,14 +238,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         <span className="text-xl">
           <InjuryButton
             className="btn-outline btn-accent btn-sm mx-2"
-            onSubmit={(options) =>
-              dispatchEvent({
-                type: "casualty",
-                player: options.player,
-                awardedTo: options.by,
-                injury: options.injury,
-              })
-            }
+            onSubmit={dispatchEvent}
             actors={{
               players: home.players,
               journeymen: home.journeymen,
@@ -324,13 +255,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           Casualties {casualties[0]}
         </span>
         <SPPButton
-          onSubmit={(player, type) => {
-            dispatchEvent({
-              type: "spp",
-              spp: type,
-              player: player.id,
-            });
-          }}
+          onSubmit={dispatchEvent}
           players={home.players}
           journeymen={home.journeymen}
           className="btn-outline btn-accent btn-sm"
@@ -351,10 +276,10 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           {touchdowns[1]} Touchdowns
           <TDButton
             className="btn-outline btn-accent btn-sm mx-2"
-            onSubmit={(player) => onTD("away", player)}
+            onSubmit={(player, type) => onTD("away", player, type)}
             players={away.players}
             journeymen={away.journeymen}
-            stars={away.starPlayers}
+            stars={away.starPlayers.map((p) => p.name)}
           >
             +1
           </TDButton>
@@ -363,14 +288,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           {casualties[1]} Casualties
           <InjuryButton
             className="btn-outline btn-accent btn-sm mx-2"
-            onSubmit={(options) => {
-              dispatchEvent({
-                type: "casualty",
-                player: options.player,
-                awardedTo: options.by,
-                injury: options.injury,
-              });
-            }}
+            onSubmit={dispatchEvent}
             actors={{
               players: away.players,
               journeymen: away.journeymen,
@@ -386,13 +304,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           </InjuryButton>
         </span>
         <SPPButton
-          onSubmit={(player, type) => {
-            dispatchEvent({
-              type: "spp",
-              spp: type,
-              player: player.id,
-            });
-          }}
+          onSubmit={dispatchEvent}
           players={away.players}
           journeymen={away.journeymen}
           className="btn-outline btn-accent btn-sm"
@@ -403,19 +315,14 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       </div>
       <div className="join col-span-2 mx-auto">
         <SubmitButton
-          submission={{ game: gameId, touchdowns, casualties, playerUpdates }}
-          homeTeam={home.name}
-          awayTeam={away.name}
+          events={gameState.events}
+          gameId={gameState.game}
+          homeTeam={home}
+          awayTeam={away}
           className="btn-outline join-item"
         />
         <InjuryButton
-          onSubmit={(options) =>
-            dispatchEvent({
-              type: "casualty",
-              player: options.player,
-              injury: options.injury,
-            })
-          }
+          onSubmit={dispatchEvent}
           targets={{
             players: home.players,
             journeymen: home.journeymen,
@@ -426,13 +333,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           Casualty (non-Block) (home)
         </InjuryButton>
         <InjuryButton
-          onSubmit={(options) => {
-            dispatchEvent({
-              type: "casualty",
-              player: options.player,
-              injury: options.injury,
-            });
-          }}
+          onSubmit={dispatchEvent}
           targets={{
             players: away.players,
             journeymen: away.journeymen,

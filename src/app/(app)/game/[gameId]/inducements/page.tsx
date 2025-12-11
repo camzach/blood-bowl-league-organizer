@@ -7,28 +7,34 @@ import {
   specialRuleToStarPlayer,
   starPlayer,
 } from "~/db/schema";
-import { eq, getTableColumns, inArray, isNotNull, or } from "drizzle-orm";
+import { eq, getTableColumns, inArray } from "drizzle-orm";
 
-function getChoicesForSpecialRules(rules: string[]) {
-  const inducements = db
-    .select()
-    .from(inducement)
-    .where(
-      or(
-        isNotNull(inducement.price),
-        inArray(inducement.specialPriceRule, rules),
-      ),
-    )
-    .then((res) =>
-      res.map((i) => ({
+async function getInducementOptions(rules: string[], rosterName: string) {
+  const allInducements = await db.select().from(inducement);
+
+  const inducementsPromise = allInducements
+    .map((i) => {
+      let price = i.price;
+      if (i.specialPriceRoster === rosterName) {
+        price = i.specialPrice;
+      } else if (i.specialPriceRule && rules.includes(i.specialPriceRule)) {
+        price = i.specialPrice;
+      }
+
+      let max = i.max;
+      if (i.specialMaxRule && rules.includes(i.specialMaxRule)) {
+        max = i.specialMax as number;
+      }
+
+      return {
         ...i,
-        price: (i.specialPriceRule !== null &&
-        rules.includes(i.specialPriceRule)
-          ? i.specialPrice
-          : i.price) as number,
-      })),
-    );
-  const stars = db
+        price: price as number,
+        max,
+      };
+    })
+    .filter((i) => i.price !== null);
+
+  const starsPromise = db
     .selectDistinct(getTableColumns(starPlayer))
     .from(starPlayer)
     .leftJoin(
@@ -37,10 +43,13 @@ function getChoicesForSpecialRules(rules: string[]) {
     )
     .where(inArray(specialRuleToStarPlayer.specialRuleName, rules))
     .orderBy(starPlayer.name);
-  return Promise.all([inducements, stars]).then(([inducements, stars]) => ({
-    inducements,
-    stars,
-  }));
+
+  return Promise.all([inducementsPromise, starsPromise]).then(
+    ([inducements, stars]) => ({
+      inducements,
+      stars,
+    }),
+  );
 }
 
 const detailsSelection = {
@@ -51,7 +60,12 @@ const detailsSelection = {
         name: true,
         chosenSpecialRuleName: true,
       },
-      with: { roster: { with: { specialRuleToRoster: true } } },
+      with: {
+        roster: {
+          with: { specialRuleToRoster: true },
+          columns: { name: true },
+        },
+      },
     },
   },
 } as const;
@@ -67,6 +81,8 @@ export default async function Inducements(props: {
     where: eq(dbGame.id, decodeURIComponent(gameId)),
     columns: {
       state: true,
+      homeDetailsId: true,
+      awayDetailsId: true,
     },
     with: {
       homeDetails: detailsSelection,
@@ -96,11 +112,13 @@ export default async function Inducements(props: {
     return rules;
   }
 
-  const homeOptions = await getChoicesForSpecialRules(
+  const homeOptions = await getInducementOptions(
     getTeamSpecialRules(game.homeDetails.team),
+    game.homeDetails.team.roster.name,
   );
-  const awayOptions = await getChoicesForSpecialRules(
+  const awayOptions = await getInducementOptions(
     getTeamSpecialRules(game.awayDetails.team),
+    game.awayDetails.team.roster.name,
   );
 
   return (

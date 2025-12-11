@@ -2,7 +2,7 @@
 import { Popup, advancementCosts } from "../player-controls/advancement-modal";
 import { useState } from "react";
 import { Modal } from "~/components/modal";
-import { skill } from "~/db/schema";
+import { skill, skillRelation } from "~/db/schema";
 import type fetchTeam from "../../fetch-team";
 import PlayerHirer from "./hire-button";
 
@@ -10,10 +10,17 @@ type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
   number: number;
   skills: Array<typeof skill.$inferSelect>;
+  skillRelations: Array<typeof skillRelation.$inferSelect>;
   state: "hiring" | "improving" | "draft";
 };
 
-export function PlayerActions({ player, skills, state, number }: Props) {
+export function PlayerActions({
+  player,
+  skills,
+  skillRelations,
+  state,
+  number,
+}: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
     Object.values(advancementCosts).some(
@@ -40,6 +47,7 @@ export function PlayerActions({ player, skills, state, number }: Props) {
             <Popup
               player={player}
               skills={skills}
+              skillRelations={skillRelations}
               onHide={() => setOpen(false)}
             />
           </div>

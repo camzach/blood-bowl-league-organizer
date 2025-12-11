@@ -43,6 +43,9 @@ describe("calculate inducement costs", () => {
       price: 50000,
       specialPrice: null,
       specialPriceRule: null,
+      specialPriceRoster: null,
+      specialMax: null,
+      specialMaxRule: null,
     },
     {
       name: "inducement-2",
@@ -50,6 +53,9 @@ describe("calculate inducement costs", () => {
       price: 10000,
       specialPrice: 5000,
       specialPriceRule: "special-rule-1",
+      specialPriceRoster: null,
+      specialMax: null,
+      specialMaxRule: null,
     },
     {
       name: "inducement-3",
@@ -57,6 +63,27 @@ describe("calculate inducement costs", () => {
       price: null,
       specialPrice: 50000,
       specialPriceRule: "special-rule-1",
+      specialPriceRoster: null,
+      specialMax: null,
+      specialMaxRule: null,
+    },
+    {
+      name: "Halfling Master Chef",
+      max: 1,
+      price: 300000,
+      specialPrice: 100000,
+      specialPriceRoster: "Halfling",
+      specialMax: null,
+      specialMaxRule: null,
+    },
+    {
+      name: "Bribe",
+      max: 3,
+      price: 100000,
+      specialPrice: 50000,
+      specialPriceRule: "Bribery and Corruption",
+      specialMax: 6,
+      specialMaxRule: "Bribery and Corruption",
     },
   ] as Array<typeof inducement.$inferSelect>;
 
@@ -66,6 +93,7 @@ describe("calculate inducement costs", () => {
       [],
       [],
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -79,6 +107,7 @@ describe("calculate inducement costs", () => {
       [],
       [],
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -95,6 +124,7 @@ describe("calculate inducement costs", () => {
       [],
       [],
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -108,6 +138,7 @@ describe("calculate inducement costs", () => {
       [],
       ["special-rule-1"],
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -122,6 +153,7 @@ describe("calculate inducement costs", () => {
         [],
         [],
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -135,6 +167,7 @@ describe("calculate inducement costs", () => {
       [],
       ["special-rule-1"],
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -149,6 +182,7 @@ describe("calculate inducement costs", () => {
       stars,
       specialRules,
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -163,6 +197,7 @@ describe("calculate inducement costs", () => {
       stars,
       specialRules,
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );
@@ -177,6 +212,7 @@ describe("calculate inducement costs", () => {
         stars,
         [],
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -191,6 +227,7 @@ describe("calculate inducement costs", () => {
         stars,
         [],
         16,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -205,6 +242,7 @@ describe("calculate inducement costs", () => {
         [],
         [],
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -219,10 +257,80 @@ describe("calculate inducement costs", () => {
         [],
         [],
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
     ).toThrow("Inducement maximum exceeded");
+  });
+
+  it("should use special max for bribes", () => {
+    const inducements = [{ name: "Bribe", quantity: 6 }];
+    const specialRules = ["Bribery and Corruption"];
+    calculateInducementCostsFromData(
+      inducements,
+      [],
+      specialRules,
+      11,
+      "Some Roster",
+      mockStarPlayersData,
+      mockInducementsData,
+    );
+    expect(() =>
+      calculateInducementCostsFromData(
+        inducements,
+        [],
+        [],
+        11,
+        "Some Roster",
+        mockStarPlayersData,
+        mockInducementsData,
+      ),
+    ).toThrow("Inducement maximum exceeded");
+  });
+
+  it("should throw error if inducement maximum exceeded for special max", () => {
+    const inducements = [{ name: "Bribe", quantity: 7 }];
+    const specialRules = ["Bribery and Corruption"];
+    expect(() =>
+      calculateInducementCostsFromData(
+        inducements,
+        [],
+        specialRules,
+        11,
+        "Some Roster",
+        mockStarPlayersData,
+        mockInducementsData,
+      ),
+    ).toThrow("Inducement maximum exceeded");
+  });
+
+  it("should use roster-specific pricing", () => {
+    const inducements = [{ name: "Halfling Master Chef", quantity: 1 }];
+    const result = calculateInducementCostsFromData(
+      inducements,
+      [],
+      [],
+      11,
+      "Halfling",
+      mockStarPlayersData,
+      mockInducementsData,
+    );
+    expect(result).toBe(100000);
+  });
+
+  it("should not use roster-specific pricing for other rosters", () => {
+    const inducements = [{ name: "Halfling Master Chef", quantity: 1 }];
+    const result = calculateInducementCostsFromData(
+      inducements,
+      [],
+      [],
+      11,
+      "Some Other Roster",
+      mockStarPlayersData,
+      mockInducementsData,
+    );
+    expect(result).toBe(300000);
   });
 
   it("should throw error for invalid star player selection (missing special rule)", () => {
@@ -234,6 +342,7 @@ describe("calculate inducement costs", () => {
         stars,
         [],
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -249,6 +358,7 @@ describe("calculate inducement costs", () => {
         stars,
         specialRules,
         11,
+        "Some Roster",
         mockStarPlayersData,
         mockInducementsData,
       ),
@@ -263,6 +373,7 @@ describe("calculate inducement costs", () => {
       stars,
       specialRules,
       11,
+      "Some Roster",
       mockStarPlayersData,
       mockInducementsData,
     );

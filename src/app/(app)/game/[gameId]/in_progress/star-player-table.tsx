@@ -21,6 +21,7 @@ export default function StarPlayerTable({ stars }: Props) {
         nigglingInjuries: 0,
         starPlayerPoints: 0,
         position: { name: "STAR" },
+        isCaptain: false,
       }))}
       cols={[
         "name",

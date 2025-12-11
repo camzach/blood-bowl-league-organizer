@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import PopupButton from "~/components/popup-button";
 import { GameState } from "./score-widget";
@@ -31,9 +30,9 @@ export default function PlayerUpdatesButton({
     st: "lost a ST",
   };
   const prettySPP = {
-    completions: "completed a pass",
-    deflections: "deflected a pass",
-    interceptions: "intercepted a pass",
+    completion: "completed a pass",
+    interception: "intercepted a pass",
+    safeLanding: "landed safely after being thrown",
     otherSPP: "earned misc. SPP",
   };
 
@@ -42,11 +41,13 @@ export default function PlayerUpdatesButton({
       case "touchdown":
         return `Touchdown scored by ${identifyPlayer(e.player)}`;
       case "casualty":
-        return `${identifyPlayer(e.player)} ${prettyInjury[e.injury]} ${
-          e.awardedTo ? "by " + identifyPlayer(e.awardedTo) : ""
+        return `${identifyPlayer(e.player)} ${prettyInjury[e.injury.type]} ${
+          e.injury.causedBy
+            ? "by " + identifyPlayer(e.injury.causedBy?.player)
+            : ""
         }`;
-      case "spp":
-        return `${identifyPlayer(e.player)} ${prettySPP[e.spp]}`;
+      default:
+        return `${identifyPlayer(e.player)} ${prettySPP[e.type]}`;
     }
   }
   return (

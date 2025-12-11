@@ -6,7 +6,7 @@ import { team as dbTeam, season, team } from "~/db/schema";
 import { auth } from "~/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, not } from "drizzle-orm";
 import SignoutButton from "~/components/signout-button";
 import { isLeagueAdmin } from "~/utils/is-league-admin";
 import LeagueSelector from "~/components/league-selector";
@@ -32,7 +32,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const drawerId = "_drawer_";
 
   const teams = await db.query.team.findMany({
-    where: eq(dbTeam.leagueId, session.activeOrganizationId ?? ""),
+    where: and(
+      not(eq(dbTeam.state, "draft")),
+      eq(dbTeam.leagueId, session.activeOrganizationId ?? ""),
+    ),
     orderBy: team.name,
   });
 
