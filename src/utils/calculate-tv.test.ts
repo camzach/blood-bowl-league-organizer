@@ -93,7 +93,7 @@ describe("getPlayerSppAndTv", () => {
       playerWithImprovement,
     );
     expect(teamValue).toBe(50000 + 40000);
-    expect(starPlayerPoints).toBe(-12);
+    expect(starPlayerPoints).toBe(-10);
   });
 
   it("calculates team value and SPP cost for a random primary skill", () => {
@@ -130,7 +130,7 @@ describe("getPlayerSppAndTv", () => {
   });
 
   it("calculates team value and SPP cost for a stat increase", () => {
-    const expectedSPP = -18;
+    const expectedSPP = -14;
     const playerWithMAImprovement = {
       ...mockPlayer({}),
       improvements: [
@@ -156,7 +156,7 @@ describe("getPlayerSppAndTv", () => {
     } as unknown as Player;
     const { teamValue: teamValueST, starPlayerPoints: sppST } =
       getPlayerSppAndTv(playerWithSTImprovement);
-    expect(teamValueST).toBe(50000 + 80000);
+    expect(teamValueST).toBe(50000 + 60000);
     expect(sppST).toBe(expectedSPP);
 
     const playerWithAGImprovement = {
@@ -170,7 +170,7 @@ describe("getPlayerSppAndTv", () => {
     } as unknown as Player;
     const { teamValue: teamValueAG, starPlayerPoints: sppAG } =
       getPlayerSppAndTv(playerWithAGImprovement);
-    expect(teamValueAG).toBe(50000 + 40000);
+    expect(teamValueAG).toBe(50000 + 30000);
     expect(sppAG).toBe(expectedSPP);
 
     const playerWithPAImprovement = {
@@ -221,7 +221,7 @@ describe("getPlayerSppAndTv", () => {
       playerWithImprovements,
     );
     expect(teamValue).toBe(50000 + 20000 + 20000);
-    expect(starPlayerPoints).toBe(-6 - 20);
+    expect(starPlayerPoints).toBe(-6 - 16);
   });
 });
 
