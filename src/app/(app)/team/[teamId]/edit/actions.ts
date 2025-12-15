@@ -485,9 +485,31 @@ export const ready = action
           state: true,
           treasury: true,
         },
-        with: { players: { where: eq(dbPlayer.membershipType, "player") } },
+        with: {
+          players: {
+            where: eq(dbPlayer.membershipType, "player"),
+            with: {
+              position: {
+                with: {
+                  skillToPosition: true,
+                },
+              },
+            },
+          },
+        },
       });
       if (!team) throw new Error("Team not found");
+
+      const insignificantPlayers = team.players.filter((p) =>
+        p.position.skillToPosition.some((s) => s.skillName === "Insignificant"),
+      ).length;
+
+      if (insignificantPlayers > team.players.length / 2) {
+        throw new Error(
+          "You may not have more players with Insignificant than without",
+        );
+      }
+
       if (team.state !== "draft" && team.state !== "hiring")
         throw new Error("Team not in Draft or Hiring state");
       if (team.state === "draft" && team.players.length < 11)

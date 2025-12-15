@@ -862,11 +862,15 @@ export const end = action
                   where: eq(skill.name, hatredSkillName),
                 });
                 if (!existingSkill) {
+                  const baseHatredSkill = await tx.query.skill.findFirst({
+                    where: eq(skill.name, "Hatred"),
+                  });
+                  if (!baseHatredSkill) {
+                    throw new Error("Failed to find Hatred skill");
+                  }
                   await tx.insert(skill).values({
+                    ...baseHatredSkill,
                     name: hatredSkillName,
-                    rules:
-                      "HATRED RULES TEXT HATRED RULES TEXT HATRED RULES TEXT",
-                    category: "trait",
                   });
                 }
                 const fetchedPlayer = players.find((p) => p.id === ev.player);

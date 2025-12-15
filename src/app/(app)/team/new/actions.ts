@@ -2,7 +2,6 @@
 
 import { coachToTeam, optionalSpecialRuleToRoster, team } from "~/db/schema";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
 import nanoid from "~/utils/nanoid";
