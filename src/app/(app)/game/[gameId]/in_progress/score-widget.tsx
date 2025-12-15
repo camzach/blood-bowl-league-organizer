@@ -1,7 +1,7 @@
 "use client";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { RefObject, useMemo } from "react";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useMemo } from "react";
+import { createParser, useQueryState } from "nuqs";
+import { useEffect, useRef } from "react";
 import { z } from "zod";
 import InjuryButton from "./injury-button";
 import SPPButton from "./spp-button";
@@ -44,47 +44,29 @@ type Props = {
   >
 >;
 
-const gameStateParser = z
-  .object({
-    events: z.array(
-      z.intersection(gameEvent, z.object({ eventId: z.string() })),
-    ),
-  })
-  .catch({ events: [] });
+const gameEventsCodec = z.codec(
+  z.string(),
+  z.array(z.intersection(gameEvent, z.object({ eventId: z.string() }))),
+  {
+    encode: (state) => encodeURIComponent(btoa(JSON.stringify(state))),
+    decode: (query) => JSON.parse(atob(decodeURIComponent(query))),
+  },
+);
+const gameStateParser = createParser({
+  parse: gameEventsCodec.parse,
+  serialize: gameEventsCodec.encode,
+});
 
-export type GameState = z.infer<typeof gameStateParser>;
-
-function safeParse(input: string): unknown {
-  try {
-    return JSON.parse(input);
-  } catch {
-    return null;
-  }
-}
+export type GameState = z.infer<typeof gameEventsCodec>;
 
 export default function ScoreWidget({ home, away, gameId }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const homeSongRef = useRef<HTMLAudioElement>(null);
   const awaySongRef = useRef<HTMLAudioElement>(null);
-  const [gameState, setGameState] = useState<GameState & { game: string }>(
-    () => {
-      const encodedGameState = searchParams?.get("gameState") ?? "";
-      return {
-        game: gameId,
-        ...gameStateParser.parse(
-          safeParse(atob(decodeURIComponent(encodedGameState))),
-        ),
-      };
-    },
-  );
 
-  useEffect(() => {
-    const newParams = new URLSearchParams(searchParams?.toString() ?? "");
-    newParams.set("gameState", btoa(JSON.stringify(gameState)));
-    router.replace(`?${newParams.toString()}`);
-  }, [gameState, pathname, router, searchParams]);
+  const [gameState, setGameState] = useQueryState("gameState", {
+    ...gameStateParser,
+    defaultValue: [],
+  });
 
   const playerToTeamMap = useMemo(() => {
     const map = new Map<string, "home" | "away">();
@@ -139,10 +121,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   ]);
 
   function dispatchEvent(e: z.infer<typeof gameEvent>) {
-    setGameState((old) => ({
-      ...old,
-      events: [...old.events, { ...e, eventId: nanoid() }],
-    }));
+    setGameState((old) => [...old, { ...e, eventId: nanoid() }]);
   }
 
   const fireworksCanvas = useRef<HTMLCanvasElement>(null);
@@ -187,7 +166,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
     if (player === undefined) return;
   };
 
-  const [touchdowns, casualties] = gameState.events.reduce(
+  const [touchdowns, casualties] = gameState.reduce(
     (acc, curr) => {
       const [touchdowns, casualties] = acc;
 
@@ -315,8 +294,8 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
       </div>
       <div className="join col-span-2 mx-auto">
         <SubmitButton
-          events={gameState.events}
-          gameId={gameState.game}
+          events={gameState}
+          gameId={gameId}
           homeTeam={home}
           awayTeam={away}
           className="btn-outline join-item"
@@ -344,12 +323,9 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           Casualty (non-Block) (away)
         </InjuryButton>
         <PlayerUpdatesButton
-          events={gameState.events}
+          events={gameState}
           removeEvent={(eventId) =>
-            setGameState((old) => ({
-              ...old,
-              events: old.events.filter((e) => e.eventId !== eventId),
-            }))
+            setGameState((old) => old.filter((e) => e.eventId !== eventId))
           }
           playerMap={idToPlayerMap}
         />

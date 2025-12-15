@@ -3,7 +3,7 @@ import PopupButton from "~/components/popup-button";
 import { GameState } from "./score-widget";
 
 type Props = {
-  events: GameState["events"];
+  events: GameState;
   playerMap: Map<string, { name: string | null; id: string; number: number }>;
   removeEvent: (id: string) => void;
 };
