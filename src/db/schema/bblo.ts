@@ -836,14 +836,18 @@ export const keywordRelations = relations(keyword, ({ many }) => ({
   keywordToStarPlayer: many(keywordToStarPlayer),
 }));
 
-export const keywordToPosition = pgTable("keyword_to_position", {
-  keywordName: text("keyword_name")
-    .notNull()
-    .references(() => keyword.name),
-  positionId: text("position_id")
-    .notNull()
-    .references(() => position.id),
-});
+export const keywordToPosition = pgTable(
+  "keyword_to_position",
+  {
+    keywordName: text("keyword_name")
+      .notNull()
+      .references(() => keyword.name),
+    positionId: text("position_id")
+      .notNull()
+      .references(() => position.id),
+  },
+  (table) => [primaryKey({ columns: [table.keywordName, table.positionId] })],
+);
 export const keywordToPositionRelations = relations(
   keywordToPosition,
   ({ one }) => ({
@@ -858,14 +862,20 @@ export const keywordToPositionRelations = relations(
   }),
 );
 
-export const keywordToStarPlayer = pgTable("keyword_to_star_player", {
-  keywordName: text("keyword_name")
-    .notNull()
-    .references(() => keyword.name),
-  starPlayerName: text("star_player_name")
-    .notNull()
-    .references(() => starPlayer.name),
-});
+export const keywordToStarPlayer = pgTable(
+  "keyword_to_star_player",
+  {
+    keywordName: text("keyword_name")
+      .notNull()
+      .references(() => keyword.name),
+    starPlayerName: text("star_player_name")
+      .notNull()
+      .references(() => starPlayer.name),
+  },
+  (table) => [
+    primaryKey({ columns: [table.keywordName, table.starPlayerName] }),
+  ],
+);
 export const keywordToStarPlayerRelations = relations(
   keywordToStarPlayer,
   ({ one }) => ({
