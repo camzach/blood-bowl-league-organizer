@@ -2,8 +2,8 @@
 import type { TeamTableProps } from "~/components/team-table";
 import { TeamTable } from "~/components/team-table";
 import { useState, useCallback } from "react";
-import fetchTeam from "../../fetch-team";
-import { PlayerActions } from "../player-controls/action-buttons";
+import fetchTeam from "../fetch-team";
+import { PlayerActions } from "./player-controls/action-buttons";
 import { skill, skillRelation } from "~/db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
