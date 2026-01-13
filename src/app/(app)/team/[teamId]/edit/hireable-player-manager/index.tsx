@@ -3,7 +3,7 @@ import type { TeamTableProps } from "~/components/team-table";
 import { TeamTable } from "~/components/team-table";
 import { useState, useCallback } from "react";
 import fetchTeam from "../../fetch-team";
-import { PlayerActions } from "./action-buttons";
+import { PlayerActions } from "../player-controls/action-buttons";
 import { skill, skillRelation } from "~/db/schema";
 
 type FetchedTeamType = Exclude<Awaited<ReturnType<typeof fetchTeam>>, null>;
@@ -86,7 +86,8 @@ export function HireablePlayerManager({
           skills={skills}
           skillRelations={skillRelations}
           state={state}
-          number={numbers[player.id]}
+          hasCaptainRule={false}
+          currentCaptainId={undefined}
         />
       ),
     },

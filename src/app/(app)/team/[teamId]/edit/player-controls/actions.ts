@@ -122,8 +122,6 @@ export const fire = action
       });
       if (!player) throw new Error("Player does not exist");
       if (player.team === null) throw new Error("Player is not on any team");
-      if (player.membershipType !== "player")
-        throw new Error("Player is not fireable");
 
       if (player.isCaptain) {
         const hasInjury =

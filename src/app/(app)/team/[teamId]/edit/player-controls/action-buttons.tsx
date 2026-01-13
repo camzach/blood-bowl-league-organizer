@@ -7,6 +7,7 @@ import { skill, skillRelation } from "~/db/schema";
 import type fetchTeam from "../../fetch-team";
 import classNames from "classnames";
 import CaptainButton from "./captain-button";
+import HireButton from "./hire-button";
 
 type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
@@ -47,7 +48,13 @@ export function PlayerActions({
           Spend SPP
         </button>
       ) : (
-        <FireButton id={player.id} />
+        <>
+          {player.membershipType === "journeyman" ||
+            (player.membershipType === "retired" && (
+              <HireButton player={player.id} number={player.number} />
+            ))}
+          <FireButton id={player.id} />
+        </>
       )}
       {hasCaptainRule &&
         (currentCaptainId === undefined || state === "draft") && (
