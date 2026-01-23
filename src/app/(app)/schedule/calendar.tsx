@@ -10,6 +10,9 @@ import {
   isSameDay,
   isSameMonth,
   addMonths,
+  endOfMonth,
+  endOfWeek,
+  differenceInDays,
 } from "date-fns";
 import classNames from "classnames";
 import Link from "next/link";
@@ -37,6 +40,7 @@ export default function Calendar(props: Props) {
   month = startOfMonth(month);
 
   const firstDay = startOfWeek(month);
+  const nDays = differenceInDays(endOfWeek(endOfMonth(month)), firstDay);
 
   const nextMonth = addMonths(month, 1);
   const nextMonthSearch = new URLSearchParams(searchParams);
@@ -71,7 +75,7 @@ export default function Calendar(props: Props) {
         </button>
       </span>
       <div className="grid auto-rows-fr grid-cols-[repeat(7,1fr)] gap-3 overflow-scroll">
-        {Array.from(Array(6 * 7), (_, i) => addDays(firstDay, i)).map(
+        {Array.from(Array(nDays + 1), (_, i) => addDays(firstDay, i)).map(
           (date) => {
             const gameList = props.games.filter(
               (game) => game.time && isSameDay(game.time, date),
