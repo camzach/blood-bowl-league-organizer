@@ -801,6 +801,9 @@ export const end = action
             const injury = ev.injury;
             const playerUpdate = playerUpdates[ev.player];
 
+            if (injury.type === "mng") {
+              playerUpdate.missNextGame = true;
+            }
             if (
               injury.type === "ma" ||
               injury.type === "st" ||
@@ -823,7 +826,7 @@ export const end = action
               playerUpdate.dead = true;
             }
 
-            if (injury.causedBy) {
+            if (injury.causedBy && injury.type !== "bh") {
               let offenderKeywords: string[];
               const causedByPlayer = injury.causedBy.player;
 
