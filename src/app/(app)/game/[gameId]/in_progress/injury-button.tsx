@@ -45,7 +45,7 @@ export default function InjuryButton({
   children,
   onSubmit,
 }: PropsWithChildren<Props>) {
-  const { register, handleSubmit, control } = useForm<FormValues>({
+  const { register, handleSubmit, setValue, control } = useForm<FormValues>({
     defaultValues: {
       type: "bh",
       causingPlayer:
@@ -56,8 +56,11 @@ export default function InjuryButton({
         targets.players[0]?.id ??
         targets.journeymen[0]?.id ??
         targets.stars[0]?.name,
-      keyword: (actors?.players[0] ?? actors?.journeymen[0] ?? actors?.stars[0])
-        ?.keywords[0]?.name,
+      keyword: (
+        actors?.players[0] ??
+        actors?.journeymen[0] ??
+        actors?.stars[0]
+      )?.keywords.filter((k) => k.canBeHated)[0]?.name,
     },
   });
   const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +74,8 @@ export default function InjuryButton({
     allActors.find((p) => p.id === causingPlayerId) ??
     allStars.find((p) => p.name === causingPlayerId);
 
-  const causingPlayerKeywords = causingPlayer?.keywords ?? [];
+  const causingPlayerKeywords =
+    causingPlayer?.keywords.filter((k) => k.canBeHated) ?? [];
 
   const onFormSubmit = handleSubmit((data) => {
     const keyword = data.keyword;
@@ -169,7 +173,18 @@ export default function InjuryButton({
                 Caused By:
                 <select
                   className="select select-bordered select-sm"
-                  {...register("causingPlayer")}
+                  {...register("causingPlayer", {
+                    onChange(e) {
+                      const player =
+                        allActors.find((p) => p.id === e.target.value) ??
+                        allStars.find((p) => p.name === e.target.value)!;
+
+                      setValue(
+                        "keyword",
+                        player.keywords.filter((k) => k.canBeHated)[0].name,
+                      );
+                    },
+                  })}
                 >
                   <optgroup label="Rostered Players">
                     {actors.players.map((p) => (
@@ -205,6 +220,7 @@ export default function InjuryButton({
                   Keyword:
                   <select
                     className="select select-bordered select-sm"
+                    disabled={causingPlayerKeywords.length < 2}
                     {...register("keyword")}
                   >
                     {causingPlayerKeywords
