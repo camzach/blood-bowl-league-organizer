@@ -49,7 +49,7 @@ export async function GET(
         return;
       }
       cal.createEvent({
-        summary: `${game.game.homeDetails?.team.name ?? "TBD"} @ ${game.game.awayDetails?.team.name ?? "TBD"}`,
+        summary: `${game.game.awayDetails?.team.name ?? "TBD"} @ ${game.game.homeDetails?.team.name ?? "TBD"}`,
         start: game.game.scheduledTime,
         end: new Date(game.game.scheduledTime.valueOf() + 3 * 60 * 60 * 1000),
       });
