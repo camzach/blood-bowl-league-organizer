@@ -68,9 +68,9 @@ export default function SPPButton({
         <label>
           Type of SPP:
           <select className="select" {...register("type")}>
-            <option value="deflections">Deflection</option>
-            <option value="interceptions">Interception</option>
-            <option value="completions">Completion</option>
+            <option value="interception">Interception</option>
+            <option value="completion">Completion</option>
+            <option value="safeLanding">Safe Landing</option>
             <option value="otherSPP">Misc.</option>
           </select>
         </label>
