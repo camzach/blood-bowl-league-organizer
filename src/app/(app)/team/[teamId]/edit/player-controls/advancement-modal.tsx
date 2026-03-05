@@ -44,6 +44,7 @@ type Props = {
     id: string;
     skills: Array<{ name: string }>;
     totalImprovements: number;
+    starPlayerPoints: number;
     position: {
       primary: Array<SkillCategory>;
       secondary: Array<SkillCategory>;
@@ -141,6 +142,19 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
   );
 
   const hasPending = !!(player.pendingRandomSkill || player.pendingRandomStat);
+
+  const canTakeRandom =
+    player.starPlayerPoints >=
+    advancementCosts["Random Primary"][player.totalImprovements];
+  const canTakePrimary =
+    player.starPlayerPoints >=
+    advancementCosts["Chosen Primary"][player.totalImprovements];
+  const canTakeSecondary =
+    player.starPlayerPoints >=
+    advancementCosts["Chosen Secondary"][player.totalImprovements];
+  const canTakeCharacteristic =
+    player.starPlayerPoints >=
+    advancementCosts["Characteristic Improvement"][player.totalImprovements];
 
   return (
     <>
@@ -259,8 +273,9 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
                 className={classNames(
                   "tab px-1",
                   tab === category && "tab-active",
+                  !canTakeRandom && "tab-disabled",
                 )}
-                onClick={() => setTab(category)}
+                onClick={() => canTakeRandom && setTab(category)}
               >
                 {upperFirst(category)}
               </a>
@@ -275,8 +290,9 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
                 className={classNames(
                   "tab px-1",
                   tab === category && "tab-active",
+                  !canTakeSecondary && "tab-disabled",
                 )}
-                onClick={() => setTab(category)}
+                onClick={() => canTakeSecondary && setTab(category)}
               >
                 {upperFirst(category)}
               </a>
@@ -286,8 +302,12 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
             )}
             <a
               role="tab"
-              className={classNames("tab px-1", tab === "stat" && "tab-active")}
-              onClick={() => setTab("stat")}
+              className={classNames(
+                "tab px-1",
+                tab === "stat" && "tab-active",
+                !canTakeCharacteristic && "tab-disabled",
+              )}
+              onClick={() => canTakeCharacteristic && setTab("stat")}
             >
               Stat
             </a>
@@ -304,7 +324,14 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
                       player.skills.some((ps) => ps.name === s.name) &&
                         "btn-outline",
                     ])}
-                    disabled={hasPending || blockedSkills.has(s.name)}
+                    disabled={
+                      hasPending ||
+                      blockedSkills.has(s.name) ||
+                      (player.position.primary.includes(tab) &&
+                        !canTakePrimary) ||
+                      (player.position.secondary.includes(tab) &&
+                        !canTakeSecondary)
+                    }
                     onClick={purchaseSkill(s.name)}
                   >
                     {s.name}
@@ -315,7 +342,7 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
                 <button
                   className="btn btn-secondary btn-wide mx-auto"
                   onClick={purchaseRandom}
-                  disabled={hasPending}
+                  disabled={hasPending || !canTakeRandom}
                 >
                   {`Random - ${
                     advancementCosts["Random Primary"][player.totalImprovements]
@@ -329,7 +356,7 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
               <button
                 className="btn btn-secondary"
                 onClick={purchaseStat}
-                disabled={hasPending}
+                disabled={hasPending || !canTakeCharacteristic}
               >
                 Roll for Stat Increase
               </button>
