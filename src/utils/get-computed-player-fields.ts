@@ -118,16 +118,12 @@ export function getPlayerSppAndTv(
     teamValue = 0;
   }
 
-  const tdSpp = player.position.rosterSlot.roster.specialRuleToRoster.some(
-    (rule) => rule.specialRuleName === "Brawlin Brutes",
-  )
-    ? 2
-    : 3;
-  const casSpp = player.position.rosterSlot.roster.specialRuleToRoster.some(
-    (rule) => rule.specialRuleName === "Brawlin Brutes",
-  )
-    ? 3
-    : 2;
+  const [tdSpp, casSpp] =
+    player.position.rosterSlot.roster.specialRuleToRoster.some(
+      (rule) => rule.specialRuleName === "Brawlin' Brutes",
+    )
+      ? [2, 3]
+      : [3, 2];
 
   let starPlayerPoints =
     player.mvps * 4 +
