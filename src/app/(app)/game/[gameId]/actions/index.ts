@@ -826,7 +826,7 @@ export const end = action
               playerUpdate.dead = true;
             }
 
-            if (injury.causedBy && injury.type !== "bh") {
+            if (injury.causedBy) {
               let offenderKeywords: string[];
               const causedByPlayer = injury.causedBy.player;
 
@@ -856,7 +856,7 @@ export const end = action
                   .map((k) => k.keyword.name);
               }
 
-              if (d6() >= 4) {
+              if (injury.type !== "bh" && d6() >= 4) {
                 if (!offenderKeywords.includes(injury.causedBy.hatredKeyword)) {
                   throw new Error("Invalid keyword chosen for Hatred");
                 }
