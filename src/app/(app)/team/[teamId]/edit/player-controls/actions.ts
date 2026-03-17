@@ -278,7 +278,6 @@ export const learnSkill = action
       const player = {
         ...fetchedPlayer,
         skills: getPlayerSkills(fetchedPlayer, proSkill),
-        totalImprovements: fetchedPlayer.improvements.length,
       };
 
       if (player.team === null) throw new Error("Player is not on any team");
@@ -330,7 +329,7 @@ export const learnSkill = action
 
       await tx.insert(improvement).values({
         type: "chosen_skill",
-        order: player.improvements.length,
+        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
         skillName: skill.name,
         playerId: player.id,
       });
@@ -352,7 +351,7 @@ export const learnSkill = action
 
       const { starPlayerPoints } = getPlayerSppAndTv(updatedPlayer);
 
-      if (updatedPlayer.improvements.length > 6)
+      if (Math.max(0, ...player.improvements.map((i) => i.order)) >= 5)
         throw new Error("Player cannot be improved further");
       if (starPlayerPoints < 0)
         throw new Error("Player does not have enough SPP");
@@ -395,7 +394,7 @@ export const rollRandomSkill = action
       if (player.pendingRandomStat) {
         throw new Error("Player has a pending random stat to resolve");
       }
-      if (player.improvements.length >= 6) {
+      if (Math.max(0, ...player.improvements.map((i) => i.order)) >= 5) {
         throw new Error("Player may not be improved further");
       }
 
@@ -472,7 +471,6 @@ export const confirmRandomSkill = action
       const player = {
         ...fetchedPlayer,
         skills: getPlayerSkills(fetchedPlayer, proSkill),
-        totalImprovements: fetchedPlayer.improvements.length,
       };
 
       if (player.team === null) throw new Error("Player is not on any team");
@@ -502,7 +500,7 @@ export const confirmRandomSkill = action
 
       await tx.insert(improvement).values({
         type: "random_skill",
-        order: player.improvements.length,
+        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
         skillName: skill.name,
         playerId: player.id,
       });
@@ -567,7 +565,7 @@ export const rollRandomStat = action
       if (player.pendingRandomStat) {
         throw new Error("Player has a pending random stat to resolve");
       }
-      if (player.improvements.length >= 6) {
+      if (Math.max(0, ...player.improvements.map((i) => i.order)) >= 5) {
         throw new Error("Player may not be improved further");
       }
 
@@ -622,7 +620,6 @@ export const confirmRandomStat = action
       const player = {
         ...fetchedPlayer,
         skills: getPlayerSkills(fetchedPlayer, proSkill),
-        totalImprovements: fetchedPlayer.improvements.length,
       };
 
       if (player.team === null) throw new Error("Player is not on any team");
@@ -701,7 +698,7 @@ export const confirmRandomStat = action
 
       await tx.insert(improvement).values({
         type: input.choice,
-        order: player.improvements.length,
+        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
         skillName,
         playerId: player.id,
       });
