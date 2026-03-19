@@ -830,7 +830,11 @@ export const end = action
               let offenderKeywords: string[];
               const causedByPlayer = injury.causedBy.player;
 
-              if (injury.causedBy.type === "player") {
+              if (
+                injury.causedBy.type === "player" &&
+                ev.player in playerUpdates
+              ) {
+                console.log("CAS FOR PLAYER", ev.player);
                 playerUpdates[ev.player].casualties =
                   (playerUpdates[ev.player]?.casualties ?? 0) + 1;
 
