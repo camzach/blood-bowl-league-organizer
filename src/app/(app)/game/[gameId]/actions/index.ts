@@ -832,15 +832,16 @@ export const end = action
 
               if (
                 injury.causedBy.type === "player" &&
-                ev.player in playerUpdates
+                causedByPlayer in playerUpdates
               ) {
-                playerUpdates[ev.player].casualties =
-                  (playerUpdates[ev.player]?.casualties ?? 0) + 1;
-
                 const offender = players.find((p) => p.id === causedByPlayer);
                 if (!offender) {
                   throw new Error("Offending player does not exist");
                 }
+
+                playerUpdates[causedByPlayer].casualties =
+                  (playerUpdates[causedByPlayer]?.casualties ?? 0) + 1;
+
                 offenderKeywords = offender.position.keywordToPosition
                   .filter((k) => k.keyword.canBeHated)
                   .map((k) => k.keyword.name);
