@@ -329,7 +329,7 @@ export const learnSkill = action
 
       await tx.insert(improvement).values({
         type: "chosen_skill",
-        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
+        order: player.improvements.filter((i) => i.order >= 0).length,
         skillName: skill.name,
         playerId: player.id,
       });
@@ -350,6 +350,7 @@ export const learnSkill = action
       if (!updatedPlayer) throw new Error("Failed to select after update");
 
       const { starPlayerPoints } = getPlayerSppAndTv(updatedPlayer);
+      console.log("new SPP: ", starPlayerPoints, updatedPlayer.improvements);
 
       if (Math.max(0, ...player.improvements.map((i) => i.order)) >= 5)
         throw new Error("Player cannot be improved further");
@@ -500,7 +501,7 @@ export const confirmRandomSkill = action
 
       await tx.insert(improvement).values({
         type: "random_skill",
-        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
+        order: player.improvements.filter((i) => i.order >= 0).length,
         skillName: skill.name,
         playerId: player.id,
       });
@@ -698,7 +699,7 @@ export const confirmRandomStat = action
 
       await tx.insert(improvement).values({
         type: input.choice,
-        order: Math.max(0, ...player.improvements.map((i) => i.order)) + 1,
+        order: player.improvements.filter((i) => i.order >= 0).length,
         skillName,
         playerId: player.id,
       });

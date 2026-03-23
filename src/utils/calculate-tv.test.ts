@@ -55,12 +55,12 @@ describe("getPlayerSppAndTv", () => {
     expect(starPlayerPoints).toBe(4 + 3 + 1 + 2 + 1 + 2 + 1);
   });
 
-  it("calculates SPP correctly for Brawlin Brutes", () => {
+  it("calculates SPP correctly for Brawlin' Brutes", () => {
     const { starPlayerPoints } = getPlayerSppAndTv(
       mockPlayer({
         touchdowns: 2,
         casualties: 3,
-        specialRules: ["Brawlin Brutes"],
+        specialRules: ["Brawlin' Brutes"],
       }),
     );
     expect(starPlayerPoints).toBe(2 * 2 + 3 * 3);
