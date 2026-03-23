@@ -1,27 +1,37 @@
-"use client";
-
 import { useState } from "react";
 import { Modal } from "~/components/modal";
 
-type BasePlayer = { id: string; name: string | null; number: number; missNextGame: boolean };
+type BasePlayer = {
+  id: string;
+  name: string | null;
+  number: number;
+  missNextGame: boolean;
+};
 
-type MvpModalProps = {
+type EndGameModalProps = {
   isOpen: boolean;
   onRequestClose: () => void;
   homePlayers: BasePlayer[];
   awayPlayers: BasePlayer[];
-  onMvpSubmit: (homeNominees: string[], awayNominees: string[]) => void;
+  onSubmit: (
+    homeNominees: string[],
+    awayNominees: string[],
+    homeStalled: boolean,
+    awayStalled: boolean,
+  ) => void;
 };
 
-export function MvpModal({
+export function EndGameModal({
   isOpen,
   onRequestClose,
   homePlayers,
   awayPlayers,
-  onMvpSubmit,
-}: MvpModalProps) {
+  onSubmit,
+}: EndGameModalProps) {
   const [homeNominees, setHomeNominees] = useState<string[]>([]);
   const [awayNominees, setAwayNominees] = useState<string[]>([]);
+  const [homeStalled, setHomeStalled] = useState(false);
+  const [awayStalled, setAwayStalled] = useState(false);
 
   const handleHomeSelect = (playerId: string) => {
     setHomeNominees((prev) =>
@@ -40,7 +50,7 @@ export function MvpModal({
   };
 
   const handleSubmit = () => {
-    onMvpSubmit(homeNominees, awayNominees);
+    onSubmit(homeNominees, awayNominees, homeStalled, awayStalled);
   };
 
   return (
@@ -49,6 +59,16 @@ export function MvpModal({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h3 className="text-lg font-semibold">Home Team</h3>
+          <div className="mb-2">
+            <label>
+              <input
+                type="checkbox"
+                checked={homeStalled}
+                onChange={(e) => setHomeStalled(e.target.checked)}
+              />
+              Stalled this game
+            </label>
+          </div>
           {homePlayers.map((player) => (
             <div key={player.id}>
               <label>
@@ -57,7 +77,8 @@ export function MvpModal({
                   checked={homeNominees.includes(player.id)}
                   onChange={() => handleHomeSelect(player.id)}
                   disabled={
-                    homeNominees.length >= 6 && !homeNominees.includes(player.id)
+                    homeNominees.length >= 6 &&
+                    !homeNominees.includes(player.id)
                   }
                 />
                 {player.name ?? `#${player.number}`}
@@ -67,6 +88,16 @@ export function MvpModal({
         </div>
         <div>
           <h3 className="text-lg font-semibold">Away Team</h3>
+          <div className="mb-2">
+            <label>
+              <input
+                type="checkbox"
+                checked={awayStalled}
+                onChange={(e) => setAwayStalled(e.target.checked)}
+              />
+              Stalled this game
+            </label>
+          </div>
           {awayPlayers.map((player) => (
             <div key={player.id}>
               <label>
@@ -75,9 +106,10 @@ export function MvpModal({
                   checked={awayNominees.includes(player.id)}
                   onChange={() => handleAwaySelect(player.id)}
                   disabled={
-                    awayNominees.length >= 6 && !awayNominees.includes(player.id)
+                    awayNominees.length >= 6 &&
+                    !awayNominees.includes(player.id)
                   }
-                  />
+                />
                 {player.name ?? `#${player.number}`}
               </label>
             </div>

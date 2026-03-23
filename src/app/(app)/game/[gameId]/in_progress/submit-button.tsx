@@ -1,11 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { end } from "../actions";
 import { useAction } from "next-safe-action/hooks";
 import classNames from "classnames";
 import { Modal } from "~/components/modal";
 import { Die } from "~/components/die";
-import { MvpModal } from "./mvp-modal";
+import { EndGameModal } from "./end-game-modal";
 import { gameEvent } from "../actions/game-events";
 import z from "zod";
 
@@ -133,7 +133,7 @@ export default function Button({
   return (
     <>
       {mvpModalOpen && (
-        <MvpModal
+        <EndGameModal
           isOpen={mvpModalOpen}
           onRequestClose={() => setMvpModalOpen(false)}
           homePlayers={homeTeam.players
@@ -160,12 +160,14 @@ export default function Button({
                     ev.injury.type === "dead",
                 ),
             )}
-          onMvpSubmit={(homeNominees, awayNominees) => {
+          onSubmit={(homeNominees, awayNominees, homeStalled, awayStalled) => {
             execute({
               game: gameId,
               events,
               homeMvpNominees: homeNominees,
               awayMvpNominees: awayNominees,
+              homeStalled,
+              awayStalled,
             });
           }}
         />

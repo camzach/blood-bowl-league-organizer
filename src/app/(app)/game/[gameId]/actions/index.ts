@@ -628,6 +628,8 @@ export const end = action
       events: z.array(gameEvent),
       homeMvpNominees: z.array(z.string()).length(6),
       awayMvpNominees: z.array(z.string()).length(6),
+      homeStalled: z.boolean(),
+      awayStalled: z.boolean(),
     }),
   )
   .use(async ({ next, clientInput }) => {
@@ -980,8 +982,14 @@ export const end = action
       const sharedWinnings =
         ((game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
         10_000;
-      const homeWinnings = touchdowns[0] * 10_000 + sharedWinnings;
-      const awayWinnings = touchdowns[1] * 10_000 + sharedWinnings;
+      const homeWinnings =
+        touchdowns[0] * 10_000 +
+        sharedWinnings +
+        (!input.homeStalled ? 10_000 : 0);
+      const awayWinnings =
+        touchdowns[1] * 10_000 +
+        sharedWinnings +
+        (!input.awayStalled ? 10_000 : 0);
 
       const playerUpdateQueries = Object.entries(playerUpdates).map(
         ([id, update]) =>
