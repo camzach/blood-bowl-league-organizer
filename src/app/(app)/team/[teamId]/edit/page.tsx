@@ -106,7 +106,9 @@ export default async function EditTeam(props: Props) {
           Current TV -{" "}
           {calculateTV({
             ...team,
-            players: team.players.filter((p) => !p.missNextGame),
+            players: team.players.filter(
+              (p) => !p.missNextGame && p.membershipType === "player",
+            ),
           }).toLocaleString()}
         </span>
       </div>
