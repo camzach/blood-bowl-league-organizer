@@ -18,10 +18,17 @@ export const authMiddleware = createMiddleware().define(async ({ next }) => {
 export const action = createSafeActionClient().use(authMiddleware);
 
 export const teamPermissionMiddleware = createMiddleware<{
-  ctx: { authParams: { teamId: string | string[] }; user: Session["user"] };
+  ctx: {
+    authParams: { teamId: string | string[]; allowAdmin?: boolean };
+    user: Session["user"];
+  };
 }>().define(async ({ next, ctx }) => {
   const { authParams, user } = ctx;
   const { teamId } = authParams;
+
+  if (authParams.allowAdmin && user.role === "admin") {
+    return next();
+  }
 
   const teamCoach = await db.query.coachToTeam.findFirst({
     where: and(

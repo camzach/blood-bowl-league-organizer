@@ -56,6 +56,7 @@ export const start = action
       ctx: {
         authParams: {
           teamId: [game.homeDetails.teamId, game.awayDetails.teamId],
+          allowAdmin: true,
         },
       },
     });
@@ -248,6 +249,7 @@ export const selectJourneymen = action
       ctx: {
         authParams: {
           teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+          allowAdmin: true,
         },
       },
     });
@@ -453,6 +455,7 @@ export const purchaseInducements = action
       ctx: {
         authParams: {
           teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+          allowAdmin: true,
         },
       },
     });
@@ -649,6 +652,7 @@ export const end = action
       ctx: {
         authParams: {
           teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
+          allowAdmin: true,
         },
       },
     });
