@@ -20,6 +20,12 @@ const config = defineConfig([
       "next-env.d.ts",
     ],
 
+    settings: {
+      react: {
+        version: "19",
+      },
+    },
+
     plugins: {
       drizzle,
     },

@@ -42,7 +42,9 @@ export const create = action
     } catch (e) {
       if (e instanceof Error && "errno" in e) {
         if (e.errno == 1062)
-          throw new Error("Team with this name already exists!");
+          throw new Error("Team with this name already exists!", {
+            cause: e,
+          });
       }
     }
   });

@@ -4,7 +4,7 @@
     "strict": true,
     "skipLibCheck": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "target": "es2022",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -19,7 +19,6 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }
