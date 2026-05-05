@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import InducementSelector from "./inducement-selector";
-import { purchaseInducements } from "../actions";
+import { purchaseInducements } from "../actions/inducements";
 import { useRouter } from "next/navigation";
 
 type InducementArray = Array<{ name: string; price: number; max: number }>;

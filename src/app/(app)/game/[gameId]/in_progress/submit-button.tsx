@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { end } from "../actions";
+import { end } from "../actions/end";
 import { useAction } from "next-safe-action/hooks";
 import classNames from "classnames";
 import { Modal } from "~/components/modal";

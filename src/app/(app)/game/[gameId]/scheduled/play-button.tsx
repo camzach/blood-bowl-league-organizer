@@ -1,7 +1,7 @@
 "use client";
 import { Die } from "~/components/die";
 import Link from "next/link";
-import { start } from "../actions";
+import { start } from "../actions/start";
 import { useAction } from "next-safe-action/hooks";
 
 export function PlayButton({ gameId }: { gameId: string }) {

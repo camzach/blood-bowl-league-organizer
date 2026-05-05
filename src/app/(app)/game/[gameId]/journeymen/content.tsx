@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { selectJourneymen } from "../actions";
+import { selectJourneymen } from "../actions/journeymen";
 import { useRouter } from "next/navigation";
 
 type TeamWithChoices = {

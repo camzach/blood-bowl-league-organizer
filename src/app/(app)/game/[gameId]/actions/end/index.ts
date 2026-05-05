@@ -1,628 +1,32 @@
 "use server";
-import { z } from "zod";
-import { action, teamPermissionMiddleware } from "~/utils/safe-action";
-import { db } from "~/utils/drizzle";
 import {
-  and,
   eq,
-  not,
-  inArray,
-  sql,
-  SQL,
   InferInsertModel,
+  SQL,
+  sql,
   SQLWrapper,
+  and,
+  inArray,
 } from "drizzle-orm";
+import { headers } from "next/headers";
+import z from "zod";
+import nanoid from "~/utils/nanoid";
+import { auth } from "~/auth";
 import {
-  game as dbGame,
   player,
-  team as dbTeam,
-  weatherOpts,
-  gameDetails,
   improvement,
+  skill,
   team,
-  gameDetailsToStarPlayer,
-  gameDetailsToInducement,
+  gameDetails,
   bracketGame,
   season,
-  skill,
-  keywordToPosition,
+  game as dbGame,
 } from "~/db/schema";
-
-import calculateTV from "~/utils/calculate-tv";
-import { nanoid } from "nanoid";
-import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { d6 } from "~/utils/d6";
-import { auth } from "~/auth";
-import { headers } from "next/headers";
-import { gameEvent } from "./game-events";
+import { db } from "~/utils/drizzle";
 import { getPlayerStats } from "~/utils/get-computed-player-fields";
-
-export const start = action
-  .inputSchema(z.object({ id: z.string() }))
-  .use(async ({ next, clientInput }) => {
-    const { id } = z.object({ id: z.string() }).parse(clientInput);
-    const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, id),
-      with: {
-        homeDetails: { columns: { teamId: true } },
-        awayDetails: { columns: { teamId: true } },
-      },
-    });
-    if (!game) throw new Error("Could not find game");
-    if (!game.homeDetails || !game.awayDetails)
-      throw new Error("Game does not have two teams");
-
-    return next({
-      ctx: {
-        authParams: {
-          teamId: [game.homeDetails.teamId, game.awayDetails.teamId],
-          allowAdmin: true,
-        },
-      },
-    });
-  })
-  .use(teamPermissionMiddleware)
-  .action(async ({ parsedInput: { id } }) => {
-    return db.transaction(async (tx) => {
-      const teamDetailsOptions = {
-        with: {
-          team: {
-            with: {
-              players: {
-                where: and(
-                  inArray(player.membershipType, ["player", "journeyman"]),
-                  eq(player.missNextGame, false),
-                ),
-                with: {
-                  improvements: { with: { skill: true } },
-                  position: {
-                    with: {
-                      rosterSlot: {
-                        with: {
-                          roster: { with: { specialRuleToRoster: true } },
-                        },
-                      },
-                      keywordToPosition: {
-                        with: { keyword: true },
-                      },
-                    },
-                  },
-                },
-              },
-              roster: {
-                with: {
-                  rosterSlots: {
-                    with: {
-                      position: {
-                        with: {
-                          keywordToPosition: {
-                            where: eq(keywordToPosition.keywordName, "Lineman"),
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
-
-      const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, id),
-        with: {
-          homeDetails: teamDetailsOptions,
-          awayDetails: teamDetailsOptions,
-        },
-      });
-      if (!game) throw new Error("Could not find game");
-      if (!game.homeDetails || !game.awayDetails)
-        throw new Error("Game does not have two teams");
-
-      if (
-        game.homeDetails.team.state !== "ready" ||
-        game.awayDetails.team.state !== "ready"
-      )
-        throw new Error("Teams are not ready to start a game");
-
-      if (game.state !== "scheduled")
-        throw new Error("Game has already been started");
-
-      const weatherTable = [
-        null as never,
-        null as never,
-        "sweltering_heat",
-        "very_sunny",
-        ...Array.from(Array(7), () => "perfect" as const),
-        "pouring_rain",
-        "blizzard",
-      ] satisfies Array<(typeof weatherOpts)[number]>;
-
-      const fairweatherFansHome = Math.ceil(Math.random() * 3);
-      const fanFactorHome =
-        game.homeDetails.team.dedicatedFans + fairweatherFansHome;
-      const fairweatherFansAway = Math.ceil(Math.random() * 3);
-      const fanFactorAway =
-        game.awayDetails.team.dedicatedFans + fairweatherFansAway;
-      const weatherRoll = [d6(), d6()];
-      const weatherResult = weatherTable[weatherRoll[0] + weatherRoll[1]];
-
-      const homeJourneymen = {
-        count: Math.max(0, 11 - game.homeDetails.team.players.length),
-        players: game.homeDetails.team.roster.rosterSlots.flatMap((slot) =>
-          slot.position.map((pos) => pos.name),
-        ),
-      };
-      const awayJourneymen = {
-        count: Math.max(0, 11 - game.awayDetails.team.players.length),
-        players: game.awayDetails.team.roster.rosterSlots.flatMap((slot) =>
-          slot.position.map((pos) => pos.name),
-        ),
-      };
-
-      const result = {
-        fairweatherFansHome,
-        fanFactorHome,
-        fairweatherFansAway,
-        fanFactorAway,
-        weatherRoll,
-        weatherResult,
-        homeJourneymen,
-        awayJourneymen,
-      };
-
-      const homeTV = calculateTV(game.homeDetails.team);
-      const awayTV = calculateTV(game.awayDetails.team);
-      const pettyCashHome = Math.max(0, awayTV - homeTV);
-      const pettyCashAway = Math.max(0, homeTV - awayTV);
-
-      const teamUpdate = tx
-        .update(dbTeam)
-        .set({
-          state: "playing",
-        })
-        .where(
-          inArray(dbTeam.id, [
-            game.homeDetails.team.id,
-            game.awayDetails.team.id,
-          ]),
-        );
-      const gameUpdate = tx
-        .update(dbGame)
-        .set({
-          state:
-            homeJourneymen.count > 0 || awayJourneymen.count > 0
-              ? "journeymen"
-              : "inducements",
-          weather: weatherResult,
-        })
-        .where(eq(dbGame.id, game.id));
-      const homeDetailsUpdate = tx
-        .update(gameDetails)
-        .set({
-          journeymenRequired: homeJourneymen.count,
-          fanFactor: fanFactorHome,
-          pettyCashAwarded: pettyCashHome,
-        })
-        .where(eq(gameDetails.id, game.homeDetails.id));
-      const awayDetailsUpdate = tx
-        .update(gameDetails)
-        .set({
-          journeymenRequired: awayJourneymen.count,
-          fanFactor: fanFactorAway,
-          pettyCashAwarded: pettyCashAway,
-        })
-        .where(eq(gameDetails.id, game.awayDetails.id));
-
-      return Promise.all([
-        teamUpdate,
-        gameUpdate,
-        homeDetailsUpdate,
-        awayDetailsUpdate,
-      ]).then(() => result);
-    });
-  });
-
-export const selectJourneymen = action
-  .inputSchema(
-    z.object({
-      home: z.string().optional(),
-      away: z.string().optional(),
-      game: z.string(),
-    }),
-  )
-  .use(async ({ next, clientInput }) => {
-    const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
-    const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, gameId),
-      with: {
-        homeDetails: { with: { team: { columns: { id: true } } } },
-        awayDetails: { with: { team: { columns: { id: true } } } },
-      },
-    });
-    if (!game) throw new Error("Failed to find game");
-    if (!game.homeDetails || !game.awayDetails)
-      throw new Error("Game does not have two teams");
-
-    return next({
-      ctx: {
-        authParams: {
-          teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
-          allowAdmin: true,
-        },
-      },
-    });
-  })
-  .use(teamPermissionMiddleware)
-  .action(async ({ parsedInput: input }) => {
-    return db.transaction(async (tx) => {
-      const teamFields = {
-        columns: {
-          id: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          rerolls: true,
-        },
-        with: {
-          roster: {
-            columns: { name: true, rerollCost: true },
-            with: {
-              specialRuleToRoster: true,
-              rosterSlots: {
-                with: {
-                  position: {
-                    with: {
-                      keywordToPosition: {
-                        where: eq(keywordToPosition.keywordName, "Lineman"),
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          players: {
-            where: and(
-              eq(player.missNextGame, false),
-              eq(player.membershipType, "player"),
-            ),
-            with: {
-              improvements: { with: { skill: true } },
-              position: {
-                with: {
-                  rosterSlot: {
-                    with: { roster: { with: { specialRuleToRoster: true } } },
-                  },
-                },
-              },
-            },
-          },
-        },
-      } satisfies Parameters<typeof tx.query.team.findFirst>[0];
-
-      const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, input.game),
-        columns: {
-          id: true,
-          state: true,
-        },
-        with: {
-          homeDetails: { with: { team: teamFields } },
-          awayDetails: { with: { team: teamFields } },
-        },
-      });
-      if (!game) throw new Error("Failed to find game");
-      if (!game.homeDetails || !game.awayDetails)
-        throw new Error("Game does not have two teams");
-
-      if (game.state !== "journeymen")
-        throw new Error("Game not awaiting journeymen choice");
-
-      const homeChoice =
-        input.home !== undefined
-          ? game.homeDetails.team.roster.rosterSlots
-              .flatMap((slot) => slot.position)
-              .find((pos) => pos.id === input.home)
-          : undefined;
-      const awayChoice =
-        input.away !== undefined
-          ? game.awayDetails.team.roster.rosterSlots
-              .flatMap((slot) => slot.position)
-              .find((pos) => pos.id === input.away)
-          : undefined;
-
-      const homePlayers = game.homeDetails.team.players.length;
-      const awayPlayers = game.awayDetails.team.players.length;
-      if (homePlayers < 11 && !homeChoice)
-        throw new Error("Missing journeymen selection for home team");
-      else if (homePlayers >= 11 && homeChoice)
-        throw new Error("Home team will not take any journeymen");
-      if (awayPlayers < 11 && !awayChoice)
-        throw new Error("Missing journeymen selection for away team");
-      else if (awayPlayers >= 11 && awayChoice)
-        throw new Error("Away team will not take any journeymen");
-
-      let homeTV = calculateTV(game.homeDetails.team);
-      let awayTV = calculateTV(game.awayDetails.team);
-
-      const newPlayers: Array<typeof player.$inferInsert> = [];
-      if (homeChoice) {
-        homeTV += homeChoice.cost * (11 - homePlayers);
-        for (let i = 0; i < 11 - homePlayers; i++) {
-          newPlayers.push({
-            id: nanoid(),
-            number: 99 - i,
-            positionId: homeChoice.id,
-            membershipType: "journeyman" as const,
-            teamId: game.homeDetails.teamId,
-          });
-        }
-      }
-      if (awayChoice) {
-        awayTV += awayChoice.cost * (11 - awayPlayers);
-        for (let i = 0; i < 11 - awayPlayers; i++) {
-          newPlayers.push({
-            id: nanoid(),
-            number: 99 - i,
-            positionId: awayChoice.id,
-            membershipType: "journeyman" as const,
-            teamId: game.awayDetails.teamId,
-          });
-        }
-      }
-
-      const pettyCashHome = Math.max(0, awayTV - homeTV);
-      const pettyCashAway = Math.max(0, homeTV - awayTV);
-
-      await Promise.all([
-        tx
-          .update(dbGame)
-          .set({
-            state: "inducements",
-          })
-          .where(eq(dbGame.id, input.game)),
-        tx
-          .update(gameDetails)
-          .set({
-            pettyCashAwarded: pettyCashHome,
-          })
-          .where(eq(gameDetails.id, game.homeDetails.id)),
-        tx
-          .update(gameDetails)
-          .set({
-            pettyCashAwarded: pettyCashAway,
-          })
-          .where(eq(gameDetails.id, game.awayDetails.id)),
-        ...(newPlayers.length > 0
-          ? [
-              tx
-                .insert(player)
-                .values(newPlayers)
-                .then(() =>
-                  tx.insert(improvement).values(
-                    newPlayers.map((p) => ({
-                      playerId: p.id,
-                      type: "automatic_skill" as const,
-                      order: -1,
-                      skillName: "Loner (4+)",
-                    })),
-                  ),
-                ),
-            ]
-          : []),
-      ]);
-
-      return {
-        pettyCashHome,
-        pettyCashAway,
-      };
-    });
-  });
-
-const inducementChoicesSchema = z.object({
-  stars: z.array(z.string()).max(2),
-  inducements: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.number().int().nonnegative().default(1),
-    }),
-  ),
-});
-export const purchaseInducements = action
-  .inputSchema(
-    z.object({
-      game: z.string(),
-      home: inducementChoicesSchema,
-      away: inducementChoicesSchema,
-    }),
-  )
-  .use(async ({ next, clientInput }) => {
-    const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
-    const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, gameId),
-      with: {
-        homeDetails: { with: { team: { columns: { id: true } } } },
-        awayDetails: { with: { team: { columns: { id: true } } } },
-      },
-    });
-    if (!game) throw new Error("Game does not exist");
-    if (!game.homeDetails || !game.awayDetails)
-      throw new Error("Game does not have two teams");
-
-    return next({
-      ctx: {
-        authParams: {
-          teamId: [game.homeDetails.team.id, game.awayDetails.team.id],
-          allowAdmin: true,
-        },
-      },
-    });
-  })
-  .use(teamPermissionMiddleware)
-  .action(async ({ parsedInput: input }) => {
-    return db.transaction(async (tx) => {
-      const detailsFields = {
-        columns: {
-          id: true,
-          pettyCashAwarded: true,
-        },
-        with: {
-          team: {
-            columns: {
-              id: true,
-              treasury: true,
-              chosenSpecialRuleName: true,
-            },
-            with: {
-              roster: {
-                with: { specialRuleToRoster: true },
-              },
-              players: {
-                where: and(
-                  eq(player.missNextGame, false),
-                  not(eq(player.membershipType, "retired")),
-                ),
-              },
-            },
-          },
-        },
-      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
-      const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, input.game),
-        columns: {
-          id: true,
-          state: true,
-        },
-        with: {
-          homeDetails: detailsFields,
-          awayDetails: detailsFields,
-        },
-      });
-      if (!game) throw new Error("Game does not exist");
-      if (!game.homeDetails || !game.awayDetails)
-        throw new Error("Game does not have two teams");
-
-      if (game.state !== "inducements")
-        throw new Error("Game not awaiting inducements");
-
-      const teamSpecialRules = (
-        team: (typeof game.homeDetails | typeof game.awayDetails)["team"],
-      ) => {
-        const rules = team.roster.specialRuleToRoster.map(
-          (r) => r.specialRuleName,
-        );
-        if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);
-        return rules;
-      };
-
-      const homeInducementCost = await calculateInducementCosts(
-        input.home.inducements,
-        input.home.stars,
-        teamSpecialRules(game.homeDetails.team),
-        game.homeDetails.team.players.length,
-        game.homeDetails.team.roster.name,
-        tx,
-      );
-      const awayInducementCost = await calculateInducementCosts(
-        input.away.inducements,
-        input.away.stars,
-        teamSpecialRules(game.awayDetails.team),
-        game.awayDetails.team.players.length,
-        game.awayDetails.team.roster.name,
-        tx,
-      );
-
-      const extraPettyCash = { home: 0, away: 0 };
-      let treasuryCostHome =
-        homeInducementCost - game.homeDetails.pettyCashAwarded;
-      let treasuryCostAway =
-        awayInducementCost - game.awayDetails.pettyCashAwarded;
-      if (game.homeDetails.pettyCashAwarded > 0) {
-        extraPettyCash.home += treasuryCostAway;
-        treasuryCostHome -= extraPettyCash.home;
-      } else if (game.awayDetails.pettyCashAwarded > 0) {
-        extraPettyCash.away += treasuryCostHome;
-        treasuryCostAway -= extraPettyCash.away;
-      }
-      treasuryCostHome = Math.max(0, treasuryCostHome);
-      treasuryCostAway = Math.max(0, treasuryCostAway);
-      if (
-        (game.homeDetails.pettyCashAwarded === 0 && treasuryCostAway > 0) ||
-        (game.awayDetails.pettyCashAwarded === 0 && treasuryCostHome > 0) ||
-        treasuryCostHome > game.homeDetails.team.treasury ||
-        treasuryCostAway > game.awayDetails.team.treasury
-      )
-        throw new Error("Inducements are too expensive");
-
-      const starInserts: Array<
-        InferInsertModel<typeof gameDetailsToStarPlayer>
-      > = [];
-      for (const star of input.home.stars) {
-        starInserts.push({
-          starPlayerName: star,
-          gameDetailsId: game.homeDetails.id,
-        });
-      }
-      for (const star of input.away.stars) {
-        starInserts.push({
-          starPlayerName: star,
-          gameDetailsId: game.awayDetails.id,
-        });
-      }
-
-      const inducementInserts: Array<
-        InferInsertModel<typeof gameDetailsToInducement>
-      > = [];
-      for (const inducement of input.home.inducements) {
-        if (inducement.quantity <= 0) continue;
-        inducementInserts.push({
-          inducementName: inducement.name,
-          count: inducement.quantity,
-          gameDetailsId: game.homeDetails.id,
-        });
-      }
-      for (const inducement of input.away.inducements) {
-        if (inducement.quantity <= 0) continue;
-        inducementInserts.push({
-          inducementName: inducement.name,
-          count: inducement.quantity,
-          gameDetailsId: game.awayDetails.id,
-        });
-      }
-
-      await Promise.all([
-        tx
-          .update(team)
-          .set({
-            treasury: sql`${team.treasury} - ${treasuryCostHome}`,
-          })
-          .where(eq(team.id, game.homeDetails.team.id)),
-        tx
-          .update(team)
-          .set({
-            treasury: sql`${team.treasury} - ${treasuryCostAway}`,
-          })
-          .where(eq(team.id, game.awayDetails.team.id)),
-        tx
-          .update(dbGame)
-          .set({
-            state: "in_progress",
-          })
-          .where(eq(dbGame.id, input.game)),
-        starInserts.length > 0 &&
-          tx.insert(gameDetailsToStarPlayer).values(starInserts),
-        inducementInserts.length > 0 &&
-          tx.insert(gameDetailsToInducement).values(inducementInserts),
-      ]);
-
-      return {
-        treasuryCostHome,
-        treasuryCostAway,
-      };
-    });
-  });
+import { action, teamPermissionMiddleware } from "~/utils/safe-action";
+import { gameEvent } from "../game-events";
 
 export const end = action
   .inputSchema(
@@ -640,8 +44,16 @@ export const end = action
     const game = await db.query.game.findFirst({
       where: eq(dbGame.id, gameId),
       with: {
-        homeDetails: { with: { team: { columns: { id: true } } } },
-        awayDetails: { with: { team: { columns: { id: true } } } },
+        homeDetails: {
+          with: {
+            team: { columns: { id: true } },
+          },
+        },
+        awayDetails: {
+          with: {
+            team: { columns: { id: true } },
+          },
+        },
       },
     });
     if (!game) throw new Error("Game not found");
@@ -675,7 +87,13 @@ export const end = action
               players: {
                 with: {
                   position: {
-                    with: { keywordToPosition: { with: { keyword: true } } },
+                    with: {
+                      keywordToPosition: {
+                        with: {
+                          keyword: true,
+                        },
+                      },
+                    },
                   },
                   improvements: true,
                 },
@@ -773,8 +191,10 @@ export const end = action
       );
 
       const newImprovements: Array<InferInsertModel<typeof improvement>> = [];
-      const improvementsToDelete: Array<{ playerId: string; order: number }> =
-        [];
+      const improvementsToDelete: Array<{
+        playerId: string;
+        order: number;
+      }> = [];
 
       for (const ev of input.events) {
         if (playerToTeamMap.get(ev.player) === undefined) {
@@ -855,7 +275,11 @@ export const end = action
                 const offender = await tx.query.starPlayer.findFirst({
                   where: (starPlayer) => eq(starPlayer.name, causedByPlayer),
                   with: {
-                    keywordToStarPlayer: { with: { keyword: true } },
+                    keywordToStarPlayer: {
+                      with: {
+                        keyword: true,
+                      },
+                    },
                   },
                 });
                 if (!offender) {
@@ -1211,8 +635,14 @@ export const end = action
           currentFans: awayFansUpdate.currentFans,
           newFans: awayFansUpdate.newFans,
         },
-        homeMVP: { name: mvpHome.name, number: mvpHome.number },
-        awayMVP: { name: mvpAway.name, number: mvpAway.number },
+        homeMVP: {
+          name: mvpHome.name,
+          number: mvpHome.number,
+        },
+        awayMVP: {
+          name: mvpAway.name,
+          number: mvpAway.number,
+        },
       };
     });
   });
