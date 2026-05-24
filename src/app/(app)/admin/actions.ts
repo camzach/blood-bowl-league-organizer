@@ -213,9 +213,18 @@ export const seedBracket = action
           .where(inArray(gameDetails.id, gameDetailsIds));
       }
       const leagueTable = await getLeagueTable(tx);
-      const TOP_CUT = 8;
-      const teams = Object.keys(leagueTable)
-        .sort((a, b) => leagueTable[b].points - leagueTable[a].points)
+      const TOP_CUT = 10;
+      const teams = Object.entries(leagueTable)
+        .sort(([, a], [, b]) => {
+          if (a.points !== b.points) return b.points - a.points;
+          // Tiebreakers
+          if (a.tdDiff !== b.tdDiff) return b.tdDiff - a.tdDiff;
+          if (a.casDiff !== b.casDiff) return b.casDiff - a.casDiff;
+          if (a.tdDiff + a.casDiff !== b.tdDiff + b.casDiff)
+            return b.tdDiff + b.casDiff - (a.tdDiff + b.casDiff);
+          return 0;
+        })
+        .map(([k]) => k)
         .slice(0, TOP_CUT);
 
       const detailsInserts: Array<InferInsertModel<typeof gameDetails>> = [];
@@ -439,7 +448,7 @@ export const endSeason = action
               assistantCoaches: 0,
               cheerleaders: 0,
               apothecary: false,
-              state: 'draft',
+              state: "draft",
             })
             .where(eq(team.id, teamId)),
         ),
