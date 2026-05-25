@@ -15,6 +15,13 @@
       "when": 1765572350665,
       "tag": "0001_brainy_apocalypse",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779744023140,
+      "tag": "0002_tearful_nomad",
+      "breakpoints": true
     }
   ]
 }
