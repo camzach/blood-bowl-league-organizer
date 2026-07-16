@@ -17,6 +17,7 @@ import {
 import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
 import nanoid from "~/utils/nanoid";
 import { getPlayerSppAndTv } from "~/utils/get-computed-player-fields";
+import { playerForTvCalculation } from "~/db/query-fragments/player.fragments";
 
 export const create = action
   .inputSchema(z.object({ name: z.string().min(1), roster: z.string() }))
@@ -264,14 +265,7 @@ export const hireExistingPlayer = action
         ),
         with: {
           team: true,
-          improvements: { with: { skill: true } },
-          position: {
-            with: {
-              rosterSlot: {
-                with: { roster: { with: { specialRuleToRoster: true } } },
-              },
-            },
-          },
+          ...playerForTvCalculation,
         },
       });
       if (!player) throw new Error("Player not found");

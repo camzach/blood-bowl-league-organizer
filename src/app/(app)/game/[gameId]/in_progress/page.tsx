@@ -11,49 +11,30 @@ import {
 import { db } from "~/utils/drizzle";
 import { and, eq, inArray } from "drizzle-orm";
 import { game as dbGame, player, skill, starPlayer } from "~/db/schema";
+import { playerWithPosition } from "~/db/query-fragments/player.fragments";
+import { starPlayerWithSkills } from "~/db/query-fragments/star-player.fragments";
+import { gameDetailsWithTeam } from "~/db/query-fragments/game.fragments";
+import { mergeQueryFragments } from "~/db/query-fragments/merge";
 
 type Props = {
   params: Promise<{ gameId: string }>;
 };
 
-const detailsSelect = {
+const detailsSelect = mergeQueryFragments(gameDetailsWithTeam, {
   with: {
-    gameDetailsToStarPlayer: true,
-    gameDetailsToInducement: true,
     team: {
-      columns: {
-        name: true,
-        id: true,
-        touchdownSong: true,
-        rerolls: true,
-        assistantCoaches: true,
-        cheerleaders: true,
-        apothecary: true,
-      },
       with: {
-        song: true,
         players: {
           where: and(
             inArray(player.membershipType, ["player", "journeyman"]),
             eq(player.missNextGame, false),
           ),
-          with: {
-            position: {
-              with: {
-                rosterSlot: {
-                  with: { roster: { with: { specialRuleToRoster: true } } },
-                },
-                skillToPosition: { with: { skill: true } },
-                keywordToPosition: { with: { keyword: true } },
-              },
-            },
-            improvements: { with: { skill: true } },
-          },
+          ...playerWithPosition,
         },
       },
     },
   },
-} satisfies Parameters<typeof db.query.gameDetails.findMany>[0];
+}) satisfies Parameters<typeof db.query.gameDetails.findMany>[0];
 
 const cols = [
   "number",
@@ -115,10 +96,7 @@ export default async function InProgress(props: Props) {
       ? (
           await db.query.starPlayer.findMany({
             where: inArray(starPlayer.name, starsToQuery),
-            with: {
-              skillToStarPlayer: { with: { skill: true } },
-              keywordToStarPlayer: { with: { keyword: true } },
-            },
+            ...starPlayerWithSkills,
           })
         ).map((star) => ({
           ...star,

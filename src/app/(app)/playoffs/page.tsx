@@ -5,17 +5,13 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
+import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 async function getPlayoffsBracket(seasonId: string) {
   return db.query.bracketGame.findMany({
     where: eq(bracketGame.seasonId, seasonId),
     with: {
-      game: {
-        with: {
-          homeDetails: { with: { team: { columns: { name: true } } } },
-          awayDetails: { with: { team: { columns: { name: true } } } },
-        },
-      },
+      game: gameWithTeamNames,
     },
   });
 }

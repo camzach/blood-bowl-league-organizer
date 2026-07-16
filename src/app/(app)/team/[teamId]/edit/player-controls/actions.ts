@@ -19,6 +19,10 @@ import {
 } from "~/db/schema";
 
 import { getBlockedSkills } from "~/utils/get-blocked-skills";
+import {
+  playerWithAdvancement,
+  playerForTvCalculation,
+} from "~/db/query-fragments/player.fragments";
 
 export const makeCaptain = action
   .inputSchema(z.object({ playerId: z.string() }))
@@ -265,10 +269,7 @@ export const learnSkill = action
         where: eq(dbPlayer.id, input.player),
         with: {
           team: { columns: { state: true, id: true } },
-          improvements: { with: { skill: true } },
-          position: { with: { skillToPosition: { with: { skill: true } } } },
-          pendingRandomSkill: true,
-          pendingRandomStat: true,
+          ...playerWithAdvancement,
         },
       });
       if (!fetchedPlayer) throw new Error("Player not found");
@@ -336,16 +337,7 @@ export const learnSkill = action
 
       const updatedPlayer = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, player.id),
-        with: {
-          improvements: { with: { skill: true } },
-          position: {
-            with: {
-              rosterSlot: {
-                with: { roster: { with: { specialRuleToRoster: true } } },
-              },
-            },
-          },
-        },
+        ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");
 
@@ -376,10 +368,7 @@ export const rollRandomSkill = action
         where: eq(dbPlayer.id, input.player),
         with: {
           team: { columns: { state: true, id: true } },
-          improvements: { with: { skill: true } },
-          position: { with: { skillToPosition: { with: { skill: true } } } },
-          pendingRandomSkill: true,
-          pendingRandomStat: true,
+          ...playerWithAdvancement,
         },
       });
       if (!player) throw new Error("Player not found");
@@ -455,8 +444,7 @@ export const confirmRandomSkill = action
         where: eq(dbPlayer.id, input.player),
         with: {
           team: { columns: { state: true, id: true } },
-          improvements: { with: { skill: true } },
-          position: { with: { skillToPosition: { with: { skill: true } } } },
+          ...playerWithAdvancement,
           pendingRandomSkill: {
             with: {
               skill1: true,
@@ -512,16 +500,7 @@ export const confirmRandomSkill = action
 
       const updatedPlayer = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, player.id),
-        with: {
-          improvements: { with: { skill: true } },
-          position: {
-            with: {
-              rosterSlot: {
-                with: { roster: { with: { specialRuleToRoster: true } } },
-              },
-            },
-          },
-        },
+        ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");
 
@@ -609,9 +588,7 @@ export const confirmRandomStat = action
         where: eq(dbPlayer.id, input.player),
         with: {
           team: { columns: { state: true, id: true } },
-          improvements: { with: { skill: true } },
-          position: { with: { skillToPosition: { with: { skill: true } } } },
-          pendingRandomStat: true,
+          ...playerWithAdvancement,
         },
       });
       if (!fetchedPlayer) throw new Error("Player not found");
@@ -710,16 +687,7 @@ export const confirmRandomStat = action
 
       const updatedPlayer = await tx.query.player.findFirst({
         where: eq(dbPlayer.id, player.id),
-        with: {
-          improvements: { with: { skill: true } },
-          position: {
-            with: {
-              rosterSlot: {
-                with: { roster: { with: { specialRuleToRoster: true } } },
-              },
-            },
-          },
-        },
+        ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");
 

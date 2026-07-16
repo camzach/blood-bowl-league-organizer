@@ -4,24 +4,23 @@ import { auth } from "~/auth";
 import { headers } from "next/headers";
 import { starPlayer, team } from "~/db/schema/bblo";
 import { eq } from "drizzle-orm";
+import { starPlayerWithSkills } from "~/db/query-fragments/star-player.fragments";
+import { mergeQueryFragments } from "~/db/query-fragments/merge";
 
 export default async function StarPlayersPage() {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   const leagueId = apiSession?.session?.activeOrganizationId;
 
   const starPlayers = await db.query.starPlayer.findMany({
-    with: {
-      skillToStarPlayer: {
-        with: {
-          skill: true,
+    ...mergeQueryFragments(starPlayerWithSkills, {
+      with: {
+        specialRuleToStarPlayer: {
+          with: {
+            specialRule: true,
+          },
         },
       },
-      specialRuleToStarPlayer: {
-        with: {
-          specialRule: true,
-        },
-      },
-    },
+    }),
     orderBy: starPlayer.name,
   });
 

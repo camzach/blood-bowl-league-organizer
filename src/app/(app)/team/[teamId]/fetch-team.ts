@@ -6,6 +6,7 @@ import {
   getPlayerSppAndTv,
   getPlayerSkills,
 } from "~/utils/get-computed-player-fields";
+import { playerWithAdvancement } from "~/db/query-fragments/player.fragments";
 
 export default async function fetchTeam(
   id: string,
@@ -22,25 +23,7 @@ export default async function fetchTeam(
         where: includeNonPlayers
           ? undefined
           : eq(player.membershipType, "player"),
-        with: {
-          improvements: { with: { skill: true } },
-          pendingRandomSkill: true,
-          pendingRandomStat: true,
-          position: {
-            with: {
-              skillToPosition: { with: { skill: true } },
-              rosterSlot: {
-                with: {
-                  roster: {
-                    with: {
-                      specialRuleToRoster: { with: { specialRule: true } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        ...playerWithAdvancement,
       },
     },
   });

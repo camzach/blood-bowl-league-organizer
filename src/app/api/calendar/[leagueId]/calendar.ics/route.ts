@@ -3,6 +3,7 @@ import ical from "ical-generator";
 import { db } from "~/utils/drizzle";
 import { league as dbLeague } from "~/db/schema";
 import { eq } from "drizzle-orm";
+import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 export async function GET(
   req: NextRequest,
@@ -17,12 +18,7 @@ export async function GET(
         with: {
           roundRobinGames: {
             with: {
-              game: {
-                with: {
-                  homeDetails: { with: { team: true } },
-                  awayDetails: { with: { team: true } },
-                },
-              },
+              game: gameWithTeamNames,
             },
           },
         },

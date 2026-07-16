@@ -2,13 +2,7 @@ import { league as dbLeague, roundRobinGame, season } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "~/utils/drizzle";
 import ScheduleEditor from "./editor";
-
-const gameFields = {
-  with: {
-    homeDetails: { with: { team: { columns: { name: true } } } },
-    awayDetails: { with: { team: { columns: { name: true } } } },
-  },
-} as const;
+import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 type Props = {
   leagueId: string;
@@ -21,10 +15,10 @@ export default async function ScheduleManager({ leagueId }: Props) {
         where: eq(season.isActive, true),
         with: {
           roundRobinGames: {
-            with: { game: gameFields },
+            with: { game: gameWithTeamNames },
             orderBy: roundRobinGame.round,
           },
-          bracketGames: { with: { game: gameFields } },
+          bracketGames: { with: { game: gameWithTeamNames } },
         },
       },
     },

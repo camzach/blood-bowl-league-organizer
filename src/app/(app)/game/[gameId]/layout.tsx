@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { db } from "~/utils/drizzle";
+import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,7 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, params.gameId),
-    with: {
-      homeDetails: { with: { team: { columns: { name: true } } } },
-      awayDetails: { with: { team: { columns: { name: true } } } },
-    },
+    ...gameWithTeamNames,
   });
   if (!game) return notFound();
   if (!game.homeDetails || !game.awayDetails) return notFound();

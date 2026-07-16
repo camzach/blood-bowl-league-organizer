@@ -4,7 +4,7 @@ import { db } from "~/utils/drizzle";
 import { game as dbGame, player, rosterSlot } from "~/db/schema";
 import { and, eq, gte } from "drizzle-orm";
 
-const detailsFeilds = {
+const detailsFields = {
   with: {
     team: {
       with: {
@@ -41,8 +41,8 @@ export default async function Journeymen(props: Props) {
   const game = await db.query.game.findFirst({
     where: eq(dbGame.id, gameId),
     with: {
-      homeDetails: detailsFeilds,
-      awayDetails: detailsFeilds,
+      homeDetails: detailsFields,
+      awayDetails: detailsFields,
     },
   });
   if (!game) return notFound();
