@@ -1,5 +1,4 @@
-import { notFound, redirect } from "next/navigation";
-import React from "react";
+import { notFound, redirect, unauthorized } from "next/navigation";
 import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
@@ -10,20 +9,18 @@ import { TeamTable } from "~/components/team-table";
 import { PlayerActions } from "./player-controls/action-buttons";
 import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
-import fetchTeam from "../fetch-team";
 import { db } from "~/utils/drizzle";
-import { coachToTeam, rosterSlot, team as dbTeam } from "~/db/schema";
-import { eq } from "drizzle-orm";
 import TeamState from "./team-state";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
+import fetchTeam from "../fetch-team";
 
 type Props = { params: Promise<{ teamId: string }> };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const routeTeam = await db.query.team.findFirst({
-    where: eq(dbTeam.id, params.teamId),
+    where: { id: params.teamId },
     columns: { name: true },
   });
   return { title: routeTeam?.name ?? "Unknown Team" };
@@ -38,31 +35,23 @@ export default async function EditTeam(props: Props) {
   if (!apiSession) return redirect("/login");
   const { user } = apiSession;
 
-  const editableTeams = await db.query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, user.id),
-  });
-
-  if (
-    !editableTeams.some(
-      (entry) =>
-        entry.teamId === decodeURIComponent(teamId) &&
-        entry.coachId === user.id,
-    )
-  ) {
-    return redirect(`/team/${teamId}`);
-  }
   const team = await fetchTeam(decodeURIComponent(teamId), true);
+  if (!team) {
+    return notFound();
+  }
+  if (!team.coaches.some((c) => c.id === user.id)) {
+    return unauthorized();
+  }
+
   const skills = await db.query.skill.findMany({});
   const skillRelations = await db.query.skillRelation.findMany({});
-
-  if (!team) return notFound();
 
   const state = team.state;
   if (state === "ready" || state === "playing")
     return redirect(`/team/${team.id}`);
 
   const rosterSlots = await db.query.rosterSlot.findMany({
-    where: eq(rosterSlot.rosterName, team.rosterName),
+    where: { rosterName: team.rosterName },
     with: { position: true },
   });
 
@@ -79,8 +68,8 @@ export default async function EditTeam(props: Props) {
       : p.membershipType === "journeyman",
   );
 
-  const hasCaptainRule = team.roster.specialRuleToRoster.some(
-    (r) => r.specialRuleName === "Team Captain",
+  const hasCaptainRule = team.roster.specialRules.some(
+    (r) => r.name === "Team Captain",
   );
 
   const currentCaptain = team.players.find((p) => p.isCaptain);

@@ -5,8 +5,8 @@ export const playerWithPosition = {
         rosterSlot: {
           with: { roster: { with: { specialRuleToRoster: true } } },
         },
-        skillToPosition: { with: { skill: true } },
-        keywordToPosition: { with: { keyword: true } },
+        skills: true,
+        keywords: true,
       },
     },
     improvements: { with: { skill: true } },
@@ -18,10 +18,10 @@ export const playerWithAdvancement = {
     position: {
       with: {
         rosterSlot: {
-          with: { roster: { with: { specialRuleToRoster: true } } },
+          with: { roster: { with: { specialRules: true } } },
         },
-        skillToPosition: { with: { skill: true } },
-        keywordToPosition: { with: { keyword: true } },
+        skills: true,
+        keywords: true,
       },
     },
     improvements: { with: { skill: true } },

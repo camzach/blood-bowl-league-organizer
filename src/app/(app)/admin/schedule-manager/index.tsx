@@ -1,5 +1,3 @@
-import { league as dbLeague, roundRobinGame, season } from "~/db/schema";
-import { eq } from "drizzle-orm";
 import { db } from "~/utils/drizzle";
 import ScheduleEditor from "./editor";
 import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
@@ -9,14 +7,14 @@ type Props = {
 };
 export default async function ScheduleManager({ leagueId }: Props) {
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.id, leagueId),
+    where: { id: leagueId },
     with: {
       seasons: {
-        where: eq(season.isActive, true),
+        where: { isActive: true },
         with: {
           roundRobinGames: {
             with: { game: gameWithTeamNames },
-            orderBy: roundRobinGame.round,
+            orderBy: { round: "asc" },
           },
           bracketGames: { with: { game: gameWithTeamNames } },
         },

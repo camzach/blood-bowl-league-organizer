@@ -9,32 +9,33 @@ import {
   getPlayerSppAndTv,
 } from "~/utils/get-computed-player-fields";
 import { db } from "~/utils/drizzle";
-import { and, eq, inArray } from "drizzle-orm";
-import { game as dbGame, player, skill, starPlayer } from "~/db/schema";
-import { playerWithPosition } from "~/db/query-fragments/player.fragments";
 import { starPlayerWithSkills } from "~/db/query-fragments/star-player.fragments";
 import { gameDetailsWithTeam } from "~/db/query-fragments/game.fragments";
-import { mergeQueryFragments } from "~/db/query-fragments/merge";
+import { playerWithPosition } from "~/db/query-fragments/player.fragments";
 
 type Props = {
   params: Promise<{ gameId: string }>;
 };
 
-const detailsSelect = mergeQueryFragments(gameDetailsWithTeam, {
+const detailsSelect = {
+  ...gameDetailsWithTeam,
   with: {
+    ...gameDetailsWithTeam.with,
     team: {
+      ...gameDetailsWithTeam.with.team,
       with: {
+        ...gameDetailsWithTeam.with.team.with,
         players: {
-          where: and(
-            inArray(player.membershipType, ["player", "journeyman"]),
-            eq(player.missNextGame, false),
-          ),
           ...playerWithPosition,
+          where: {
+            membershipType: { in: ["player" as const, "journeyman" as const] },
+            missNextGame: false,
+          },
         },
       },
     },
   },
-}) satisfies Parameters<typeof db.query.gameDetails.findMany>[0];
+};
 
 const cols = [
   "number",
@@ -64,14 +65,14 @@ export default async function InProgress(props: Props) {
   const { gameId } = params;
 
   const game = await db.query.game.findFirst({
-    where: eq(dbGame.id, decodeURIComponent(gameId)),
+    where: { id: decodeURIComponent(gameId) },
     with: {
       homeDetails: detailsSelect,
       awayDetails: detailsSelect,
     },
   });
   const proSkill = await db.query.skill.findFirst({
-    where: eq(skill.name, "Pro"),
+    where: { name: "Pro" },
   });
   if (!game) return notFound();
   if (!game.homeDetails || !game.awayDetails) return notFound();
@@ -93,15 +94,10 @@ export default async function InProgress(props: Props) {
   // query star players separately because the query got too big and broke
   const stars =
     starsToQuery.length > 0
-      ? (
-          await db.query.starPlayer.findMany({
-            where: inArray(starPlayer.name, starsToQuery),
-            ...starPlayerWithSkills,
-          })
-        ).map((star) => ({
-          ...star,
-          skills: star.skillToStarPlayer.map((skill) => skill.skill),
-        }))
+      ? await db.query.starPlayer.findMany({
+          ...starPlayerWithSkills,
+          where: { name: { in: starsToQuery } },
+        })
       : [];
 
   return (
@@ -136,23 +132,18 @@ export default async function InProgress(props: Props) {
             .sort((a, b) => a.number - b.number)
             .map((p) => ({
               ...p,
-              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+              keywords: p.position.keywords,
             })),
           journeymen: game.homeDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
             .sort((a, b) => a.number - b.number)
             .map((p) => ({
               ...p,
-              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+              keywords: p.position.keywords,
             })),
           starPlayers: game.homeDetails.gameDetailsToStarPlayer.map(
-            ({ starPlayerName }) => {
-              const star = stars.find((star) => star.name === starPlayerName)!;
-              return {
-                ...star,
-                keywords: star.keywordToStarPlayer.map((k) => k.keyword),
-              };
-            },
+            ({ starPlayerName }) =>
+              stars.find((star) => star.name === starPlayerName)!,
           ),
         }}
         away={{
@@ -180,23 +171,18 @@ export default async function InProgress(props: Props) {
             .sort((a, b) => a.number - b.number)
             .map((p) => ({
               ...p,
-              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+              keywords: p.position.keywords,
             })),
           journeymen: game.awayDetails.team.players
             .filter((p) => p.membershipType === "journeyman")
             .sort((a, b) => a.number - b.number)
             .map((p) => ({
               ...p,
-              keywords: p.position.keywordToPosition.map((k) => k.keyword),
+              keywords: p.position.keywords,
             })),
           starPlayers: game.awayDetails.gameDetailsToStarPlayer.map(
-            ({ starPlayerName }) => {
-              const star = stars.find((star) => star.name === starPlayerName)!;
-              return {
-                ...star,
-                keywords: star.keywordToStarPlayer.map((k) => k.keyword),
-              };
-            },
+            ({ starPlayerName }) =>
+              stars.find((star) => star.name === starPlayerName)!,
           ),
         }}
       />
@@ -237,8 +223,8 @@ export default async function InProgress(props: Props) {
           <>
             <div className="divider">Star Players</div>
             <StarPlayerTable
-              stars={game.homeDetails.gameDetailsToStarPlayer.map(
-                (e) => stars.find((star) => star.name === e.starPlayerName)!,
+              stars={game.homeDetails.gameDetailsToStarPlayer.map((e) =>
+                stars.find((star) => star.name === e.starPlayerName)!,
               )}
             />
           </>
@@ -280,8 +266,8 @@ export default async function InProgress(props: Props) {
           <>
             <div className="divider">Star Players</div>
             <StarPlayerTable
-              stars={game.awayDetails.gameDetailsToStarPlayer.map(
-                (e) => stars.find((star) => star.name === e.starPlayerName)!,
+              stars={game.awayDetails.gameDetailsToStarPlayer.map((e) =>
+                stars.find((star) => star.name === e.starPlayerName)!,
               )}
             />
           </>

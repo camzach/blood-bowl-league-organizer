@@ -1,6 +1,4 @@
 import { auth } from "~/auth";
-import { league as dbLeague } from "~/db/schema";
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "~/utils/drizzle";
 import { isLeagueAdmin } from "~/utils/is-league-admin";
@@ -25,7 +23,7 @@ export async function GET() {
   }
 
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.id, leagueId), // Assuming leagueId is the ID, not the name
+    where: { id: leagueId },
   });
 
   if (!league?.discordGuildId) return Response.json(null);

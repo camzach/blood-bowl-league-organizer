@@ -19,7 +19,7 @@ export const updateDiscordGuildId = action
   .use(requireRole)
   .action(async ({ parsedInput: { guildId, leagueId } }) => {
     const oldLeague = await db.query.league.findFirst({
-      where: eq(league.id, leagueId),
+      where: { id: leagueId },
     });
 
     if (!oldLeague) {

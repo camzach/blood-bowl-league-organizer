@@ -1,13 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import Content from "./content";
 import { db } from "~/utils/drizzle";
-import {
-  game as dbGame,
-  inducement,
-  specialRuleToStarPlayer,
-  starPlayer,
-} from "~/db/schema";
-import { eq, getTableColumns, inArray } from "drizzle-orm";
+import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
+import { eq, getColumns, inArray } from "drizzle-orm";
 
 async function getInducementOptions(rules: string[], rosterName: string) {
   const allInducements = await db.select().from(inducement);
@@ -35,7 +30,7 @@ async function getInducementOptions(rules: string[], rosterName: string) {
     .filter((i) => i.price !== null);
 
   const starsPromise = db
-    .selectDistinct(getTableColumns(starPlayer))
+    .selectDistinct(getColumns(starPlayer))
     .from(starPlayer)
     .leftJoin(
       specialRuleToStarPlayer,
@@ -78,7 +73,7 @@ export default async function Inducements(props: {
   const { gameId } = params;
 
   const game = await db.query.game.findFirst({
-    where: eq(dbGame.id, decodeURIComponent(gameId)),
+    where: { id: decodeURIComponent(gameId) },
     columns: {
       state: true,
       homeDetailsId: true,

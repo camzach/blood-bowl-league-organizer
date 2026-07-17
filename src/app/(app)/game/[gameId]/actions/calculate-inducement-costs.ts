@@ -1,5 +1,4 @@
-import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
-import { inArray } from "drizzle-orm";
+import { inducement, specialRule, starPlayer } from "~/db/schema";
 import type { Transaction } from "~/utils/drizzle";
 
 function getInducementPrice(
@@ -36,9 +35,7 @@ export function calculateInducementCostsFromData(
   rosterName: string,
   starPlayersData: Array<
     typeof starPlayer.$inferSelect & {
-      specialRuleToStarPlayer: Array<
-        typeof specialRuleToStarPlayer.$inferSelect
-      >;
+      specialRules: Array<typeof specialRule.$inferSelect>;
     }
   >,
   inducementsData: Array<typeof inducement.$inferSelect>,
@@ -56,8 +53,8 @@ export function calculateInducementCostsFromData(
   let starPlayerCost = 0;
   for (const player of starPlayers) {
     if (
-      !player.specialRuleToStarPlayer.some(({ specialRuleName: rule }) =>
-        specialRules.some((r) => r === rule),
+      !player.specialRules.some(({ name }) =>
+        specialRules.some((r) => r === name),
       )
     )
       throw new InducementError("Invalid Star Player selected");
@@ -111,19 +108,20 @@ export async function calculateInducementCosts(
   tx: Transaction,
 ): Promise<number> {
   const starPlayersData = await tx.query.starPlayer.findMany({
-    where: inArray(starPlayer.name, stars),
+    where: { name: { in: stars } },
     with: {
-      specialRuleToStarPlayer: true,
+      specialRules: true,
     },
   });
 
   const inducementsData =
     inducements.length > 0
       ? await tx.query.inducement.findMany({
-          where: inArray(
-            inducement.name,
-            inducements.map((ind) => ind.name),
-          ),
+          where: {
+            name: {
+              in: inducements.map((ind) => ind.name),
+            },
+          },
         })
       : [];
 

@@ -1,13 +1,5 @@
 "use server";
-import {
-  eq,
-  InferInsertModel,
-  SQL,
-  sql,
-  SQLWrapper,
-  and,
-  inArray,
-} from "drizzle-orm";
+import { eq, InferInsertModel, SQL, sql, SQLWrapper, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import z from "zod";
 import nanoid from "~/utils/nanoid";
@@ -42,7 +34,7 @@ export const end = action
   .use(async ({ next, clientInput }) => {
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, gameId),
+      where: { id: gameId },
       with: {
         homeDetails: {
           with: {
@@ -88,11 +80,7 @@ export const end = action
                 with: {
                   position: {
                     with: {
-                      keywordToPosition: {
-                        with: {
-                          keyword: true,
-                        },
-                      },
+                      keywords: true,
                     },
                   },
                   improvements: true,
@@ -104,7 +92,7 @@ export const end = action
         },
       } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, input.game),
+        where: { id: input.game },
         columns: {
           id: true,
           state: true,
@@ -268,26 +256,22 @@ export const end = action
                 playerUpdates[causedByPlayer].casualties =
                   (playerUpdates[causedByPlayer]?.casualties ?? 0) + 1;
 
-                offenderKeywords = offender.position.keywordToPosition
-                  .filter((k) => k.keyword.canBeHated)
-                  .map((k) => k.keyword.name);
+                offenderKeywords = offender.position.keywords
+                  .filter((k) => k.canBeHated)
+                  .map((k) => k.name);
               } else {
                 const offender = await tx.query.starPlayer.findFirst({
-                  where: (starPlayer) => eq(starPlayer.name, causedByPlayer),
+                  where: { name: causedByPlayer },
                   with: {
-                    keywordToStarPlayer: {
-                      with: {
-                        keyword: true,
-                      },
-                    },
+                    keywords: true,
                   },
                 });
                 if (!offender) {
                   throw new Error("Offending player does not exist");
                 }
-                offenderKeywords = offender.keywordToStarPlayer
-                  .filter((k) => k.keyword.canBeHated)
-                  .map((k) => k.keyword.name);
+                offenderKeywords = offender.keywords
+                  .filter((k) => k.canBeHated)
+                  .map((k) => k.name);
               }
 
               if (injury.type !== "bh" && d6() >= 4) {
@@ -296,11 +280,11 @@ export const end = action
                 }
                 const hatredSkillName = `Hatred (${injury.causedBy.hatredKeyword})`;
                 const existingSkill = await tx.query.skill.findFirst({
-                  where: eq(skill.name, hatredSkillName),
+                  where: { name: hatredSkillName },
                 });
                 if (!existingSkill) {
                   const baseHatredSkill = await tx.query.skill.findFirst({
-                    where: eq(skill.name, "Hatred"),
+                    where: { name: "Hatred" },
                   });
                   if (!baseHatredSkill) {
                     throw new Error("Failed to find Hatred skill");
@@ -568,11 +552,11 @@ export const end = action
           id: detailsId,
         });
         const nextGame = await tx.query.bracketGame.findFirst({
-          where: and(
-            eq(bracketGame.round, relatedBracketGame.round - 1),
-            eq(bracketGame.seed, nextSeed),
-            eq(bracketGame.seasonId, relatedBracketGame.seasonId),
-          ),
+          where: {
+            round: relatedBracketGame.round - 1,
+            seed: nextSeed,
+            seasonId: relatedBracketGame.seasonId,
+          },
         });
         if (!nextGame) {
           throw new Error("Couldn't find next bracket round");
@@ -599,7 +583,7 @@ export const end = action
         av: [3, 11],
       };
       const updatedPlayers = await tx.query.player.findMany({
-        where: inArray(player.id, Object.keys(playerUpdates)),
+        where: { id: { in: Object.keys(playerUpdates) } },
         with: { position: true, improvements: true },
       });
       for (const updatedPlayer of updatedPlayers) {

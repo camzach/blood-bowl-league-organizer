@@ -1,13 +1,10 @@
 import { notFound, redirect } from "next/navigation";
-import React from "react";
 import calculateTV from "~/utils/calculate-tv";
 import SongControls from "./touchdown-song-controls";
 import type { Metadata } from "next";
 import { TeamTable } from "~/components/team-table";
 import EditButton from "./edit-button";
 import { db } from "~/utils/drizzle";
-import { eq } from "drizzle-orm";
-import { coachToTeam, team as dbTeam } from "~/db/schema";
 import fetchTeam from "./fetch-team";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
@@ -17,7 +14,7 @@ type Props = { params: Promise<{ teamId: string }> };
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const routeTeam = await db.query.team.findFirst({
-    where: eq(dbTeam.id, params.teamId),
+    where: { id: params.teamId },
     columns: { name: true },
   });
   return { title: routeTeam?.name ?? "Unknown Team" };
@@ -41,7 +38,7 @@ export default async function TeamPage(props: Props) {
   }
 
   const editableTeams = await db.query.coachToTeam.findMany({
-    where: eq(coachToTeam.coachId, user.id),
+    where: { coachId: user.id },
   });
 
   return (

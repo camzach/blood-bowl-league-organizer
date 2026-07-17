@@ -1,6 +1,4 @@
 import { auth } from "~/auth";
-import { bracketGame, season } from "~/db/schema";
-import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -9,7 +7,7 @@ import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 async function getPlayoffsBracket(seasonId: string) {
   return db.query.bracketGame.findMany({
-    where: eq(bracketGame.seasonId, seasonId),
+    where: { seasonId },
     with: {
       game: gameWithTeamNames,
     },
@@ -90,10 +88,10 @@ export default async function Playoffs() {
   const { session } = apiSession;
 
   const activeSeason = await db.query.season.findFirst({
-    where: and(
-      eq(season.leagueId, session.activeOrganizationId ?? ""),
-      eq(season.isActive, true),
-    ),
+    where: {
+      leagueId: session.activeOrganizationId ?? "",
+      isActive: true,
+    },
   });
   if (!activeSeason) return notFound();
 

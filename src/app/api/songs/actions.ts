@@ -41,7 +41,7 @@ export const uploadTouchdownSong = action
     }
 
     const team = await db.query.team.findFirst({
-      where: eq(dbTeam.id, teamId),
+      where: { id: teamId },
       with: { song: true },
     });
 

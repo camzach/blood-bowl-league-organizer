@@ -1,8 +1,7 @@
 "use server";
-import { eq, and, not, InferInsertModel, sql } from "drizzle-orm";
+import { eq, InferInsertModel, sql } from "drizzle-orm";
 import z from "zod";
 import {
-  player,
   gameDetailsToStarPlayer,
   gameDetailsToInducement,
   team,
@@ -33,7 +32,7 @@ export const purchaseInducements = action
   .use(async ({ next, clientInput }) => {
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, gameId),
+      where: { id: gameId },
       with: {
         homeDetails: {
           with: {
@@ -82,17 +81,17 @@ export const purchaseInducements = action
                 },
               },
               players: {
-                where: and(
-                  eq(player.missNextGame, false),
-                  not(eq(player.membershipType, "retired")),
-                ),
+                where: {
+                  missNextGame: false,
+                  membershipType: { NOT: "retired" },
+                },
               },
             },
           },
         },
       } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, input.game),
+        where: { id: input.game },
         columns: {
           id: true,
           state: true,

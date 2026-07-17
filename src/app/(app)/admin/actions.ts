@@ -29,10 +29,10 @@ export const scheduleAction = action
   .action(async ({ ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
-        where: and(
-          eq(season.leagueId, session.activeOrganizationId ?? ""),
-          eq(season.isActive, true),
-        ),
+        where: {
+          leagueId: session.activeOrganizationId ?? "",
+          isActive: true,
+        },
         with: {
           roundRobinGames: {
             columns: {},
@@ -46,10 +46,10 @@ export const scheduleAction = action
 
       const teams = (
         await tx.query.team.findMany({
-          where: and(
-            eq(team.leagueId, session.activeOrganizationId ?? ""),
-            eq(team.state, "ready"),
-          ),
+          where: {
+            leagueId: session.activeOrganizationId ?? "",
+            state: "ready",
+          },
           columns: { id: true },
         })
       ).map((t) => t.id);
@@ -94,10 +94,10 @@ export const clearAction = action
   .action(async ({ ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
-        where: and(
-          eq(season.leagueId, session.activeOrganizationId ?? ""),
-          eq(season.isActive, true),
-        ),
+        where: {
+          leagueId: session.activeOrganizationId ?? "",
+          isActive: true,
+        },
       });
       if (!activeSeason) throw new Error("No active season");
       const gameIds = (
@@ -146,10 +146,10 @@ export const rescheduleGames = action
   .action(async ({ parsedInput: games, ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
-        where: and(
-          eq(season.leagueId, session.activeOrganizationId ?? ""),
-          eq(season.isActive, true),
-        ),
+        where: {
+          leagueId: session.activeOrganizationId ?? "",
+          isActive: true,
+        },
         with: {
           roundRobinGames: true,
         },
@@ -180,10 +180,10 @@ export const seedBracket = action
   .action(async ({ ctx: { session } }) => {
     return await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
-        where: and(
-          eq(season.leagueId, session.activeOrganizationId ?? ""),
-          eq(season.isActive, true),
-        ),
+        where: {
+          leagueId: session.activeOrganizationId ?? "",
+          isActive: true,
+        },
       });
       if (!activeSeason) {
         throw new Error("No active season");
@@ -191,14 +191,14 @@ export const seedBracket = action
 
       {
         const bracketGames = await tx.query.bracketGame.findMany({
-          where: eq(bracketGame.seasonId, activeSeason.id),
+          where: { seasonId: activeSeason.id },
+          with: { game: true },
         });
         const gameIds = bracketGames.map((g) => g.gameId).filter((id) => !!id);
-        const games = await tx.query.game.findMany({
-          where: inArray(game.id, gameIds),
-        });
-        const gameDetailsIds = games
-          .flatMap((g) => [g.homeDetailsId, g.awayDetailsId])
+        const gameDetailsIds = bracketGames
+          .flatMap((bg) =>
+            bg.game ? [bg.game.homeDetailsId, bg.game.awayDetailsId] : [],
+          )
           .filter((id): id is string => !!id);
 
         console.log(`Deleting ${gameIds.length} bracket games`);
@@ -323,10 +323,10 @@ export const endSeason = action
   .action(async ({ ctx: { session } }) => {
     await db.transaction(async (tx) => {
       const activeSeason = await tx.query.season.findFirst({
-        where: and(
-          eq(season.leagueId, session.activeOrganizationId ?? ""),
-          eq(season.isActive, true),
-        ),
+        where: {
+          leagueId: session.activeOrganizationId ?? "",
+          isActive: true,
+        },
         with: {
           roundRobinGames: true,
           bracketGames: true,
@@ -335,7 +335,7 @@ export const endSeason = action
       if (!activeSeason) throw new Error("No active season");
 
       const teams = await tx.query.team.findMany({
-        where: eq(team.leagueId, session.activeOrganizationId ?? ""),
+        where: { leagueId: session.activeOrganizationId ?? "" },
         with: {
           players: true,
         },
@@ -349,7 +349,9 @@ export const endSeason = action
         ...activeSeason.bracketGames.map((g) => g.gameId),
       ];
       const games = await tx.query.game.findMany({
-        where: inArray(game.id, gameIds),
+        where: {
+          id: { in: gameIds },
+        },
       });
       if (games.some((g) => g.state !== "complete")) {
         throw new Error("Not all games have been played");
@@ -385,10 +387,10 @@ export const endSeason = action
 
       let winnerId: string | undefined;
       const final = await tx.query.bracketGame.findFirst({
-        where: and(
-          eq(bracketGame.seasonId, activeSeason.id),
-          eq(bracketGame.round, 1),
-        ),
+        where: {
+          seasonId: activeSeason.id,
+          round: 1,
+        },
         with: {
           game: { with: { homeDetails: true, awayDetails: true } },
         },
@@ -408,10 +410,10 @@ export const endSeason = action
       }
 
       const semiFinals = await tx.query.bracketGame.findMany({
-        where: and(
-          eq(bracketGame.seasonId, activeSeason.id),
-          eq(bracketGame.round, 2),
-        ),
+        where: {
+          seasonId: activeSeason.id,
+          round: 2,
+        },
         with: {
           game: { with: { homeDetails: true, awayDetails: true } },
         },

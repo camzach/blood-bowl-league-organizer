@@ -1,20 +1,21 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { db } from "./utils/drizzle";
 import { admin, organization } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
-import { member } from "~/db/schema";
+import { schema } from "./db/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
+    schema,
     provider: "pg",
   }),
+  experimental: { joins: true },
   databaseHooks: {
     session: {
       create: {
         async before(session) {
           const league = await db.query.member.findFirst({
-            where: eq(member.userId, session.userId),
+            where: { userId: session.userId },
           });
           return {
             data: {

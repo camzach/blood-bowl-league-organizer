@@ -2,11 +2,10 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type { Metadata } from "next";
 import { db } from "~/utils/drizzle";
-import { team as dbTeam, season, team } from "~/db/schema";
 import { auth } from "~/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { and, eq, sql, not } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import SignoutButton from "~/components/signout-button";
 import { isLeagueAdmin } from "~/utils/is-league-admin";
 import LeagueSelector from "~/components/league-selector";
@@ -32,18 +31,18 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const drawerId = "_drawer_";
 
   const teams = await db.query.team.findMany({
-    where: and(
-      not(eq(dbTeam.state, "draft")),
-      eq(dbTeam.leagueId, session.activeOrganizationId ?? ""),
-    ),
-    orderBy: team.name,
+    where: {
+      NOT: { state: "draft" },
+      leagueId: session.activeOrganizationId ?? "",
+    },
+    orderBy: { name: "asc" },
   });
 
   const activeSeason = await db.query.season.findFirst({
-    where: and(
-      eq(season.leagueId, session.activeOrganizationId ?? ""),
-      eq(season.isActive, true),
-    ),
+    where: {
+      leagueId: session.activeOrganizationId ?? "",
+      isActive: true,
+    },
     with: {
       bracketGames: {
         extras: { _: sql<never>`'_'`.as("_") },

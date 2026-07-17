@@ -1,9 +1,7 @@
 "use server";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import z from "zod";
 import {
-  player,
-  keywordToPosition,
   weatherOpts,
   gameDetails,
   game as dbGame,
@@ -19,7 +17,7 @@ export const start = action
   .use(async ({ next, clientInput }) => {
     const { id } = z.object({ id: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, id),
+      where: { id },
       with: {
         homeDetails: { columns: { teamId: true } },
         awayDetails: { columns: { teamId: true } },
@@ -46,10 +44,10 @@ export const start = action
           team: {
             with: {
               players: {
-                where: and(
-                  inArray(player.membershipType, ["player", "journeyman"]),
-                  eq(player.missNextGame, false),
-                ),
+                where: {
+                  membershipType: { in: ["player", "journeyman"] },
+                  missNextGame: false,
+                },
                 with: {
                   improvements: {
                     with: {
@@ -67,11 +65,7 @@ export const start = action
                           },
                         },
                       },
-                      keywordToPosition: {
-                        with: {
-                          keyword: true,
-                        },
-                      },
+                      keywords: true,
                     },
                   },
                 },
@@ -82,9 +76,7 @@ export const start = action
                     with: {
                       position: {
                         with: {
-                          keywordToPosition: {
-                            where: eq(keywordToPosition.keywordName, "Lineman"),
-                          },
+                          keywords: true,
                         },
                       },
                     },
@@ -97,7 +89,7 @@ export const start = action
       } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
 
       const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, id),
+        where: { id },
         with: {
           homeDetails: teamDetailsOptions,
           awayDetails: teamDetailsOptions,

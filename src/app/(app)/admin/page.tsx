@@ -1,7 +1,5 @@
 import { clearAction, scheduleAction, seedBracket, endSeason } from "./actions";
 import { db } from "~/utils/drizzle";
-import { league as dbLeague, team } from "~/db/schema";
-import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import DiscordGuildLinker from "./discord-guild-linker";
 import InviteManager from "./invite-manager";
@@ -23,13 +21,16 @@ export default async function AdminPage() {
   }
 
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.id, session.activeOrganizationId ?? ""),
+    where: { id: session.activeOrganizationId ?? "" },
   });
 
   if (!league) return notFound();
 
   const draftTeams = await db.query.team.findMany({
-    where: and(eq(team.leagueId, league.id), eq(team.state, "draft")),
+    where: {
+      leagueId: league.id,
+      state: "draft",
+    },
     columns: {
       name: true,
     },

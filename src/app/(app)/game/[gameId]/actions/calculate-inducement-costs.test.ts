@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateInducementCostsFromData } from "./calculate-inducement-costs";
-import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
+import { inducement, specialRule, starPlayer } from "~/db/schema";
 
 describe("calculate inducement costs", () => {
   const mockStarPlayersData = [
@@ -8,31 +8,29 @@ describe("calculate inducement costs", () => {
       name: "star-player-1",
       hiringFee: 430000,
       partnerName: null,
-      specialRuleToStarPlayer: [{ specialRuleName: "special-rule-1" }],
+      specialRules: [{ name: "special-rule-1" }],
     },
     {
       name: "star-player-2",
       hiringFee: 320000,
       partnerName: null,
-      specialRuleToStarPlayer: [{ specialRuleName: "special-rule-2" }],
+      specialRules: [{ name: "special-rule-2" }],
     },
     {
       name: "star-player-3",
       hiringFee: 390000,
       partnerName: "star-player-4",
-      specialRuleToStarPlayer: [{ specialRuleName: "special-rule-1" }],
+      specialRules: [{ name: "special-rule-1" }],
     },
     {
       name: "star-player-4",
       hiringFee: 390000,
       partnerName: "star-player-3",
-      specialRuleToStarPlayer: [{ specialRuleName: "special-rule-1" }],
+      specialRules: [{ name: "special-rule-1" }],
     },
   ] as Array<
     typeof starPlayer.$inferSelect & {
-      specialRuleToStarPlayer: Array<
-        typeof specialRuleToStarPlayer.$inferSelect
-      >;
+      specialRules: Array<typeof specialRule.$inferSelect>;
     }
   >;
 

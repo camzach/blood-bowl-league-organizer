@@ -1,7 +1,5 @@
-import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
-import { game as dbGame } from "~/db/schema";
 import { gameWithTeamNamesAndMvp } from "~/db/query-fragments/game.fragments";
 
 export default async function Game(props: {
@@ -12,7 +10,7 @@ export default async function Game(props: {
   const { gameId } = params;
 
   const game = await db.query.game.findFirst({
-    where: eq(dbGame.id, decodeURIComponent(gameId)),
+    where: { id: decodeURIComponent(gameId) },
     ...gameWithTeamNamesAndMvp,
   });
   if (!game) return notFound();

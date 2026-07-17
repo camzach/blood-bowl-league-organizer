@@ -4,7 +4,7 @@ import {
   position,
   roster,
   skill,
-  specialRuleToRoster,
+  specialRule,
 } from "~/db/schema";
 
 type Player = typeof player.$inferSelect;
@@ -12,7 +12,7 @@ type Position = typeof position.$inferSelect;
 type Improvement = typeof improvement.$inferSelect;
 type Skill = typeof skill.$inferSelect;
 type Roster = typeof roster.$inferSelect;
-type SpecialRuleToRoster = typeof specialRuleToRoster.$inferSelect;
+type SpecialRule = typeof specialRule.$inferSelect;
 
 export function getPlayerStats(
   player: Pick<
@@ -54,14 +54,14 @@ export function getPlayerStats(
 
 export function getPlayerSkills(
   player: {
-    position: { skillToPosition: Array<{ skill: Skill }> };
+    position: { skills: Array<Skill> };
     improvements: { skill: Skill | null }[];
     isCaptain: boolean;
   },
   proSkill?: Skill,
 ) {
   const skills = [
-    ...player.position.skillToPosition.map((e) => e.skill),
+    ...player.position.skills,
     ...player.improvements
       .flatMap(({ skill }) => (skill ? [skill] : []))
       .filter(Boolean),
@@ -103,7 +103,7 @@ export function getPlayerSppAndTv(
     position: Pick<Position, "cost" | "primary" | "secondary"> & {
       rosterSlot: {
         roster: Pick<Roster, never> & {
-          specialRuleToRoster: SpecialRuleToRoster[];
+          specialRules: SpecialRule[];
         };
       };
     };
@@ -111,19 +111,18 @@ export function getPlayerSppAndTv(
 ) {
   let teamValue = player.position.cost;
   if (
-    player.position.rosterSlot.roster.specialRuleToRoster.some(
-      (r) => r.specialRuleName === "Low Cost Linemen",
+    player.position.rosterSlot.roster.specialRules.some(
+      (r) => r.name === "Low Cost Linemen",
     )
   ) {
     teamValue = 0;
   }
 
-  const [tdSpp, casSpp] =
-    player.position.rosterSlot.roster.specialRuleToRoster.some(
-      (rule) => rule.specialRuleName === "Brawlin' Brutes",
-    )
-      ? [2, 3]
-      : [3, 2];
+  const [tdSpp, casSpp] = player.position.rosterSlot.roster.specialRules.some(
+    (rule) => rule.name === "Brawlin' Brutes",
+  )
+    ? [2, 3]
+    : [3, 2];
 
   let starPlayerPoints =
     player.mvps * 4 +

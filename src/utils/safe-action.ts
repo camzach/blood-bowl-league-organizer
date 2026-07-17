@@ -2,8 +2,6 @@ import { auth } from "~/auth";
 import { createMiddleware, createSafeActionClient } from "next-safe-action";
 import { headers } from "next/headers";
 import { db } from "./drizzle";
-import { coachToTeam, player } from "~/db/schema/bblo";
-import { and, eq, inArray } from "drizzle-orm";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -31,12 +29,10 @@ export const teamPermissionMiddleware = createMiddleware<{
   }
 
   const teamCoach = await db.query.coachToTeam.findFirst({
-    where: and(
-      Array.isArray(teamId)
-        ? inArray(coachToTeam.teamId, teamId)
-        : eq(coachToTeam.teamId, teamId),
-      eq(coachToTeam.coachId, user.id),
-    ),
+    where: {
+      teamId: Array.isArray(teamId) ? { in: teamId } : teamId,
+      coachId: user.id,
+    },
   });
 
   if (!teamCoach) {
@@ -53,9 +49,9 @@ export const playerPermissionMiddleware = createMiddleware<{
   const { playerId } = authParams;
 
   const playerRecord = await db.query.player.findFirst({
-    where: Array.isArray(playerId)
-      ? inArray(player.id, playerId)
-      : eq(player.id, playerId),
+    where: {
+      id: Array.isArray(playerId) ? { in: playerId } : playerId,
+    },
     columns: { teamId: true },
   });
 
@@ -64,10 +60,10 @@ export const playerPermissionMiddleware = createMiddleware<{
   }
 
   const teamCoach = await db.query.coachToTeam.findFirst({
-    where: and(
-      eq(coachToTeam.teamId, playerRecord.teamId),
-      eq(coachToTeam.coachId, user.id),
-    ),
+    where: {
+      teamId: playerRecord.teamId,
+      coachId: user.id,
+    },
   });
 
   if (!teamCoach) {

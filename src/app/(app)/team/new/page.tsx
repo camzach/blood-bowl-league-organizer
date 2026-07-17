@@ -1,5 +1,5 @@
-import { coachToTeam, roster, team } from "~/db/schema";
-import { getTableColumns, eq, and } from "drizzle-orm";
+import { coachToTeam, team } from "~/db/schema";
+import { getColumns, eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
 import RosterSelector from "./roster-selector";
@@ -14,7 +14,7 @@ export default async function NewTeam() {
   const { user } = apiSession;
 
   const teams = await db
-    .select(getTableColumns(team))
+    .select(getColumns(team))
     .from(team)
     .leftJoin(coachToTeam, eq(team.id, coachToTeam.teamId))
     .where(and(eq(coachToTeam.coachId, user.id), eq(team.state, "draft")));
@@ -22,7 +22,7 @@ export default async function NewTeam() {
   const rosters = await db.query.roster.findMany({
     columns: { name: true, tier: true },
     with: { optionalSpecialRules: true },
-    orderBy: [roster.tier, roster.name],
+    orderBy: { tier: "asc", name: "asc" },
   });
 
   return (

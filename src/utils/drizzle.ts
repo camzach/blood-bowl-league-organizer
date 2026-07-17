@@ -1,9 +1,12 @@
-import * as schema from "../db/schema";
-import { drizzle } from "drizzle-orm/neon-serverless";
+import { relations } from "../db/schema";
+import { drizzle, NeonDatabase } from "drizzle-orm/neon-serverless";
 import { neonConfig, Pool } from "@neondatabase/serverless";
 
-// @ts-expect-error typescript issues but it's chill
-let db: ReturnType<typeof drizzle<typeof schema>> = global.db;
+declare global {
+  var db: NeonDatabase<typeof relations>;
+}
+
+let db = globalThis.db;
 
 if (!db) {
   if (!process.env.VERCEL_ENV) {
@@ -20,9 +23,9 @@ if (!db) {
   }
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
-  db = drizzle(pool, {
-    schema,
-    logger: false,
+  db = drizzle({
+    client: pool,
+    relations,
   });
 }
 

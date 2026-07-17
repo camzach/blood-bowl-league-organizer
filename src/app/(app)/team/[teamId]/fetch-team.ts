@@ -1,6 +1,4 @@
-import { eq } from "drizzle-orm";
 import { db } from "~/utils/drizzle";
-import { team as dbTeam, player, skill } from "~/db/schema";
 import {
   getPlayerStats,
   getPlayerSppAndTv,
@@ -13,16 +11,15 @@ export default async function fetchTeam(
   includeNonPlayers: boolean,
 ) {
   const proSkill = await db.query.skill.findFirst({
-    where: eq(skill.name, "Pro"),
+    where: { name: "Pro" },
   });
   const fetchedTeam = await db.query.team.findFirst({
-    where: eq(dbTeam.id, id),
+    where: { id },
     with: {
-      roster: { with: { specialRuleToRoster: true } },
+      coaches: true,
+      roster: { with: { specialRules: true } },
       players: {
-        where: includeNonPlayers
-          ? undefined
-          : eq(player.membershipType, "player"),
+        where: includeNonPlayers ? undefined : { membershipType: "player" },
         ...playerWithAdvancement,
       },
     },
@@ -35,12 +32,8 @@ export default async function fetchTeam(
     players: fetchedTeam.players.map((p) => {
       const position = {
         ...p.position,
-        skills: p.position.skillToPosition.map((stp) => stp.skill),
         roster: {
           ...p.position.rosterSlot.roster,
-          specialRules: p.position.rosterSlot.roster.specialRuleToRoster.map(
-            (sr) => sr.specialRule,
-          ),
         },
       };
       return {

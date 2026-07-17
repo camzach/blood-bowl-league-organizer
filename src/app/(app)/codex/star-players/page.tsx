@@ -2,44 +2,28 @@ import { db } from "~/utils/drizzle";
 import StarPlayersClientPage from "./star-players-client-page";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
-import { starPlayer, team } from "~/db/schema/bblo";
-import { eq } from "drizzle-orm";
-import { starPlayerWithSkills } from "~/db/query-fragments/star-player.fragments";
-import { mergeQueryFragments } from "~/db/query-fragments/merge";
 
 export default async function StarPlayersPage() {
   const apiSession = await auth.api.getSession({ headers: await headers() });
   const leagueId = apiSession?.session?.activeOrganizationId;
 
   const starPlayers = await db.query.starPlayer.findMany({
-    ...mergeQueryFragments(starPlayerWithSkills, {
-      with: {
-        specialRuleToStarPlayer: {
-          with: {
-            specialRule: true,
-          },
-        },
-      },
-    }),
-    orderBy: starPlayer.name,
+    with: { skills: true, specialRules: true },
+    orderBy: { name: "asc" },
   });
 
   const teams = leagueId
     ? await db.query.team.findMany({
-        where: eq(team.leagueId, leagueId),
+        where: { leagueId },
         with: {
           roster: {
             with: {
-              specialRuleToRoster: {
-                with: {
-                  specialRule: true,
-                },
-              },
+              specialRules: true,
             },
           },
           specialRuleChoice: true,
         },
-        orderBy: team.name,
+        orderBy: { name: "asc" },
       })
     : [];
 
@@ -47,16 +31,14 @@ export default async function StarPlayersPage() {
     <StarPlayersClientPage
       starPlayers={starPlayers.map((s) => ({
         ...s,
-        name: s.name,
-        skills: s.skillToStarPlayer.map((sts) => sts.skill),
-        playsFor: s.specialRuleToStarPlayer.map((srs) => srs.specialRule.name),
+        playsFor: s.specialRules.map((rule) => rule.name),
       }))}
       teams={teams.map((t) => ({
         id: t.id,
         name: t.name,
-        rosterSpecialRules: t.roster.specialRuleToRoster
-          .filter((sr) => sr.specialRule.visible)
-          .map((sr) => sr.specialRuleName),
+        rosterSpecialRules: t.roster.specialRules
+          .filter((sr) => sr.visible)
+          .map((sr) => sr.name),
         chosenSpecialRule: t.chosenSpecialRuleName,
       }))}
     />

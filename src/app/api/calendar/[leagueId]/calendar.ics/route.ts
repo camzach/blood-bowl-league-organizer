@@ -1,8 +1,6 @@
 import { NextRequest } from "next/server";
 import ical from "ical-generator";
 import { db } from "~/utils/drizzle";
-import { league as dbLeague } from "~/db/schema";
-import { eq } from "drizzle-orm";
 import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
 
 export async function GET(
@@ -12,7 +10,7 @@ export async function GET(
   const teamId = req.nextUrl.searchParams.getAll("teamId");
 
   const league = await db.query.league.findFirst({
-    where: eq(dbLeague.id, (await params).leagueId),
+    where: { id: (await params).leagueId },
     with: {
       seasons: {
         with: {

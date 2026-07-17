@@ -14,7 +14,7 @@ import {
   player as dbPlayer,
   improvement,
 } from "~/db/schema";
-import { and, eq, getTableColumns, not, sql } from "drizzle-orm";
+import { and, eq, getColumns, sql } from "drizzle-orm";
 import nanoid from "~/utils/nanoid";
 import { getPlayerSppAndTv } from "~/utils/get-computed-player-fields";
 import { playerForTvCalculation } from "~/db/query-fragments/player.fragments";
@@ -68,7 +68,7 @@ export const hirePlayer = action
     return db.transaction(async (tx) => {
       const positionQuery = await db
         .select({
-          ...getTableColumns(dbPosition),
+          ...getColumns(dbPosition),
           rosterSlotMax: rosterSlot.max,
         })
         .from(dbPosition)
@@ -100,12 +100,12 @@ export const hirePlayer = action
       });
 
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input.teamId),
+        where: { id: input.teamId },
         columns: { treasury: true, state: true },
         with: {
           players: {
             columns: { number: true },
-            where: eq(dbPlayer.membershipType, "player"),
+            where: { membershipType: "player" },
             with: {
               position: {
                 columns: {},
@@ -160,7 +160,7 @@ export const hireStaff = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const team = await db.query.team.findFirst({
-        where: eq(dbTeam.id, input.teamId),
+        where: { id: input.teamId },
         with: {
           roster: {
             columns: { rerollCost: true },
@@ -213,7 +213,7 @@ export const hireStaff = action
         .where(eq(dbTeam.id, input.teamId));
 
       const updatedTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input.teamId),
+        where: { id: input.teamId },
         columns: {
           treasury: true,
           rerolls: true,
@@ -259,13 +259,13 @@ export const hireExistingPlayer = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: and(
-          eq(dbPlayer.id, input.player),
-          not(eq(dbPlayer.membershipType, "player")),
-        ),
+        where: {
+          id: input.player,
+          membershipType: { NOT: "player" },
+        },
         with: {
+          ...playerForTvCalculation.with,
           team: true,
-          ...playerForTvCalculation,
         },
       });
       if (!player) throw new Error("Player not found");
@@ -275,7 +275,7 @@ export const hireExistingPlayer = action
       const cost = teamValue + player.seasonsPlayed * 20_000;
 
       const oldTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, player.team.id),
+        where: { id: player.team.id },
         columns: {
           treasury: true,
         },
@@ -304,11 +304,11 @@ export const hireExistingPlayer = action
       ]);
 
       const updatedTeam = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, player.team.id),
+        where: { id: player.team.id },
         columns: { treasury: true },
         with: {
           players: {
-            where: eq(dbPlayer.membershipType, "player"),
+            where: { membershipType: "player" },
             with: { position: { with: { rosterSlot: true } } },
           },
         },
@@ -354,7 +354,7 @@ export const fireStaff = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input.teamId),
+        where: { id: input.teamId },
         columns: {
           state: true,
           name: true,
@@ -430,7 +430,7 @@ export const doneImproving = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input),
+        where: { id: input },
         columns: {
           id: true,
           state: true,
@@ -475,7 +475,7 @@ export const ready = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const team = await tx.query.team.findFirst({
-        where: eq(dbTeam.id, input),
+        where: { id: input },
         columns: {
           name: true,
           state: true,
@@ -483,11 +483,11 @@ export const ready = action
         },
         with: {
           players: {
-            where: eq(dbPlayer.membershipType, "player"),
+            where: { membershipType: "player" },
             with: {
               position: {
                 with: {
-                  skillToPosition: true,
+                  skills: true,
                 },
               },
             },
@@ -497,7 +497,7 @@ export const ready = action
       if (!team) throw new Error("Team not found");
 
       const insignificantPlayers = team.players.filter((p) =>
-        p.position.skillToPosition.some((s) => s.skillName === "Insignificant"),
+        p.position.skills.some((s) => s.name === "Insignificant"),
       ).length;
 
       if (insignificantPlayers > team.players.length / 2) {

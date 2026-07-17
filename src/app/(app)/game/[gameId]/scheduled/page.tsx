@@ -1,8 +1,6 @@
-import { eq } from "drizzle-orm";
 import { PlayButton } from "./play-button";
 import { notFound, redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
-import { game as dbGame } from "~/db/schema";
 
 export default async function Game(props: {
   params: Promise<{ gameId: string }>;
@@ -12,7 +10,7 @@ export default async function Game(props: {
   const { gameId } = params;
 
   const game = await db.query.game.findFirst({
-    where: eq(dbGame.id, gameId),
+    where: { id: gameId },
   });
   if (!game) return notFound();
 

@@ -1,7 +1,6 @@
 "use server";
 
-import { coachToTeam, optionalSpecialRuleToRoster, team } from "~/db/schema";
-import { eq } from "drizzle-orm";
+import { coachToTeam, team } from "~/db/schema";
 import { redirect } from "next/navigation";
 import { db } from "~/utils/drizzle";
 import nanoid from "~/utils/nanoid";
@@ -23,7 +22,7 @@ export const createNewTeamAction = action
     if (!session.activeOrganizationId) throw new Error("No active league");
 
     const ruleOptions = await db.query.optionalSpecialRuleToRoster.findMany({
-      where: eq(optionalSpecialRuleToRoster.rosterName, roster),
+      where: { rosterName: roster },
     });
     const option = ruleOptions.find(
       (opt) => opt.specialRuleName === optionalRule,

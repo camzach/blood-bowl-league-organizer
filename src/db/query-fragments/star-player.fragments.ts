@@ -1,6 +1,6 @@
 export const starPlayerWithSkills = {
   with: {
-    skillToStarPlayer: { with: { skill: true } },
-    keywordToStarPlayer: { with: { keyword: true } },
+    skills: true,
+    keywords: true,
   },
 } as const;

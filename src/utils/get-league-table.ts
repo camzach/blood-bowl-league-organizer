@@ -1,5 +1,3 @@
-import { season } from "~/db/schema";
-import { and, eq } from "drizzle-orm";
 import { db as drizzle } from "./drizzle";
 import { auth } from "~/auth";
 import { headers } from "next/headers";
@@ -17,10 +15,10 @@ export async function getLeagueTable(
   }
 
   const activeSeason = await db.query.season.findFirst({
-    where: and(
-      eq(season.leagueId, session.session.activeOrganizationId ?? ""),
-      eq(season.isActive, true),
-    ),
+    where: {
+      leagueId: session.session.activeOrganizationId ?? "",
+      isActive: true,
+    },
     with: {
       roundRobinGames: {
         with: {
@@ -48,13 +46,10 @@ export async function getLeagueTable(
   const games = activeSeason.roundRobinGames;
 
   const teams = new Set(
-    games.flatMap(({ game: { homeDetails, awayDetails } }) =>
-      homeDetails && awayDetails
-        ? [
-            { name: homeDetails.team.name, id: homeDetails.team.id },
-            { name: awayDetails.team.name, id: awayDetails.team.id },
-          ]
-        : [],
+    games.flatMap((game) =>
+      [game.game?.homeDetails?.team, game.game?.awayDetails?.team].filter(
+        (t) => !!t,
+      ),
     ),
   );
 

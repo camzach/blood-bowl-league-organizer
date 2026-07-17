@@ -1,6 +1,4 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { team as dbTeam } from "~/db/schema";
-import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { db } from "~/utils/drizzle";
@@ -16,12 +14,12 @@ const s3 = new S3({
 });
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   props: { params: Promise<{ teamId: string }> },
 ) {
   const params = await props.params;
   const team = await db.query.team.findFirst({
-    where: eq(dbTeam.id, decodeURIComponent(params.teamId)),
+    where: { id: decodeURIComponent(params.teamId) },
     with: { song: true },
   });
   if (!team) return new NextResponse("No team found", { status: 404 });

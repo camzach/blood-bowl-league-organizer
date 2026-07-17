@@ -7,11 +7,10 @@ import {
   getPlayerStats,
 } from "~/utils/get-computed-player-fields";
 import { db } from "~/utils/drizzle";
-import { and, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import {
   player as dbPlayer,
   team as dbTeam,
-  skill as dbSkill,
   skillCategories,
   improvement,
   pendingRandomSkill,
@@ -34,7 +33,7 @@ export const makeCaptain = action
   .action(async ({ parsedInput: { playerId } }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, playerId),
+        where: { id: playerId },
         columns: {
           teamId: true,
           isCaptain: true,
@@ -45,9 +44,7 @@ export const makeCaptain = action
           },
           position: {
             with: {
-              keywordToPosition: {
-                with: { keyword: true },
-              },
+              keywords: true,
             },
           },
         },
@@ -67,11 +64,7 @@ export const makeCaptain = action
         throw new Error("This team's roster does not allow a captain.");
       }
 
-      if (
-        player.position.keywordToPosition.some(
-          (k) => k.keyword.name === "Big Guy",
-        )
-      ) {
+      if (player.position.keywords.some((k) => k.name === "Big Guy")) {
         throw new Error("A Big Guy cannot be a captain.");
       }
 
@@ -82,10 +75,10 @@ export const makeCaptain = action
           .where(eq(dbPlayer.teamId, player.teamId));
       } else if (
         await tx.query.player.findFirst({
-          where: and(
-            eq(dbPlayer.teamId, player.teamId),
-            eq(dbPlayer.isCaptain, true),
-          ),
+          where: {
+            teamId: player.teamId,
+            isCaptain: true,
+          },
         })
       ) {
         throw new Error("Team already has a captain");
@@ -108,7 +101,7 @@ export const fire = action
   .action(async ({ parsedInput: { playerId } }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, playerId),
+        where: { id: playerId },
         columns: {
           membershipType: true,
           id: true,
@@ -184,7 +177,7 @@ export const update = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         columns: {
           membershipType: true,
           number: true,
@@ -196,7 +189,7 @@ export const update = action
             with: { skill: true },
           },
           position: {
-            with: { skillToPosition: { with: { skill: true } } },
+            with: { skills: true },
           },
         },
       });
@@ -211,11 +204,11 @@ export const update = action
       const otherPlayer =
         input.number !== undefined &&
         (await tx.query.player.findFirst({
-          where: and(
-            eq(dbPlayer.number, input.number),
-            eq(dbPlayer.teamId, player.team.id),
-            eq(dbPlayer.membershipType, "player"),
-          ),
+          where: {
+            number: input.number,
+            teamId: player.team.id,
+            membershipType: "player",
+          },
           columns: { id: true },
         }));
 
@@ -266,15 +259,18 @@ export const learnSkill = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const fetchedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         with: {
           team: { columns: { state: true, id: true } },
-          ...playerWithAdvancement,
+          improvements: { with: { skill: true } },
+          position: { with: { skills: true } },
+          pendingRandomSkill: true,
+          pendingRandomStat: true,
         },
       });
       if (!fetchedPlayer) throw new Error("Player not found");
       const proSkill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, "Pro"),
+        where: { name: "Pro" },
       });
       const player = {
         ...fetchedPlayer,
@@ -294,7 +290,7 @@ export const learnSkill = action
       }
 
       const skill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, input.skill),
+        where: { name: input.skill },
       });
       if (!skill) throw new Error("Skill not recognized");
 
@@ -336,7 +332,7 @@ export const learnSkill = action
       });
 
       const updatedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, player.id),
+        where: { id: player.id },
         ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");
@@ -365,10 +361,13 @@ export const rollRandomSkill = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         with: {
           team: { columns: { state: true, id: true } },
-          ...playerWithAdvancement,
+          improvements: { with: { skill: true } },
+          position: { with: { skills: true } },
+          pendingRandomSkill: true,
+          pendingRandomStat: true,
         },
       });
       if (!player) throw new Error("Player not found");
@@ -393,7 +392,7 @@ export const rollRandomSkill = action
       }
 
       const proSkill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, "Pro"),
+        where: { name: "Pro" },
       });
       const playerSkills = getPlayerSkills(player, proSkill).map(
         (skill) => skill.name,
@@ -402,7 +401,7 @@ export const rollRandomSkill = action
       const skillsInCategory = new Set(
         (
           await tx.query.skill.findMany({
-            where: eq(dbSkill.category, input.category),
+            where: { category: input.category },
           })
         ).map((s) => s.name),
       );
@@ -441,10 +440,12 @@ export const confirmRandomSkill = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const fetchedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         with: {
           team: { columns: { state: true, id: true } },
-          ...playerWithAdvancement,
+          improvements: { with: { skill: true } },
+          position: { with: { skills: true } },
+          pendingRandomStat: true,
           pendingRandomSkill: {
             with: {
               skill1: true,
@@ -455,7 +456,7 @@ export const confirmRandomSkill = action
       });
       if (!fetchedPlayer) throw new Error("Player not found");
       const proSkill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, "Pro"),
+        where: { name: "Pro" },
       });
       const player = {
         ...fetchedPlayer,
@@ -483,7 +484,7 @@ export const confirmRandomSkill = action
       }
 
       const skill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, input.skill),
+        where: { name: input.skill },
       });
       if (!skill) throw new Error("Skill not recognized");
 
@@ -499,7 +500,7 @@ export const confirmRandomSkill = action
         .where(eq(pendingRandomSkill.playerId, player.id));
 
       const updatedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, player.id),
+        where: { id: player.id },
         ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");
@@ -524,7 +525,7 @@ export const rollRandomStat = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const player = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         with: {
           team: { columns: { state: true, id: true } },
           improvements: true,
@@ -585,15 +586,19 @@ export const confirmRandomStat = action
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
       const fetchedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, input.player),
+        where: { id: input.player },
         with: {
           team: { columns: { state: true, id: true } },
           ...playerWithAdvancement,
+          improvements: { with: { skill: true } },
+          position: { with: { skills: true } },
+          pendingRandomSkill: true,
+          pendingRandomStat: true,
         },
       });
       if (!fetchedPlayer) throw new Error("Player not found");
       const proSkill = await tx.query.skill.findFirst({
-        where: eq(dbSkill.name, "Pro"),
+        where: { name: "Pro" },
       });
       const player = {
         ...fetchedPlayer,
@@ -614,7 +619,7 @@ export const confirmRandomStat = action
       let skillName = null;
       if (input.choice === "fallback_skill") {
         const skill = await db.query.skill.findFirst({
-          where: eq(dbSkill.name, input.fallbackSkill),
+          where: { name: input.fallbackSkill },
         });
 
         if (!skill) {
@@ -686,7 +691,7 @@ export const confirmRandomStat = action
         .where(eq(pendingRandomStat.playerId, player.id));
 
       const updatedPlayer = await tx.query.player.findFirst({
-        where: eq(dbPlayer.id, player.id),
+        where: { id: player.id },
         ...playerForTvCalculation,
       });
       if (!updatedPlayer) throw new Error("Failed to select after update");

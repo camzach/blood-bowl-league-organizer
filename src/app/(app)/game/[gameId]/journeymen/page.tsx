@@ -1,8 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Content from "./content";
 import { db } from "~/utils/drizzle";
-import { game as dbGame, player, rosterSlot } from "~/db/schema";
-import { and, eq, gte } from "drizzle-orm";
 
 const detailsFields = {
   with: {
@@ -11,7 +9,7 @@ const detailsFields = {
         roster: {
           with: {
             rosterSlots: {
-              where: gte(rosterSlot.max, 12),
+              where: { max: { gte: 12 } },
               with: {
                 position: true,
               },
@@ -19,10 +17,7 @@ const detailsFields = {
           },
         },
         players: {
-          where: and(
-            eq(player.missNextGame, false),
-            eq(player.membershipType, "player"),
-          ),
+          where: { missNextGame: false, membershipType: "player" },
         },
       },
     },
@@ -39,7 +34,7 @@ export default async function Journeymen(props: Props) {
   const { gameId } = params;
 
   const game = await db.query.game.findFirst({
-    where: eq(dbGame.id, gameId),
+    where: { id: gameId },
     with: {
       homeDetails: detailsFields,
       awayDetails: detailsFields,

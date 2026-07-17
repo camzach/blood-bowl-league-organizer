@@ -1,14 +1,8 @@
 "use server";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import z from "zod";
 import nanoid from "~/utils/nanoid";
-import {
-  keywordToPosition,
-  player,
-  gameDetails,
-  improvement,
-  game as dbGame,
-} from "~/db/schema";
+import { player, gameDetails, improvement, game as dbGame } from "~/db/schema";
 import calculateTV from "~/utils/calculate-tv";
 import { db } from "~/utils/drizzle";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
@@ -24,7 +18,7 @@ export const selectJourneymen = action
   .use(async ({ next, clientInput }) => {
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
-      where: eq(dbGame.id, gameId),
+      where: { id: gameId },
       with: {
         homeDetails: {
           with: {
@@ -74,8 +68,8 @@ export const selectJourneymen = action
                 with: {
                   position: {
                     with: {
-                      keywordToPosition: {
-                        where: eq(keywordToPosition.keywordName, "Lineman"),
+                      keywords: {
+                        where: { name: "Lineman" },
                       },
                     },
                   },
@@ -84,10 +78,10 @@ export const selectJourneymen = action
             },
           },
           players: {
-            where: and(
-              eq(player.missNextGame, false),
-              eq(player.membershipType, "player"),
-            ),
+            where: {
+              missNextGame: false,
+              membershipType: "player",
+            },
             with: {
               improvements: {
                 with: {
@@ -113,7 +107,7 @@ export const selectJourneymen = action
       } satisfies Parameters<typeof tx.query.team.findFirst>[0];
 
       const game = await tx.query.game.findFirst({
-        where: eq(dbGame.id, input.game),
+        where: { id: input.game },
         columns: {
           id: true,
           state: true,
