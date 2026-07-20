@@ -164,15 +164,15 @@ export const relations = defineRelations(
     },
     inducement: {
       specialPriceRule: r.one.specialRule({
-        from: r.inducement.specialPriceRule,
+        from: r.inducement.specialPriceRuleName,
         to: r.specialRule.name,
       }),
       specialMaxRule: r.one.specialRule({
-        from: r.inducement.specialMaxRule,
+        from: r.inducement.specialMaxRuleName,
         to: r.specialRule.name,
       }),
       specialPriceRoster: r.one.roster({
-        from: r.inducement.specialPriceRoster,
+        from: r.inducement.specialPriceRosterName,
         to: r.roster.name,
       }),
     },
@@ -435,7 +435,7 @@ export const relations = defineRelations(
       }),
       specialRuleToInducement: r.many.inducement({
         from: r.specialRule.name,
-        to: r.inducement.specialPriceRule,
+        to: r.inducement.specialPriceRuleName,
       }),
       specialRuleToStarPlayer: r.many.specialRuleToStarPlayer({
         from: r.specialRule.name,

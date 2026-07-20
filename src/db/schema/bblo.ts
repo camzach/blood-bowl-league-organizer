@@ -435,14 +435,16 @@ export const inducement = pgTable("inducement", {
   //   ((special_price IS NULL AND special_price_rule IS NULL) OR
   //    (special_price IS NOT NULL AND special_price_rule IS NOT NULL))
   specialPrice: integer("special_price"),
-  specialPriceRule: varchar("special_price_rule", { length: 255 }).references(
-    () => specialRule.name,
-  ),
-  specialPriceRoster: text("special_price_roster").references(
+  specialPriceRuleName: varchar("special_price_rule_name", {
+    length: 255,
+  }).references(() => specialRule.name),
+  specialPriceRosterName: text("special_price_roster_name").references(
     () => roster.name,
   ),
   specialMax: integer("special_max"),
-  specialMaxRule: text("special_max_rule").references(() => specialRule.name),
+  specialMaxRuleName: text("special_max_rule_name").references(
+    () => specialRule.name,
+  ),
 });
 
 export const starPlayer = pgTable(

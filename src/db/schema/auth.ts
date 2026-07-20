@@ -90,4 +90,5 @@ export const invitation = pgTable("invitation", {
   inviterId: text("inviter_id")
     .notNull()
     .references(() => user.id),
+  createdAt: timestamp("created_at").notNull(),
 });

@@ -40,7 +40,7 @@ export default async function EditTeam(props: Props) {
     return notFound();
   }
   if (!team.coaches.some((c) => c.id === user.id)) {
-    return unauthorized();
+    return notFound();
   }
 
   const skills = await db.query.skill.findMany({});
