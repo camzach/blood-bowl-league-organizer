@@ -10,14 +10,17 @@ async function getInducementOptions(rules: string[], rosterName: string) {
   const inducementsPromise = allInducements
     .map((i) => {
       let price = i.price;
-      if (i.specialPriceRoster === rosterName) {
+      if (i.specialPriceRosterName === rosterName) {
         price = i.specialPrice;
-      } else if (i.specialPriceRule && rules.includes(i.specialPriceRule)) {
+      } else if (
+        i.specialPriceRuleName &&
+        rules.includes(i.specialPriceRuleName)
+      ) {
         price = i.specialPrice;
       }
 
       let max = i.max;
-      if (i.specialMaxRule && rules.includes(i.specialMaxRule)) {
+      if (i.specialMaxRuleName && rules.includes(i.specialMaxRuleName)) {
         max = i.specialMax as number;
       }
 

@@ -79,9 +79,9 @@ describe("calculate inducement costs", () => {
       max: 3,
       price: 100000,
       specialPrice: 50000,
-      specialPriceRule: "Bribery and Corruption",
+      specialPriceRuleName: "Bribery and Corruption",
       specialMax: 6,
-      specialMaxRule: "Bribery and Corruption",
+      specialMaxRuleName: "Bribery and Corruption",
     },
   ] as Array<typeof inducement.$inferSelect>;
 

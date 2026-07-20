@@ -1,4 +1,4 @@
-import { notFound, redirect, unauthorized } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";

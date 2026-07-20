@@ -5,21 +5,21 @@ function getInducementPrice(
   inducement: {
     price: number | null;
     specialPrice: number | null;
-    specialPriceRule: string | null;
-    specialPriceRoster: string | null;
+    specialPriceRuleName: string | null;
+    specialPriceRosterName: string | null;
   },
   specialRules: string[],
   rosterName: string,
 ): number | null {
   if (
-    inducement.specialPriceRoster &&
-    inducement.specialPriceRoster === rosterName
+    inducement.specialPriceRosterName &&
+    inducement.specialPriceRosterName === rosterName
   ) {
     return inducement.specialPrice;
   }
   if (
-    inducement.specialPriceRule !== null &&
-    specialRules.includes(inducement.specialPriceRule)
+    inducement.specialPriceRuleName !== null &&
+    specialRules.includes(inducement.specialPriceRuleName)
   )
     return inducement.specialPrice as number;
   return inducement.price;
@@ -82,8 +82,8 @@ export function calculateInducementCostsFromData(
 
     let max = foundInducement.max;
     if (
-      foundInducement.specialMaxRule &&
-      specialRules.includes(foundInducement.specialMaxRule)
+      foundInducement.specialMaxRuleName &&
+      specialRules.includes(foundInducement.specialMaxRuleName)
     ) {
       max = foundInducement.specialMax as number;
     }
