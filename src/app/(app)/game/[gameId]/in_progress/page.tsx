@@ -9,32 +9,10 @@ import {
   getPlayerSppAndTv,
 } from "~/utils/get-computed-player-fields";
 import { db } from "~/utils/drizzle";
-import { starPlayerWithSkills } from "~/db/query-fragments/star-player.fragments";
-import { gameDetailsWithTeam } from "~/db/query-fragments/game.fragments";
-import { playerWithPosition } from "~/db/query-fragments/player.fragments";
+import { gameDetailsWithFullTeam } from "~/db/query-fragments/game.fragments";
 
 type Props = {
   params: Promise<{ gameId: string }>;
-};
-
-const detailsSelect = {
-  ...gameDetailsWithTeam,
-  with: {
-    ...gameDetailsWithTeam.with,
-    team: {
-      ...gameDetailsWithTeam.with.team,
-      with: {
-        ...gameDetailsWithTeam.with.team.with,
-        players: {
-          ...playerWithPosition,
-          where: {
-            membershipType: { in: ["player" as const, "journeyman" as const] },
-            missNextGame: false,
-          },
-        },
-      },
-    },
-  },
 };
 
 const cols = [
@@ -67,8 +45,8 @@ export default async function InProgress(props: Props) {
   const game = await db.query.game.findFirst({
     where: { id: decodeURIComponent(gameId) },
     with: {
-      homeDetails: detailsSelect,
-      awayDetails: detailsSelect,
+      homeDetails: gameDetailsWithFullTeam,
+      awayDetails: gameDetailsWithFullTeam,
     },
   });
   const proSkill = await db.query.skill.findFirst({
@@ -95,7 +73,10 @@ export default async function InProgress(props: Props) {
   const stars =
     starsToQuery.length > 0
       ? await db.query.starPlayer.findMany({
-          ...starPlayerWithSkills,
+          with: {
+            skills: true,
+            keywords: true,
+          },
           where: { name: { in: starsToQuery } },
         })
       : [];

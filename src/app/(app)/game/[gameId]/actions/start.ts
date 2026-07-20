@@ -11,6 +11,7 @@ import calculateTV from "~/utils/calculate-tv";
 import { d6 } from "~/utils/d6";
 import { db } from "~/utils/drizzle";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
+import { gameWithTeamIds, gameDetailsWithTeamAndPlayers } from "~/db/query-fragments/game.fragments";
 
 export const start = action
   .inputSchema(z.object({ id: z.string() }))
@@ -18,10 +19,7 @@ export const start = action
     const { id } = z.object({ id: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
       where: { id },
-      with: {
-        homeDetails: { columns: { teamId: true } },
-        awayDetails: { columns: { teamId: true } },
-      },
+      ...gameWithTeamIds,
     });
     if (!game) throw new Error("Could not find game");
     if (!game.homeDetails || !game.awayDetails)
@@ -39,60 +37,11 @@ export const start = action
   .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: { id } }) => {
     return db.transaction(async (tx) => {
-      const teamDetailsOptions = {
-        with: {
-          team: {
-            with: {
-              players: {
-                where: {
-                  membershipType: { in: ["player", "journeyman"] },
-                  missNextGame: false,
-                },
-                with: {
-                  improvements: {
-                    with: {
-                      skill: true,
-                    },
-                  },
-                  position: {
-                    with: {
-                      rosterSlot: {
-                        with: {
-                          roster: {
-                            with: {
-                              specialRuleToRoster: true,
-                            },
-                          },
-                        },
-                      },
-                      keywords: true,
-                    },
-                  },
-                },
-              },
-              roster: {
-                with: {
-                  rosterSlots: {
-                    with: {
-                      position: {
-                        with: {
-                          keywords: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
-
       const game = await tx.query.game.findFirst({
         where: { id },
         with: {
-          homeDetails: teamDetailsOptions,
-          awayDetails: teamDetailsOptions,
+          homeDetails: gameDetailsWithTeamAndPlayers,
+          awayDetails: gameDetailsWithTeamAndPlayers,
         },
       });
       if (!game) throw new Error("Could not find game");

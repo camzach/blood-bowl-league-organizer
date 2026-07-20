@@ -19,6 +19,7 @@ import { db } from "~/utils/drizzle";
 import { getPlayerStats } from "~/utils/get-computed-player-fields";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
 import { gameEvent } from "../game-events";
+import { gameWithTeamIds, gameDetailsWithTeamForEndGame } from "~/db/query-fragments/game.fragments";
 
 export const end = action
   .inputSchema(
@@ -35,18 +36,7 @@ export const end = action
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
       where: { id: gameId },
-      with: {
-        homeDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-        awayDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-      },
+      ...gameWithTeamIds,
     });
     if (!game) throw new Error("Game not found");
     if (!game.homeDetails || !game.awayDetails)
@@ -72,25 +62,6 @@ export const end = action
       if (!session.activeOrganizationId) {
         throw new Error("No league currently active 💀");
       }
-      const detailsFields = {
-        with: {
-          team: {
-            with: {
-              players: {
-                with: {
-                  position: {
-                    with: {
-                      keywords: true,
-                    },
-                  },
-                  improvements: true,
-                },
-              },
-            },
-          },
-          gameDetailsToStarPlayer: true,
-        },
-      } satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
         where: { id: input.game },
         columns: {
@@ -98,8 +69,8 @@ export const end = action
           state: true,
         },
         with: {
-          homeDetails: detailsFields,
-          awayDetails: detailsFields,
+          homeDetails: gameDetailsWithTeamForEndGame,
+          awayDetails: gameDetailsWithTeamForEndGame,
         },
       });
       if (!game) throw new Error("Game not found");

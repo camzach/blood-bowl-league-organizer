@@ -10,6 +10,7 @@ import {
 import { db } from "~/utils/drizzle";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
+import { gameWithTeamIds, gameDetailsForInducements } from "~/db/query-fragments/game.fragments";
 
 const inducementChoicesSchema = z.object({
   stars: z.array(z.string()).max(2),
@@ -33,18 +34,7 @@ export const purchaseInducements = action
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
       where: { id: gameId },
-      with: {
-        homeDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-        awayDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-      },
+      ...gameWithTeamIds,
     });
     if (!game) throw new Error("Game does not exist");
     if (!game.homeDetails || !game.awayDetails)
@@ -62,34 +52,6 @@ export const purchaseInducements = action
   .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      const detailsFields = {
-        columns: {
-          id: true,
-          pettyCashAwarded: true,
-        },
-        with: {
-          team: {
-            columns: {
-              id: true,
-              treasury: true,
-              chosenSpecialRuleName: true,
-            },
-            with: {
-              roster: {
-                with: {
-                  specialRuleToRoster: true,
-                },
-              },
-              players: {
-                where: {
-                  missNextGame: false,
-                  membershipType: { NOT: "retired" },
-                },
-              },
-            },
-          },
-        },
-      } as const satisfies Parameters<typeof tx.query.gameDetails.findFirst>[0];
       const game = await tx.query.game.findFirst({
         where: { id: input.game },
         columns: {
@@ -97,8 +59,8 @@ export const purchaseInducements = action
           state: true,
         },
         with: {
-          homeDetails: detailsFields,
-          awayDetails: detailsFields,
+          homeDetails: gameDetailsForInducements,
+          awayDetails: gameDetailsForInducements,
         },
       });
       if (!game) throw new Error("Game does not exist");

@@ -6,6 +6,10 @@ import { player, gameDetails, improvement, game as dbGame } from "~/db/schema";
 import calculateTV from "~/utils/calculate-tv";
 import { db } from "~/utils/drizzle";
 import { action, teamPermissionMiddleware } from "~/utils/safe-action";
+import {
+  gameWithTeamIds,
+  gameDetailsWithTeamAndPlayers,
+} from "~/db/query-fragments/game.fragments";
 
 export const selectJourneymen = action
   .inputSchema(
@@ -19,18 +23,7 @@ export const selectJourneymen = action
     const { game: gameId } = z.object({ game: z.string() }).parse(clientInput);
     const game = await db.query.game.findFirst({
       where: { id: gameId },
-      with: {
-        homeDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-        awayDetails: {
-          with: {
-            team: { columns: { id: true } },
-          },
-        },
-      },
+      ...gameWithTeamIds,
     });
     if (!game) throw new Error("Failed to find game");
     if (!game.homeDetails || !game.awayDetails)
@@ -48,64 +41,6 @@ export const selectJourneymen = action
   .use(teamPermissionMiddleware)
   .action(async ({ parsedInput: input }) => {
     return db.transaction(async (tx) => {
-      const teamFields = {
-        columns: {
-          id: true,
-          apothecary: true,
-          assistantCoaches: true,
-          cheerleaders: true,
-          rerolls: true,
-        },
-        with: {
-          roster: {
-            columns: {
-              name: true,
-              rerollCost: true,
-            },
-            with: {
-              specialRuleToRoster: true,
-              rosterSlots: {
-                with: {
-                  position: {
-                    with: {
-                      keywords: {
-                        where: { name: "Lineman" },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          players: {
-            where: {
-              missNextGame: false,
-              membershipType: "player",
-            },
-            with: {
-              improvements: {
-                with: {
-                  skill: true,
-                },
-              },
-              position: {
-                with: {
-                  rosterSlot: {
-                    with: {
-                      roster: {
-                        with: {
-                          specialRuleToRoster: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      } satisfies Parameters<typeof tx.query.team.findFirst>[0];
-
       const game = await tx.query.game.findFirst({
         where: { id: input.game },
         columns: {
@@ -113,12 +48,8 @@ export const selectJourneymen = action
           state: true,
         },
         with: {
-          homeDetails: {
-            with: { team: teamFields },
-          },
-          awayDetails: {
-            with: { team: teamFields },
-          },
+          homeDetails: gameDetailsWithTeamAndPlayers,
+          awayDetails: gameDetailsWithTeamAndPlayers,
         },
       });
       if (!game) throw new Error("Failed to find game");

@@ -30,16 +30,6 @@ export const playerWithAdvancement = {
   },
 } as const;
 
-export const playerWithBasicPosition = {
-  with: {
-    position: {
-      with: {
-        skillToPosition: { with: { skill: true } },
-      },
-    },
-  },
-} as const;
-
 export const playerForTvCalculation = {
   with: {
     improvements: { with: { skill: true } },
@@ -48,6 +38,31 @@ export const playerForTvCalculation = {
         rosterSlot: {
           with: { roster: { with: { specialRuleToRoster: true } } },
         },
+      },
+    },
+  },
+} as const;
+
+export const playerWithFullContext = {
+  with: {
+    position: {
+      with: {
+        rosterSlot: {
+          with: {
+            roster: {
+              with: {
+                specialRuleToRoster: true,
+              },
+            },
+          },
+        },
+        skills: true,
+        keywords: true,
+      },
+    },
+    improvements: {
+      with: {
+        skill: true,
       },
     },
   },

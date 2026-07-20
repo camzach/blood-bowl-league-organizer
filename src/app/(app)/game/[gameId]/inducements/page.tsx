@@ -3,6 +3,7 @@ import Content from "./content";
 import { db } from "~/utils/drizzle";
 import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
 import { eq, getColumns, inArray } from "drizzle-orm";
+import { gameDetailsWithTeamTreasury } from "~/db/query-fragments/game.fragments";
 
 async function getInducementOptions(rules: string[], rosterName: string) {
   const allInducements = await db.select().from(inducement);
@@ -50,23 +51,7 @@ async function getInducementOptions(rules: string[], rosterName: string) {
   );
 }
 
-const detailsSelection = {
-  with: {
-    team: {
-      columns: {
-        treasury: true,
-        name: true,
-        chosenSpecialRuleName: true,
-      },
-      with: {
-        roster: {
-          with: { specialRuleToRoster: true },
-          columns: { name: true },
-        },
-      },
-    },
-  },
-} as const;
+const detailsSelection = gameDetailsWithTeamTreasury;
 
 export default async function Inducements(props: {
   params: Promise<{ gameId: string }>;
