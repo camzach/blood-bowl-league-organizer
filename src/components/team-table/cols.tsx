@@ -14,7 +14,12 @@ export const cols = [
   {
     id: "name",
     name: "Name",
-    Component: ({ name }) => <>{name}</>,
+    Component: ({ name, isCaptain }) => (
+      <>
+        {name}
+        {isCaptain && <span className="ml-1 font-bold text-primary">(C)</span>}
+      </>
+    ),
   },
   {
     id: "position",
