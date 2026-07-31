@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: "postgres:16-alpine"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  pg_proxy:
+    image: ghcr.io/neondatabase/wsproxy:latest
+    environment:
+      APPEND_PORT: "postgres:5432"
+      ALLOW_ADDR_REGEX: ".*"
+      LOG_TRAFFIC: "true"
+    ports:
+      - "5433:80"
+    depends_on:
+      - postgres
+  minio:
+    image: "quay.io/minio/minio"
+    command: "server /data --console-address \"0.0.0.0:9001\""
+    volumes:
+      - minio:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+volumes:
+  postgres:
+  minio:
