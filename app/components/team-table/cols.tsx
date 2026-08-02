@@ -1,4 +1,4 @@
-import Table from "~/components/table";
+import Table from "~/app/components/table";
 import { ComponentProps, Fragment } from "react";
 import { PlayerType } from ".";
 import Skill from "./skill";
@@ -17,7 +17,7 @@ export const cols = [
     Component: ({ name, isCaptain }) => (
       <>
         {name}
-        {isCaptain && <span className="ml-1 font-bold text-primary">(C)</span>}
+        {isCaptain && <span className="text-primary ml-1 font-bold">(C)</span>}
       </>
     ),
   },

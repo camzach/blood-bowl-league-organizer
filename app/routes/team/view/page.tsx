@@ -1,8 +1,5 @@
-import { authContext } from "~/app/protected-route";
 import type { Route } from "./+types/page";
-// import { notFound, redirect } from "next/navigation";
 import calculateTV from "~/app/utils/calculate-tv";
-// import SongControls from "./[teamId]/touchdown-song-controlss";
 import { TeamTable } from "~/app/components/team-table";
 import EditButton from "./edit-button";
 import SongControls from "./touchdown-song-controls";

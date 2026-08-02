@@ -1,4 +1,6 @@
+// @ts-expect-error no types for svg
 import logoDark from "./logo-dark.svg";
+// @ts-expect-error no types for svg
 import logoLight from "./logo-light.svg";
 
 export function Welcome() {
