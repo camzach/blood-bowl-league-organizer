@@ -15,6 +15,7 @@ type Props = {
   state: "hiring" | "improving" | "draft";
   hasCaptainRule: boolean;
   currentCaptainId: string | undefined;
+  teamId: string;
 };
 
 export function PlayerActions({
@@ -24,6 +25,7 @@ export function PlayerActions({
   state,
   hasCaptainRule,
   currentCaptainId,
+  teamId,
 }: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
@@ -50,9 +52,13 @@ export function PlayerActions({
         <>
           {player.membershipType === "journeyman" ||
             (player.membershipType === "retired" && (
-              <HireButton player={player.id} number={player.number} />
+              <HireButton
+                player={player.id}
+                number={player.number}
+                teamId={teamId}
+              />
             ))}
-          <FireButton id={player.id} />
+          <FireButton id={player.id} teamId={teamId} />
         </>
       )}
       {hasCaptainRule &&
@@ -60,6 +66,7 @@ export function PlayerActions({
           <CaptainButton
             playerId={player.id}
             disabled={currentCaptainId === player.id}
+            teamId={teamId}
           />
         )}
       {canAdvance && (
@@ -70,6 +77,7 @@ export function PlayerActions({
               skills={skills}
               skillRelations={skillRelations}
               onHide={() => setOpen(false)}
+              teamId={teamId}
             />
           </div>
         </Modal>

@@ -1,9 +1,9 @@
 import { Die } from "~/app/components/die";
 import { Modal } from "~/app/components/modal";
-// import { ready } from "../actions";
 import { useState } from "react";
 import cx from "classnames";
 import useTooltip from "~/app/components/tooltip";
+import { useFetcher } from "react-router";
 
 type Props = {
   teamId: string;
@@ -16,37 +16,34 @@ const tableRows = Array.from(Array(2), (i) => <Catastrophe key={i} />)
   .concat(Array.from(Array(5), (i) => <CrisisAverted key={i + 6} />));
 
 export default function ReadyButton({ teamId, treasury }: Props) {
-  // const router = useRouter();
-  // const { execute, result, status } = useAction(ready, {
-  //   onSuccess() {
-  //     if (treasury < 100000) {
-  //       router.refresh();
-  //     }
-  //   },
-  // });
+  const fetcher = useFetcher();
   const [warningOpen, setWarningOpen] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const tableOffset = Math.min(Math.floor(treasury / 100000), 6);
+  
+  const result = fetcher.data as { expensiveMistake: string; expensiveMistakesCost: number; expensiveMistakeRoll: number } | undefined;
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
 
   return (
     <>
-      {/* {treasury >= 100000 && status === "hasSucceeded" && result.data && ( */}
-      {/*   <Modal isOpen> */}
-      {/*     <div className="flex flex-col"> */}
-      {/*       <Die result={result.data.expensiveMistakeRoll} /> */}
-      {/*       {result.data.expensiveMistake} */}
-      {/*       {" - Lost "} */}
-      {/*       {result.data.expensiveMistakesCost} */}
-      {/*       {" gold!"} */}
-      {/*       <button */}
-      {/*         onClick={(): void => { */}
-      {/*           router.refresh(); */}
-      {/*         }} */}
-      {/*       > */}
-      {/*         OK */}
-      {/*       </button> */}
-      {/*     </div> */}
-      {/*   </Modal> */}
-      {/* )} */}
+      {treasury >= 100000 && result && showResult && (
+        <Modal isOpen onRequestClose={() => setShowResult(false)}>
+          <div className="flex flex-col">
+            <Die result={result.expensiveMistakeRoll} />
+            {result.expensiveMistake}
+            {" - Lost "}
+            {result.expensiveMistakesCost}
+            {" gold!"}
+            <button
+              onClick={(): void => {
+                setShowResult(false);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </Modal>
+      )}
       <Modal isOpen={warningOpen} onRequestClose={() => setWarningOpen(false)}>
         <p className="mb-3">
           Warning: You have more than {tableOffset}00k in your treasury!
@@ -80,7 +77,11 @@ export default function ReadyButton({ teamId, treasury }: Props) {
             className="btn btn-warning flex-1"
             onClick={() => {
               setWarningOpen(false);
-              // execute(teamId);
+              fetcher.submit(
+                { action: "ready" },
+                { method: "post", action: `/team/${teamId}/edit/state` }
+              );
+              if (treasury >= 100000) setShowResult(true);
             }}
           >
             Continue Anyways
@@ -93,22 +94,25 @@ export default function ReadyButton({ teamId, treasury }: Props) {
           </button>
         </div>
       </Modal>
-      {/* {status === "executing" ? ( */}
-      {/*   "Submitting..." */}
-      {/* ) : ( */}
-      <button
-        className={cx("btn", treasury > 100000 ? "btn-warning" : "btn-primary")}
-        onClick={() => {
-          if (treasury > 100000) {
-            setWarningOpen(true);
-          } else {
-            // execute(teamId);
-          }
-        }}
-      >
-        Ready for next game
-      </button>
-      {/* )} */}
+      {isSubmitting ? (
+        "Submitting..."
+      ) : (
+        <button
+          className={cx("btn", treasury > 100000 ? "btn-warning" : "btn-primary")}
+          onClick={() => {
+            if (treasury > 100000) {
+              setWarningOpen(true);
+            } else {
+              fetcher.submit(
+                { action: "ready" },
+                { method: "post", action: `/team/${teamId}/edit/state` }
+              );
+            }
+          }}
+        >
+          Ready for next game
+        </button>
+      )}
     </>
   );
 }

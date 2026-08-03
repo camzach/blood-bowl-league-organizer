@@ -1,29 +1,25 @@
-// import { useAction } from "next-safe-action/hooks";
-// import { hireExistingPlayer } from "../actions";
-// import { useRouter } from "next/navigation";
+import { useFetcher } from "react-router";
 
 type Props = {
   player: string;
   number: number;
+  teamId: string;
 };
 
-export default function PlayerHirer({ player, number }: Props) {
-  // const router = useRouter();
-  // const { execute, status } = useAction(hireExistingPlayer, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
+export default function PlayerHirer({ player, number, teamId }: Props) {
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
 
-  // if (status === "executing") return <>Hiring...</>;
-  //
-  // if (status === "hasErrored") return <>Failed to hire. Please try again</>;
+  if (isSubmitting) return <>Hiring...</>;
 
   return (
     <button
       className="btn-bordered btn btn-primary btn-sm"
       onClick={() => {
-        // execute({ player, number });
+        fetcher.submit(
+          { action: "existing", player, number: number.toString() },
+          { method: "post", action: `/team/${teamId}/edit/hire-player` }
+        );
       }}
     >
       Hire!

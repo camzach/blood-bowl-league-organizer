@@ -9,6 +9,7 @@ import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import { db } from "~/app/utils/drizzle";
 import TeamState from "./team-state";
+import { useCallback } from "react";
 
 import { Route } from "./+types/page";
 import { redirect } from "react-router";
@@ -50,6 +51,43 @@ export default function EditTeam({
   );
 
   const currentCaptain = team.players.find((p) => p.isCaptain);
+
+  const PlayerActionsComponent = useCallback(
+    (player: typeof team.players[number]) => (
+      <PlayerActions
+        player={player}
+        skills={skills}
+        state={state}
+        skillRelations={skillRelations}
+        hasCaptainRule={hasCaptainRule}
+        currentCaptainId={currentCaptain?.id}
+        teamId={team.id}
+      />
+    ),
+    [skills, state, skillRelations, hasCaptainRule, currentCaptain?.id, team.id],
+  );
+
+  const PlayerNumberSelectorComponent = useCallback(
+    (player: typeof team.players[number]) => (
+      <PlayerNumberSelector
+        id={player.id}
+        number={player.number}
+        teamId={team.id}
+      />
+    ),
+    [team.id],
+  );
+
+  const PlayerNameEditorComponent = useCallback(
+    (player: typeof team.players[number]) => (
+      <PlayerNameEditor
+        id={player.id}
+        name={player.name}
+        teamId={team.id}
+      />
+    ),
+    [team.id],
+  );
 
   return (
     <>
@@ -103,8 +141,8 @@ export default function EditTeam({
       <TeamTable
         players={team.players.filter((p) => p.membershipType === "player")}
         cols={[
-          { id: "#", name: "#", Component: PlayerNumberSelector },
-          { id: "name", name: "Name", Component: PlayerNameEditor },
+          { id: "#", name: "#", Component: PlayerNumberSelectorComponent },
+          { id: "name", name: "Name", Component: PlayerNameEditorComponent },
           "position",
           "skills",
           "ma",
@@ -119,23 +157,14 @@ export default function EditTeam({
           {
             id: "Actions",
             name: "Actions",
-            Component: (player) => (
-              <PlayerActions
-                player={player}
-                skills={skills}
-                state={state}
-                skillRelations={skillRelations}
-                hasCaptainRule={hasCaptainRule}
-                currentCaptainId={currentCaptain?.id}
-              />
-            ),
+            Component: PlayerActionsComponent,
           },
         ]}
       />
       <div className="my-2">
         <PlayerHirer
           disabled={state !== "hiring" && state !== "draft"}
-          positions={rosterSlots
+          positions={team.roster.rosterSlots
             .filter(
               (slot) =>
                 team.players.filter((p) =>

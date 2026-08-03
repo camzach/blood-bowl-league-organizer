@@ -211,9 +211,7 @@ async function rollRandomSkill(
     const blockedSkills = new Set(
       getBlockedSkills(playerSkills, skillRelations).keys(),
     );
-    const skillChoices = Array.from(
-      skillsInCategory.difference(blockedSkills),
-    );
+    const skillChoices = Array.from(skillsInCategory.difference(blockedSkills));
 
     const randomSkill1 =
       skillChoices[Math.floor(Math.random() * skillChoices.length)];
@@ -263,9 +261,7 @@ async function confirmRandomSkill(playerId: string, input: { skill: string }) {
       throw new Error("Team is not in improving state");
 
     if (!player.pendingRandomSkill) {
-      throw new Error(
-        "Player does not have a pending random skill to confirm",
-      );
+      throw new Error("Player does not have a pending random skill to confirm");
     }
 
     if (
@@ -359,11 +355,7 @@ async function confirmRandomStat(
       where: { id: playerId },
       with: {
         team: { columns: { state: true, id: true } },
-        ...playerWithAdvancement,
-        improvements: { with: { skill: true } },
-        position: { with: { skills: true } },
-        pendingRandomSkill: true,
-        pendingRandomStat: true,
+        ...playerWithAdvancement.with,
       },
     });
     if (!fetchedPlayer) throw new Error("Player not found");
@@ -381,9 +373,7 @@ async function confirmRandomStat(
       throw new Error("Team is not in improving state");
 
     if (!player.pendingRandomStat) {
-      throw new Error(
-        "Player does not have a pending random stat to confirm",
-      );
+      throw new Error("Player does not have a pending random stat to confirm");
     }
 
     let skillName = null;
@@ -435,6 +425,7 @@ async function confirmRandomStat(
       const characteristicsByRoll = [
         ["av"],
         ["av", "pa"],
+        ["av", "ma", "pa"],
         ["av", "ma", "pa"],
         ["ma", "pa"],
         ["ag", "ma"],

@@ -7,8 +7,7 @@ import type {
   pendingRandomStat,
   skillRelation,
 } from "~/db/schema";
-// import { useAction } from "next-safe-action/hooks";
-// import { useRouter } from "next/navigation";
+import { useFetcher } from "react-router";
 import { getBlockedSkills } from "~/app/utils/get-blocked-skills";
 
 export const advancementCosts = {
@@ -21,6 +20,7 @@ export const advancementCosts = {
 const characteristicsByRoll = [
   ["av"],
   ["av", "pa"],
+  ["av", "ma", "pa"],
   ["av", "ma", "pa"],
   ["ma", "pa"],
   ["ag", "ma"],
@@ -48,67 +48,105 @@ type Props = {
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
   onHide: () => void;
+  teamId: string;
 };
-export function Popup({ player, skills, skillRelations, onHide }: Props) {
-  // const router = useRouter();
+export function Popup({
+  player,
+  skills,
+  skillRelations,
+  onHide,
+  teamId,
+}: Props) {
+  const fetcher = useFetcher();
   const [fallbackSkill, setFallbackSkill] = useState<string | null>(null);
   const [tab, setTab] = useState<SkillCategory | "stat">(
     player.position.primary[0] ?? player.position.secondary[0],
   );
 
-  // const { execute: executeLearnSkill } = useAction(learnSkill, {
-  //   onSuccess() {
-  //     router.refresh();
-  //     onHide();
-  //   },
-  // });
+  const executeLearnSkill = (data: { player: string; skill: string }) => {
+    fetcher.submit(
+      { action: "learn-skill", skill: data.skill },
+      {
+        method: "post",
+        action: `/team/${teamId}/edit/player/${data.player}/advance`,
+      },
+    );
+  };
 
-  // const { execute: executeRollRandomSkill } = useAction(rollRandomSkill, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
+  const executeRollRandomSkill = (data: {
+    player: string;
+    category: SkillCategory;
+  }) => {
+    fetcher.submit(
+      { action: "roll-random-skill", category: data.category },
+      {
+        method: "post",
+        action: `/team/${teamId}/edit/player/${data.player}/advance`,
+      },
+    );
+  };
 
-  // const { execute: executeConfirmRandomSkill } = useAction(confirmRandomSkill, {
-  //   onSuccess() {
-  //     router.refresh();
-  //     onHide();
-  //   },
-  // });
+  const executeConfirmRandomSkill = (data: {
+    player: string;
+    choice: string;
+  }) => {
+    fetcher.submit(
+      { action: "confirm-random-skill", skill: data.choice },
+      {
+        method: "post",
+        action: `/team/${teamId}/edit/player/${data.player}/advance`,
+      },
+    );
+  };
 
-  // const { execute: executeRollRandomStat } = useAction(rollRandomStat, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
+  const executeRollRandomStat = (data: { player: string }) => {
+    fetcher.submit(
+      { action: "roll-random-stat" },
+      {
+        method: "post",
+        action: `/team/${teamId}/edit/player/${data.player}/advance`,
+      },
+    );
+  };
 
-  // const { execute: executeConfirmRandomStat } = useAction(confirmRandomStat, {
-  //   onSuccess() {
-  //     router.refresh();
-  //     onHide();
-  //   },
-  // });
+  const executeConfirmRandomStat = (data: {
+    player: string;
+    choice: string;
+    fallbackSkill?: string;
+  }) => {
+    const payload: Record<string, string> = {
+      action: "confirm-random-stat",
+      choice: data.choice,
+    };
+    if (data.fallbackSkill) {
+      payload.fallbackSkill = data.fallbackSkill;
+    }
+    fetcher.submit(payload, {
+      method: "post",
+      action: `/team/${teamId}/edit/player/${data.player}/advance`,
+    });
+  };
 
   const purchaseSkill = (skill: string) => () => {
     if (tab === "stat") return;
-    // executeLearnSkill({
-    //   player: player.id,
-    //   skill,
-    // });
+    executeLearnSkill({
+      player: player.id,
+      skill,
+    });
   };
 
   const purchaseRandom = () => {
     if (tab === "stat") return;
-    // executeRollRandomSkill({
-    //   player: player.id,
-    //   category: tab,
-    // });
+    executeRollRandomSkill({
+      player: player.id,
+      category: tab,
+    });
   };
 
   const purchaseStat = () => {
-    // executeRollRandomStat({
-    //   player: player.id,
-    // });
+    executeRollRandomStat({
+      player: player.id,
+    });
   };
 
   const skillsByCategory = skills.reduce<
@@ -157,24 +195,22 @@ export function Popup({ player, skills, skillRelations, onHide }: Props) {
           <div className="flex gap-2">
             <button
               className="btn btn-primary"
-              onClick={
-                () => false
-                // executeConfirmRandomSkill({
-                //   player: player.id,
-                //   skill: player.pendingRandomSkill?.skillName1 ?? "",
-                // })
+              onClick={() =>
+                executeConfirmRandomSkill({
+                  player: player.id,
+                  choice: player.pendingRandomSkill?.skillName1 ?? "",
+                })
               }
             >
               {player.pendingRandomSkill.skillName1}
             </button>
             <button
               className="btn btn-primary"
-              onClick={
-                () => false
-                // executeConfirmRandomSkill({
-                //   player: player.id,
-                //   skill: player.pendingRandomSkill?.skillName2 ?? "",
-                // })
+              onClick={() =>
+                executeConfirmRandomSkill({
+                  player: player.id,
+                  choice: player.pendingRandomSkill?.skillName2 ?? "",
+                })
               }
             >
               {player.pendingRandomSkill.skillName2}

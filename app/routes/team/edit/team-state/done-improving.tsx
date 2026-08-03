@@ -1,6 +1,4 @@
-// import { useRouter } from "next/navigation";
-// import { doneImproving } from "../actions";
-// import { useAction } from "next-safe-action/hooks";
+import { useFetcher } from "react-router";
 
 type Props = {
   teamId: string;
@@ -8,22 +6,23 @@ type Props = {
 };
 
 export default function ReadyButton({ teamId, blocked = false }: Props) {
-  // const router = useRouter();
-  // const { execute, status } = useAction(doneImproving, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
 
-  // return status === "executing" ? (
-  //   "Submitting..."
-  // ) : (
-  <button
-    className="btn btn-primary"
-    disabled={blocked}
-    // onClick={() => execute(teamId)}
-  >
-    Done improving players
-  </button>;
-  // );
+  return isSubmitting ? (
+    "Submitting..."
+  ) : (
+    <button
+      className="btn btn-primary"
+      disabled={blocked}
+      onClick={() => {
+        fetcher.submit(
+          { action: "done-improving" },
+          { method: "post", action: `/team/${teamId}/edit/state` }
+        );
+      }}
+    >
+      Done improving players
+    </button>
+  );
 }

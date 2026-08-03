@@ -1,5 +1,6 @@
 "use client";
 import { NumberInput } from "~/app/components/number-input";
+import { useFetcher } from "react-router";
 
 type Props = {
   title: string;
@@ -24,57 +25,29 @@ export default function StaffHirer({
   treasury,
   disabled = false,
 }: Props) {
-  // const router = useRouter();
-  // const {
-  //   execute: hireAction,
-  //   status: hireStatus,
-  //   reset: resetHire,
-  // } = useAction(hireStaffAction, {
-  //   onError() {
-  //     setTimeout(resetHire, 1500);
-  //   },
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
-  // const {
-  //   execute: fireAction,
-  //   status: fireStatus,
-  //   reset: resetFire,
-  // } = useAction(fireStaffAction, {
-  //   onError() {
-  //     setTimeout(resetFire, 1500);
-  //   },
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
-  //
+  const fetcher = useFetcher();
+  
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more
   const inputMax = Math.min(max, Math.floor(treasury / cost) + current);
 
   const hireStaff = (val: number): void => {
-    // if (val > current) {
-    //   hireAction({
-    //     teamId,
-    //     type,
-    //     quantity: val - current,
-    //   });
-    // } else {
-    //   fireAction({
-    //     teamId,
-    //     type,
-    //     quantity: current - val,
-    //   });
-    // }
+    if (val > current) {
+      fetcher.submit(
+        { action: "hire", type, quantity: (val - current).toString() },
+        { method: "post", action: `/team/${teamId}/edit/staff` }
+      );
+    } else {
+      fetcher.submit(
+        { action: "fire", type, quantity: (current - val).toString() },
+        { method: "post", action: `/team/${teamId}/edit/staff` }
+      );
+    }
   };
 
-  // if (hireStatus === "executing" || fireStatus === "executing")
-  //   return <>Mutating...</>;
-  //
-  // if (hireStatus === "hasErrored" || fireStatus === "hasErrored")
-  //   return <>Failed to hire staff</>;
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+  
+  if (isSubmitting) return <>Mutating...</>;
 
   return max > 1 ? (
     <NumberInput

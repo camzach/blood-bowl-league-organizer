@@ -1,26 +1,26 @@
-// import { update } from "./actions";
+import { useFetcher } from "react-router";
 
 type Props = {
   id: string;
   number: number;
+  teamId: string;
 };
 
-export default function PlayerNumberSelector({ id, number }: Props) {
-  // const router = useRouter();
-  // const { execute, status } = useAction(update, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
+export default function PlayerNumberSelector({ id, number, teamId }: Props) {
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
 
-  // if (status === "executing") return <>Updating...</>;
+  if (isSubmitting) return <>Updating...</>;
 
   return (
     <select
       className="select select-bordered select-sm"
       value={number}
       onChange={(e): void => {
-        // execute({ player: id, number: parseInt(e.target.value, 10) });
+        fetcher.submit(
+          { action: "info", number: e.target.value },
+          { method: "post", action: `/team/${teamId}/edit/player/${id}/update` }
+        );
       }}
     >
       {Array.from(Array(16), (_, idx) => (

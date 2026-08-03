@@ -3,7 +3,7 @@ export const playerWithPosition = {
     position: {
       with: {
         rosterSlot: {
-          with: { roster: { with: { specialRuleToRoster: true } } },
+          with: { roster: { with: { specialRules: true } } },
         },
         skills: true,
         keywords: true,
@@ -36,7 +36,7 @@ export const playerForTvCalculation = {
     position: {
       with: {
         rosterSlot: {
-          with: { roster: { with: { specialRuleToRoster: true } } },
+          with: { roster: { with: { specialRules: true } } },
         },
       },
     },
@@ -51,7 +51,7 @@ export const playerWithFullContext = {
           with: {
             roster: {
               with: {
-                specialRuleToRoster: true,
+                specialRules: true,
               },
             },
           },

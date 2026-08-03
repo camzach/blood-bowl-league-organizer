@@ -1,25 +1,27 @@
 import { useState } from "react";
+import { useFetcher } from "react-router";
 
 type Props = {
   id: string;
   name: string | null;
+  teamId: string;
 };
 
-export default function PlayerNameEditor({ name: playerName, id }: Props) {
-  // const router = useRouter();
-  // const { execute, status } = useAction(update, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
-
+export default function PlayerNameEditor({ name: playerName, id, teamId }: Props) {
+  const fetcher = useFetcher();
   const [localName, setLocalName] = useState(playerName ?? "");
+  
   const submitName = () => {
     if (localName === playerName || localName === "") return;
-    // execute({ player: id, name: localName });
+    fetcher.submit(
+      { action: "info", name: localName },
+      { method: "post", action: `/team/${teamId}/edit/player/${id}/update` }
+    );
   };
 
-  // if (status === "executing") return <>Updating...</>;
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+  
+  if (isSubmitting) return <>Updating...</>;
 
   return (
     <input

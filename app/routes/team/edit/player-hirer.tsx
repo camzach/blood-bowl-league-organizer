@@ -1,8 +1,6 @@
 "use client";
 import { ChangeEvent, useCallback, useState } from "react";
-// import { hirePlayer } from "./actions";
-// import { useRouter } from "next/navigation";
-// import { useAction } from "next-safe-action/hooks";
+import { useFetcher } from "react-router";
 
 type Props = {
   positions: Array<{ name: string; cost: number }>;
@@ -19,14 +17,9 @@ export function PlayerHirer({
   teamId,
   disabled = false,
 }: Props) {
-  // const router = useRouter();
+  const fetcher = useFetcher();
   const [position, setPosition] = useState(positions[0]?.name ?? "");
   const [number, setNumber] = useState(freeNumbers[0] ?? 0);
-  // const { execute, status } = useAction(hirePlayer, {
-  //   onSuccess() {
-  //     router.refresh();
-  //   },
-  // });
 
   if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
     setNumber(freeNumbers[0]);
@@ -51,9 +44,9 @@ export function PlayerHirer({
     [],
   );
 
-  // if (status === "executing") return <>Hiring...</>;
-  //
-  // if (status === "hasErrored") return <>An error occurred. Try again.</>;
+  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+
+  if (isSubmitting) return <>Hiring...</>;
 
   return (
     <div className="join">
@@ -81,8 +74,13 @@ export function PlayerHirer({
       </select>
       <button
         className="btn btn-primary join-item"
-        // onClick={() => execute({ number, teamId, position })}
-        disabled={disabled}
+        onClick={() => 
+          fetcher.submit(
+            { action: "new", position, number: number.toString() },
+            { method: "post", action: `/team/${teamId}/edit/hire-player` }
+          )
+        }
+        disabled={disabled || isSubmitting}
       >
         HIRE!!!
       </button>
