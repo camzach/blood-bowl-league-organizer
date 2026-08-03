@@ -2,11 +2,10 @@ import { relations } from "~/db/schema";
 import { drizzle, NeonDatabase } from "drizzle-orm/neon-serverless";
 import { neonConfig, Pool } from "@neondatabase/serverless";
 
-declare global {
-  var db: NeonDatabase<typeof relations>;
-}
-
-let db = globalThis.db;
+// @ts-expect-error db is explicitly not being put into the
+// globalThis scope because I only ever want to use it by
+// importing it from this file
+let db: NeonDatabase<typeof relations> = globalThis.db;
 
 if (!db) {
   if (!process.env.VERCEL_ENV) {

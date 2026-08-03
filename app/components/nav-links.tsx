@@ -42,7 +42,17 @@ export default function NavLinks(props: {
       )}
       {props.isAdmin && (
         <li>
-          <Link to="/admin">Admin</Link>
+          <NavDropdown title="Admin">
+            <li>
+              <Link to="/admin/schedule-manager">Schedule Manager</Link>
+            </li>
+            <li>
+              <Link to="/admin/discord-guild-linker">Discord Integration</Link>
+            </li>
+            <li>
+              <Link to="/admin/invite-manager">Invite Manager</Link>
+            </li>
+          </NavDropdown>
         </li>
       )}
     </ul>

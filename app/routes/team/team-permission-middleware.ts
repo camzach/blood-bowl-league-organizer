@@ -2,8 +2,6 @@ import { redirect } from "react-router";
 import { Route } from "./+types/team-permission-middleware";
 import { authContext } from "~/app/primary-layout";
 import { db } from "~/app/utils/drizzle";
-import { and, eq } from "drizzle-orm";
-import { coachToTeam } from "~/db/schema";
 
 export const middleware: Route.MiddlewareFunction[] = [
   async ({ params, context }) => {

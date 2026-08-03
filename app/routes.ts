@@ -10,6 +10,23 @@ export default [
     route("/create-league", "./routes/create-league/page.tsx"),
     route("/create-league/create", "./routes/create-league/action.ts"),
 
+    layout("./routes/admin/admin-permission-middleware.ts", [
+      route("/admin/action", "./routes/admin/admin.action.ts"),
+      route(
+        "/admin/schedule-manager",
+        "./routes/admin/schedule-manager/page.tsx",
+      ),
+      route(
+        "/admin/discord-guild-linker",
+        "./routes/admin/discord-guild-linker.tsx",
+      ),
+      route("/admin/invite-manager", "./routes/admin/invite-manager/page.tsx"),
+      route(
+        "/admin/invite-manager/action",
+        "./routes/admin/invite-manager/action.ts",
+      ),
+    ]),
+
     route("/team/new", "./routes/team/new/page.tsx"),
     route("/team/new/create", "./routes/team/new/create.action.ts"),
     layout("./routes/team/loader.tsx", [

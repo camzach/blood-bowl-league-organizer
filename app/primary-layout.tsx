@@ -1,4 +1,3 @@
-// import { isLeagueAdmin } from "~/utils/is-league-admin";
 import { db } from "~/app/utils/drizzle";
 import NavLinks from "./components/nav-links";
 import { Link, redirect } from "react-router";
@@ -9,7 +8,7 @@ import "@react-router/node";
 import { auth } from "~/app/utils/auth.server";
 import LeagueSelector from "./components/league-selector";
 import SignoutButton from "./components/signout-button";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
 
 type BetterAuthSession = NonNullable<
