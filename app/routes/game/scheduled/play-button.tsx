@@ -3,19 +3,7 @@ import { Die } from "~/app/components/die";
 import { Link, useFetcher } from "react-router";
 
 export function PlayButton({ gameId }: { gameId: string }) {
-  const fetcher = useFetcher<{
-    success: boolean;
-    data?: {
-      fairweatherFansHome: number;
-      fanFactorHome: number;
-      fairweatherFansAway: number;
-      fanFactorAway: number;
-      weatherRoll: [number, number];
-      weatherResult: string;
-      homeJourneymen: { count: number; players: string[] };
-      awayJourneymen: { count: number; players: string[] };
-    };
-  }>();
+  const fetcher = useFetcher();
 
   const isLoading = fetcher.state !== "idle";
   const result = fetcher.data;
@@ -61,7 +49,11 @@ export function PlayButton({ gameId }: { gameId: string }) {
       onClick={() => {
         fetcher.submit(
           { action: "start", gameId },
-          { action: `/game/${gameId}/action`, method: "post" }
+          {
+            action: `/game/${gameId}/action`,
+            method: "post",
+            defaultShouldRevalidate: false,
+          },
         );
       }}
     >

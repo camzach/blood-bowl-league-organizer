@@ -63,11 +63,7 @@ export default [
     route("/playoffs", "./routes/playoffs/page.tsx"),
     route("/league-table", "./routes/league-table/page.tsx"),
 
-    route("/game/:gameId/action", "./routes/game/$gameId/game.action.ts"),
-    route("/game/:gameId", "./routes/game/$gameId/page.tsx"),
-    route("/game/:gameId/scheduled", "./routes/game/$gameId/scheduled/page.tsx"),
-    route("/game/:gameId/journeymen", "./routes/game/$gameId/journeymen/page.tsx"),
-    route("/game/:gameId/inducements", "./routes/game/$gameId/inducements/page.tsx"),
-    route("/game/:gameId/in_progress", "./routes/game/$gameId/in_progress/page.tsx"),
+    route("/game/:gameId/action", "./routes/game/game.action.ts"),
+    route("/game/:gameId", "./routes/game/page.tsx"),
   ]),
 ] satisfies RouteConfig;
