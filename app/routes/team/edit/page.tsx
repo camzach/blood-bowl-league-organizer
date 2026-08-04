@@ -184,6 +184,7 @@ export default function EditTeam({
           skills={skills}
           skillRelations={skillRelations}
           state={state}
+          teamId={team.id}
         />
       )}
       <table>

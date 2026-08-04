@@ -3,6 +3,7 @@ import { layout, route, type RouteConfig } from "@react-router/dev/routes";
 export default [
   route("/api/auth/*", "./routes/auth.ts"),
   route("/login", "./routes/login.tsx"),
+  route("/songs/:teamId", "./routes/songs.$teamId.ts"),
 
   layout("./primary-layout.tsx", [
     route("/", "./routes/home.tsx"),
@@ -51,10 +52,18 @@ export default [
           "/team/:teamId/edit/player/:playerId/advance",
           "./routes/team/edit/player/$playerId/advance.action.ts",
         ),
+        route("/team/:teamId/song", "./routes/team/view/song.action.ts"),
       ]),
     ]),
 
     route("/codex/skills", "./routes/codex/skills/page.tsx"),
     route("/codex/star-players", "./routes/codex/star-players/page.tsx"),
+
+    route("/game/:gameId/action", "./routes/game/$gameId/game.action.ts"),
+    route("/game/:gameId", "./routes/game/$gameId/page.tsx"),
+    route("/game/:gameId/scheduled", "./routes/game/$gameId/scheduled/page.tsx"),
+    route("/game/:gameId/journeymen", "./routes/game/$gameId/journeymen/page.tsx"),
+    route("/game/:gameId/inducements", "./routes/game/$gameId/inducements/page.tsx"),
+    route("/game/:gameId/in_progress", "./routes/game/$gameId/in_progress/page.tsx"),
   ]),
 ] satisfies RouteConfig;

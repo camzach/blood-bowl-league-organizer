@@ -1,12 +1,8 @@
-"use client";
 import classNames from "classnames";
-import { useState, useTransition } from "react";
-import { useController, useForm } from "react-hook-form";
-// import { uploadTouchdownSong } from "../../../api/songs/actions"; // Import the server action
+import { useState } from "react";
+import { useFetcher } from "react-router";
 
 type Props = { teamId: string; currentSong?: string; isEditable: boolean };
-
-type FormValues = { songName: string; file: File };
 
 export default function SongControls({
   teamId,
@@ -14,34 +10,11 @@ export default function SongControls({
   isEditable,
 }: Props) {
   const [showForm, setShowForm] = useState(false);
+  const fetcher = useFetcher();
 
-  const [isTransitioning, startTransition] = useTransition();
-  const { register, handleSubmit, control } = useForm<FormValues>();
-  const { field: fileControl } = useController({ control, name: "file" });
-  const onSubmit = handleSubmit((data: FormValues) => {
-    const formData = new FormData();
-    formData.append("teamId", teamId); // Add teamId to FormData
-    formData.append("songName", data.songName);
-    formData.append("file", data.file);
+  const isSubmitting = fetcher.state !== "idle";
 
-    startTransition(async () => {
-      // setShowForm(false);
-      // try {
-      //   // Directly call the action with FormData
-      //   await uploadTouchdownSong({
-      //     teamId,
-      //     songName: data.songName,
-      //     file: data.file,
-      //   });
-      //   // Handle success, e.g., revalidate path if needed
-      // } catch (error) {
-      //   console.error("Error uploading song:", error);
-      //   // Handle error, e.g., show an error message to the user
-      // }
-    });
-  });
-
-  if (isTransitioning) return <div>Submitting song...</div>;
+  if (isSubmitting) return <div>Submitting song...</div>;
 
   const editor = (
     <>
@@ -55,43 +28,46 @@ export default function SongControls({
           setShowForm((o) => !o);
         }}
       />
-      <form
+      <fetcher.Form
+        method="post"
+        action={`/team/${teamId}/song`}
+        encType="multipart/form-data"
         className={showForm ? "join join-vertical" : "hidden"}
-        onSubmit={(e) => {
-          void onSubmit(e);
-        }}
+        onSubmit={() => setShowForm(false)}
       >
+        <input type="hidden" name="teamId" value={teamId} />
         <input
-          {...register("songName", { required: true })}
+          name="songName"
           placeholder="Song name"
           className="input join-item"
+          required
         />
         <input
-          // Eslint thinks that fileControl is a ref since it's being passed to the ref prop
-          // eslint-disable-next-line react-hooks/refs
-          name={fileControl.name}
-          // eslint-disable-next-line react-hooks/refs
-          ref={fileControl.ref}
-          onChange={(e) => {
-            if (!e.target.files) return;
-            fileControl.onChange(e.target.files[0]);
-          }}
+          name="file"
           type="file"
           accept="audio/*"
           className="file-input join-item"
+          required
         />
-        <button className="btn join-item" type="submit">
+        <button className="btn join-item" type="submit" disabled={isSubmitting}>
           Submit
         </button>
-      </form>
+      </fetcher.Form>
     </>
   );
 
   return (
     <div>
-      {currentSong !== undefined
-        ? `Touchdown song: ${currentSong}`
-        : "No touchdown song selected"}
+      {currentSong !== undefined ? (
+        <div className="flex items-center gap-2">
+          <span>Touchdown song: {currentSong}</span>
+          <audio controls src={`/songs/${teamId}`} className="max-w-xs">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      ) : (
+        "No touchdown song selected"
+      )}
       {isEditable && editor}
     </div>
   );
