@@ -1,6 +1,6 @@
 import { S3 } from "@aws-sdk/client-s3";
 import { data } from "react-router";
-import type { Route } from "./+types/songs.$teamId";
+import type { Route } from "./+types/songs";
 import { db } from "~/app/utils/drizzle";
 
 const s3 = new S3({

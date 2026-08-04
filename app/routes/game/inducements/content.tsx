@@ -89,9 +89,9 @@ export default function Content(props: Props) {
     );
   };
 
-  // Navigate when successful
+  // Navigate when successful - loader will handle showing correct state
   if (fetcher.data?.success) {
-    navigate(`/game/${props.gameId}/in_progress`);
+    navigate(`/game/${props.gameId}`);
   }
 
   const calculateTotalCost = (from: "home" | "away"): number => {

@@ -66,9 +66,9 @@ export default function Journeymen({ home, away, gameId }: Props) {
     fetcher.submit(formData, { action: `/game/${gameId}/action`, method: "post" });
   };
 
-  // Navigate when successful
+  // Navigate when successful - loader will handle showing correct state
   if (fetcher.data?.success) {
-    navigate(`/game/${gameId}/inducements`);
+    navigate(`/game/${gameId}`);
   }
 
   return (

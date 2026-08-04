@@ -48,9 +48,9 @@ export function NumberInput({
       >
         {labelElement ?? label}
       </label>
-      <span className="relative w-28">
+      <span className="relative isolate w-28">
         <button
-          className="btn btn-square btn-sm absolute top-0 left-0 rounded-r-none"
+          className="btn btn-square btn-sm absolute top-0 left-0 z-10 rounded-r-none"
           onClick={handleTick("down")}
           disabled={disabled || (min !== undefined && value <= min)}
         >
@@ -70,7 +70,7 @@ export function NumberInput({
           ref={inputRef}
         />
         <button
-          className="btn btn-square btn-sm absolute top-0 right-0 rounded-l-none"
+          className="btn btn-square btn-sm absolute top-0 right-0 z-10 rounded-l-none"
           onClick={handleTick("up")}
           disabled={disabled || (max !== undefined && value >= max)}
         >

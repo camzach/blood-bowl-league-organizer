@@ -9,11 +9,6 @@ export function PlayButton({ gameId }: { gameId: string }) {
   const result = fetcher.data;
 
   if (result?.success && result.data) {
-    const nextStep =
-      result.data.homeJourneymen.count > 0 ||
-      result.data.awayJourneymen.count > 0
-        ? "journeymen"
-        : "inducements";
     return (
       <>
         <span className="text-4xl">
@@ -35,8 +30,8 @@ export function PlayButton({ gameId }: { gameId: string }) {
           {result.data.weatherResult}
         </span>
         <br />
-        <Link className="btn" to={`/game/${gameId}/${nextStep}`}>
-          Next step — {nextStep}
+        <Link className="btn" to={`/game/${gameId}`}>
+          Continue
         </Link>
       </>
     );

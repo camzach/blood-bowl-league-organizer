@@ -3,64 +3,20 @@ import { eq, getColumns, inArray } from "drizzle-orm";
 import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
 import { gameDetailsWithTeamTreasury } from "~/db/query-fragments/game.fragments";
 
-type ScheduledData = {
-  state: "scheduled";
-  gameId: string;
-};
+type ScheduledData = Awaited<ReturnType<typeof loadScheduledData>>;
+type JourneymenData = Awaited<ReturnType<typeof loadJourneymenData>>;
+type InducementsData = Awaited<ReturnType<typeof loadInducementsData>>;
+export type InProgressData = Awaited<ReturnType<typeof loadInProgressData>>;
+type CompleteData = Awaited<ReturnType<typeof loadCompleteData>>;
 
-type JourneymenData = {
-  state: "journeymen";
-  gameId: string;
-  home: {
-    name: string;
-    choices: Array<{ name: string; id: string }>;
-    needed: number;
-  };
-  away: {
-    name: string;
-    choices: Array<{ name: string; id: string }>;
-    needed: number;
-  };
-};
+export type GameData =
+  | ScheduledData
+  | JourneymenData
+  | InducementsData
+  | InProgressData
+  | CompleteData;
 
-type InducementsData = {
-  state: "inducements";
-  gameId: string;
-  inducements: [any[], any[]];
-  stars: [any[], any[]];
-  pettyCash: [number, number];
-  treasury: [number, number];
-  teams: [string, string];
-};
 
-type InProgressData = {
-  state: "in_progress";
-  gameId: string;
-  proSkill: any;
-  home: any;
-  away: any;
-  stars: any[];
-};
-
-type CompleteData = {
-  state: "complete";
-  game: {
-    homeDetails: {
-      touchdowns: number;
-      casualties: number;
-      mvp: { name: string | null; number: number } | null;
-      team: { name: string };
-    };
-    awayDetails: {
-      touchdowns: number;
-      casualties: number;
-      mvp: { name: string | null; number: number } | null;
-      team: { name: string };
-    };
-  };
-};
-
-export type GameData = ScheduledData | JourneymenData | InducementsData | InProgressData | CompleteData;
 
 async function getInducementOptions(rules: string[], rosterName: string) {
   const allInducements = await db.select().from(inducement);
@@ -108,11 +64,11 @@ async function getInducementOptions(rules: string[], rosterName: string) {
   );
 }
 
-async function loadScheduledData(gameId: string): Promise<ScheduledData> {
-  return { state: "scheduled", gameId };
+async function loadScheduledData(gameId: string) {
+  return { state: "scheduled" as const, gameId };
 }
 
-async function loadJourneymenData(gameId: string): Promise<JourneymenData> {
+async function loadJourneymenData(gameId: string) {
   const game = await db.query.game.findFirst({
     where: { id: gameId },
     with: {
@@ -162,7 +118,7 @@ async function loadJourneymenData(gameId: string): Promise<JourneymenData> {
   }
 
   return {
-    state: "journeymen",
+    state: "journeymen" as const,
     gameId,
     home: {
       name: game.homeDetails.team.name,
@@ -181,7 +137,7 @@ async function loadJourneymenData(gameId: string): Promise<JourneymenData> {
   };
 }
 
-async function loadInducementsData(gameId: string): Promise<InducementsData> {
+async function loadInducementsData(gameId: string) {
   const game = await db.query.game.findFirst({
     where: { id: gameId },
     with: {
@@ -214,26 +170,25 @@ async function loadInducementsData(gameId: string): Promise<InducementsData> {
   ]);
 
   return {
-    state: "inducements",
+    state: "inducements" as const,
     gameId,
-    inducements: [homeOptions.inducements, awayOptions.inducements],
-    stars: [homeOptions.stars, awayOptions.stars],
+    inducements: [homeOptions.inducements, awayOptions.inducements] as const,
+    stars: [homeOptions.stars, awayOptions.stars] as const,
     pettyCash: [
       game.homeDetails.pettyCashAwarded,
       game.awayDetails.pettyCashAwarded,
-    ],
-    treasury: [
-      game.homeDetails.team.treasury,
-      game.awayDetails.team.treasury,
-    ],
-    teams: [game.homeDetails.team.name, game.awayDetails.team.name],
+    ] as const,
+    treasury: [game.homeDetails.team.treasury, game.awayDetails.team.treasury] as const,
+    teams: [game.homeDetails.team.name, game.awayDetails.team.name] as const,
   };
 }
 
-async function loadInProgressData(gameId: string): Promise<InProgressData> {
-  const { gameDetailsWithFullTeam } = await import("~/db/query-fragments/game.fragments");
-  const { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } = await import("~/app/utils/get-computed-player-fields");
-  
+async function loadInProgressData(gameId: string) {
+  const { gameDetailsWithFullTeam } =
+    await import("~/db/query-fragments/game.fragments");
+  const { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } =
+    await import("~/app/utils/get-computed-player-fields");
+
   const game = await db.query.game.findFirst({
     where: { id: gameId },
     with: {
@@ -241,13 +196,14 @@ async function loadInProgressData(gameId: string): Promise<InProgressData> {
       awayDetails: gameDetailsWithFullTeam,
     },
   });
-  
+
   const proSkill = await db.query.skill.findFirst({
     where: { name: "Pro" },
   });
-  
+
   if (!game) throw new Response("Not Found", { status: 404 });
-  if (!game.homeDetails || !game.awayDetails) throw new Response("Not Found", { status: 404 });
+  if (!game.homeDetails || !game.awayDetails)
+    throw new Response("Not Found", { status: 404 });
 
   const starsToQuery = [game.homeDetails, game.awayDetails].flatMap((details) =>
     details.gameDetailsToStarPlayer.map((star) => star.starPlayerName),
@@ -265,7 +221,7 @@ async function loadInProgressData(gameId: string): Promise<InProgressData> {
       : [];
 
   return {
-    state: "in_progress",
+    state: "in_progress" as const,
     gameId,
     proSkill,
     home: {
@@ -362,7 +318,7 @@ async function loadInProgressData(gameId: string): Promise<InProgressData> {
   };
 }
 
-async function loadCompleteData(gameId: string): Promise<CompleteData> {
+async function loadCompleteData(gameId: string) {
   const game = await db.query.game.findFirst({
     where: { id: gameId },
     with: {
@@ -386,7 +342,7 @@ async function loadCompleteData(gameId: string): Promise<CompleteData> {
   }
 
   return {
-    state: "complete",
+    state: "complete" as const,
     game: {
       homeDetails: {
         touchdowns: game.homeDetails.touchdowns,

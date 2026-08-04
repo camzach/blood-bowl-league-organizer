@@ -3,7 +3,7 @@ import { layout, route, type RouteConfig } from "@react-router/dev/routes";
 export default [
   route("/api/auth/*", "./routes/auth.ts"),
   route("/login", "./routes/login.tsx"),
-  route("/songs/:teamId", "./routes/songs.$teamId.ts"),
+  route("/songs/:teamId", "./routes/songs.ts"),
 
   layout("./primary-layout.tsx", [
     route("/", "./routes/home.tsx"),
@@ -42,15 +42,15 @@ export default [
         route("/team/:teamId/edit/state", "./routes/team/edit/state.action.ts"),
         route(
           "/team/:teamId/edit/player/:playerId/update",
-          "./routes/team/edit/player/$playerId/update.action.ts",
+          "./routes/team/edit/player/update.action.ts",
         ),
         route(
           "/team/:teamId/edit/player/:playerId/fire",
-          "./routes/team/edit/player/$playerId/fire.action.ts",
+          "./routes/team/edit/player/fire.action.ts",
         ),
         route(
           "/team/:teamId/edit/player/:playerId/advance",
-          "./routes/team/edit/player/$playerId/advance.action.ts",
+          "./routes/team/edit/player/advance.action.ts",
         ),
         route("/team/:teamId/song", "./routes/team/view/song.action.ts"),
       ]),
