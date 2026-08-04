@@ -59,6 +59,9 @@ export default [
     route("/codex/skills", "./routes/codex/skills/page.tsx"),
     route("/codex/star-players", "./routes/codex/star-players/page.tsx"),
 
+    route("/schedule", "./routes/schedule/page.tsx"),
+    route("/playoffs", "./routes/playoffs/page.tsx"),
+
     route("/game/:gameId/action", "./routes/game/$gameId/game.action.ts"),
     route("/game/:gameId", "./routes/game/$gameId/page.tsx"),
     route("/game/:gameId/scheduled", "./routes/game/$gameId/scheduled/page.tsx"),
