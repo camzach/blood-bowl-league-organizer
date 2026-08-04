@@ -61,6 +61,7 @@ export default [
 
     route("/schedule", "./routes/schedule/page.tsx"),
     route("/playoffs", "./routes/playoffs/page.tsx"),
+    route("/league-table", "./routes/league-table/page.tsx"),
 
     route("/game/:gameId/action", "./routes/game/$gameId/game.action.ts"),
     route("/game/:gameId", "./routes/game/$gameId/page.tsx"),
