@@ -1,8 +1,9 @@
-import { Link } from "react-router";
+import { Link, useRevalidator } from "react-router";
 import type { Route } from "./+types/home";
 import { authContext } from "../primary-layout";
 import { db } from "~/app/utils/drizzle";
 import { auth } from "~/app/utils/auth.server";
+import { authClient } from "~/app/utils/auth.client";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const { user, session } = context.get(authContext);
@@ -42,6 +43,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
+  const revalidator = useRevalidator();
   const { activeLeague, myTeams, myLeagues, upcomingGames } = loaderData;
   if (!activeLeague && myLeagues.length === 0) {
     return (
@@ -55,23 +57,18 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           or create your own.
         </span>
         <form
-          action={async (data) => {
-            // "use server";
-            // const leagueName = data.get("leagueName") as string;
-            // try {
-            //   await auth.api.createOrganization({
-            //     body: {
-            //       name: leagueName,
-            //       slug: encodeURIComponent(
-            //         leagueName.toLowerCase().replace(" ", "-"),
-            //       ),
-            //     },
-            //     headers: await headers(),
-            //   });
-            // } catch (e) {
-            //   console.log(e);
-            // }
-            // redirect("/");
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const data = new FormData(e.target);
+            const leagueName = data.get("leagueName")?.toString();
+            if (!leagueName) {
+              return;
+            }
+            await authClient.organization.create({
+              name: leagueName,
+              slug: leagueName.toLowerCase().replace(/\s/g, "-"),
+            });
+            await revalidator.revalidate();
           }}
         >
           <input
