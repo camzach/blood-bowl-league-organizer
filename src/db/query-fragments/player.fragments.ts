@@ -3,7 +3,7 @@ export const playerWithPosition = {
     position: {
       with: {
         rosterSlot: {
-          with: { roster: { with: { specialRuleToRoster: true } } },
+          with: { roster: { with: { specialRules: true } } },
         },
         skills: true,
         keywords: true,
