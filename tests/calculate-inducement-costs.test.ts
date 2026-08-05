@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateInducementCostsFromData } from "./calculate-inducement-costs";
+import { calculateInducementCostsFromData } from "~/app/routes/game/calculate-inducement-costs";
 import { inducement, specialRule, starPlayer } from "~/db/schema";
 
 describe("calculate inducement costs", () => {
@@ -40,39 +40,40 @@ describe("calculate inducement costs", () => {
       max: 2,
       price: 50000,
       specialPrice: null,
-      specialPriceRule: null,
-      specialPriceRoster: null,
+      specialPriceRuleName: null,
+      specialPriceRosterName: null,
       specialMax: null,
-      specialMaxRule: null,
+      specialMaxRuleName: null,
     },
     {
       name: "inducement-2",
       max: 6,
       price: 10000,
       specialPrice: 5000,
-      specialPriceRule: "special-rule-1",
-      specialPriceRoster: null,
+      specialPriceRuleName: "special-rule-1",
+      specialPriceRosterName: null,
       specialMax: null,
-      specialMaxRule: null,
+      specialMaxRuleName: null,
     },
     {
       name: "inducement-3",
       max: 3,
       price: null,
       specialPrice: 50000,
-      specialPriceRule: "special-rule-1",
-      specialPriceRoster: null,
+      specialPriceRuleName: "special-rule-1",
+      specialPriceRosterName: null,
       specialMax: null,
-      specialMaxRule: null,
+      specialMaxRuleName: null,
     },
     {
       name: "Halfling Master Chef",
       max: 1,
       price: 300000,
       specialPrice: 100000,
-      specialPriceRoster: "Halfling",
+      specialPriceRosterName: "Halfling",
+      specialPriceRuleName: null,
       specialMax: null,
-      specialMaxRule: null,
+      specialMaxRuleName: null,
     },
     {
       name: "Bribe",
@@ -80,6 +81,7 @@ describe("calculate inducement costs", () => {
       price: 100000,
       specialPrice: 50000,
       specialPriceRuleName: "Bribery and Corruption",
+      specialPriceRosterName: null,
       specialMax: 6,
       specialMaxRuleName: "Bribery and Corruption",
     },

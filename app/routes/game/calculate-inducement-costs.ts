@@ -13,15 +13,17 @@ function getInducementPrice(
 ): number | null {
   if (
     inducement.specialPriceRosterName &&
-    inducement.specialPriceRosterName === rosterName
+    inducement.specialPriceRosterName === rosterName &&
+    inducement.specialPrice !== null
   ) {
     return inducement.specialPrice;
   }
   if (
     inducement.specialPriceRuleName !== null &&
-    specialRules.includes(inducement.specialPriceRuleName)
+    specialRules.includes(inducement.specialPriceRuleName) &&
+    inducement.specialPrice !== null
   )
-    return inducement.specialPrice as number;
+    return inducement.specialPrice;
   return inducement.price;
 }
 
