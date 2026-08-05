@@ -1,0 +1,87 @@
+import FireButton from "./player-firer";
+import { Popup, advancementCosts } from "./advancement-modal";
+import { useState } from "react";
+import { Modal } from "~/app/components/modal";
+import { skill, skillRelation } from "~/db/schema";
+import type fetchTeam from "../../fetch-team";
+import classNames from "classnames";
+import CaptainButton from "./captain-button";
+import HireButton from "./hire-button";
+
+type Props = {
+  player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
+  skills: Array<typeof skill.$inferSelect>;
+  skillRelations: Array<typeof skillRelation.$inferSelect>;
+  state: "hiring" | "improving" | "draft";
+  hasCaptainRule: boolean;
+  currentCaptainId: string | undefined;
+  teamId: string;
+};
+
+export function PlayerActions({
+  player,
+  skills,
+  skillRelations,
+  state,
+  hasCaptainRule,
+  currentCaptainId,
+  teamId,
+}: Props) {
+  const [isOpen, setOpen] = useState(false);
+  const canAdvance =
+    Object.values(advancementCosts).some(
+      (list) => list[player.totalImprovements] <= player.starPlayerPoints,
+    ) && player.totalImprovements < 6;
+
+  return (
+    <>
+      {state === "improving" ? (
+        <button
+          className={classNames(
+            "btn btn-sm",
+            player.pendingRandomStat || player.pendingRandomSkill
+              ? "btn-warning"
+              : "btn-accent",
+          )}
+          onClick={() => setOpen(true)}
+          disabled={!canAdvance}
+        >
+          Spend SPP
+        </button>
+      ) : (
+        <>
+          {player.membershipType === "journeyman" ||
+            (player.membershipType === "retired" && (
+              <HireButton
+                player={player.id}
+                number={player.number}
+                teamId={teamId}
+              />
+            ))}
+          <FireButton id={player.id} teamId={teamId} />
+        </>
+      )}
+      {hasCaptainRule &&
+        (currentCaptainId === undefined || state === "draft") && (
+          <CaptainButton
+            playerId={player.id}
+            disabled={currentCaptainId === player.id}
+            teamId={teamId}
+          />
+        )}
+      {canAdvance && (
+        <Modal isOpen={isOpen} onRequestClose={() => setOpen(false)}>
+          <div className="whitespace-pre-wrap">
+            <Popup
+              player={player}
+              skills={skills}
+              skillRelations={skillRelations}
+              onHide={() => setOpen(false)}
+              teamId={teamId}
+            />
+          </div>
+        </Modal>
+      )}
+    </>
+  );
+}

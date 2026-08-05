@@ -19,15 +19,20 @@ services:
       - "5433:80"
     depends_on:
       - postgres
-  minio:
-    image: "quay.io/minio/minio"
-    command: "server /data --console-address \"0.0.0.0:9001\""
+  rustfs:
+    image: "rustfs/rustfs:latest"
+    environment:
+      RUSTFS_ACCESS_KEY: asdfasdf
+      RUSTFS_SECRET_KEY: asdfasdf
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: true
     volumes:
-      - minio:/data
+      - rustfs:/data
     ports:
       - "9000:9000"
       - "9001:9001"
 
 volumes:
   postgres:
-  minio:
+  rustfs:

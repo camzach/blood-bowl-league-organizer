@@ -1,0 +1,124 @@
+import {
+  setMonth,
+  setYear,
+  startOfMonth,
+  startOfWeek,
+  addDays,
+  isSameDay,
+  isSameMonth,
+  addMonths,
+  endOfMonth,
+  endOfWeek,
+  differenceInDays,
+} from "date-fns";
+import classNames from "classnames";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import type fetchGames from "./fetch-games";
+
+type Props = {
+  year?: number;
+  month?: number;
+  games: Awaited<ReturnType<typeof fetchGames>>["games"];
+};
+
+export default function Calendar(props: Props) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  let month = new Date();
+  if (props.year !== undefined) {
+    month = setYear(month, props.year);
+  }
+  if (props.month !== undefined) {
+    month = setMonth(month, props.month);
+  }
+  month = startOfMonth(month);
+
+  const firstDay = startOfWeek(month);
+  const nDays = differenceInDays(endOfWeek(endOfMonth(month)), firstDay);
+
+  const nextMonth = addMonths(month, 1);
+  const nextMonthSearch = new URLSearchParams(searchParams);
+  nextMonthSearch.set("month", nextMonth.getMonth().toString());
+  nextMonthSearch.set("year", nextMonth.getFullYear().toString());
+
+  const lastMonth = addMonths(month, -1);
+  const lastMonthSearch = new URLSearchParams(searchParams);
+  lastMonthSearch.set("month", lastMonth.getMonth().toString());
+  lastMonthSearch.set("year", lastMonth.getFullYear().toString());
+
+  return (
+    <div className="w-full">
+      <span className="mb-4 flex items-center justify-center gap-4 text-3xl">
+        <button
+          className="btn"
+          onClick={() => navigate(`?${lastMonthSearch.toString()}`)}
+        >
+          &lt;
+        </button>
+        <h1>
+          {month.toLocaleDateString("default", {
+            month: "long",
+            year: "numeric",
+          })}
+        </h1>
+        <button
+          className="btn"
+          onClick={() => navigate(`?${nextMonthSearch.toString()}`)}
+        >
+          &gt;
+        </button>
+      </span>
+      <div className="grid auto-rows-fr grid-cols-[repeat(7,1fr)] gap-3 overflow-scroll">
+        {Array.from(Array(nDays + 1), (_, i) => addDays(firstDay, i)).map(
+          (date) => {
+            const gameList = props.games.filter(
+              (game) => game.time && isSameDay(game.time, date),
+            );
+            return (
+              <div
+                className={classNames(
+                  "bg-base-200 flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border shadow-xl lg:aspect-square",
+                  isSameDay(new Date(), date)
+                    ? "border-accent"
+                    : "border-neutral",
+                  !isSameMonth(date, month) && "opacity-50",
+                )}
+                key={date.toString()}
+              >
+                <span className="bg-neutral text-neutral-content w-full pb-1 text-center">
+                  {date.toLocaleDateString("default", { day: "numeric" })}
+                </span>
+                <div className="flex flex-1 flex-col gap-1 overflow-y-scroll p-2">
+                  {gameList.map((game) => (
+                    <Game key={game.id} game={game} />
+                  ))}
+                </div>
+              </div>
+            );
+          },
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Game({
+  game,
+}: {
+  game: Awaited<ReturnType<typeof fetchGames>>["games"][number];
+}) {
+  return (
+    <Link
+      to={`/game/${game.id}`}
+      className={classNames(
+        "w-full rounded-lg text-center",
+        game.state === "scheduled"
+          ? "bg-accent text-accent-content"
+          : "bg-success text-success-content",
+      )}
+    >
+      {game.awayDetails.teamName} @ {game.homeDetails.teamName}
+    </Link>
+  );
+}

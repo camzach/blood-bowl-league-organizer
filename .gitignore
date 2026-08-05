@@ -1,9 +1,8 @@
-node_modules/
-dist/
-build/
-.next/
-.DS_STORE
+.DS_Store
 .env
+/node_modules/
+tsconfig.tsbuildinfo
 
-.vscode
-*.tsbuildinfo
+# React Router
+/.react-router/
+/build/

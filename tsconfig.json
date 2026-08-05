@@ -14,28 +14,20 @@
     "incremental": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
-      "~/*": ["./src/*"]
-    }
+      "~/*": ["./*"]
+    },
+    "rootDirs": [".", "./.react-router/types"]
   },
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
   "include": [
-    "src",
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "*.config.js",
-    "*.config.mjs",
-    "*.config.cjs",
-    "*.config.ts",
-    ".next/dev/types/**/*.ts"
+    "**/*",
+    "**/.server/**/*",
+    "**/.client/**/*",
+    ".react-router/types/**/*"
   ],
   "exclude": ["node_modules"]
 }

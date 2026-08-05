@@ -2,23 +2,15 @@ import drizzle from "eslint-plugin-drizzle";
 import tsParser from "@typescript-eslint/parser";
 import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
 import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 const config = defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  ...nextVitals,
   prettier,
   {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-    ],
+    ignores: ["node_modules/**", "out/**", "build/**"],
 
     settings: {
       react: {
