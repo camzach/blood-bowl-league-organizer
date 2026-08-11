@@ -9,6 +9,7 @@ import type {
 } from "~/db/schema";
 import { useFetcher } from "react-router";
 import { getBlockedSkills } from "~/app/utils/get-blocked-skills";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export const advancementCosts = {
   "Random Primary": [3, 4, 6, 8, 10, 15],
@@ -62,6 +63,8 @@ export function Popup({
   const [tab, setTab] = useState<SkillCategory | "stat">(
     player.position.primary[0] ?? player.position.secondary[0],
   );
+  
+  useFetcherErrorNotification(fetcher);
 
   const executeLearnSkill = (data: { player: string; skill: string }) => {
     fetcher.submit(
@@ -69,7 +72,7 @@ export function Popup({
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      },
+      }
     );
   };
 
@@ -82,7 +85,7 @@ export function Popup({
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      },
+      }
     );
   };
 
@@ -95,7 +98,7 @@ export function Popup({
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      },
+      }
     );
   };
 
@@ -105,7 +108,7 @@ export function Popup({
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      },
+      }
     );
   };
 

@@ -1,4 +1,5 @@
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = {
   id: string;
@@ -7,6 +8,9 @@ type Props = {
 
 export default function PlayerFirer({ id, teamId }: Props) {
   const fetcher = useFetcher();
+  
+  useFetcherErrorNotification(fetcher);
+  
   const isSubmitting =
     fetcher.state === "submitting" || fetcher.state === "loading";
 
@@ -21,7 +25,7 @@ export default function PlayerFirer({ id, teamId }: Props) {
           {
             method: "post",
             action: `/team/${teamId}/edit/player/${id}/fire`,
-          },
+          }
         );
       }}
     >

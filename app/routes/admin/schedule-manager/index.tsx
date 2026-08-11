@@ -4,6 +4,7 @@ import { useState } from "react";
 import DateTimePicker from "./date-time-picker";
 import { isEqual } from "date-fns";
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Game = {
   id: string;
@@ -21,11 +22,13 @@ export default function ScheduleEditor(props: Props) {
   const [games, setGames] = useState(props.games);
   const fetcher = useFetcher();
   
+  useFetcherErrorNotification(fetcher);
+  
   const status = fetcher.state === "submitting" || fetcher.state === "loading" 
     ? "executing" 
     : fetcher.data?.success 
     ? "hasSucceeded" 
-    : fetcher.data?.errors 
+    : (fetcher.data && !fetcher.data.success)
     ? "hasErrored" 
     : "idle";
 

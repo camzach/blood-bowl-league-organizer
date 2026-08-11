@@ -1,4 +1,5 @@
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = {
   id: string;
@@ -8,6 +9,9 @@ type Props = {
 
 export default function PlayerNumberSelector({ id, number, teamId }: Props) {
   const fetcher = useFetcher();
+  
+  useFetcherErrorNotification(fetcher);
+  
   const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
 
   if (isSubmitting) return <>Updating...</>;

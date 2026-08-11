@@ -1,0 +1,42 @@
+.notif-column {
+  --inset: 20px;
+  position: absolute;
+  right: var(--inset);
+  top: var(--inset);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.notif {
+  height: 75px;
+  width: 300px;
+  padding: 10px;
+  background: var(--color-base-200);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+
+  display: grid;
+  place-items: center;
+}
+
+.notif-timer {
+  display: block;
+  position: absolute;
+  height: 5px;
+  top: 0;
+  left: 0;
+  background: var(--color-error);
+
+  animation: calc(1ms * var(--duration, 0)) 1 ease-out countdown;
+}
+
+@keyframes countdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

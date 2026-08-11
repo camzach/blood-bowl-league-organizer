@@ -1,6 +1,7 @@
 "use client";
 import { ChangeEvent, useCallback, useState } from "react";
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = {
   positions: Array<{ name: string; cost: number }>;
@@ -20,6 +21,8 @@ export function PlayerHirer({
   const fetcher = useFetcher();
   const [position, setPosition] = useState(positions[0]?.name ?? "");
   const [number, setNumber] = useState(freeNumbers[0] ?? 0);
+  
+  useFetcherErrorNotification(fetcher);
 
   if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
     setNumber(freeNumbers[0]);
@@ -49,6 +52,7 @@ export function PlayerHirer({
   if (isSubmitting) return <>Hiring...</>;
 
   return (
+    <>
     <div className="join">
       <select
         className="join-item select select-bordered"
@@ -85,5 +89,6 @@ export function PlayerHirer({
         HIRE!!!
       </button>
     </div>
+    </>
   );
 }

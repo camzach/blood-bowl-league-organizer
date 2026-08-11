@@ -33,6 +33,11 @@ export default function LoginPage() {
           setError(response.error.message);
           setTimeout(() => setError(undefined), 2000);
         }
+      })
+      .catch((error) => {
+        setIsSigningIn(false);
+        setError(error instanceof Error ? error.message : "Login failed");
+        setTimeout(() => setError(undefined), 2000);
       });
   };
 
@@ -59,6 +64,11 @@ export default function LoginPage() {
         } else {
           throw redirect("/");
         }
+      })
+      .catch((error) => {
+        setIsSigningUp(false);
+        setError(error instanceof Error ? error.message : "Signup failed");
+        setTimeout(() => setError(undefined), 2000);
       });
   };
 

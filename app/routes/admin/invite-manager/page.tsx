@@ -2,6 +2,7 @@ import { authContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { redirect, useFetcher } from "react-router";
 import { auth } from "~/app/utils/auth.server";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const { session } = context.get(authContext);
@@ -25,12 +26,26 @@ export default function InviteManagerPage({
   const { invites } = loaderData;
   const generateFetcher = useFetcher();
   const revokeFetcher = useFetcher();
+  
+  useFetcherErrorNotification(generateFetcher);
+  useFetcherErrorNotification(revokeFetcher);
 
   return (
     <div className="flex flex-col">
       <h1 className="mb-4 text-2xl font-bold">Manage Invites</h1>
       
-      <generateFetcher.Form method="post" action="/admin/invite-manager/action">
+      <generateFetcher.Form 
+        method="post" 
+        action="/admin/invite-manager/action"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          generateFetcher.submit(formData, {
+            method: "post",
+            action: "/admin/invite-manager/action"
+          });
+        }}
+      >
         <div className="join join-horizontal mb-4">
           <input
             name="email"
@@ -74,6 +89,14 @@ export default function InviteManagerPage({
                     <revokeFetcher.Form
                       method="post"
                       action="/admin/invite-manager/action"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        revokeFetcher.submit(formData, {
+                          method: "post",
+                          action: "/admin/invite-manager/action"
+                        });
+                      }}
                     >
                       <input type="hidden" name="action" value="revoke" />
                       <input type="hidden" name="inviteId" value={code.id} />

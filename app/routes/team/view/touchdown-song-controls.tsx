@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { useState } from "react";
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = { teamId: string; currentSong?: string; isEditable: boolean };
 
@@ -11,6 +12,8 @@ export default function SongControls({
 }: Props) {
   const [showForm, setShowForm] = useState(false);
   const fetcher = useFetcher();
+  
+  useFetcherErrorNotification(fetcher);
 
   const isSubmitting = fetcher.state !== "idle";
 

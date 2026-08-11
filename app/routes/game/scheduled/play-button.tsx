@@ -1,9 +1,12 @@
 "use client";
 import { Die } from "~/app/components/die";
 import { Link, useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export function PlayButton({ gameId }: { gameId: string }) {
   const fetcher = useFetcher();
+  
+  useFetcherErrorNotification(fetcher);
 
   const isLoading = fetcher.state !== "idle";
   const result = fetcher.data;

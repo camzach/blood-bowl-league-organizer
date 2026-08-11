@@ -1,6 +1,7 @@
 "use client";
 import { NumberInput } from "~/app/components/number-input";
 import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = {
   title: string;
@@ -27,6 +28,8 @@ export default function StaffHirer({
 }: Props) {
   const fetcher = useFetcher();
   
+  useFetcherErrorNotification(fetcher);
+  
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more
   const inputMax = Math.min(max, Math.floor(treasury / cost) + current);
@@ -49,7 +52,9 @@ export default function StaffHirer({
   
   if (isSubmitting) return <>Mutating...</>;
 
-  return max > 1 ? (
+  return (
+    <>
+      {max > 1 ? (
     <NumberInput
       disabled={disabled}
       value={current}
@@ -68,5 +73,7 @@ export default function StaffHirer({
         hireStaff(Number(e.target.checked));
       }}
     ></input>
+      )}
+    </>
   );
 }

@@ -9,7 +9,6 @@ export default [
     route("/", "./routes/home.tsx"),
 
     route("/create-league", "./routes/create-league/page.tsx"),
-    route("/create-league/create", "./routes/create-league/action.ts"),
 
     layout("./routes/admin/admin-permission-middleware.ts", [
       route("/admin/action", "./routes/admin/admin.action.ts"),

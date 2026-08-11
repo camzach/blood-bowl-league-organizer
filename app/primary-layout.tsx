@@ -10,6 +10,7 @@ import LeagueSelector from "./components/league-selector";
 import SignoutButton from "./components/signout-button";
 import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
+import { NotificationProvider } from "./components/notification-provider";
 
 type BetterAuthSession = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -75,7 +76,7 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
   const { user, teams, activeLeague, userLeagues, activeSeason } = loaderData;
 
   return (
-    <>
+    <NotificationProvider>
       <div className="drawer">
         <input id={drawerId} type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
@@ -143,6 +144,6 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
           </nav>
         </div>
       </div>
-    </>
+    </NotificationProvider>
   );
 }

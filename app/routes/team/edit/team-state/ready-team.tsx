@@ -1,9 +1,10 @@
 import { Die } from "~/app/components/die";
 import { Modal } from "~/app/components/modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import cx from "classnames";
 import useTooltip from "~/app/components/tooltip";
-import { useFetcher } from "react-router";
+import { useFetcher, useNavigate } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type Props = {
   teamId: string;
@@ -17,12 +18,29 @@ const tableRows = Array.from(Array(2), (i) => <Catastrophe key={i} />)
 
 export default function ReadyButton({ teamId, treasury }: Props) {
   const fetcher = useFetcher();
+  const navigate = useNavigate();
   const [warningOpen, setWarningOpen] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const tableOffset = Math.min(Math.floor(treasury / 100000), 6);
-  
-  const result = fetcher.data as { expensiveMistake: string; expensiveMistakesCost: number; expensiveMistakeRoll: number } | undefined;
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+
+  useFetcherErrorNotification(fetcher);
+
+  const result = fetcher.data as
+    | {
+        expensiveMistake: string;
+        expensiveMistakesCost: number;
+        expensiveMistakeRoll: number;
+      }
+    | undefined;
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
+
+  useEffect(() => {
+    // Navigate to view page on success (after showing result modal if needed)
+    if (fetcher.data?.success && !showResult) {
+      navigate(`/team/${teamId}`, { replace: true });
+    }
+  }, [fetcher.data?.success, showResult, navigate, teamId]);
 
   return (
     <>
@@ -79,7 +97,11 @@ export default function ReadyButton({ teamId, treasury }: Props) {
               setWarningOpen(false);
               fetcher.submit(
                 { action: "ready" },
-                { method: "post", action: `/team/${teamId}/edit/state` }
+                {
+                  defaultShouldRevalidate: false,
+                  method: "post",
+                  action: `/team/${teamId}/edit/state`,
+                },
               );
               if (treasury >= 100000) setShowResult(true);
             }}
@@ -98,14 +120,17 @@ export default function ReadyButton({ teamId, treasury }: Props) {
         "Submitting..."
       ) : (
         <button
-          className={cx("btn", treasury > 100000 ? "btn-warning" : "btn-primary")}
+          className={cx(
+            "btn",
+            treasury > 100000 ? "btn-warning" : "btn-primary",
+          )}
           onClick={() => {
             if (treasury > 100000) {
               setWarningOpen(true);
             } else {
               fetcher.submit(
                 { action: "ready" },
-                { method: "post", action: `/team/${teamId}/edit/state` }
+                { method: "post", action: `/team/${teamId}/edit/state` },
               );
             }
           }}

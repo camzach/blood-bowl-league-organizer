@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { authClient } from "~/app/utils/auth.client";
 import { useNavigate } from "react-router";
+import { notificationContext } from "~/app/components/notification-provider";
 
 export default function CreateLeaguePage() {
   const [leagueName, setLeagueName] = useState("");
   const navigate = useNavigate();
+  const sendNotification = useContext(notificationContext);
 
   return (
     <div className="container mx-auto p-4">
@@ -18,11 +20,18 @@ export default function CreateLeaguePage() {
           if (!leagueName) {
             return;
           }
-          await authClient.organization.create({
-            name: leagueName,
-            slug: leagueName.toLowerCase().replace(/\s/g, "-"),
-          });
-          await navigate("/");
+          try {
+            await authClient.organization.create({
+              name: leagueName,
+              slug: leagueName.toLowerCase().replace(/\s/g, "-"),
+            });
+            await navigate("/");
+          } catch (error) {
+            sendNotification({
+              text: error instanceof Error ? error.message : "Failed to create league",
+              time: 5000,
+            });
+          }
         }}
       >
         <label className="label">

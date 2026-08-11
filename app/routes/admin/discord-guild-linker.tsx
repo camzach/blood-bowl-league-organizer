@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { notificationContext } from "~/app/components/notification-provider";
 
 export default function DiscordGuildLinkerPage() {
+  const sendNotification = useContext(notificationContext);
   const [guildName, setGuildName] = useState<
     { loading: true } | { loading: false; name?: string }
   >({ loading: true });
@@ -9,7 +11,13 @@ export default function DiscordGuildLinkerPage() {
     function resolveGuildName() {
       return fetch("/discord-integration/resolve-guild-name")
         .then((res) => res.json())
-        .catch(() => null);
+        .catch((error) => {
+          sendNotification({
+            text: error instanceof Error ? error.message : "Failed to resolve Discord guild",
+            time: 5000,
+          });
+          return null;
+        });
     }
 
     function handleMessage(msg: MessageEvent) {

@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InducementSelector from "./inducement-selector";
 import { useFetcher, useNavigate } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type InducementArray = Array<{ name: string; price: number; max: number }>;
 type StarsArray = Array<{ name: string; hiringFee: number }>;
@@ -28,6 +29,8 @@ export default function Content(props: Props) {
   const [homeTeam, awayTeam] = props.teams;
   const fetcher = useFetcher();
   const navigate = useNavigate();
+
+  useFetcherErrorNotification(fetcher);
 
   const [homeChoices, setHomeChoices] = useState<ChoicesType>({
     stars: [],
@@ -85,14 +88,16 @@ export default function Content(props: Props) {
           ),
         }),
       },
-      { action: `/game/${props.gameId}/action`, method: "post" }
+      { action: `/game/${props.gameId}/action`, method: "post" },
     );
   };
 
-  // Navigate when successful - loader will handle showing correct state
-  if (fetcher.data?.success) {
-    navigate(`/game/${props.gameId}`);
-  }
+  useEffect(() => {
+    // Navigate when successful - loader will handle showing correct state
+    if (fetcher.data?.success) {
+      navigate(`/game/${props.gameId}`, { replace: true });
+    }
+  }, [fetcher.data?.success, props.gameId, navigate]);
 
   const calculateTotalCost = (from: "home" | "away"): number => {
     const choices = from === "home" ? homeChoices : awayChoices;
@@ -139,74 +144,76 @@ export default function Content(props: Props) {
   const isLoading = fetcher.state !== "idle";
 
   return (
-    <div
-      className="mx-auto grid w-3/5 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]"
-      style={{ placeItems: "start center" }}
-    >
-      <div>
-        <h2 className="text-bold text-2xl">{homeTeam}</h2>
-        {homePettyCash > 0 ? (
-          <>
-            Petty Cash:{" "}
-            {Math.max(0, homeFinalPettyCash - calculateTotalCost("home"))}
-          </>
-        ) : (
-          <>
-            Treasury:{" "}
-            {homeTreasury -
-              Math.max(0, calculateTotalCost("home") - homeFinalPettyCash)}
-          </>
-        )}
-        <br />
-        Total Cost: {calculateTotalCost("home")}
+    <>
+      <div
+        className="mx-auto grid w-3/5 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]"
+        style={{ placeItems: "start center" }}
+      >
+        <div>
+          <h2 className="text-bold text-2xl">{homeTeam}</h2>
+          {homePettyCash > 0 ? (
+            <>
+              Petty Cash:{" "}
+              {Math.max(0, homeFinalPettyCash - calculateTotalCost("home"))}
+            </>
+          ) : (
+            <>
+              Treasury:{" "}
+              {homeTreasury -
+                Math.max(0, calculateTotalCost("home") - homeFinalPettyCash)}
+            </>
+          )}
+          <br />
+          Total Cost: {calculateTotalCost("home")}
+        </div>
+        <div>
+          Treasury Transfer
+          <br />
+          {homePettyCash > 0 ? "<==" : "==>"}
+          <br />
+          {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
+        </div>
+        <div>
+          <h2 className="text-bold text-2xl">{awayTeam}</h2>
+          {awayPettyCash > 0 ? (
+            <>
+              Petty Cash:{" "}
+              {Math.max(0, awayFinalPettyCash - calculateTotalCost("away"))}
+            </>
+          ) : (
+            <>
+              Treasury:{" "}
+              {awayTreasury -
+                Math.max(0, calculateTotalCost("away") - awayFinalPettyCash)}
+            </>
+          )}
+          <br />
+          Total Cost: {calculateTotalCost("away")}
+        </div>
+        <div>
+          <InducementSelector
+            inducements={homeInducements}
+            stars={homeStars}
+            choices={homeChoices}
+            onUpdate={(choice): void => {
+              handleChooseInducement({ team: "home", choice });
+            }}
+          />
+        </div>
+        <button className="btn" onClick={submit} disabled={isLoading}>
+          {isLoading ? "Submitting..." : "Done :)"}
+        </button>
+        <div>
+          <InducementSelector
+            inducements={awayInducements}
+            stars={awayStars}
+            choices={awayChoices}
+            onUpdate={(choice): void => {
+              handleChooseInducement({ team: "away", choice });
+            }}
+          />
+        </div>
       </div>
-      <div>
-        Treasury Transfer
-        <br />
-        {homePettyCash > 0 ? "<==" : "==>"}
-        <br />
-        {homePettyCash > 0 ? treasuryCostAway : treasuryCostHome}
-      </div>
-      <div>
-        <h2 className="text-bold text-2xl">{awayTeam}</h2>
-        {awayPettyCash > 0 ? (
-          <>
-            Petty Cash:{" "}
-            {Math.max(0, awayFinalPettyCash - calculateTotalCost("away"))}
-          </>
-        ) : (
-          <>
-            Treasury:{" "}
-            {awayTreasury -
-              Math.max(0, calculateTotalCost("away") - awayFinalPettyCash)}
-          </>
-        )}
-        <br />
-        Total Cost: {calculateTotalCost("away")}
-      </div>
-      <div>
-        <InducementSelector
-          inducements={homeInducements}
-          stars={homeStars}
-          choices={homeChoices}
-          onUpdate={(choice): void => {
-            handleChooseInducement({ team: "home", choice });
-          }}
-        />
-      </div>
-      <button className="btn" onClick={submit} disabled={isLoading}>
-        {isLoading ? "Submitting..." : "Done :)"}
-      </button>
-      <div>
-        <InducementSelector
-          inducements={awayInducements}
-          stars={awayStars}
-          choices={awayChoices}
-          onUpdate={(choice): void => {
-            handleChooseInducement({ team: "away", choice });
-          }}
-        />
-      </div>
-    </div>
+    </>
   );
 }

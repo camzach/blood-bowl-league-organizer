@@ -4,6 +4,8 @@ import { authContext } from "../primary-layout";
 import { db } from "~/app/utils/drizzle";
 import { auth } from "~/app/utils/auth.server";
 import { authClient } from "~/app/utils/auth.client";
+import { useContext } from "react";
+import { notificationContext } from "../components/notification-provider";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const { user, session } = context.get(authContext);
@@ -44,6 +46,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
+  const sendNotification = useContext(notificationContext);
+
   const { activeLeague, myTeams, myLeagues, upcomingGames } = loaderData;
   if (!activeLeague && myLeagues.length === 0) {
     return (
@@ -64,11 +68,18 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             if (!leagueName) {
               return;
             }
-            await authClient.organization.create({
-              name: leagueName,
-              slug: leagueName.toLowerCase().replace(/\s/g, "-"),
-            });
-            await revalidator.revalidate();
+            try {
+              await authClient.organization.create({
+                name: leagueName,
+                slug: leagueName.toLowerCase().replace(/\s/g, "-"),
+              });
+              await revalidator.revalidate();
+            } catch (error) {
+              sendNotification({
+                text: error instanceof Error ? error.message : "Failed to create league",
+                time: 5000,
+              });
+            }
           }}
         >
           <input
@@ -87,6 +98,17 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
+      <button
+        className="btn btn-primary"
+        onClick={() =>
+          sendNotification({
+            text: Math.random().toString(),
+            time: Math.ceil(Math.random() * 6) * 1000,
+          })
+        }
+      >
+        SEND A NOTIFICATION
+      </button>
       <h1 className="mb-4 text-2xl font-bold">Your Teams</h1>
       {myTeams.length === 0 ? (
         <p>

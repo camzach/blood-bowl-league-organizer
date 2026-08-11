@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 type TeamWithChoices = {
   name: string;
@@ -54,6 +55,8 @@ export default function Journeymen({ home, away, gameId }: Props) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
 
+  useFetcherErrorNotification(fetcher);
+
   const isLoading = fetcher.state !== "idle";
 
   const handleSubmit = () => {
@@ -62,14 +65,19 @@ export default function Journeymen({ home, away, gameId }: Props) {
     formData.append("gameId", gameId);
     if (homeChoice) formData.append("home", homeChoice);
     if (awayChoice) formData.append("away", awayChoice);
-    
-    fetcher.submit(formData, { action: `/game/${gameId}/action`, method: "post" });
+
+    fetcher.submit(formData, {
+      action: `/game/${gameId}/action`,
+      method: "post",
+    });
   };
 
-  // Navigate when successful - loader will handle showing correct state
-  if (fetcher.data?.success) {
-    navigate(`/game/${gameId}`);
-  }
+  useEffect(() => {
+    // Navigate when successful - loader will handle showing correct state
+    if (fetcher.data?.success) {
+      navigate(`/game/${gameId}`, { replace: true });
+    }
+  }, [fetcher.data?.success, gameId, navigate]);
 
   return (
     <>
@@ -92,11 +100,7 @@ export default function Journeymen({ home, away, gameId }: Props) {
         />
       )}
       <br />
-      <button
-        className="btn"
-        onClick={handleSubmit}
-        disabled={isLoading}
-      >
+      <button className="btn" onClick={handleSubmit} disabled={isLoading}>
         {isLoading ? "Submitting..." : "Submit!"}
       </button>
     </>
