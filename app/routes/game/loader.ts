@@ -1,7 +1,8 @@
 import { db } from "~/app/utils/drizzle";
 import { eq, getColumns, inArray } from "drizzle-orm";
 import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
-import { gameDetailsWithTeamTreasury } from "~/db/query-fragments/game.fragments";
+import { gameDetailsWithTeamTreasury, gameDetailsWithFullTeam } from "~/db/query-fragments/game.fragments";
+import { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } from "~/app/utils/get-computed-player-fields";
 
 type ScheduledData = Awaited<ReturnType<typeof loadScheduledData>>;
 type JourneymenData = Awaited<ReturnType<typeof loadJourneymenData>>;
@@ -184,11 +185,6 @@ async function loadInducementsData(gameId: string) {
 }
 
 async function loadInProgressData(gameId: string) {
-  const { gameDetailsWithFullTeam } =
-    await import("~/db/query-fragments/game.fragments");
-  const { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } =
-    await import("~/app/utils/get-computed-player-fields");
-
   const game = await db.query.game.findFirst({
     where: { id: gameId },
     with: {
