@@ -12,7 +12,7 @@
   },
   "engines": {
     "node": "24",
-    "pnpm": "11"
+    "pnpm": "10"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1101.0",
