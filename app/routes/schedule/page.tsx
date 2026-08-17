@@ -10,7 +10,7 @@ import fetchGames from "./fetch-games";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const { session } = context.get(authContext);
-  
+
   if (!session) {
     throw redirect("/login");
   }
@@ -33,7 +33,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
   const baseURL =
     process.env.NODE_ENV === "production"
-      ? process.env.NEXT_PUBLIC_BASE_URL
+      ? import.meta.env.BASE_URL
       : "http://localhost:" + (process.env.PORT ?? "5173");
 
   const exportLink = new URL(
@@ -59,7 +59,16 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {
-  const { teams, games, mode, state, teamId, parsedMonth, parsedYear, exportLink } = loaderData;
+  const {
+    teams,
+    games,
+    mode,
+    state,
+    teamId,
+    parsedMonth,
+    parsedYear,
+    exportLink,
+  } = loaderData;
 
   return (
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
@@ -71,11 +80,7 @@ export default function Schedule({ loaderData }: Route.ComponentProps) {
         {mode === "list" ? (
           <List games={games} />
         ) : (
-          <Calendar
-            games={games}
-            month={parsedMonth}
-            year={parsedYear}
-          />
+          <Calendar games={games} month={parsedMonth} year={parsedYear} />
         )}
       </div>
     </div>
