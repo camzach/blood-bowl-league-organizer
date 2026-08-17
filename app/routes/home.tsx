@@ -76,7 +76,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               await revalidator.revalidate();
             } catch (error) {
               sendNotification({
-                text: error instanceof Error ? error.message : "Failed to create league",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create league",
                 time: 5000,
               });
             }
@@ -98,17 +101,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <button
-        className="btn btn-primary"
-        onClick={() =>
-          sendNotification({
-            text: Math.random().toString(),
-            time: Math.ceil(Math.random() * 6) * 1000,
-          })
-        }
-      >
-        SEND A NOTIFICATION
-      </button>
       <h1 className="mb-4 text-2xl font-bold">Your Teams</h1>
       {myTeams.length === 0 ? (
         <p>
