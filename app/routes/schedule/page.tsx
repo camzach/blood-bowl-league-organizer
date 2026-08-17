@@ -33,7 +33,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
   const baseURL =
     process.env.NODE_ENV === "production"
-      ? import.meta.env.BASE_URL
+      ? import.meta.env.VITE_BASE_URL
       : "http://localhost:" + (process.env.PORT ?? "5173");
 
   const exportLink = new URL(

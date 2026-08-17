@@ -3,7 +3,7 @@ import { createAuthClient } from "better-auth/react";
 
 const baseURL = import.meta.env.DEV
   ? "http://localhost:5173"
-  : import.meta.env.BASE_URL;
+  : import.meta.env.VITE_BASE_URL;
 
 export const authClient = createAuthClient({
   baseURL,

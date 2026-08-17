@@ -5,7 +5,7 @@ interface ViteTypeOptions {
 interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;
   readonly DEV: boolean;
-  readonly BASE_URL: string;
+  readonly VITE_BASE_URL: string;
   readonly DISCORD_CLIENT_ID: string;
 }
 
