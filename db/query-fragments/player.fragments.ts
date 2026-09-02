@@ -43,27 +43,3 @@ export const playerForTvCalculation = {
   },
 } as const;
 
-export const playerWithFullContext = {
-  with: {
-    position: {
-      with: {
-        rosterSlot: {
-          with: {
-            roster: {
-              with: {
-                specialRules: true,
-              },
-            },
-          },
-        },
-        skills: true,
-        keywords: true,
-      },
-    },
-    improvements: {
-      with: {
-        skill: true,
-      },
-    },
-  },
-} as const;

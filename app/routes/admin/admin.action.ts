@@ -4,7 +4,7 @@ import type { Route } from "./+types/admin.action";
 import { db } from "~/app/utils/drizzle";
 import { authContext } from "~/app/primary-layout";
 import { generateSchedule } from "~/app/utils/schedule-generator";
-import { getLeagueTableForSeason } from "./get-league-table-helper";
+import { computeLeagueTable } from "~/app/utils/get-league-table";
 import {
   bracketGame,
   game,
@@ -240,7 +240,23 @@ async function seedBracket(session: { activeOrganizationId?: string | null }) {
         .delete(gameDetails)
         .where(inArray(gameDetails.id, gameDetailsIds));
     }
-    const leagueTable = await getLeagueTableForSeason(tx, activeSeason.id);
+    const leagueTableSeason = await tx.query.season.findFirst({
+      where: { id: activeSeason.id, isActive: true },
+      with: {
+        roundRobinGames: {
+          with: {
+            game: {
+              with: {
+                homeDetails: { with: { team: { columns: { name: true, id: true } } } },
+                awayDetails: { with: { team: { columns: { name: true, id: true } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!leagueTableSeason) throw new Error("No active season found");
+    const leagueTable = computeLeagueTable(leagueTableSeason.roundRobinGames);
     const TOP_CUT = 10;
     const teams = Object.entries(leagueTable)
       .sort(([, a], [, b]) => {
@@ -405,7 +421,23 @@ async function endSeason(session: { activeOrganizationId?: string | null }) {
         );
     }
 
-    const leagueTable = await getLeagueTableForSeason(tx, activeSeason.id);
+    const leagueTableSeason = await tx.query.season.findFirst({
+      where: { id: activeSeason.id, isActive: true },
+      with: {
+        roundRobinGames: {
+          with: {
+            game: {
+              with: {
+                homeDetails: { with: { team: { columns: { name: true, id: true } } } },
+                awayDetails: { with: { team: { columns: { name: true, id: true } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!leagueTableSeason) throw new Error("No active season found");
+    const leagueTable = computeLeagueTable(leagueTableSeason.roundRobinGames);
     const teamUpdates: Record<string, number> = {};
 
     let winnerId: string | undefined;

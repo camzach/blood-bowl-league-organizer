@@ -22,6 +22,7 @@ import { d6 } from "~/app/utils/d6";
 import nanoid from "~/app/utils/nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { gameEvent } from "./game-events";
+import { getTeamSpecialRules } from "./get-team-special-rules";
 import {
   gameWithTeamIds,
   gameDetailsWithTeamAndPlayers,
@@ -382,20 +383,10 @@ async function handlePurchaseInducements(
     if (game.state !== "inducements")
       throw new Error("Game not awaiting inducements");
 
-    const teamSpecialRules = (
-      team: (typeof game.homeDetails | typeof game.awayDetails)["team"],
-    ) => {
-      const rules = team.roster.specialRuleToRoster.map(
-        (r) => r.specialRuleName,
-      );
-      if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);
-      return rules;
-    };
-
     const homeInducementCost = await calculateInducementCosts(
       homeChoices.inducements,
       homeChoices.stars,
-      teamSpecialRules(game.homeDetails.team),
+      getTeamSpecialRules(game.homeDetails.team),
       game.homeDetails.team.players.length,
       game.homeDetails.team.roster.name,
       tx,
@@ -403,7 +394,7 @@ async function handlePurchaseInducements(
     const awayInducementCost = await calculateInducementCosts(
       awayChoices.inducements,
       awayChoices.stars,
-      teamSpecialRules(game.awayDetails.team),
+      getTeamSpecialRules(game.awayDetails.team),
       game.awayDetails.team.players.length,
       game.awayDetails.team.roster.name,
       tx,

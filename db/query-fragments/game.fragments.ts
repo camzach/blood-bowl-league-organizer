@@ -1,4 +1,4 @@
-import { playerWithFullContext, playerWithPosition } from "./player.fragments";
+import { playerWithPosition } from "./player.fragments";
 
 export const gameDetailsWithTeamName = {
   with: {
@@ -123,7 +123,7 @@ export const gameDetailsWithTeamAndPlayers = {
       },
       with: {
         players: {
-          ...playerWithFullContext,
+          ...playerWithPosition,
           where: {
             membershipType: {
               in: ["player", "journeyman"] as ["player", "journeyman"],

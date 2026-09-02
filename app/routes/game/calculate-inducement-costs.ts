@@ -1,7 +1,7 @@
 import { inducement, specialRule, starPlayer } from "~/db/schema";
 import type { Transaction } from "~/app/utils/drizzle";
 
-function getInducementPrice(
+export function getInducementPrice(
   inducement: {
     price: number | null;
     specialPrice: number | null;

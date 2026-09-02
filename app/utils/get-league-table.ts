@@ -1,6 +1,6 @@
 import { db } from "~/app/utils/drizzle";
 
-type TeamStats = {
+export type TeamStats = {
   name: string;
   points: number;
   wins: number;
@@ -12,38 +12,17 @@ type TeamStats = {
   casDiff: number;
 };
 
-export async function getLeagueTable(
-  leagueId: string,
-): Promise<Record<string, TeamStats>> {
-  const activeSeason = await db.query.season.findFirst({
-    where: {
-      leagueId,
-      isActive: true,
-    },
-    with: {
-      roundRobinGames: {
-        with: {
-          game: {
-            with: {
-              homeDetails: {
-                with: { team: { columns: { name: true, id: true } } },
-              },
-              awayDetails: {
-                with: { team: { columns: { name: true, id: true } } },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+type RoundRobinGame = {
+  game?: {
+    state?: string;
+    homeDetails?: { touchdowns: number; casualties: number; team: { id: string; name: string } } | null;
+    awayDetails?: { touchdowns: number; casualties: number; team: { id: string; name: string } } | null;
+  } | null;
+};
 
-  if (!activeSeason) {
-    throw new Error("No active season found");
-  }
-
-  const games = activeSeason.roundRobinGames;
-
+export function computeLeagueTable(
+  games: RoundRobinGame[],
+): Record<string, TeamStats> {
   const teams = new Set(
     games.flatMap((game) =>
       [game.game?.homeDetails?.team, game.game?.awayDetails?.team].filter(
@@ -52,16 +31,14 @@ export async function getLeagueTable(
     ),
   );
 
-  const table = games.reduce<Record<string, TeamStats>>(
+  return games.reduce<Record<string, TeamStats>>(
     (prev, roundRobinGame) => {
       const { state, homeDetails, awayDetails } = roundRobinGame.game ?? {};
       if (state !== "complete") return prev;
       const next = { ...prev };
 
       // Bye
-      if (!homeDetails || !awayDetails) {
-        return next;
-      }
+      if (!homeDetails || !awayDetails) return next;
 
       // Win / Loss / Draw
       if (homeDetails.touchdowns > awayDetails.touchdowns) {
@@ -98,14 +75,10 @@ export async function getLeagueTable(
       next[awayDetails.team.id].td += awayDetails.touchdowns;
       next[homeDetails.team.id].cas += homeDetails.casualties;
       next[awayDetails.team.id].cas += awayDetails.casualties;
-      next[homeDetails.team.id].tdDiff +=
-        homeDetails.touchdowns - awayDetails.touchdowns;
-      next[awayDetails.team.id].tdDiff +=
-        awayDetails.touchdowns - homeDetails.touchdowns;
-      next[homeDetails.team.id].casDiff +=
-        homeDetails.casualties - awayDetails.casualties;
-      next[awayDetails.team.id].casDiff +=
-        awayDetails.casualties - homeDetails.casualties;
+      next[homeDetails.team.id].tdDiff += homeDetails.touchdowns - awayDetails.touchdowns;
+      next[awayDetails.team.id].tdDiff += awayDetails.touchdowns - homeDetails.touchdowns;
+      next[homeDetails.team.id].casDiff += homeDetails.casualties - awayDetails.casualties;
+      next[awayDetails.team.id].casDiff += awayDetails.casualties - homeDetails.casualties;
 
       return next;
     },
@@ -126,5 +99,37 @@ export async function getLeagueTable(
       ]),
     ),
   );
-  return table;
+}
+
+export async function getLeagueTable(
+  leagueId: string,
+): Promise<Record<string, TeamStats>> {
+  const activeSeason = await db.query.season.findFirst({
+    where: {
+      leagueId,
+      isActive: true,
+    },
+    with: {
+      roundRobinGames: {
+        with: {
+          game: {
+            with: {
+              homeDetails: {
+                with: { team: { columns: { name: true, id: true } } },
+              },
+              awayDetails: {
+                with: { team: { columns: { name: true, id: true } } },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!activeSeason) {
+    throw new Error("No active season found");
+  }
+
+  return computeLeagueTable(activeSeason.roundRobinGames);
 }

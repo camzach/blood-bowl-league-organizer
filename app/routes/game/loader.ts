@@ -3,6 +3,8 @@ import { eq, getColumns, inArray } from "drizzle-orm";
 import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
 import { gameDetailsWithTeamTreasury, gameDetailsWithFullTeam } from "~/db/query-fragments/game.fragments";
 import { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } from "~/app/utils/get-computed-player-fields";
+import { getTeamSpecialRules } from "./get-team-special-rules";
+import { getInducementPrice } from "./calculate-inducement-costs";
 
 type ScheduledData = Awaited<ReturnType<typeof loadScheduledData>>;
 type JourneymenData = Awaited<ReturnType<typeof loadJourneymenData>>;
@@ -24,26 +26,12 @@ async function getInducementOptions(rules: string[], rosterName: string) {
 
   const inducementsPromise = allInducements
     .map((i) => {
-      let price = i.price;
-      if (i.specialPriceRosterName === rosterName) {
-        price = i.specialPrice;
-      } else if (
-        i.specialPriceRuleName &&
-        rules.includes(i.specialPriceRuleName)
-      ) {
-        price = i.specialPrice;
-      }
-
-      let max = i.max;
-      if (i.specialMaxRuleName && rules.includes(i.specialMaxRuleName)) {
-        max = i.specialMax as number;
-      }
-
-      return {
-        ...i,
-        price: price as number,
-        max,
-      };
+      const price = getInducementPrice(i, rules, rosterName);
+      const max =
+        i.specialMaxRuleName && rules.includes(i.specialMaxRuleName)
+          ? (i.specialMax as number)
+          : i.max;
+      return { ...i, price: price as number, max };
     })
     .filter((i) => i.price !== null);
 
@@ -151,13 +139,6 @@ async function loadInducementsData(gameId: string) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  const getTeamSpecialRules = (
-    team: typeof game.homeDetails.team | typeof game.awayDetails.team,
-  ) => {
-    const rules = team.roster.specialRuleToRoster.map((r) => r.specialRuleName);
-    if (team.chosenSpecialRuleName) rules.push(team.chosenSpecialRuleName);
-    return rules;
-  };
 
   const [homeOptions, awayOptions] = await Promise.all([
     getInducementOptions(
