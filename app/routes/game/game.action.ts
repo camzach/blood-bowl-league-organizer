@@ -23,6 +23,7 @@ import nanoid from "~/app/utils/nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { gameEvent } from "./game-events";
 import { getTeamSpecialRules } from "./get-team-special-rules";
+import { processGameEvents, calculateWinnings } from "./process-game-events";
 import {
   gameWithTeamIds,
   gameDetailsWithTeamAndPlayers,
@@ -523,214 +524,48 @@ async function handleEndGame(
 
     if (game.state !== "in_progress") throw new Error("Game not in progress");
 
-    const playerToTeamMap = new Map<string, "home" | "away">();
-    for (const player of game.homeDetails.team.players) {
-      playerToTeamMap.set(player.id, "home");
-    }
-    for (const player of game.homeDetails.gameDetailsToStarPlayer) {
-      playerToTeamMap.set(player.starPlayerName, "home");
-    }
-    for (const player of game.awayDetails.team.players) {
-      playerToTeamMap.set(player.id, "away");
-    }
-    for (const player of game.awayDetails.gameDetailsToStarPlayer) {
-      playerToTeamMap.set(player.starPlayerName, "away");
-    }
+    // Pre-fetch star players referenced in events so processGameEvents is DB-free
+    const starPlayerNamesInEvents = events
+      .filter((ev) => ev.type === "casualty" && ev.injury.causedBy?.type === "star")
+      .map((ev) => (ev as { injury: { causedBy: { player: string } } }).injury.causedBy.player);
+    const starPlayersForEvents = starPlayerNamesInEvents.length > 0
+      ? await tx.query.starPlayer.findMany({
+          where: { name: { in: starPlayerNamesInEvents } },
+          with: { keywords: true },
+        })
+      : [];
 
-    const [touchdowns, casualties] = events.reduce(
-      (acc, curr) => {
-        const [touchdowns, casualties] = acc;
-
-        if (curr.type === "touchdown") {
-          const team = playerToTeamMap.get(curr.player) === "home" ? 0 : 1;
-          touchdowns[team] += 1;
-        }
-        if (
-          curr.type === "casualty" &&
-          curr.injury.causedBy?.type === "player"
-        ) {
-          const team =
-            playerToTeamMap.get(curr.injury.causedBy.player) === "home"
-              ? 0
-              : 1;
-          casualties[team] += 1;
-        }
-
-        return acc;
-      },
-      [
-        [0, 0],
-        [0, 0],
-      ],
-    );
-
-    const players = [
-      ...game.homeDetails.team.players,
-      ...game.awayDetails.team.players,
-    ];
-    const playerUpdates: Record<
-      string,
-      Partial<{
-        touchdowns: number;
-        casualties: number;
-        mvps: number;
-        interceptions: number;
-        safeLandings: number;
-        missNextGame: boolean;
-        otherSPP: number;
-        completions: number;
-        dead: boolean;
-        maInjuries: number;
-        avInjuries: number;
-        stInjuries: number;
-        agInjuries: number;
-        paInjuries: number;
-        nigglingInjuries: number;
-        teamId: string | null;
-        membershipType: typeof player.membershipType._.data | null;
-      }>
-    > = Object.fromEntries(
-      players.map(({ id }) => [id, { missNextGame: false }]),
+    const { touchdowns, casualties, playerUpdates, hatredNeeded } = processGameEvents(
+      events,
+      game.homeDetails.team.players,
+      game.awayDetails.team.players,
+      game.homeDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
+      game.awayDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
+      starPlayersForEvents,
     );
 
     const newImprovements: Array<typeof improvement.$inferInsert> = [];
-    const improvementsToDelete: Array<{
-      playerId: string;
-      order: number;
-    }> = [];
+    const improvementsToDelete: Array<{ playerId: string; order: number }> = [];
 
-    for (const ev of events) {
-      if (playerToTeamMap.get(ev.player) === undefined) {
-        throw new Error("Event references a player not on any team");
+    // Resolve Hatred skills outside the pure function
+    for (const { playerId, keyword, nextNegativeOrder } of hatredNeeded) {
+      const hatredSkillName = `Hatred (${keyword})`;
+      const existingSkill = await tx.query.skill.findFirst({
+        where: { name: hatredSkillName },
+      });
+      if (!existingSkill) {
+        const baseHatredSkill = await tx.query.skill.findFirst({
+          where: { name: "Hatred" },
+        });
+        if (!baseHatredSkill) throw new Error("Failed to find Hatred skill");
+        await tx.insert(skill).values({ ...baseHatredSkill, name: hatredSkillName });
       }
-      switch (ev.type) {
-        case "touchdown":
-          if (ev.playerType === "player") {
-            playerUpdates[ev.player].touchdowns =
-              (playerUpdates[ev.player]?.touchdowns ?? 0) + 1;
-          }
-          break;
-        case "completion":
-          playerUpdates[ev.player].completions =
-            (playerUpdates[ev.player]?.completions ?? 0) + 1;
-          break;
-        case "interception":
-          playerUpdates[ev.player].interceptions =
-            (playerUpdates[ev.player]?.interceptions ?? 0) + 1;
-          break;
-        case "safeLanding":
-          playerUpdates[ev.player].safeLandings =
-            (playerUpdates[ev.player]?.safeLandings ?? 0) + 1;
-          break;
-        case "otherSPP":
-          playerUpdates[ev.player].otherSPP =
-            (playerUpdates[ev.player]?.otherSPP ?? 0) + 1;
-          break;
-        case "casualty": {
-          const injury = ev.injury;
-          const playerUpdate = playerUpdates[ev.player];
-
-          if (injury.type === "mng") {
-            playerUpdate.missNextGame = true;
-          }
-          if (
-            injury.type === "ma" ||
-            injury.type === "st" ||
-            injury.type === "ag" ||
-            injury.type === "pa" ||
-            injury.type === "av"
-          ) {
-            playerUpdate.missNextGame = true;
-            playerUpdate[`${injury.type}Injuries`] =
-              (playerUpdate[`${injury.type}Injuries`] ?? 0) + 1;
-          }
-          if (injury.type === "ni") {
-            playerUpdate.missNextGame = true;
-            playerUpdate.nigglingInjuries =
-              (playerUpdate.nigglingInjuries ?? 0) + 1;
-          }
-          if (injury.type === "dead") {
-            playerUpdate.teamId = null;
-            playerUpdate.membershipType = null;
-            playerUpdate.dead = true;
-          }
-
-          if (injury.causedBy) {
-            let offenderKeywords: string[];
-            const causedByPlayer = injury.causedBy.player;
-
-            if (
-              injury.causedBy.type === "player" &&
-              causedByPlayer in playerUpdates
-            ) {
-              const offender = players.find((p) => p.id === causedByPlayer);
-              if (!offender) {
-                throw new Error("Offending player does not exist");
-              }
-
-              playerUpdates[causedByPlayer].casualties =
-                (playerUpdates[causedByPlayer]?.casualties ?? 0) + 1;
-
-              offenderKeywords = offender.position.keywords
-                .filter((k) => k.canBeHated)
-                .map((k) => k.name);
-            } else {
-              const offender = await tx.query.starPlayer.findFirst({
-                where: { name: causedByPlayer },
-                with: {
-                  keywords: true,
-                },
-              });
-              if (!offender) {
-                throw new Error("Offending player does not exist");
-              }
-              offenderKeywords = offender.keywords
-                .filter((k) => k.canBeHated)
-                .map((k) => k.name);
-            }
-
-            if (injury.type !== "bh" && d6() >= 4) {
-              if (!offenderKeywords.includes(injury.causedBy.hatredKeyword)) {
-                throw new Error("Invalid keyword chosen for Hatred");
-              }
-              const hatredSkillName = `Hatred (${injury.causedBy.hatredKeyword})`;
-              const existingSkill = await tx.query.skill.findFirst({
-                where: { name: hatredSkillName },
-              });
-              if (!existingSkill) {
-                const baseHatredSkill = await tx.query.skill.findFirst({
-                  where: { name: "Hatred" },
-                });
-                if (!baseHatredSkill) {
-                  throw new Error("Failed to find Hatred skill");
-                }
-                await tx.insert(skill).values({
-                  ...baseHatredSkill,
-                  name: hatredSkillName,
-                });
-              }
-              const fetchedPlayer = players.find((p) => p.id === ev.player);
-              if (!fetchedPlayer) {
-                throw new Error("Injured player does not exist");
-              }
-              const nextNegativeOrder =
-                Math.min(
-                  0,
-                  ...fetchedPlayer.improvements.map((i) => i.order),
-                ) - 1;
-
-              newImprovements.push({
-                playerId: ev.player,
-                type: "automatic_skill",
-                order: nextNegativeOrder,
-                skillName: hatredSkillName,
-              });
-            }
-          }
-
-          break;
-        }
-      }
+      newImprovements.push({
+        playerId,
+        type: "automatic_skill",
+        order: nextNegativeOrder,
+        skillName: hatredSkillName,
+      });
     }
 
     const eligibleHome = game.homeDetails.team.players
@@ -806,17 +641,14 @@ async function handleEndGame(
       ),
     ];
 
-    const sharedWinnings =
-      ((game.homeDetails.fanFactor + game.awayDetails.fanFactor) / 2) *
-      10_000;
-    const homeWinnings =
-      touchdowns[0] * 10_000 +
-      sharedWinnings +
-      (!homeStalled ? 10_000 : 0);
-    const awayWinnings =
-      touchdowns[1] * 10_000 +
-      sharedWinnings +
-      (!awayStalled ? 10_000 : 0);
+    const { homeWinnings, awayWinnings } = calculateWinnings(
+      touchdowns[0],
+      touchdowns[1],
+      game.homeDetails.fanFactor,
+      game.awayDetails.fanFactor,
+      homeStalled,
+      awayStalled,
+    );
 
     const playerUpdateQueries = Object.entries(playerUpdates).map(
       ([id, update]) =>
