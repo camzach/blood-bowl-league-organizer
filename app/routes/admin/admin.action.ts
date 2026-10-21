@@ -44,29 +44,31 @@ export const action = createValidatedAction(
   async (data, args: Route.ActionArgs) => {
     // Admin permission check handled by admin-permission-middleware layout
     const { session } = args.context.get(authContext);
+    const leagueId = session.activeOrganizationId;
+    if (!leagueId) throw new Error("No league currently active");
 
     // Route to appropriate handler
     switch (data.action) {
       case "schedule":
-        return scheduleAction(session);
+        return scheduleAction(leagueId);
       case "clear":
-        return clearAction(session);
+        return clearAction(leagueId);
       case "reschedule":
-        return rescheduleGames(session, data.games);
+        return rescheduleGames(leagueId, data.games);
       case "seed-bracket":
-        return seedBracket(session);
+        return seedBracket(leagueId);
       case "end-season":
-        return endSeason(session);
+        return endSeason(leagueId);
     }
   },
 );
 
-async function scheduleAction(session: { activeOrganizationId?: string | null }) {
+async function scheduleAction(leagueId: string) {
 
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
-        leagueId: session.activeOrganizationId ?? "",
+        leagueId,
         isActive: true,
       },
       with: {
@@ -83,7 +85,7 @@ async function scheduleAction(session: { activeOrganizationId?: string | null })
     const teams = (
       await tx.query.team.findMany({
         where: {
-          leagueId: session.activeOrganizationId ?? "",
+          leagueId,
           state: "ready",
         },
         columns: { id: true },
@@ -123,16 +125,26 @@ async function scheduleAction(session: { activeOrganizationId?: string | null })
   return { success: true };
 }
 
-async function clearAction(session: { activeOrganizationId?: string | null }) {
+async function clearAction(leagueId: string) {
 
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
-        leagueId: session.activeOrganizationId ?? "",
+        leagueId,
         isActive: true,
       },
     });
     if (!activeSeason) throw new Error("No active season");
+
+    const startedGame = await tx.query.roundRobinGame.findFirst({
+      where: {
+        seasonId: activeSeason.id,
+        game: { state: { ne: "scheduled" } },
+      },
+    });
+    if (startedGame)
+      throw new Error("Cannot clear a season with games already started");
+
     const gameIds = (
       await tx
         .delete(roundRobinGame)
@@ -173,14 +185,14 @@ async function clearAction(session: { activeOrganizationId?: string | null }) {
 }
 
 async function rescheduleGames(
-  session: { activeOrganizationId?: string | null },
+  leagueId: string,
   games: Array<{ id: string; time: string }>,
 ) {
 
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
-        leagueId: session.activeOrganizationId ?? "",
+        leagueId,
         isActive: true,
       },
       with: {
@@ -204,12 +216,12 @@ async function rescheduleGames(
   return { success: true };
 }
 
-async function seedBracket(session: { activeOrganizationId?: string | null }) {
+async function seedBracket(leagueId: string) {
 
   return await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
-        leagueId: session.activeOrganizationId ?? "",
+        leagueId,
         isActive: true,
       },
     });
@@ -222,6 +234,8 @@ async function seedBracket(session: { activeOrganizationId?: string | null }) {
         where: { seasonId: activeSeason.id },
         with: { game: true },
       });
+      if (bracketGames.some((bg) => bg.game && bg.game.state !== "scheduled"))
+        throw new Error("Cannot reseed a bracket with games already started");
       const gameIds = bracketGames.map((g) => g.gameId).filter((id) => !!id);
       const gameDetailsIds = bracketGames
         .flatMap((bg) =>
@@ -358,12 +372,12 @@ async function seedBracket(session: { activeOrganizationId?: string | null }) {
   });
 }
 
-async function endSeason(session: { activeOrganizationId?: string | null }) {
+async function endSeason(leagueId: string) {
 
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
-        leagueId: session.activeOrganizationId ?? "",
+        leagueId,
         isActive: true,
       },
       with: {
@@ -374,7 +388,7 @@ async function endSeason(session: { activeOrganizationId?: string | null }) {
     if (!activeSeason) throw new Error("No active season");
 
     const teams = await tx.query.team.findMany({
-      where: { leagueId: session.activeOrganizationId ?? "" },
+      where: { leagueId },
       with: {
         players: true,
       },
