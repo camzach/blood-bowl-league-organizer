@@ -186,16 +186,22 @@ export const gameWithTeamNames = {
   },
 } as const;
 
-export const gameWithTeamIds = {
+export const gameWithTeamCoaches = {
   with: {
     homeDetails: {
       with: {
-        team: { columns: { id: true } },
+        team: {
+          columns: { id: true },
+          with: { coaches: { columns: { id: true } } },
+        },
       },
     },
     awayDetails: {
       with: {
-        team: { columns: { id: true } },
+        team: {
+          columns: { id: true },
+          with: { coaches: { columns: { id: true } } },
+        },
       },
     },
   },

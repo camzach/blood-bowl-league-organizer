@@ -23,9 +23,10 @@ import nanoid from "~/app/utils/nanoid";
 import { calculateInducementCosts } from "./calculate-inducement-costs";
 import { gameEvent } from "./game-events";
 import { getTeamSpecialRules } from "./get-team-special-rules";
+import { canActOnGame } from "./can-act-on-game";
 import { processGameEvents, calculateWinnings } from "./process-game-events";
 import {
-  gameWithTeamIds,
+  gameWithTeamCoaches,
   gameDetailsWithTeamAndPlayers,
   gameDetailsForInducements,
   gameDetailsWithTeamForEndGame,
@@ -77,20 +78,18 @@ const actionSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   actionSchema,
   async (data, { context }: Route.ActionArgs) => {
-    const { session } = context.get(authContext);
+    const { session, user } = context.get(authContext);
 
-    // Get game and verify permissions
     const game = await db.query.game.findFirst({
       where: { id: data.gameId },
-      ...gameWithTeamIds,
+      ...gameWithTeamCoaches,
     });
     if (!game) throw new Error("Game not found");
     if (!game.homeDetails || !game.awayDetails)
       throw new Error("Game does not have two teams");
 
-    // Verify team permissions (user must be on one of the teams or be admin)
-    const teamIds = [game.homeDetails.team.id, game.awayDetails.team.id];
-    // TODO: Add proper permission check here based on session
+    if (!canActOnGame(user, game))
+      throw new Error("You do not have permission to act on this game");
 
     switch (data.action) {
       case "start":
