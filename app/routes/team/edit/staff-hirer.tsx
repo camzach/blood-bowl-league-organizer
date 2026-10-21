@@ -5,7 +5,7 @@ import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notif
 
 type Props = {
   title: string;
-  type: any;
+  type: string;
   current: number;
   cost: number;
   teamId: string;

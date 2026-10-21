@@ -58,7 +58,9 @@ export const action = createValidatedAction(
         });
       } catch (error) {
         console.error("Error removing old song from S3:", error);
-        throw new Error("There was an issue removing the old song");
+        throw new Error("There was an issue removing the old song", {
+          cause: error,
+        });
       }
     }
 
@@ -73,7 +75,9 @@ export const action = createValidatedAction(
       });
     } catch (error) {
       console.error("Error storing new song in S3:", error);
-      throw new Error("There was an issue storing the song.");
+      throw new Error("There was an issue storing the song.", {
+        cause: error,
+      });
     }
 
     // Update database

@@ -737,7 +737,7 @@ async function handleEndGame(
       })
       .where(eq(dbTeam.id, game.awayDetails.teamId));
 
-    const allUpdates: Array<Promise<any>> = [
+    const allUpdates: Array<PromiseLike<unknown>> = [
       ...playerUpdateQueries,
       gameUpdate,
       homeDetailsUpdate,

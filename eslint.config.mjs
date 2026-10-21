@@ -1,17 +1,17 @@
 import drizzle from "eslint-plugin-drizzle";
 import tsParser from "@typescript-eslint/parser";
 import js from "@eslint/js";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const config = defineConfig([
+  globalIgnores(["node_modules/**", "out/**", "build/**", ".react-router/**"]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
   {
-    ignores: ["node_modules/**", "out/**", "build/**"],
-
     settings: {
       react: {
         version: "19",
@@ -20,6 +20,7 @@ const config = defineConfig([
 
     plugins: {
       drizzle,
+      "react-hooks": reactHooks,
     },
 
     languageOptions: {
