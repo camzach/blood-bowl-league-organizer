@@ -1,5 +1,4 @@
 import { redirect } from "react-router";
-import { db } from "~/app/utils/drizzle";
 import { authContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import List from "./list";

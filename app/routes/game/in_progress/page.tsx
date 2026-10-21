@@ -1,15 +1,7 @@
 import { TeamTable } from "~/app/components/team-table";
 import type { ComponentProps } from "react";
 import ScoreWidget from "./score-widget";
-import { redirect } from "react-router";
 import StarPlayerTable from "./star-player-table";
-import {
-  getPlayerStats,
-  getPlayerSkills,
-  getPlayerSppAndTv,
-} from "~/app/utils/get-computed-player-fields";
-import { db } from "~/app/utils/drizzle";
-import { gameDetailsWithFullTeam } from "~/db/query-fragments/game.fragments";
 import { InProgressData } from "../loader";
 
 const cols = [

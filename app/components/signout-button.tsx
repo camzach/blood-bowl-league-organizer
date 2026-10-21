@@ -1,5 +1,5 @@
 import { authClient } from "~/app/utils/auth.client";
-import { Router, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useContext } from "react";
 import { notificationContext } from "./notification-provider";
 
