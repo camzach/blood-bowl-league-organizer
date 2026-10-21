@@ -2,7 +2,6 @@ import { S3 } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
-import { Route } from "./+types/song.action";
 import { db } from "~/app/utils/drizzle";
 import { song as dbSong, team as dbTeam } from "~/db/schema";
 import { eq } from "drizzle-orm";
@@ -25,7 +24,7 @@ const songSchema = z.object({
 
 export const action = createValidatedAction(
   songSchema,
-  async (data, { params }: Route.ActionArgs) => {
+  async (data) => {
     const { teamId, songName, file } = data;
 
     // Permission check handled by team-permission-middleware layout

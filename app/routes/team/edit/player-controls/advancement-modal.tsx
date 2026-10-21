@@ -48,16 +48,9 @@ type Props = {
   };
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
-  onHide: () => void;
   teamId: string;
 };
-export function Popup({
-  player,
-  skills,
-  skillRelations,
-  onHide,
-  teamId,
-}: Props) {
+export function Popup({ player, skills, skillRelations, teamId }: Props) {
   const fetcher = useFetcher();
   const [fallbackSkill, setFallbackSkill] = useState<string | null>(null);
   const [tab, setTab] = useState<SkillCategory | "stat">(

@@ -76,7 +76,6 @@ export function PlayerActions({
               player={player}
               skills={skills}
               skillRelations={skillRelations}
-              onHide={() => setOpen(false)}
               teamId={teamId}
             />
           </div>

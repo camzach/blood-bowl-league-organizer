@@ -12,26 +12,32 @@ import TeamState from "./team-state";
 import { useCallback } from "react";
 
 import { Route } from "./+types/page";
-import { redirect } from "react-router";
+import { data, redirect } from "react-router";
 
-export async function loader() {
+export async function loader({ params }: Route.LoaderArgs) {
+  const team = await db.query.team.findFirst({
+    where: { id: params.teamId },
+    columns: { state: true },
+  });
+  if (!team) throw data({}, { status: 404 });
+  if (team.state === "ready" || team.state === "playing")
+    throw redirect(`/team/${params.teamId}`);
+
   const skills = await db.query.skill.findMany({});
 
   const skillRelations = await db.query.skillRelation.findMany({});
 
-  return { skills, skillRelations };
+  return { skills, skillRelations, state: team.state };
 }
+
+type Player = Route.ComponentProps["matches"][2]["loaderData"]["team"]["players"][number];
 
 export default function EditTeam({
   matches,
   loaderData,
 }: Route.ComponentProps) {
   const { team } = matches[2].loaderData;
-  const { skills, skillRelations } = loaderData;
-
-  const state = team.state;
-  if (state === "ready" || state === "playing")
-    return redirect(`/team/${team.id}`);
+  const { skills, skillRelations, state } = loaderData;
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(
     (n) =>
@@ -53,7 +59,7 @@ export default function EditTeam({
   const currentCaptain = team.players.find((p) => p.isCaptain);
 
   const PlayerActionsComponent = useCallback(
-    (player: typeof team.players[number]) => (
+    (player: Player) => (
       <PlayerActions
         player={player}
         skills={skills}
@@ -68,7 +74,7 @@ export default function EditTeam({
   );
 
   const PlayerNumberSelectorComponent = useCallback(
-    (player: typeof team.players[number]) => (
+    (player: Player) => (
       <PlayerNumberSelector
         id={player.id}
         number={player.number}
@@ -79,7 +85,7 @@ export default function EditTeam({
   );
 
   const PlayerNameEditorComponent = useCallback(
-    (player: typeof team.players[number]) => (
+    (player: Player) => (
       <PlayerNameEditor
         id={player.id}
         name={player.name}

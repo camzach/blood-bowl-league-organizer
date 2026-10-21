@@ -11,6 +11,7 @@ const config = defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
+  reactHooks.configs.flat.recommended,
   {
     settings: {
       react: {
@@ -20,7 +21,6 @@ const config = defineConfig([
 
     plugins: {
       drizzle,
-      "react-hooks": reactHooks,
     },
 
     languageOptions: {

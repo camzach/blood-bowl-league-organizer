@@ -32,7 +32,7 @@ export default function DiscordGuildLinkerPage() {
     resolveGuildName().then((name) => setGuildName({ loading: false, name }));
 
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [sendNotification]);
 
   if (guildName.loading) {
     return "Resolving guild name...";
