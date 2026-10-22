@@ -194,13 +194,17 @@ export default function Button({
               {
                 action: "end-game",
                 gameId,
-                events: JSON.stringify(events),
-                homeMvpNominees: JSON.stringify(homeNominees),
-                awayMvpNominees: JSON.stringify(awayNominees),
-                homeStalled: homeStalled.toString(),
-                awayStalled: awayStalled.toString(),
+                events,
+                homeMvpNominees: homeNominees,
+                awayMvpNominees: awayNominees,
+                homeStalled,
+                awayStalled,
               },
-              { action: `/game/${gameId}/action`, method: "post" }
+              {
+                action: `/game/${gameId}/action`,
+                method: "post",
+                encType: "application/json",
+              },
             );
           }}
         />

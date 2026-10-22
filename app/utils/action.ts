@@ -9,8 +9,13 @@ export function createValidatedAction<
   handler: (data: z.infer<T>, args: Args) => Promise<unknown> | unknown,
 ) {
   return async function action(args: Args) {
-    const formData = await args.request.formData();
-    const result = schema.safeParse(Object.fromEntries(formData));
+    const isJson = args.request.headers
+      .get("content-type")
+      ?.includes("application/json");
+    const body = isJson
+      ? await args.request.json()
+      : Object.fromEntries(await args.request.formData());
+    const result = schema.safeParse(body);
 
     if (!result.success) {
       return routerData(

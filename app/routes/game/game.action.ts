@@ -33,6 +33,13 @@ import {
 } from "~/db/query-fragments/game.fragments";
 import { getPlayerStats } from "~/app/utils/get-computed-player-fields";
 
+const inducementChoices = z.object({
+  stars: z.array(z.string()),
+  inducements: z.array(
+    z.object({ name: z.string(), quantity: z.number().int() }),
+  ),
+});
+
 const actionSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("start"),
@@ -47,31 +54,17 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("purchase-inducements"),
     gameId: z.string(),
-    home: z.string().transform((val) => JSON.parse(val) as {
-      stars: string[];
-      inducements: Array<{ name: string; quantity: number }>;
-    }),
-    away: z.string().transform((val) => JSON.parse(val) as {
-      stars: string[];
-      inducements: Array<{ name: string; quantity: number }>;
-    }),
+    home: inducementChoices,
+    away: inducementChoices,
   }),
   z.object({
     action: z.literal("end-game"),
     gameId: z.string(),
-    events: z.string().transform((val) => JSON.parse(val) as z.infer<typeof gameEvent>[]),
-    homeMvpNominees: z.string().transform((val) => {
-      const parsed = JSON.parse(val) as string[];
-      if (parsed.length !== 6) throw new Error("Must have exactly 6 MVP nominees");
-      return parsed;
-    }),
-    awayMvpNominees: z.string().transform((val) => {
-      const parsed = JSON.parse(val) as string[];
-      if (parsed.length !== 6) throw new Error("Must have exactly 6 MVP nominees");
-      return parsed;
-    }),
-    homeStalled: z.string().transform((val) => val === "true"),
-    awayStalled: z.string().transform((val) => val === "true"),
+    events: z.array(gameEvent),
+    homeMvpNominees: z.array(z.string()).length(6),
+    awayMvpNominees: z.array(z.string()).length(6),
+    homeStalled: z.boolean(),
+    awayStalled: z.boolean(),
   }),
 ]);
 

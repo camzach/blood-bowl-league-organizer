@@ -75,20 +75,24 @@ export default function Content(props: Props) {
       {
         action: "purchase-inducements",
         gameId: props.gameId,
-        home: JSON.stringify({
+        home: {
           stars: homeChoices.stars,
           inducements: Object.entries(homeChoices.inducements).map(
             ([name, quantity]) => ({ name, quantity }),
           ),
-        }),
-        away: JSON.stringify({
+        },
+        away: {
           stars: awayChoices.stars,
           inducements: Object.entries(awayChoices.inducements).map(
             ([name, quantity]) => ({ name, quantity }),
           ),
-        }),
+        },
       },
-      { action: `/game/${props.gameId}/action`, method: "post" },
+      {
+        action: `/game/${props.gameId}/action`,
+        method: "post",
+        encType: "application/json",
+      },
     );
   };
 

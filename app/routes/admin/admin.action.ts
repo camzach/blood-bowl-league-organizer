@@ -29,7 +29,7 @@ const adminActionSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("reschedule"),
-    games: z.string().transform((val) => JSON.parse(val) as Array<{ id: string; time: string }>),
+    games: z.array(z.object({ id: z.string(), time: z.string() })),
   }),
   z.object({
     action: z.literal("seed-bracket"),

@@ -61,11 +61,12 @@ export default function ScheduleEditor(props: Props) {
             .filter((g): g is typeof g & { newTime: Date } => !!g.newTime)
             .map((g) => ({ id: g.id, time: g.newTime.toISOString() }));
           fetcher.submit(
-            { 
-              action: "reschedule",
-              games: JSON.stringify(modifiedGames)
+            { action: "reschedule", games: modifiedGames },
+            {
+              action: "/admin/action",
+              method: "post",
+              encType: "application/json",
             },
-            { action: "/admin/action", method: "post" }
           );
         }}
       >
