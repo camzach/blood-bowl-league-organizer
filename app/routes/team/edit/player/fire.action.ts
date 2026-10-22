@@ -4,6 +4,7 @@ import { Route } from "./+types/fire.action";
 import { db } from "~/app/utils/drizzle";
 import { player as dbPlayer, team as dbTeam } from "~/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { canFirePlayer } from "~/app/utils/can-fire-player";
 
 const fireSchema = z.object({});
 
@@ -53,7 +54,31 @@ async function firePlayer(playerId: string) {
       }
     }
 
-    if (player.team.state === "draft") {
+    await tx
+      .select({ id: dbTeam.id })
+      .from(dbTeam)
+      .where(eq(dbTeam.id, player.team.id))
+      .for("update");
+
+    const team = await tx.query.team.findFirst({
+      where: { id: player.team.id },
+      columns: { state: true },
+      with: {
+        players: {
+          columns: { id: true, membershipType: true, missNextGame: true },
+        },
+      },
+    });
+    if (!team) throw new Error("Team not found");
+
+    if (team.state !== "draft" && team.state !== "hiring")
+      throw new Error("Team not in hiring state");
+    if (!canFirePlayer(team.state, team.players, playerId))
+      throw new Error(
+        "A team must keep at least 11 players eligible for the next game",
+      );
+
+    if (team.state === "draft") {
       await Promise.all([
         tx.delete(dbPlayer).where(eq(dbPlayer.id, playerId)),
         tx
@@ -63,7 +88,7 @@ async function firePlayer(playerId: string) {
           })
           .where(eq(dbTeam.id, player.team.id)),
       ]);
-    } else if (player.team.state === "hiring") {
+    } else {
       await tx
         .update(dbPlayer)
         .set({
@@ -71,8 +96,6 @@ async function firePlayer(playerId: string) {
           membershipType: null,
         })
         .where(eq(dbPlayer.id, playerId));
-    } else {
-      throw new Error("Team not in hiring state");
     }
 
     return { success: true };

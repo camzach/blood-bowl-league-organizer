@@ -4,9 +4,10 @@ import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notif
 type Props = {
   id: string;
   teamId: string;
+  disabled: boolean;
 };
 
-export default function PlayerFirer({ id, teamId }: Props) {
+export default function PlayerFirer({ id, teamId, disabled }: Props) {
   const fetcher = useFetcher();
   
   useFetcherErrorNotification(fetcher);
@@ -18,6 +19,12 @@ export default function PlayerFirer({ id, teamId }: Props) {
   return (
     <button
       className="btn btn-outline btn-secondary btn-sm"
+      disabled={disabled}
+      title={
+        disabled
+          ? "A team must keep at least 11 players eligible for the next game"
+          : undefined
+      }
       onClick={() => {
         console.log("Sus");
         fetcher.submit(

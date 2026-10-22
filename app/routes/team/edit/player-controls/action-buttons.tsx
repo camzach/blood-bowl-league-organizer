@@ -16,6 +16,7 @@ type Props = {
   hasCaptainRule: boolean;
   currentCaptainId: string | undefined;
   teamId: string;
+  canFire: (playerId: string) => boolean;
 };
 
 export function PlayerActions({
@@ -26,6 +27,7 @@ export function PlayerActions({
   hasCaptainRule,
   currentCaptainId,
   teamId,
+  canFire,
 }: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
@@ -58,7 +60,11 @@ export function PlayerActions({
                 teamId={teamId}
               />
             ))}
-          <FireButton id={player.id} teamId={teamId} />
+          <FireButton
+            id={player.id}
+            teamId={teamId}
+            disabled={!canFire(player.id)}
+          />
         </>
       )}
       {hasCaptainRule &&

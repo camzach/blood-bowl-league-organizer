@@ -14,6 +14,7 @@ type Props = {
   skillRelations: Array<typeof skillRelation.$inferSelect>;
   state: "draft" | "hiring" | "improving";
   teamId: string;
+  canFire: (playerId: string) => boolean;
 };
 export function HireablePlayerManager({
   skills,
@@ -22,6 +23,7 @@ export function HireablePlayerManager({
   players,
   freeNumbers,
   teamId,
+  canFire,
 }: Props) {
   const [numbers, setNumbers] = useState(
     Object.fromEntries(
@@ -90,6 +92,7 @@ export function HireablePlayerManager({
           hasCaptainRule={false}
           currentCaptainId={undefined}
           teamId={teamId}
+          canFire={canFire}
         />
       ),
     },

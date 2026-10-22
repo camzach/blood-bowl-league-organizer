@@ -2,6 +2,7 @@ import { HireablePlayerManager } from "./hireable-player-manager";
 import { PlayerHirer } from "./player-hirer";
 import StaffHirer from "./staff-hirer";
 import calculateTV from "~/app/utils/calculate-tv";
+import { canFirePlayer } from "~/app/utils/can-fire-player";
 import SongControls from "../view/touchdown-song-controls";
 import { TeamTable } from "~/app/components/team-table";
 import { PlayerActions } from "./player-controls/action-buttons";
@@ -58,6 +59,11 @@ export default function EditTeam({
 
   const currentCaptain = team.players.find((p) => p.isCaptain);
 
+  const canFire = useCallback(
+    (playerId: string) => canFirePlayer(team.state, team.players, playerId),
+    [team.state, team.players],
+  );
+
   const PlayerActionsComponent = useCallback(
     (player: Player) => (
       <PlayerActions
@@ -68,9 +74,18 @@ export default function EditTeam({
         hasCaptainRule={hasCaptainRule}
         currentCaptainId={currentCaptain?.id}
         teamId={team.id}
+        canFire={canFire}
       />
     ),
-    [skills, state, skillRelations, hasCaptainRule, currentCaptain?.id, team.id],
+    [
+      skills,
+      state,
+      skillRelations,
+      hasCaptainRule,
+      currentCaptain?.id,
+      team.id,
+      canFire,
+    ],
   );
 
   const PlayerNumberSelectorComponent = useCallback(
@@ -191,6 +206,7 @@ export default function EditTeam({
           skillRelations={skillRelations}
           state={state}
           teamId={team.id}
+          canFire={canFire}
         />
       )}
       <table>
