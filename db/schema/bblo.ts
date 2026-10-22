@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  check,
   integer,
   pgEnum,
   pgTable,
@@ -90,7 +91,9 @@ export const team = pgTable(
   {
     id: varchar("id", { length: 25 }).notNull().primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
-    leagueId: text("league_id").references(() => league.id),
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id),
     treasury: integer("treasury").notNull().default(1_000_000),
     state: teamState("state").notNull().default("draft"),
     rosterName: varchar("roster_name", { length: 255 })
@@ -139,17 +142,17 @@ export const player = pgTable(
     positionId: varchar("position_id", { length: 25 })
       .notNull()
       .references(() => position.id),
-    // The following two fields should be either BOTH null, or BOTH not null
-    // integer player_team_membership_nullity CHECK
-    //   ((team_id IS NULL AND membership_type IS NULL) OR
-    //    (team_id IS NOT NULL AND membership_type IS NOT NULL))
-    teamId: varchar("team_id", { length: 255 }).references(() => team.id),
+    teamId: varchar("team_id", { length: 25 }).references(() => team.id),
     membershipType: membershipType("membership_type"),
   },
   (table) => [
     uniqueIndex()
       .on(table.teamId)
       .where(sql`${table.isCaptain} = true`),
+    check(
+      "player_team_membership_nullity",
+      sql`(${table.teamId} IS NULL) = (${table.membershipType} IS NULL)`,
+    ),
   ],
 );
 
@@ -157,7 +160,7 @@ export const improvement = pgTable(
   "improvement",
   {
     type: improvementType("type").notNull(),
-    playerId: varchar("player_id", { length: 255 })
+    playerId: varchar("player_id", { length: 25 })
       .notNull()
       .references(() => player.id),
     order: integer("order").notNull(),
@@ -171,7 +174,7 @@ export const improvement = pgTable(
 );
 
 export const pendingRandomSkill = pgTable("pending_random_skill", {
-  playerId: varchar("player_id", { length: 255 })
+  playerId: varchar("player_id", { length: 25 })
     .notNull()
     .primaryKey()
     .references(() => player.id),
@@ -185,7 +188,7 @@ export const pendingRandomSkill = pgTable("pending_random_skill", {
 });
 
 export const pendingRandomStat = pgTable("pending_random_stat", {
-  playerId: varchar("player_id", { length: 255 })
+  playerId: varchar("player_id", { length: 25 })
     .notNull()
     .primaryKey()
     .references(() => player.id),
@@ -203,7 +206,7 @@ export const coachToTeam = pgTable(
     coachId: varchar("coach_id", { length: 255 })
       .notNull()
       .references(() => user.id),
-    teamId: varchar("team_id", { length: 255 })
+    teamId: varchar("team_id", { length: 25 })
       .notNull()
       .references(() => team.id),
   },
@@ -258,7 +261,7 @@ export const rosterSlot = pgTable(
     rosterName: varchar("roster_name", { length: 255 })
       .notNull()
       .references(() => roster.name),
-    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    id: varchar("id", { length: 25 }).notNull().primaryKey(),
     max: integer("max").notNull(),
   },
   (table) => ({
@@ -267,7 +270,7 @@ export const rosterSlot = pgTable(
 );
 
 export const position = pgTable("position", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  id: varchar("id", { length: 25 }).notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   cost: integer("cost").notNull(),
   ma: integer("ma").notNull(),
@@ -277,7 +280,7 @@ export const position = pgTable("position", {
   av: integer("av").notNull(),
   primary: skillCategorySet("primary").notNull(),
   secondary: skillCategorySet("secondary").notNull(),
-  rosterSlotId: varchar("roster_slot_id", { length: 255 })
+  rosterSlotId: varchar("roster_slot_id", { length: 25 })
     .notNull()
     .references(() => rosterSlot.id),
 });
@@ -325,12 +328,15 @@ export const skillRelation = pgTable(
     pk: primaryKey({
       columns: [table.skillNameA, table.skillNameB, table.type],
     }),
-    orderCheck: sql`("type" != 'conflicts') OR ("skill_name_a" < "skill_name_b")`,
+    orderCheck: check(
+      "skill_relation_conflicts_ordered",
+      sql`${table.type} != 'conflicts' OR ${table.skillNameA} < ${table.skillNameB}`,
+    ),
   }),
 );
 
 export const faq = pgTable("faq", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  id: varchar("id", { length: 25 }).notNull().primaryKey(),
   q: text("q").notNull(),
   a: text("a").notNull(),
 });
@@ -341,7 +347,7 @@ export const faqToSkill = pgTable(
     skillName: varchar("skill_name", { length: 255 })
       .notNull()
       .references(() => skill.name),
-    faqId: varchar("faq_id", { length: 255 })
+    faqId: varchar("faq_id", { length: 25 })
       .notNull()
       .references(() => faq.id),
   },
@@ -351,12 +357,12 @@ export const faqToSkill = pgTable(
 );
 
 export const game = pgTable("game", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  id: varchar("id", { length: 25 }).notNull().primaryKey(),
   state: gameState("state").notNull().default("scheduled"),
-  awayDetailsId: varchar("away_details_id", { length: 255 })
+  awayDetailsId: varchar("away_details_id", { length: 25 })
     .unique()
     .references(() => gameDetails.id),
-  homeDetailsId: varchar("home_details_id", { length: 255 })
+  homeDetailsId: varchar("home_details_id", { length: 25 })
     .unique()
     .references(() => gameDetails.id),
   weather: weather("weather"),
@@ -365,8 +371,8 @@ export const game = pgTable("game", {
 });
 
 export const gameDetails = pgTable("game_details", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  teamId: varchar("team_id", { length: 255 })
+  id: varchar("id", { length: 25 }).notNull().primaryKey(),
+  teamId: varchar("team_id", { length: 25 })
     .notNull()
     .references(() => team.id),
   touchdowns: integer("touchdowns").notNull().default(0),
@@ -374,7 +380,7 @@ export const gameDetails = pgTable("game_details", {
   pettyCashAwarded: integer("petty_cash_awarded").notNull().default(0),
   journeymenRequired: integer("journeymen_required"),
   fanFactor: integer("fan_factor").notNull().default(0),
-  mvpId: varchar("mvp_id", { length: 255 }).references(() => player.id),
+  mvpId: varchar("mvp_id", { length: 25 }).references(() => player.id),
 });
 
 export const season = pgTable(
@@ -395,11 +401,11 @@ export const season = pgTable(
 );
 
 export const roundRobinGame = pgTable("round_robin_game", {
-  gameId: varchar("game_id", { length: 255 })
+  gameId: varchar("game_id", { length: 25 })
     .notNull()
     .primaryKey()
     .references(() => game.id),
-  seasonId: varchar("season_id", { length: 255 })
+  seasonId: varchar("season_id", { length: 25 })
     .notNull()
     .references(() => season.id),
   round: integer("round").notNull(),
@@ -408,12 +414,12 @@ export const roundRobinGame = pgTable("round_robin_game", {
 export const bracketGame = pgTable(
   "bracket_game",
   {
-    seasonId: varchar("season_id", { length: 255 })
+    seasonId: varchar("season_id", { length: 25 })
       .notNull()
       .references(() => season.id),
     round: integer("round").notNull(),
     seed: integer("seed").notNull(),
-    gameId: varchar("game_id", { length: 255 })
+    gameId: varchar("game_id", { length: 25 })
       .notNull()
       .primaryKey()
       .references(() => game.id),
@@ -427,26 +433,31 @@ export const bracketGame = pgTable(
   }),
 );
 
-export const inducement = pgTable("inducement", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  max: integer("max").notNull(),
-  price: integer("price"),
-  // The following two fields should be either BOTH null, or BOTH not null
-  // integer player_team_membership_nullity CHECK
-  //   ((special_price IS NULL AND special_price_rule IS NULL) OR
-  //    (special_price IS NOT NULL AND special_price_rule IS NOT NULL))
-  specialPrice: integer("special_price"),
-  specialPriceRuleName: varchar("special_price_rule_name", {
-    length: 255,
-  }).references(() => specialRule.name),
-  specialPriceRosterName: text("special_price_roster_name").references(
-    () => roster.name,
-  ),
-  specialMax: integer("special_max"),
-  specialMaxRuleName: text("special_max_rule_name").references(
-    () => specialRule.name,
-  ),
-});
+export const inducement = pgTable(
+  "inducement",
+  {
+    name: varchar("name", { length: 255 }).notNull().primaryKey(),
+    max: integer("max").notNull(),
+    price: integer("price"),
+    specialPrice: integer("special_price"),
+    specialPriceRuleName: varchar("special_price_rule_name", {
+      length: 255,
+    }).references(() => specialRule.name),
+    specialPriceRosterName: text("special_price_roster_name").references(
+      () => roster.name,
+    ),
+    specialMax: integer("special_max"),
+    specialMaxRuleName: text("special_max_rule_name").references(
+      () => specialRule.name,
+    ),
+  },
+  (table) => [
+    check(
+      "inducement_special_price_condition",
+      sql`(${table.specialPrice} IS NULL) = (${table.specialPriceRuleName} IS NULL AND ${table.specialPriceRosterName} IS NULL)`,
+    ),
+  ],
+);
 
 export const starPlayer = pgTable(
   "star_player",
@@ -502,7 +513,7 @@ export const specialRuleToStarPlayer = pgTable(
 export const gameDetailsToStarPlayer = pgTable(
   "game_details_to_star_player",
   {
-    gameDetailsId: varchar("game_details_id", { length: 255 })
+    gameDetailsId: varchar("game_details_id", { length: 25 })
       .notNull()
       .references(() => gameDetails.id),
     starPlayerName: varchar("star_player_name", { length: 255 })
@@ -517,7 +528,7 @@ export const gameDetailsToStarPlayer = pgTable(
 export const gameDetailsToInducement = pgTable(
   "game_details_to_inducement",
   {
-    gameDetailsId: varchar("game_details_id", { length: 255 })
+    gameDetailsId: varchar("game_details_id", { length: 25 })
       .notNull()
       .references(() => gameDetails.id),
     inducementName: varchar("inducement_name", { length: 255 })
