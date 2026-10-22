@@ -10,7 +10,6 @@ export function createValidatedAction<
 ) {
   return async function action(args: Args) {
     const formData = await args.request.formData();
-    console.log(formData);
     const result = schema.safeParse(Object.fromEntries(formData));
 
     if (!result.success) {
