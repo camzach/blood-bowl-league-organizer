@@ -92,20 +92,22 @@ async function ready(teamId: string) {
     });
     if (!team) throw new Error("Team not found");
 
-    const insignificantPlayers = team.players.filter((p) =>
-      p.position.skills.some((s) => s.name === "Insignificant"),
-    ).length;
-
-    if (insignificantPlayers > team.players.length / 2) {
-      throw new Error(
-        "You may not have more players with Insignificant than without",
-      );
-    }
-
     if (team.state !== "draft" && team.state !== "hiring")
       throw new Error("Team not in Draft or Hiring state");
-    if (team.state === "draft" && team.players.length < 11)
-      throw new Error("11 players required to draft a team");
+
+    if (team.state === "draft") {
+      if (team.players.length < 11)
+        throw new Error("11 players required to draft a team");
+
+      const insignificantPlayers = team.players.filter((p) =>
+        p.position.skills.some((s) => s.name === "Insignificant"),
+      ).length;
+      if (insignificantPlayers > team.players.length / 2) {
+        throw new Error(
+          "You may not have more players with Insignificant than without",
+        );
+      }
+    }
 
     const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
       "Crisis Averted": () => 0,
