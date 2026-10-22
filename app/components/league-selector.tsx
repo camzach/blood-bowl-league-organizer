@@ -1,4 +1,7 @@
-import { Link } from "react-router";
+import { useContext } from "react";
+import { Link, useRevalidator } from "react-router";
+import { authClient } from "~/app/utils/auth.client";
+import { notificationContext } from "./notification-provider";
 
 interface LeagueSelectorProps {
   leagues: Array<{ id: string; name: string }>;
@@ -11,11 +14,23 @@ export default function LeagueSelector({
   activeLeagueName,
   activeLeagueId,
 }: LeagueSelectorProps) {
+  const revalidator = useRevalidator();
+  const sendNotification = useContext(notificationContext);
+
   const handleLeagueChange = async (leagueId: string) => {
-    // if (leagueId === activeLeagueId) return;
-    //
-    // await authClient.organization.setActive({ organizationId: leagueId });
-    // router.refresh();
+    if (leagueId === activeLeagueId) return;
+
+    const { error } = await authClient.organization.setActive({
+      organizationId: leagueId,
+    });
+    if (error) {
+      sendNotification({
+        text: error.message ?? "Failed to switch leagues",
+        time: 5000,
+      });
+      return;
+    }
+    await revalidator.revalidate();
   };
 
   return (
