@@ -12,7 +12,7 @@ export function canFirePlayer(
   playerId: string,
 ) {
   if (teamState === "draft") return true;
-  if (teamState !== "hiring") return false;
+  if (teamState !== "firing") return false;
 
   const player = players.find((p) => p.id === playerId);
   if (!player || player.membershipType !== "player") return true;

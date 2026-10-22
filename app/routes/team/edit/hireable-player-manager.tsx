@@ -12,7 +12,7 @@ type Props = {
   freeNumbers: number[];
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
-  state: "draft" | "hiring" | "improving";
+  state: "draft" | "hiring" | "firing" | "improving";
   teamId: string;
   canFire: (playerId: string) => boolean;
 };

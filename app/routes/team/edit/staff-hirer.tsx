@@ -12,7 +12,8 @@ type Props = {
   min?: number;
   max: number;
   treasury: number;
-  disabled?: boolean;
+  canHire: boolean;
+  canFire: boolean;
 };
 
 export default function StaffHirer({
@@ -24,7 +25,8 @@ export default function StaffHirer({
   min = 0,
   max,
   treasury,
-  disabled = false,
+  canHire,
+  canFire,
 }: Props) {
   const fetcher = useFetcher();
   
@@ -32,7 +34,10 @@ export default function StaffHirer({
   
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more
-  const inputMax = Math.min(max, Math.floor(treasury / cost) + current);
+  const inputMax = canHire
+    ? Math.min(max, Math.floor(treasury / cost) + current)
+    : current;
+  const inputMin = canFire ? min : current;
 
   const hireStaff = (val: number): void => {
     if (val > current) {
@@ -56,10 +61,10 @@ export default function StaffHirer({
     <>
       {max > 1 ? (
     <NumberInput
-      disabled={disabled}
+      disabled={!canHire && !canFire}
       value={current}
       label={title}
-      min={min}
+      min={inputMin}
       max={inputMax}
       onChange={hireStaff}
     />
@@ -68,7 +73,9 @@ export default function StaffHirer({
       type="checkbox"
       className="checkbox"
       checked={current > 0}
-      disabled={disabled || (current === 0 && treasury < cost)}
+      disabled={
+        current > 0 ? !canFire : !canHire || treasury < cost
+      }
       onChange={(e): void => {
         hireStaff(Number(e.target.checked));
       }}

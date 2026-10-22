@@ -1,0 +1,1 @@
+ALTER TYPE "team_state" ADD VALUE 'firing' BEFORE 'improving';

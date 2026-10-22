@@ -59,7 +59,7 @@ async function updatePlayerInfo(
     if (player.team === null || player.membershipType !== "player")
       throw new Error("Player is not on any team");
 
-    if (!["hiring", "improving", "draft"].includes(player.team.state))
+    if (!["hiring", "firing", "improving", "draft"].includes(player.team.state))
       throw new Error("Team is not modifiable at this time");
 
     const otherPlayer =

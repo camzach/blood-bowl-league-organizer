@@ -12,7 +12,7 @@ type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
-  state: "hiring" | "improving" | "draft";
+  state: "hiring" | "firing" | "improving" | "draft";
   hasCaptainRule: boolean;
   currentCaptainId: string | undefined;
   teamId: string;
@@ -60,11 +60,13 @@ export function PlayerActions({
                 teamId={teamId}
               />
             ))}
-          <FireButton
-            id={player.id}
-            teamId={teamId}
-            disabled={!canFire(player.id)}
-          />
+          {(state === "draft" || state === "firing") && (
+            <FireButton
+              id={player.id}
+              teamId={teamId}
+              disabled={!canFire(player.id)}
+            />
+          )}
         </>
       )}
       {hasCaptainRule &&

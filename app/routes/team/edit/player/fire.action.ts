@@ -71,8 +71,8 @@ async function firePlayer(playerId: string) {
     });
     if (!team) throw new Error("Team not found");
 
-    if (team.state !== "draft" && team.state !== "hiring")
-      throw new Error("Team not in hiring state");
+    if (team.state !== "draft" && team.state !== "firing")
+      throw new Error("Team not in firing state");
     if (!canFirePlayer(team.state, team.players, playerId))
       throw new Error(
         "A team must keep at least 11 players eligible for the next game",

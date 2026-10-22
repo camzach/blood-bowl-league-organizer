@@ -194,7 +194,7 @@ async function fireStaff(
 
     if (!updatedTeam) throw new Error("Failed to select team after update");
 
-    if (updatedTeam.state !== "draft" && updatedTeam.state !== "hiring")
+    if (updatedTeam.state !== "draft" && updatedTeam.state !== "firing")
       throw new Error("Team cannot fire staff right now");
     if (Number(updatedTeam[input.type as keyof typeof updatedTeam]) < 0)
       throw new Error("Not enough staff to fire");

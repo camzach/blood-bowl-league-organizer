@@ -14,6 +14,7 @@ export default function Component({ matches }: Route.ComponentProps) {
         {isEditable &&
           (team.state === "draft" ||
             team.state === "hiring" ||
+            team.state === "firing" ||
             team.state === "improving") && <EditButton teamId={team.id} />}
       </h1>
       <div className="my-4 flex flex-col text-lg">

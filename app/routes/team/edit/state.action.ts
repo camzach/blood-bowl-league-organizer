@@ -10,6 +10,9 @@ const stateSchema = z.discriminatedUnion("action", [
     action: z.literal("done-improving"),
   }),
   z.object({
+    action: z.literal("done-hiring"),
+  }),
+  z.object({
     action: z.literal("ready"),
   }),
 ]);
@@ -24,6 +27,8 @@ export const action = createValidatedAction(
     // Route to appropriate handler
     if (data.action === "done-improving") {
       return doneImproving(teamId);
+    } else if (data.action === "done-hiring") {
+      return doneHiring(teamId);
     } else {
       return ready(teamId);
     }
@@ -68,6 +73,19 @@ async function doneImproving(teamId: string) {
   });
 }
 
+async function doneHiring(teamId: string) {
+  return db.transaction(async (tx) => {
+    const [team] = await tx
+      .update(dbTeam)
+      .set({ state: "firing" })
+      .where(and(eq(dbTeam.id, teamId), eq(dbTeam.state, "hiring")))
+      .returning({ id: dbTeam.id });
+    if (!team) throw new Error("Team not in Hiring state");
+
+    return { success: true };
+  });
+}
+
 async function ready(teamId: string) {
   return db.transaction(async (tx) => {
     const team = await tx.query.team.findFirst({
@@ -92,8 +110,8 @@ async function ready(teamId: string) {
     });
     if (!team) throw new Error("Team not found");
 
-    if (team.state !== "draft" && team.state !== "hiring")
-      throw new Error("Team not in Draft or Hiring state");
+    if (team.state !== "draft" && team.state !== "firing")
+      throw new Error("Team not in Draft or Firing state");
 
     if (team.state === "draft") {
       if (team.players.length < 11)

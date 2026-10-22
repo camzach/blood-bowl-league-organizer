@@ -110,11 +110,15 @@ export default function EditTeam({
     [team.id],
   );
 
+  const canHire = state === "draft" || state === "hiring";
+  const canFireStaff = state === "draft" || state === "firing";
+
   return (
     <>
       <h1 className="text-4xl">{team.name}</h1>
       {(team.state === "draft" ||
         team.state === "hiring" ||
+        team.state === "firing" ||
         team.state === "improving") && (
         <TeamState
           state={team.state}
@@ -150,6 +154,8 @@ export default function EditTeam({
           treasury={team.treasury}
           min={1}
           max={6}
+          canHire={canHire}
+          canFire={canFireStaff}
         />
       ) : (
         team.dedicatedFans
@@ -184,7 +190,7 @@ export default function EditTeam({
       />
       <div className="my-2">
         <PlayerHirer
-          disabled={state !== "hiring" && state !== "draft"}
+          disabled={!canHire}
           positions={team.roster.rosterSlots
             .filter(
               (slot) =>
@@ -198,7 +204,7 @@ export default function EditTeam({
           teamId={team.id}
         />
       </div>
-      {hirablePlayers.length > 0 && (
+      {canHire && hirablePlayers.length > 0 && (
         <HireablePlayerManager
           players={hirablePlayers}
           freeNumbers={freeNumbers}
@@ -227,7 +233,8 @@ export default function EditTeam({
             </td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring" && state !== "draft"}
+                canHire={canHire}
+                canFire={canFireStaff}
                 teamId={team.id}
                 type={"rerolls"}
                 title={"Rerolls"}
@@ -248,7 +255,8 @@ export default function EditTeam({
             <td>10,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring" && state !== "draft"}
+                canHire={canHire}
+                canFire={canFireStaff}
                 teamId={team.id}
                 type={"assistantCoaches"}
                 title={"Assistant Coaches"}
@@ -265,7 +273,8 @@ export default function EditTeam({
             <td>10,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring" && state !== "draft"}
+                canHire={canHire}
+                canFire={canFireStaff}
                 teamId={team.id}
                 type={"cheerleaders"}
                 title={"Cheerleaders"}
@@ -282,7 +291,8 @@ export default function EditTeam({
             <td>50,000</td>
             <td>
               <StaffHirer
-                disabled={team.state !== "hiring" && state !== "draft"}
+                canHire={canHire}
+                canFire={canFireStaff}
                 teamId={team.id}
                 type={"apothecary"}
                 title={"Apothecary"}

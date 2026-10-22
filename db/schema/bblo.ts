@@ -21,6 +21,7 @@ export const teamStates = [
   "ready",
   "playing",
   "hiring",
+  "firing",
   "improving",
 ] as const;
 export const teamState = pgEnum("team_state", teamStates);
