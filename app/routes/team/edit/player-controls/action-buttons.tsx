@@ -52,14 +52,14 @@ export function PlayerActions({
         </button>
       ) : (
         <>
-          {player.membershipType === "journeyman" ||
-            (player.membershipType === "retired" && (
-              <HireButton
-                player={player.id}
-                number={player.number}
-                teamId={teamId}
-              />
-            ))}
+          {(player.membershipType === "journeyman" ||
+            player.membershipType === "retired") && (
+            <HireButton
+              player={player.id}
+              number={player.number}
+              teamId={teamId}
+            />
+          )}
           {(state === "draft" || state === "firing") && (
             <FireButton
               id={player.id}
