@@ -9,7 +9,7 @@ import {
   player as dbPlayer,
   improvement,
 } from "~/db/schema";
-import { and, eq, getColumns, sql } from "drizzle-orm";
+import { and, eq, getColumns, ne, sql } from "drizzle-orm";
 import nanoid from "~/app/utils/nanoid";
 import { getPlayerSppAndTv } from "~/app/utils/get-computed-player-fields";
 import { playerForTvCalculation } from "~/db/query-fragments/player.fragments";
@@ -137,6 +137,8 @@ async function hireExistingPlayer(
     });
     if (!player) throw new Error("Player not found");
     if (!player.team) throw new Error("Player not available for any team");
+    if (player.team.id !== teamId)
+      throw new Error("Player does not belong to this team");
 
     const { teamValue } = getPlayerSppAndTv(player);
     const cost = teamValue + player.seasonsPlayed * 20_000;
@@ -149,30 +151,32 @@ async function hireExistingPlayer(
     });
     if (!oldTeam) throw new Error("Team not found");
 
-    await Promise.all([
-      tx
-        .update(dbTeam)
-        .set({
-          treasury: sql`${dbTeam.treasury} - ${cost}`,
-        })
-        .where(eq(dbTeam.id, player.team.id)),
-      tx
-        .update(dbPlayer)
-        .set({ membershipType: "player", number: input.number })
-        .where(eq(dbPlayer.id, player.id)),
-      tx
-        .delete(improvement)
-        .where(
-          and(
-            eq(improvement.playerId, player.id),
-            eq(improvement.skillName, "Loner (4+)"),
-          ),
+    const hired = await tx
+      .update(dbPlayer)
+      .set({ membershipType: "player", number: input.number })
+      .where(
+        and(eq(dbPlayer.id, player.id), ne(dbPlayer.membershipType, "player")),
+      )
+      .returning({ id: dbPlayer.id });
+    if (hired.length === 0) throw new Error("Player already hired");
+
+    await tx
+      .update(dbTeam)
+      .set({ treasury: sql`${dbTeam.treasury} - ${cost}` })
+      .where(eq(dbTeam.id, teamId));
+
+    await tx
+      .delete(improvement)
+      .where(
+        and(
+          eq(improvement.playerId, player.id),
+          eq(improvement.skillName, "Loner (4+)"),
         ),
-    ]);
+      );
 
     const updatedTeam = await tx.query.team.findFirst({
-      where: { id: player.team.id },
-      columns: { treasury: true },
+      where: { id: teamId },
+      columns: { treasury: true, state: true },
       with: {
         players: {
           where: { membershipType: "player" },
@@ -182,6 +186,8 @@ async function hireExistingPlayer(
     });
     if (!updatedTeam) throw new Error("Failed to select after update");
 
+    if (updatedTeam.state !== "draft" && updatedTeam.state !== "hiring")
+      throw new Error("Team cannot hire new players right now");
     if (updatedTeam.players.length > 16)
       throw new Error("Team cannot hire any more players");
     if (
