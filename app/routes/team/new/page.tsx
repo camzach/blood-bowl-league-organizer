@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { coachToTeam, team } from "~/db/schema";
 import { getColumns, eq, and } from "drizzle-orm";
 import { db } from "~/app/utils/drizzle";
 import RosterSelector from "./roster-selector";
 import { Route } from "./+types/page";
 import { authContext } from "~/app/primary-layout";
-import { Form } from "react-router";
+import { Form, Link } from "react-router";
 
 export async function loader({ context }: Route.LoaderArgs) {
   const { user } = context.get(authContext)!;
@@ -21,11 +22,12 @@ export async function loader({ context }: Route.LoaderArgs) {
     orderBy: { tier: "asc", name: "asc" },
   });
 
-  return { user, teams, rosters };
+  return { teams, rosters };
 }
 
 export default function Component({ loaderData }: Route.ComponentProps) {
-  const { user, teams, rosters } = loaderData;
+  const { teams, rosters } = loaderData;
+  const [redraftTeamId, setRedraftTeamId] = useState(teams[0]?.id ?? "");
   return (
     <>
       <p>You do not have a team yet!</p>
@@ -49,24 +51,22 @@ export default function Component({ loaderData }: Route.ComponentProps) {
       {teams.length > 0 && (
         <>
           <div className="divider">OR</div>
-          <form
-            action={async (data) => {
-              // "use server";
-              // redraftTeam(data);
-            }}
-          >
-            <input hidden readOnly value={user.id} name="userId" />
-            <span className="join">
-              <button className="btn join-item">Redraft an exiting team</button>
-              <select className="join-item select select-accent" name="teamId">
-                {teams.map(({ id, name, rosterName }) => (
-                  <option key={name} value={id}>
-                    {name} - {rosterName}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </form>
+          <span className="join">
+            <Link className="btn join-item" to={`/team/${redraftTeamId}/edit`}>
+              Redraft an existing team
+            </Link>
+            <select
+              className="join-item select select-accent"
+              value={redraftTeamId}
+              onChange={(e) => setRedraftTeamId(e.target.value)}
+            >
+              {teams.map(({ id, name, rosterName }) => (
+                <option key={id} value={id}>
+                  {name} - {rosterName}
+                </option>
+              ))}
+            </select>
+          </span>
         </>
       )}
     </>

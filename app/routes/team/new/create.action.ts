@@ -49,22 +49,3 @@ export const action = createValidatedAction(
     throw redirect("/team/" + teamId);
   },
 );
-
-// export const redraftTeam = action
-//   .inputSchema(z.instanceof(FormData))
-//   .action(async ({ parsedInput: input }) => {
-//     const inputObject = Object.fromEntries(input.entries());
-//     const { teamId, userId } = z
-//       .object({
-//         teamId: z.string(),
-//         userId: z.string(),
-//       })
-//       .parse(inputObject);
-//
-//     await db.insert(coachToTeam).values({
-//       coachId: userId,
-//       teamId,
-//     });
-//
-//     redirect(`/team/${teamId}/edit`);
-//   });
