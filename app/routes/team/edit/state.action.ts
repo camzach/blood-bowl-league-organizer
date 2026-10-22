@@ -56,9 +56,7 @@ async function doneImproving(teamId: string) {
     if (team.state !== "improving")
       throw new Error("Team not in Improving state");
 
-    if (
-      team.players.some((p) => p.pendingRandomSkill || p.pendingRandomStat)
-    ) {
+    if (team.players.some((p) => p.pendingRandomSkill || p.pendingRandomStat)) {
       throw new Error(
         "One or more players has pending improvements that must be confirmed",
       );

@@ -15,8 +15,16 @@ export type TeamStats = {
 type RoundRobinGame = {
   game?: {
     state?: string;
-    homeDetails?: { touchdowns: number; casualties: number; team: { id: string; name: string } } | null;
-    awayDetails?: { touchdowns: number; casualties: number; team: { id: string; name: string } } | null;
+    homeDetails?: {
+      touchdowns: number;
+      casualties: number;
+      team: { id: string; name: string };
+    } | null;
+    awayDetails?: {
+      touchdowns: number;
+      casualties: number;
+      team: { id: string; name: string };
+    } | null;
   } | null;
 };
 
@@ -75,10 +83,14 @@ export function computeLeagueTable(
       next[awayDetails.team.id].td += awayDetails.touchdowns;
       next[homeDetails.team.id].cas += homeDetails.casualties;
       next[awayDetails.team.id].cas += awayDetails.casualties;
-      next[homeDetails.team.id].tdDiff += homeDetails.touchdowns - awayDetails.touchdowns;
-      next[awayDetails.team.id].tdDiff += awayDetails.touchdowns - homeDetails.touchdowns;
-      next[homeDetails.team.id].casDiff += homeDetails.casualties - awayDetails.casualties;
-      next[awayDetails.team.id].casDiff += awayDetails.casualties - homeDetails.casualties;
+      next[homeDetails.team.id].tdDiff +=
+        homeDetails.touchdowns - awayDetails.touchdowns;
+      next[awayDetails.team.id].tdDiff +=
+        awayDetails.touchdowns - homeDetails.touchdowns;
+      next[homeDetails.team.id].casDiff +=
+        homeDetails.casualties - awayDetails.casualties;
+      next[awayDetails.team.id].casDiff +=
+        awayDetails.casualties - homeDetails.casualties;
 
       return next;
     },

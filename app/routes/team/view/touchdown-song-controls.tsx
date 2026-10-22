@@ -12,7 +12,7 @@ export default function SongControls({
 }: Props) {
   const [showForm, setShowForm] = useState(false);
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
 
   const isSubmitting = fetcher.state !== "idle";

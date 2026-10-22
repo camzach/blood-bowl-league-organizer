@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { processGameEvents, calculateWinnings } from "~/app/routes/game/process-game-events";
+import {
+  processGameEvents,
+  calculateWinnings,
+} from "~/app/routes/game/process-game-events";
 
 // d6 is called inside processGameEvents for hatred rolls — mock it to be deterministic
 vi.mock("~/app/utils/d6", () => ({ d6: vi.fn(() => 6) }));
@@ -146,7 +149,11 @@ describe("processGameEvents", () => {
             player: "a1",
             injury: {
               type: "mng",
-              causedBy: { player: "h1", type: "player", hatredKeyword: "NotAKeyword" },
+              causedBy: {
+                player: "h1",
+                type: "player",
+                hatredKeyword: "NotAKeyword",
+              },
             },
           },
         ],
@@ -175,14 +182,28 @@ describe("processGameEvents", () => {
 
 describe("calculateWinnings", () => {
   it("awards TDs, shared fan winnings, and attendance bonus", () => {
-    const { homeWinnings, awayWinnings } = calculateWinnings(3, 1, 4, 3, false, false);
+    const { homeWinnings, awayWinnings } = calculateWinnings(
+      3,
+      1,
+      4,
+      3,
+      false,
+      false,
+    );
     const sharedWinnings = ((4 + 3) / 2) * 10_000; // 35_000
     expect(homeWinnings).toBe(3 * 10_000 + sharedWinnings + 10_000); // 75_000
     expect(awayWinnings).toBe(1 * 10_000 + sharedWinnings + 10_000); // 55_000
   });
 
   it("deducts attendance bonus for stalled team", () => {
-    const { homeWinnings, awayWinnings } = calculateWinnings(1, 1, 2, 2, true, false);
+    const { homeWinnings, awayWinnings } = calculateWinnings(
+      1,
+      1,
+      2,
+      2,
+      true,
+      false,
+    );
     const sharedWinnings = 2 * 10_000; // 20_000
     expect(homeWinnings).toBe(1 * 10_000 + sharedWinnings); // no bonus
     expect(awayWinnings).toBe(1 * 10_000 + sharedWinnings + 10_000);

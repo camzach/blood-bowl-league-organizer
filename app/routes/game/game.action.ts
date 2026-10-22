@@ -354,8 +354,14 @@ async function handleSelectJourneymen(
 
 async function handlePurchaseInducements(
   gameId: string,
-  homeChoices: { stars: string[]; inducements: Array<{ name: string; quantity: number }> },
-  awayChoices: { stars: string[]; inducements: Array<{ name: string; quantity: number }> },
+  homeChoices: {
+    stars: string[];
+    inducements: Array<{ name: string; quantity: number }>;
+  },
+  awayChoices: {
+    stars: string[];
+    inducements: Array<{ name: string; quantity: number }>;
+  },
 ) {
   return db.transaction(async (tx) => {
     const game = await tx.query.game.findFirst({
@@ -415,9 +421,7 @@ async function handlePurchaseInducements(
     )
       throw new Error("Inducements are too expensive");
 
-    const starInserts: Array<
-      typeof gameDetailsToStarPlayer.$inferInsert
-    > = [];
+    const starInserts: Array<typeof gameDetailsToStarPlayer.$inferInsert> = [];
     for (const star of homeChoices.stars) {
       starInserts.push({
         starPlayerName: star,
@@ -518,23 +522,31 @@ async function handleEndGame(
 
     // Pre-fetch star players referenced in events so processGameEvents is DB-free
     const starPlayerNamesInEvents = events
-      .filter((ev) => ev.type === "casualty" && ev.injury.causedBy?.type === "star")
-      .map((ev) => (ev as { injury: { causedBy: { player: string } } }).injury.causedBy.player);
-    const starPlayersForEvents = starPlayerNamesInEvents.length > 0
-      ? await tx.query.starPlayer.findMany({
-          where: { name: { in: starPlayerNamesInEvents } },
-          with: { keywords: true },
-        })
-      : [];
+      .filter(
+        (ev) => ev.type === "casualty" && ev.injury.causedBy?.type === "star",
+      )
+      .map(
+        (ev) =>
+          (ev as { injury: { causedBy: { player: string } } }).injury.causedBy
+            .player,
+      );
+    const starPlayersForEvents =
+      starPlayerNamesInEvents.length > 0
+        ? await tx.query.starPlayer.findMany({
+            where: { name: { in: starPlayerNamesInEvents } },
+            with: { keywords: true },
+          })
+        : [];
 
-    const { touchdowns, casualties, playerUpdates, hatredNeeded } = processGameEvents(
-      events,
-      game.homeDetails.team.players,
-      game.awayDetails.team.players,
-      game.homeDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
-      game.awayDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
-      starPlayersForEvents,
-    );
+    const { touchdowns, casualties, playerUpdates, hatredNeeded } =
+      processGameEvents(
+        events,
+        game.homeDetails.team.players,
+        game.awayDetails.team.players,
+        game.homeDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
+        game.awayDetails.gameDetailsToStarPlayer.map((s) => s.starPlayerName),
+        starPlayersForEvents,
+      );
 
     const newImprovements: Array<typeof improvement.$inferInsert> = [];
     const improvementsToDelete: Array<{ playerId: string; order: number }> = [];
@@ -550,7 +562,9 @@ async function handleEndGame(
           where: { name: "Hatred" },
         });
         if (!baseHatredSkill) throw new Error("Failed to find Hatred skill");
-        await tx.insert(skill).values({ ...baseHatredSkill, name: hatredSkillName });
+        await tx
+          .insert(skill)
+          .values({ ...baseHatredSkill, name: hatredSkillName });
       }
       newImprovements.push({
         playerId,
@@ -575,29 +589,20 @@ async function handleEndGame(
     }
 
     const mvpHomeId =
-      homeMvpNominees[
-        Math.floor(Math.random() * homeMvpNominees.length)
-      ];
+      homeMvpNominees[Math.floor(Math.random() * homeMvpNominees.length)];
     const mvpHome = game.homeDetails.team.players.find(
       (p) => p.id === mvpHomeId,
     )!;
-    playerUpdates[mvpHome.id].mvps =
-      (playerUpdates[mvpHome.id].mvps ?? 0) + 1;
+    playerUpdates[mvpHome.id].mvps = (playerUpdates[mvpHome.id].mvps ?? 0) + 1;
 
     const mvpAwayId =
-      awayMvpNominees[
-        Math.floor(Math.random() * awayMvpNominees.length)
-      ];
+      awayMvpNominees[Math.floor(Math.random() * awayMvpNominees.length)];
     const mvpAway = game.awayDetails.team.players.find(
       (p) => p.id === mvpAwayId,
     )!;
-    playerUpdates[mvpAway.id].mvps =
-      (playerUpdates[mvpAway.id].mvps ?? 0) + 1;
+    playerUpdates[mvpAway.id].mvps = (playerUpdates[mvpAway.id].mvps ?? 0) + 1;
 
-    const fansUpdate = (
-      wlt: "won" | "lost" | "tied",
-      currentFans: number,
-    ) => {
+    const fansUpdate = (wlt: "won" | "lost" | "tied", currentFans: number) => {
       const roll = d6();
       let newFans = currentFans;
       let updateSql: ReturnType<typeof sql> | undefined = undefined;
@@ -832,9 +837,7 @@ async function handleEndGame(
         number | null,
       ][]) {
         if (updatedPlayer[`${stat}Injuries`] > 2) {
-          throw new Error(
-            "Player cannot have any more injuries of this type",
-          );
+          throw new Error("Player cannot have any more injuries of this type");
         }
         if (
           (value ?? 1) < statMinMax[stat][0] ||

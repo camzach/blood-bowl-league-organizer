@@ -83,7 +83,7 @@ function buildGrid(numRounds: number) {
 
 export async function loader({ context }: Route.LoaderArgs) {
   const { session } = context.get(authContext);
-  
+
   if (!session) {
     throw redirect("/login");
   }
@@ -100,14 +100,17 @@ export async function loader({ context }: Route.LoaderArgs) {
   }
 
   const games = await getPlayoffsBracket(activeSeason.id);
-  const rounds = games.reduce((prev, curr) => {
-    if (!(curr.round - 1 in prev)) {
-      prev[curr.round - 1] = [curr];
-    } else {
-      prev[curr.round - 1].push(curr);
-    }
-    return prev;
-  }, [] as (typeof games)[]);
+  const rounds = games.reduce(
+    (prev, curr) => {
+      if (!(curr.round - 1 in prev)) {
+        prev[curr.round - 1] = [curr];
+      } else {
+        prev[curr.round - 1].push(curr);
+      }
+      return prev;
+    },
+    [] as (typeof games)[],
+  );
 
   return { rounds };
 }

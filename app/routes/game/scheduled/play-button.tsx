@@ -5,7 +5,7 @@ import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notif
 
 export function PlayButton({ gameId }: { gameId: string }) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
 
   const isLoading = fetcher.state !== "idle";

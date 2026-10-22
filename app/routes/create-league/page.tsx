@@ -28,7 +28,10 @@ export default function CreateLeaguePage() {
             await navigate("/");
           } catch (error) {
             sendNotification({
-              text: error instanceof Error ? error.message : "Failed to create league",
+              text:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to create league",
               time: 5000,
             });
           }

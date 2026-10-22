@@ -9,9 +9,9 @@ type Props = {
 
 export default function PlayerFirer({ id, teamId, disabled }: Props) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
+
   const isSubmitting =
     fetcher.state === "submitting" || fetcher.state === "loading";
 
@@ -32,7 +32,7 @@ export default function PlayerFirer({ id, teamId, disabled }: Props) {
           {
             method: "post",
             action: `/team/${teamId}/edit/player/${id}/fire`,
-          }
+          },
         );
       }}
     >

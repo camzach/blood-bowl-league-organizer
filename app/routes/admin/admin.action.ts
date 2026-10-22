@@ -64,7 +64,6 @@ export const action = createValidatedAction(
 );
 
 async function scheduleAction(leagueId: string) {
-
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
@@ -126,7 +125,6 @@ async function scheduleAction(leagueId: string) {
 }
 
 async function clearAction(leagueId: string) {
-
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
@@ -166,19 +164,13 @@ async function clearAction(leagueId: string) {
     await Promise.all([
       tx
         .delete(gameDetailsToInducement)
-        .where(
-          inArray(gameDetailsToInducement.gameDetailsId, gameDetailsIds),
-        ),
+        .where(inArray(gameDetailsToInducement.gameDetailsId, gameDetailsIds)),
       tx
         .delete(gameDetailsToStarPlayer)
-        .where(
-          inArray(gameDetailsToStarPlayer.gameDetailsId, gameDetailsIds),
-        ),
+        .where(inArray(gameDetailsToStarPlayer.gameDetailsId, gameDetailsIds)),
     ]);
 
-    await tx
-      .delete(gameDetails)
-      .where(inArray(gameDetails.id, gameDetailsIds));
+    await tx.delete(gameDetails).where(inArray(gameDetails.id, gameDetailsIds));
   });
 
   return { success: true };
@@ -188,7 +180,6 @@ async function rescheduleGames(
   leagueId: string,
   games: Array<{ id: string; time: string }>,
 ) {
-
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
@@ -217,7 +208,6 @@ async function rescheduleGames(
 }
 
 async function seedBracket(leagueId: string) {
-
   return await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
@@ -244,9 +234,7 @@ async function seedBracket(leagueId: string) {
         .filter((id): id is string => !!id);
 
       console.log(`Deleting ${gameIds.length} bracket games`);
-      await tx
-        .delete(bracketGame)
-        .where(inArray(bracketGame.gameId, gameIds));
+      await tx.delete(bracketGame).where(inArray(bracketGame.gameId, gameIds));
       console.log(`Deleting ${gameIds.length} games`);
       await tx.delete(game).where(inArray(game.id, gameIds));
       console.log(`Deleting ${gameDetailsIds.length} game details`);
@@ -261,8 +249,12 @@ async function seedBracket(leagueId: string) {
           with: {
             game: {
               with: {
-                homeDetails: { with: { team: { columns: { name: true, id: true } } } },
-                awayDetails: { with: { team: { columns: { name: true, id: true } } } },
+                homeDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
+                awayDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
               },
             },
           },
@@ -287,8 +279,7 @@ async function seedBracket(leagueId: string) {
 
     const detailsInserts: Array<InferInsertModel<typeof gameDetails>> = [];
     const gameInserts: Array<InferInsertModel<typeof game>> = [];
-    const bracketGameInserts: Array<InferInsertModel<typeof bracketGame>> =
-      [];
+    const bracketGameInserts: Array<InferInsertModel<typeof bracketGame>> = [];
 
     type Game = {
       homeGame?: Game;
@@ -373,7 +364,6 @@ async function seedBracket(leagueId: string) {
 }
 
 async function endSeason(leagueId: string) {
-
   await db.transaction(async (tx) => {
     const activeSeason = await tx.query.season.findFirst({
       where: {
@@ -442,8 +432,12 @@ async function endSeason(leagueId: string) {
           with: {
             game: {
               with: {
-                homeDetails: { with: { team: { columns: { name: true, id: true } } } },
-                awayDetails: { with: { team: { columns: { name: true, id: true } } } },
+                homeDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
+                awayDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
               },
             },
           },

@@ -60,7 +60,7 @@ export default function ScheduleManagerPage({
   return (
     <div className="flex flex-col">
       <h1 className="mb-4 text-2xl font-bold">Season Management</h1>
-      
+
       {draftTeams.length > 0 && (
         <div className="alert alert-warning mb-5">
           <svg
@@ -82,7 +82,7 @@ export default function ScheduleManagerPage({
           </span>
         </div>
       )}
-      
+
       <div className="join mb-5">
         <button
           className="btn btn-primary join-item"
@@ -133,7 +133,7 @@ export default function ScheduleManagerPage({
           {isEnding ? "Ending..." : "End Season"}
         </button>
       </div>
-      
+
       <ScheduleEditor
         games={games.map((g) => ({
           id: g.game.id,

@@ -56,7 +56,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
   const [tab, setTab] = useState<SkillCategory | "stat">(
     player.position.primary[0] ?? player.position.secondary[0],
   );
-  
+
   useFetcherErrorNotification(fetcher);
 
   const executeLearnSkill = (data: { player: string; skill: string }) => {
@@ -65,7 +65,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      }
+      },
     );
   };
 
@@ -78,7 +78,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      }
+      },
     );
   };
 
@@ -91,7 +91,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      }
+      },
     );
   };
 
@@ -101,7 +101,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
       {
         method: "post",
         action: `/team/${teamId}/edit/player/${data.player}/advance`,
-      }
+      },
     );
   };
 

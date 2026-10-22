@@ -22,79 +22,76 @@ const songSchema = z.object({
   file: z.instanceof(File),
 });
 
-export const action = createValidatedAction(
-  songSchema,
-  async (data) => {
-    const { teamId, songName, file } = data;
+export const action = createValidatedAction(songSchema, async (data) => {
+  const { teamId, songName, file } = data;
 
-    // Permission check handled by team-permission-middleware layout
+  // Permission check handled by team-permission-middleware layout
 
-    // Validate file is audio
-    const buffer = await file.arrayBuffer();
-    
-    // Basic MIME type check
-    if (!file.type.startsWith("audio/")) {
-      return { errors: { file: ["Audio files only"] } };
-    }
+  // Validate file is audio
+  const buffer = await file.arrayBuffer();
 
-    const team = await db.query.team.findFirst({
-      where: { id: teamId },
-      with: { song: true },
-    });
+  // Basic MIME type check
+  if (!file.type.startsWith("audio/")) {
+    return { errors: { file: ["Audio files only"] } };
+  }
 
-    if (!team) {
-      throw new Error("No team found");
-    }
+  const team = await db.query.team.findFirst({
+    where: { id: teamId },
+    with: { song: true },
+  });
 
-    const currentSong = team.song;
+  if (!team) {
+    throw new Error("No team found");
+  }
 
-    // Delete old song from S3 if exists
-    if (currentSong) {
-      try {
-        await s3.deleteObject({
-          Bucket: process.env.S3_BUCKET ?? "",
-          Key: currentSong.data,
-        });
-      } catch (error) {
-        console.error("Error removing old song from S3:", error);
-        throw new Error("There was an issue removing the old song", {
-          cause: error,
-        });
-      }
-    }
+  const currentSong = team.song;
 
-    // Upload new song to S3
-    const Key = randomUUID();
+  // Delete old song from S3 if exists
+  if (currentSong) {
     try {
-      await s3.putObject({
+      await s3.deleteObject({
         Bucket: process.env.S3_BUCKET ?? "",
-        Key,
-        Body: Buffer.from(buffer),
-        ContentType: file.type,
+        Key: currentSong.data,
       });
     } catch (error) {
-      console.error("Error storing new song in S3:", error);
-      throw new Error("There was an issue storing the song.", {
+      console.error("Error removing old song from S3:", error);
+      throw new Error("There was an issue removing the old song", {
         cause: error,
       });
     }
+  }
 
-    // Update database
-    await db.transaction(async (tx) => {
-      await tx
-        .insert(dbSong)
-        .values({ data: Key, name: songName })
-        .onConflictDoUpdate({
-          target: dbSong.name,
-          set: { data: Key },
-        });
-
-      await tx
-        .update(dbTeam)
-        .set({ touchdownSong: songName })
-        .where(eq(dbTeam.id, teamId));
+  // Upload new song to S3
+  const Key = randomUUID();
+  try {
+    await s3.putObject({
+      Bucket: process.env.S3_BUCKET ?? "",
+      Key,
+      Body: Buffer.from(buffer),
+      ContentType: file.type,
     });
+  } catch (error) {
+    console.error("Error storing new song in S3:", error);
+    throw new Error("There was an issue storing the song.", {
+      cause: error,
+    });
+  }
 
-    return { success: true };
-  },
-);
+  // Update database
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(dbSong)
+      .values({ data: Key, name: songName })
+      .onConflictDoUpdate({
+        target: dbSong.name,
+        set: { data: Key },
+      });
+
+    await tx
+      .update(dbTeam)
+      .set({ touchdownSong: songName })
+      .where(eq(dbTeam.id, teamId));
+  });
+
+  return { success: true };
+});

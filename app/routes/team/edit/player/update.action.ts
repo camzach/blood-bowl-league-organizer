@@ -119,8 +119,7 @@ async function makeCaptain(playerId: string) {
     if (!player) throw new Error("Player not found");
     if (!player.teamId) throw new Error("Player not on a team");
     if (!player.team) throw new Error("Team not found");
-    if (!player.position)
-      throw new Error("Could not identify player position");
+    if (!player.position) throw new Error("Could not identify player position");
 
     if (
       !player.team.roster.specialRuleToRoster.some(

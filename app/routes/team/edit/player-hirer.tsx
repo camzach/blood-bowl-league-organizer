@@ -21,7 +21,7 @@ export function PlayerHirer({
   const fetcher = useFetcher();
   const [position, setPosition] = useState(positions[0]?.name ?? "");
   const [number, setNumber] = useState(freeNumbers[0] ?? 0);
-  
+
   useFetcherErrorNotification(fetcher);
 
   if (freeNumbers.length > 0 && !freeNumbers.includes(number)) {
@@ -47,48 +47,49 @@ export function PlayerHirer({
     [],
   );
 
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
 
   if (isSubmitting) return <>Hiring...</>;
 
   return (
     <>
-    <div className="join">
-      <select
-        className="join-item select select-bordered"
-        value={position}
-        onChange={handlePositionSelect}
-        disabled={disabled}
-      >
-        {positions.map((p) => (
-          <option disabled={p.cost > treasury} key={p.name} value={p.name}>
-            {p.name} - {p.cost}
-          </option>
-        ))}
-      </select>
-      <select
-        className="join-item select select-bordered"
-        value={number}
-        onChange={handleNumberSelect}
-        disabled={disabled}
-      >
-        {freeNumbers.map((n) => (
-          <option key={n}>{n}</option>
-        ))}
-      </select>
-      <button
-        className="btn btn-primary join-item"
-        onClick={() => 
-          fetcher.submit(
-            { action: "new", position, number: number.toString() },
-            { method: "post", action: `/team/${teamId}/edit/hire-player` }
-          )
-        }
-        disabled={disabled || isSubmitting}
-      >
-        HIRE!!!
-      </button>
-    </div>
+      <div className="join">
+        <select
+          className="join-item select select-bordered"
+          value={position}
+          onChange={handlePositionSelect}
+          disabled={disabled}
+        >
+          {positions.map((p) => (
+            <option disabled={p.cost > treasury} key={p.name} value={p.name}>
+              {p.name} - {p.cost}
+            </option>
+          ))}
+        </select>
+        <select
+          className="join-item select select-bordered"
+          value={number}
+          onChange={handleNumberSelect}
+          disabled={disabled}
+        >
+          {freeNumbers.map((n) => (
+            <option key={n}>{n}</option>
+          ))}
+        </select>
+        <button
+          className="btn btn-primary join-item"
+          onClick={() =>
+            fetcher.submit(
+              { action: "new", position, number: number.toString() },
+              { method: "post", action: `/team/${teamId}/edit/hire-player` },
+            )
+          }
+          disabled={disabled || isSubmitting}
+        >
+          HIRE!!!
+        </button>
+      </div>
     </>
   );
 }

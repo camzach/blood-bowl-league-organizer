@@ -26,23 +26,23 @@ export default function InviteManagerPage({
   const { invites } = loaderData;
   const generateFetcher = useFetcher();
   const revokeFetcher = useFetcher();
-  
+
   useFetcherErrorNotification(generateFetcher);
   useFetcherErrorNotification(revokeFetcher);
 
   return (
     <div className="flex flex-col">
       <h1 className="mb-4 text-2xl font-bold">Manage Invites</h1>
-      
-      <generateFetcher.Form 
-        method="post" 
+
+      <generateFetcher.Form
+        method="post"
         action="/admin/invite-manager/action"
         onSubmit={(e) => {
           e.preventDefault();
           const formData = new FormData(e.currentTarget);
           generateFetcher.submit(formData, {
             method: "post",
-            action: "/admin/invite-manager/action"
+            action: "/admin/invite-manager/action",
           });
         }}
       >
@@ -94,7 +94,7 @@ export default function InviteManagerPage({
                         const formData = new FormData(e.currentTarget);
                         revokeFetcher.submit(formData, {
                           method: "post",
-                          action: "/admin/invite-manager/action"
+                          action: "/admin/invite-manager/action",
                         });
                       }}
                     >

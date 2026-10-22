@@ -13,7 +13,10 @@ export default function DiscordGuildLinkerPage() {
         .then((res) => res.json())
         .catch((error) => {
           sendNotification({
-            text: error instanceof Error ? error.message : "Failed to resolve Discord guild",
+            text:
+              error instanceof Error
+                ? error.message
+                : "Failed to resolve Discord guild",
             time: 5000,
           });
           return null;

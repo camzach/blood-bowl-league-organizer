@@ -10,11 +10,13 @@ export default function SignoutButton() {
     <button
       className="btn btn-outline btn-primary"
       onClick={() => {
-        authClient.signOut()
+        authClient
+          .signOut()
           .then(() => nav("/login", { replace: false }))
           .catch((error) => {
             sendNotification({
-              text: error instanceof Error ? error.message : "Failed to sign out",
+              text:
+                error instanceof Error ? error.message : "Failed to sign out",
               time: 5000,
             });
           });

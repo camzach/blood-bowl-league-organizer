@@ -42,7 +42,10 @@ describe("createValidatedAction", () => {
   it("returns a 400 when a JSON body breaks a schema rule", async () => {
     const result = (await action({
       request: jsonRequest({ name: "bob", nominees: ["a"] }),
-    })) as { data: { success: boolean; error: string }; init: { status: number } };
+    })) as {
+      data: { success: boolean; error: string };
+      init: { status: number };
+    };
 
     expect(result.init.status).toBe(400);
     expect(result.data.success).toBe(false);

@@ -57,9 +57,7 @@ async function hireNewPlayer(
       .from(dbPosition)
       .innerJoin(rosterSlot, eq(rosterSlot.id, dbPosition.rosterSlotId))
       .innerJoin(dbTeam, eq(dbTeam.rosterName, rosterSlot.rosterName))
-      .where(
-        and(eq(dbTeam.id, teamId), eq(dbPosition.name, input.position)),
-      )
+      .where(and(eq(dbTeam.id, teamId), eq(dbPosition.name, input.position)))
       .limit(1);
 
     if (positionQuery.length === 0)
@@ -196,9 +194,7 @@ async function hireExistingPlayer(
       ).length > player.position.rosterSlot.max
     )
       throw new Error("Cannot hire any more players of this position");
-    if (
-      updatedTeam.players.filter((p) => p.number === input.number).length > 1
-    )
+    if (updatedTeam.players.filter((p) => p.number === input.number).length > 1)
       throw new Error("Team already has a player with this number");
     if (updatedTeam.treasury < 0)
       throw new Error("Team cannot afford this player");

@@ -21,16 +21,17 @@ type Props = {
 export default function ScheduleEditor(props: Props) {
   const [games, setGames] = useState(props.games);
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
-  const status = fetcher.state === "submitting" || fetcher.state === "loading" 
-    ? "executing" 
-    : fetcher.data?.success 
-    ? "hasSucceeded" 
-    : (fetcher.data && !fetcher.data.success)
-    ? "hasErrored" 
-    : "idle";
+
+  const status =
+    fetcher.state === "submitting" || fetcher.state === "loading"
+      ? "executing"
+      : fetcher.data?.success
+        ? "hasSucceeded"
+        : fetcher.data && !fetcher.data.success
+          ? "hasErrored"
+          : "idle";
 
   const blockedMap = new WeakMap<Game, boolean>();
   const blockedBy = new Map<Game, Game[]>();

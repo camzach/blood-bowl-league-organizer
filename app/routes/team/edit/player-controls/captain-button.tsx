@@ -9,10 +9,11 @@ type Props = {
 
 export default function CaptainButton({ playerId, disabled, teamId }: Props) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
 
   return (
     <button
@@ -20,7 +21,10 @@ export default function CaptainButton({ playerId, disabled, teamId }: Props) {
       onClick={() => {
         fetcher.submit(
           { action: "captain" },
-          { method: "post", action: `/team/${teamId}/edit/player/${playerId}/update` }
+          {
+            method: "post",
+            action: `/team/${teamId}/edit/player/${playerId}/update`,
+          },
         );
       }}
       disabled={disabled || isSubmitting}

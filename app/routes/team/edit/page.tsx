@@ -31,7 +31,8 @@ export async function loader({ params }: Route.LoaderArgs) {
   return { skills, skillRelations, state: team.state };
 }
 
-type Player = Route.ComponentProps["matches"][2]["loaderData"]["team"]["players"][number];
+type Player =
+  Route.ComponentProps["matches"][2]["loaderData"]["team"]["players"][number];
 
 export default function EditTeam({
   matches,
@@ -101,11 +102,7 @@ export default function EditTeam({
 
   const PlayerNameEditorComponent = useCallback(
     (player: Player) => (
-      <PlayerNameEditor
-        id={player.id}
-        name={player.name}
-        teamId={team.id}
-      />
+      <PlayerNameEditor id={player.id} name={player.name} teamId={team.id} />
     ),
     [team.id],
   );

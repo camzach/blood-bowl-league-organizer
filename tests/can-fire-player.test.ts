@@ -55,7 +55,10 @@ describe("canFirePlayer", () => {
     expect(canFirePlayer("draft", makePlayers(11, 0), "healthy-0")).toBe(true);
   });
 
-  it.each(["improving", "hiring", "ready", "playing"])("refuses in %s", (state) => {
-    expect(canFirePlayer(state, makePlayers(14, 0), "healthy-0")).toBe(false);
-  });
+  it.each(["improving", "hiring", "ready", "playing"])(
+    "refuses in %s",
+    (state) => {
+      expect(canFirePlayer(state, makePlayers(14, 0), "healthy-0")).toBe(false);
+    },
+  );
 });

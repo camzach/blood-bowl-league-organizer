@@ -29,9 +29,9 @@ export default function StaffHirer({
   canFire,
 }: Props) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
+
   // Rather than using the normal max, calculate a temporary max based on your treasury
   // This helps disable the tick up button when you can't afford any more
   const inputMax = canHire
@@ -43,43 +43,42 @@ export default function StaffHirer({
     if (val > current) {
       fetcher.submit(
         { action: "hire", type, quantity: (val - current).toString() },
-        { method: "post", action: `/team/${teamId}/edit/staff` }
+        { method: "post", action: `/team/${teamId}/edit/staff` },
       );
     } else {
       fetcher.submit(
         { action: "fire", type, quantity: (current - val).toString() },
-        { method: "post", action: `/team/${teamId}/edit/staff` }
+        { method: "post", action: `/team/${teamId}/edit/staff` },
       );
     }
   };
 
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
-  
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
+
   if (isSubmitting) return <>Mutating...</>;
 
   return (
     <>
       {max > 1 ? (
-    <NumberInput
-      disabled={!canHire && !canFire}
-      value={current}
-      label={title}
-      min={inputMin}
-      max={inputMax}
-      onChange={hireStaff}
-    />
-  ) : (
-    <input
-      type="checkbox"
-      className="checkbox"
-      checked={current > 0}
-      disabled={
-        current > 0 ? !canFire : !canHire || treasury < cost
-      }
-      onChange={(e): void => {
-        hireStaff(Number(e.target.checked));
-      }}
-    ></input>
+        <NumberInput
+          disabled={!canHire && !canFire}
+          value={current}
+          label={title}
+          min={inputMin}
+          max={inputMax}
+          onChange={hireStaff}
+        />
+      ) : (
+        <input
+          type="checkbox"
+          className="checkbox"
+          checked={current > 0}
+          disabled={current > 0 ? !canFire : !canHire || treasury < cost}
+          onChange={(e): void => {
+            hireStaff(Number(e.target.checked));
+          }}
+        ></input>
       )}
     </>
   );

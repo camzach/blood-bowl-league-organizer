@@ -137,12 +137,17 @@ export function processGameEvents(
           const causedByPlayer = injury.causedBy.player;
           let offenderKeywords: string[];
 
-          if (injury.causedBy.type === "player" && causedByPlayer in playerUpdates) {
+          if (
+            injury.causedBy.type === "player" &&
+            causedByPlayer in playerUpdates
+          ) {
             const offender = allPlayers.find((p) => p.id === causedByPlayer);
             if (!offender) throw new Error("Offending player does not exist");
             playerUpdates[causedByPlayer].casualties =
               (playerUpdates[causedByPlayer].casualties ?? 0) + 1;
-            casualties[playerToTeamMap.get(causedByPlayer) === "home" ? 0 : 1] += 1;
+            casualties[
+              playerToTeamMap.get(causedByPlayer) === "home" ? 0 : 1
+            ] += 1;
             offenderKeywords = offender.position.keywords
               .filter((k) => k.canBeHated)
               .map((k) => k.name);
@@ -159,9 +164,11 @@ export function processGameEvents(
               throw new Error("Invalid keyword chosen for Hatred");
             }
             const fetchedPlayer = allPlayers.find((p) => p.id === ev.player);
-            if (!fetchedPlayer) throw new Error("Injured player does not exist");
+            if (!fetchedPlayer)
+              throw new Error("Injured player does not exist");
             const nextNegativeOrder =
-              Math.min(0, ...fetchedPlayer.improvements.map((i) => i.order)) - 1;
+              Math.min(0, ...fetchedPlayer.improvements.map((i) => i.order)) -
+              1;
             hatredNeeded.push({
               playerId: ev.player,
               keyword: injury.causedBy.hatredKeyword,
@@ -187,7 +194,9 @@ export function calculateWinnings(
 ): { homeWinnings: number; awayWinnings: number } {
   const sharedWinnings = ((homeFanFactor + awayFanFactor) / 2) * 10_000;
   return {
-    homeWinnings: homeTDs * 10_000 + sharedWinnings + (!homeStalled ? 10_000 : 0),
-    awayWinnings: awayTDs * 10_000 + sharedWinnings + (!awayStalled ? 10_000 : 0),
+    homeWinnings:
+      homeTDs * 10_000 + sharedWinnings + (!homeStalled ? 10_000 : 0),
+    awayWinnings:
+      awayTDs * 10_000 + sharedWinnings + (!awayStalled ? 10_000 : 0),
   };
 }

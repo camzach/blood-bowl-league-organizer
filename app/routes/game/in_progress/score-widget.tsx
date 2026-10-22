@@ -51,7 +51,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   const awaySongRef = useRef<HTMLAudioElement>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const gameState: GameState = useMemo(() => {
     const param = searchParams.get("gameState");
     if (!param) return [];

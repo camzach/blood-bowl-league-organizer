@@ -31,8 +31,7 @@ function mockPlayer(opts: {
       rosterSlot: {
         max: 16,
         roster: {
-          specialRules:
-            opts.specialRules?.map((r) => ({ name: r })) ?? [],
+          specialRules: opts.specialRules?.map((r) => ({ name: r })) ?? [],
         },
       },
     },

@@ -9,10 +9,11 @@ type Props = {
 
 export default function PlayerHirer({ player, number, teamId }: Props) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
 
   if (isSubmitting) return <>Hiring...</>;
 
@@ -22,7 +23,7 @@ export default function PlayerHirer({ player, number, teamId }: Props) {
       onClick={() => {
         fetcher.submit(
           { action: "existing", player, number: number.toString() },
-          { method: "post", action: `/team/${teamId}/edit/hire-player` }
+          { method: "post", action: `/team/${teamId}/edit/hire-player` },
         );
       }}
     >

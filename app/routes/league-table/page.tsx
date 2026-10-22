@@ -5,7 +5,7 @@ import { getLeagueTable } from "~/app/utils/get-league-table";
 
 export async function loader({ context }: Route.LoaderArgs) {
   const { session } = context.get(authContext);
-  
+
   if (!session) {
     throw redirect("/login");
   }

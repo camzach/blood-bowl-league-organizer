@@ -8,14 +8,17 @@ type Props = {
 };
 
 export default function Schedule({ games }: Props) {
-  const rounds = games.reduce((prev, curr) => {
-    if (!(curr.round - 1 in prev)) {
-      prev[curr.round - 1] = [curr];
-    } else {
-      prev[curr.round - 1].push(curr);
-    }
-    return prev;
-  }, [] as (typeof games)[]);
+  const rounds = games.reduce(
+    (prev, curr) => {
+      if (!(curr.round - 1 in prev)) {
+        prev[curr.round - 1] = [curr];
+      } else {
+        prev[curr.round - 1].push(curr);
+      }
+      return prev;
+    },
+    [] as (typeof games)[],
+  );
 
   return (
     <>

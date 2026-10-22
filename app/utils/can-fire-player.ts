@@ -18,7 +18,8 @@ export function canFirePlayer(
   if (!player || player.membershipType !== "player") return true;
 
   const eligibleAfterFiring = players.filter(
-    (p) => p.id !== playerId && p.membershipType === "player" && !p.missNextGame,
+    (p) =>
+      p.id !== playerId && p.membershipType === "player" && !p.missNextGame,
   ).length;
 
   return eligibleAfterFiring >= MIN_ELIGIBLE_PLAYERS;

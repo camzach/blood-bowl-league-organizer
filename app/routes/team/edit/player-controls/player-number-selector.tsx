@@ -9,10 +9,11 @@ type Props = {
 
 export default function PlayerNumberSelector({ id, number, teamId }: Props) {
   const fetcher = useFetcher();
-  
+
   useFetcherErrorNotification(fetcher);
-  
-  const isSubmitting = fetcher.state === "submitting" || fetcher.state === "loading";
+
+  const isSubmitting =
+    fetcher.state === "submitting" || fetcher.state === "loading";
 
   if (isSubmitting) return <>Updating...</>;
 
@@ -23,7 +24,10 @@ export default function PlayerNumberSelector({ id, number, teamId }: Props) {
       onChange={(e): void => {
         fetcher.submit(
           { action: "info", number: e.target.value },
-          { method: "post", action: `/team/${teamId}/edit/player/${id}/update` }
+          {
+            method: "post",
+            action: `/team/${teamId}/edit/player/${id}/update`,
+          },
         );
       }}
     >

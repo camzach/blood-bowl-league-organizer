@@ -1,8 +1,15 @@
 import { db } from "~/app/utils/drizzle";
 import { eq, getColumns, inArray } from "drizzle-orm";
 import { inducement, specialRuleToStarPlayer, starPlayer } from "~/db/schema";
-import { gameDetailsWithTeamTreasury, gameDetailsWithFullTeam } from "~/db/query-fragments/game.fragments";
-import { getPlayerStats, getPlayerSkills, getPlayerSppAndTv } from "~/app/utils/get-computed-player-fields";
+import {
+  gameDetailsWithTeamTreasury,
+  gameDetailsWithFullTeam,
+} from "~/db/query-fragments/game.fragments";
+import {
+  getPlayerStats,
+  getPlayerSkills,
+  getPlayerSppAndTv,
+} from "~/app/utils/get-computed-player-fields";
 import { getTeamSpecialRules } from "./get-team-special-rules";
 import { getInducementPrice } from "./calculate-inducement-costs";
 
@@ -18,8 +25,6 @@ export type GameData =
   | InducementsData
   | InProgressData
   | CompleteData;
-
-
 
 async function getInducementOptions(rules: string[], rosterName: string) {
   const allInducements = await db.select().from(inducement);
@@ -139,7 +144,6 @@ async function loadInducementsData(gameId: string) {
     throw new Response("Not Found", { status: 404 });
   }
 
-
   const [homeOptions, awayOptions] = await Promise.all([
     getInducementOptions(
       getTeamSpecialRules(game.homeDetails.team),
@@ -160,7 +164,10 @@ async function loadInducementsData(gameId: string) {
       game.homeDetails.pettyCashAwarded,
       game.awayDetails.pettyCashAwarded,
     ] as const,
-    treasury: [game.homeDetails.team.treasury, game.awayDetails.team.treasury] as const,
+    treasury: [
+      game.homeDetails.team.treasury,
+      game.awayDetails.team.treasury,
+    ] as const,
     teams: [game.homeDetails.team.name, game.awayDetails.team.name] as const,
   };
 }
