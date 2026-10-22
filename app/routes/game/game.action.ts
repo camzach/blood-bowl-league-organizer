@@ -25,6 +25,7 @@ import { gameEvent } from "./game-events";
 import { getTeamSpecialRules } from "./get-team-special-rules";
 import { canActOnGame } from "./can-act-on-game";
 import { processGameEvents, calculateWinnings } from "./process-game-events";
+import { calculateFanUpdate, resultOf } from "./fans";
 import {
   gameWithTeamCoaches,
   gameDetailsWithTeamAndPlayers,
@@ -602,41 +603,14 @@ async function handleEndGame(
     )!;
     playerUpdates[mvpAway.id].mvps = (playerUpdates[mvpAway.id].mvps ?? 0) + 1;
 
-    const fansUpdate = (wlt: "won" | "lost" | "tied", currentFans: number) => {
-      const roll = d6();
-      let newFans = currentFans;
-      let updateSql: ReturnType<typeof sql> | undefined = undefined;
-      if (wlt === "won" && roll > currentFans) {
-        newFans += 1;
-        updateSql = sql`${dbTeam.dedicatedFans} + 1`;
-      } else if (wlt === "lost" && roll < currentFans) {
-        newFans -= 1;
-        updateSql = sql`${dbTeam.dedicatedFans} - 1`;
-      }
-      return {
-        roll,
-        currentFans,
-        newFans,
-        sql: updateSql,
-      };
-    };
-
-    function wlt(myScore: number, yourScore: number) {
-      if (myScore > yourScore) return "won";
-      if (yourScore > myScore) return "lost";
-      return "tied";
-    }
-
-    const [homeFansUpdate, awayFansUpdate] = [
-      fansUpdate(
-        wlt(touchdowns[0], touchdowns[1]),
-        game.homeDetails.team.dedicatedFans,
-      ),
-      fansUpdate(
-        wlt(touchdowns[1], touchdowns[0]),
-        game.awayDetails.team.dedicatedFans,
-      ),
-    ];
+    const homeFansUpdate = calculateFanUpdate(
+      resultOf(touchdowns[0], touchdowns[1]),
+      game.homeDetails.team.dedicatedFans,
+    );
+    const awayFansUpdate = calculateFanUpdate(
+      resultOf(touchdowns[1], touchdowns[0]),
+      game.awayDetails.team.dedicatedFans,
+    );
 
     const { homeWinnings, awayWinnings } = calculateWinnings(
       touchdowns[0],
@@ -722,7 +696,7 @@ async function handleEndGame(
       .update(dbTeam)
       .set({
         state: "improving",
-        dedicatedFans: homeFansUpdate.sql,
+        dedicatedFans: sql`${dbTeam.dedicatedFans} + ${homeFansUpdate.change}`,
         treasury: sql`${dbTeam.treasury} + ${homeWinnings}`,
       })
       .where(eq(dbTeam.id, game.homeDetails.teamId));
@@ -730,7 +704,7 @@ async function handleEndGame(
       .update(dbTeam)
       .set({
         state: "improving",
-        dedicatedFans: awayFansUpdate.sql,
+        dedicatedFans: sql`${dbTeam.dedicatedFans} + ${awayFansUpdate.change}`,
         treasury: sql`${dbTeam.treasury} + ${awayWinnings}`,
       })
       .where(eq(dbTeam.id, game.awayDetails.teamId));
