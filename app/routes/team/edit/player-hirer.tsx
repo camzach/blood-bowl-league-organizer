@@ -56,6 +56,7 @@ export function PlayerHirer({
     <>
       <div className="join">
         <select
+          aria-label="Position"
           className="join-item select select-bordered"
           value={position}
           onChange={handlePositionSelect}
@@ -68,6 +69,7 @@ export function PlayerHirer({
           ))}
         </select>
         <select
+          aria-label="Player number"
           className="join-item select select-bordered"
           value={number}
           onChange={handleNumberSelect}

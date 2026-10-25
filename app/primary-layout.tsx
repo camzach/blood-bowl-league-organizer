@@ -101,9 +101,10 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
                 <div
                   tabIndex={0}
                   role="button"
+                  aria-label="User menu"
                   className="btn btn-circle m-1 text-xl font-bold"
                 >
-                  {"C"}
+                  {user.name?.[0]?.toUpperCase() ?? "?"}
                 </div>
                 <ul
                   tabIndex={0}
