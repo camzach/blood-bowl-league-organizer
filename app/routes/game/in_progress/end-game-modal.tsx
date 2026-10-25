@@ -11,6 +11,8 @@ type BasePlayer = {
 type EndGameModalProps = {
   isOpen: boolean;
   onRequestClose: () => void;
+  homeTeamName: string;
+  awayTeamName: string;
   homePlayers: BasePlayer[];
   awayPlayers: BasePlayer[];
   onSubmit: (
@@ -24,6 +26,8 @@ type EndGameModalProps = {
 export function EndGameModal({
   isOpen,
   onRequestClose,
+  homeTeamName,
+  awayTeamName,
   homePlayers,
   awayPlayers,
   onSubmit,
@@ -54,11 +58,14 @@ export function EndGameModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
-      <h2 className="text-2xl font-bold">MVP Nomination</h2>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      title="MVP Nomination"
+    >
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="text-lg font-semibold">Home Team</h3>
+        <fieldset>
+          <legend className="text-lg font-semibold">{homeTeamName}</legend>
           <div className="mb-2">
             <label>
               <input
@@ -85,9 +92,9 @@ export function EndGameModal({
               </label>
             </div>
           ))}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold">Away Team</h3>
+        </fieldset>
+        <fieldset>
+          <legend className="text-lg font-semibold">{awayTeamName}</legend>
           <div className="mb-2">
             <label>
               <input
@@ -114,7 +121,7 @@ export function EndGameModal({
               </label>
             </div>
           ))}
-        </div>
+        </fieldset>
       </div>
       <div className="mt-4 flex justify-end">
         <button

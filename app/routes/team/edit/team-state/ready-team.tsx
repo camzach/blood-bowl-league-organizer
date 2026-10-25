@@ -45,7 +45,11 @@ export default function ReadyButton({ teamId, treasury }: Props) {
   return (
     <>
       {treasury >= 100000 && result && showResult && (
-        <Modal isOpen onRequestClose={() => setShowResult(false)}>
+        <Modal
+          isOpen
+          onRequestClose={() => setShowResult(false)}
+          title="Expensive Mistakes Result"
+        >
           <div className="flex flex-col">
             <Die result={result.expensiveMistakeRoll} />
             {result.expensiveMistake}
@@ -62,7 +66,11 @@ export default function ReadyButton({ teamId, treasury }: Props) {
           </div>
         </Modal>
       )}
-      <Modal isOpen={warningOpen} onRequestClose={() => setWarningOpen(false)}>
+      <Modal
+        isOpen={warningOpen}
+        onRequestClose={() => setWarningOpen(false)}
+        title="Expensive Mistakes Warning"
+      >
         <p className="mb-3">
           Warning: You have more than {tableOffset}00k in your treasury!
         </p>

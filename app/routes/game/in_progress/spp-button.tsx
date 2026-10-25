@@ -42,7 +42,11 @@ export default function SPPButton({
 
   return (
     <>
-      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        title="Record SPP"
+      >
         <label>
           Player:
           <select className="select" {...register("player")}>

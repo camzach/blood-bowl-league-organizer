@@ -108,7 +108,11 @@ export default function InjuryButton({
 
   return (
     <>
-      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        title="Record Casualty"
+      >
         <div className="form-control">
           <label>
             Injured Player:

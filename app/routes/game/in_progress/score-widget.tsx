@@ -191,7 +191,10 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
   return (
     <div className="col-span-2 grid grid-cols-subgrid gap-y-3">
       <div className="pointer-events-none fixed top-0 right-1/3 bottom-0 left-1/3">
-        <canvas ref={fireworksCanvas} className="h-full w-full" />
+        <canvas
+          ref={fireworksCanvas}
+          className="pointer-events-none h-full w-full"
+        />
       </div>
 
       <div className="ml-auto flex flex-col items-end gap-1 leading-10">
