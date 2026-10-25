@@ -4,7 +4,7 @@ import type { Route } from "./+types/page";
 import List from "./list";
 import Calendar from "./calendar";
 import Controls from "./controls";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import fetchGames from "./fetch-games";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
@@ -17,9 +17,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const teamId = url.searchParams.getAll("teamId");
   const state = url.searchParams.get("state") ?? "any";
-  const month = url.searchParams.get("month");
-  const year = url.searchParams.get("year");
-  const mode = url.searchParams.get("mode") ?? "calendar";
 
   const { teams, games } = await fetchGames({
     teamId: teamId.length > 0 ? teamId : undefined,
@@ -27,13 +24,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
     league: session.activeOrganizationId ?? "",
   });
 
-  const parsedMonth = month !== null ? parseInt(month) : undefined;
-  const parsedYear = year !== null ? parseInt(year) : undefined;
-
-  const baseURL =
-    process.env.NODE_ENV === "production"
-      ? import.meta.env.VITE_BASE_URL
-      : "http://localhost:" + (process.env.PORT ?? "5173");
+  const requestUrl = new URL(request.url);
+  const baseURL = requestUrl.origin;
 
   const exportLink = new URL(
     `/api/calendar/${session.activeOrganizationId}/calendar.ics`,
@@ -48,31 +40,25 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   return {
     teams,
     games,
-    mode,
-    state,
-    teamId,
-    parsedMonth,
-    parsedYear,
     exportLink: exportLink.toString(),
   };
 }
 
 export default function Schedule({ loaderData }: Route.ComponentProps) {
-  const {
-    teams,
-    games,
-    mode,
-    state,
-    teamId,
-    parsedMonth,
-    parsedYear,
-    exportLink,
-  } = loaderData;
+  const { teams, games, exportLink } = loaderData;
+  const [searchParams] = useSearchParams();
+
+  const mode = searchParams.get("mode") ?? "calendar";
+
+  const month = searchParams.get("month");
+  const year = searchParams.get("year");
+  const parsedMonth = month !== null ? parseInt(month) : undefined;
+  const parsedYear = year !== null ? parseInt(year) : undefined;
 
   return (
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
       <div className="lg:mt-16">
-        <Controls teams={teams} mode={mode} state={state} selected={teamId} />
+        <Controls teams={teams} />
         <Link to={exportLink}>Export Calendar</Link>
       </div>
       <div className="basis-full">

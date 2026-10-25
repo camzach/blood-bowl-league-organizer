@@ -211,6 +211,7 @@ export default function Button({
       )}
       <button
         className={classNames("btn", className)}
+        aria-label="Done — end game"
         onClick={() => setMvpModalOpen(true)}
       >
         Done

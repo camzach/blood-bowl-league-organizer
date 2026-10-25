@@ -1,28 +1,39 @@
-import { useNavigate, useSearchParams } from "react-router";
+import { useId } from "react";
+import { useSearchParams } from "react-router";
 
 type Props = {
   teams: Array<{
     id: string;
     name: string;
   }>;
-  selected?: string[];
-  state?: string;
-  mode?: string;
 };
 
-export default function Controls({
-  teams,
-  selected = [],
-  state = "any",
-  mode = "calendar",
-}: Props) {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+export default function Controls({ teams }: Props) {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const mode = searchParams.get("mode") ?? "calendar";
+  const state = searchParams.get("state") ?? "any";
+  const selected = searchParams.getAll("teamId");
+
+  const id = useId();
+  const anchorName = `--filters-anchor-${id.replace(/:/g, "")}`;
 
   return (
-    <details className="bg-base-200 [&_input[type=checkbox]]:checkbox [&_input[type=radio]]:radio [&_label]:label collapse [&_input]:mr-2 [&_label]:w-fit">
-      <summary className="collapse-title">Filters</summary>
-      <div className="collapse-content">
+    <div className="bg-base-200 [&_input[type=checkbox]]:checkbox [&_input[type=radio]]:radio [&_label]:label [&_input]:mr-2 [&_label]:w-fit">
+      <button popoverTarget={id} style={{ anchorName } as React.CSSProperties}>
+        Filters
+      </button>
+      <div
+        id={id}
+        popover="auto"
+        style={
+          {
+            positionAnchor: anchorName,
+            top: "anchor(bottom)",
+            left: "anchor(left)",
+          } as React.CSSProperties
+        }
+      >
         <ul className="flex w-full flex-row lg:flex-col">
           <li className="flex-1">
             Display
@@ -35,9 +46,14 @@ export default function Controls({
                     value="calendar"
                     checked={mode === "calendar"}
                     onChange={(e) => {
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set("mode", e.target.value);
-                      navigate(`?${newParams.toString()}`);
+                      setSearchParams(
+                        (prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("mode", e.target.value);
+                          return next;
+                        },
+                        { replace: true },
+                      );
                     }}
                   />
                   Calendar
@@ -51,9 +67,14 @@ export default function Controls({
                     value="list"
                     checked={mode === "list"}
                     onChange={(e) => {
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set("mode", e.target.value);
-                      navigate(`?${newParams.toString()}`);
+                      setSearchParams(
+                        (prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("mode", e.target.value);
+                          return next;
+                        },
+                        { replace: true },
+                      );
                     }}
                   />
                   List
@@ -72,9 +93,14 @@ export default function Controls({
                     value="completed"
                     checked={state === "completed"}
                     onChange={(e) => {
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set("state", e.target.value);
-                      navigate(`?${newParams.toString()}`);
+                      setSearchParams(
+                        (prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("state", e.target.value);
+                          return next;
+                        },
+                        { replace: true },
+                      );
                     }}
                   />
                   Completed
@@ -88,9 +114,14 @@ export default function Controls({
                     value="scheduled"
                     checked={state === "scheduled"}
                     onChange={(e) => {
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set("state", e.target.value);
-                      navigate(`?${newParams.toString()}`);
+                      setSearchParams(
+                        (prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("state", e.target.value);
+                          return next;
+                        },
+                        { replace: true },
+                      );
                     }}
                   />
                   Scheduled
@@ -104,9 +135,14 @@ export default function Controls({
                     value="any"
                     checked={state === "any"}
                     onChange={(e) => {
-                      const newParams = new URLSearchParams(searchParams);
-                      newParams.set("state", e.target.value);
-                      navigate(`?${newParams.toString()}`);
+                      setSearchParams(
+                        (prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set("state", e.target.value);
+                          return next;
+                        },
+                        { replace: true },
+                      );
                     }}
                   />
                   Any
@@ -124,18 +160,23 @@ export default function Controls({
                       type="checkbox"
                       checked={selected?.includes(team.id) ?? false}
                       onChange={(e) => {
-                        const newSelected = new Set(selected);
-                        if (!e.target.checked) {
-                          newSelected.delete(team.id);
-                        } else {
-                          newSelected.add(team.id);
-                        }
-                        const search = new URLSearchParams(searchParams);
-                        search.delete("teamId");
-                        for (const id of newSelected) {
-                          search.append("teamId", id);
-                        }
-                        navigate(`?${search.toString()}`);
+                        setSearchParams(
+                          (prev) => {
+                            const next = new URLSearchParams(prev);
+                            const newSelected = new Set(selected);
+                            if (!e.target.checked) {
+                              newSelected.delete(team.id);
+                            } else {
+                              newSelected.add(team.id);
+                            }
+                            next.delete("teamId");
+                            for (const id of newSelected) {
+                              next.append("teamId", id);
+                            }
+                            return next;
+                          },
+                          { replace: true },
+                        );
                       }}
                     />
                     {team.name}
@@ -146,6 +187,6 @@ export default function Controls({
           </li>
         </ul>
       </div>
-    </details>
+    </div>
   );
 }
