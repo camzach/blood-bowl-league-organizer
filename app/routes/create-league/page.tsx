@@ -1,10 +1,9 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import { authClient } from "~/app/utils/auth.client";
 import { useNavigate } from "react-router";
 import { notificationContext } from "~/app/components/notification-provider";
 
 export default function CreateLeaguePage() {
-  const [leagueName, setLeagueName] = useState("");
   const navigate = useNavigate();
   const sendNotification = useContext(notificationContext);
 
@@ -15,7 +14,7 @@ export default function CreateLeaguePage() {
         className="form-control w-full max-w-xs"
         onSubmit={async (e) => {
           e.preventDefault();
-          const data = new FormData(e.target);
+          const data = new FormData(e.currentTarget);
           const leagueName = data.get("leagueName")?.toString();
           if (!leagueName) {
             return;
@@ -37,16 +36,15 @@ export default function CreateLeaguePage() {
           }
         }}
       >
-        <label className="label">
+        <label className="label" htmlFor="leagueName">
           <span className="label-text">League Name</span>
         </label>
         <input
+          id="leagueName"
           name="leagueName"
           type="text"
           placeholder="Type here"
           className="input input-bordered w-full max-w-xs"
-          value={leagueName}
-          onChange={(e) => setLeagueName(e.target.value)}
           required
         />
         <button type="submit" className="btn btn-primary mt-4">
