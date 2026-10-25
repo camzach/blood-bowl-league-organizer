@@ -1,8 +1,10 @@
 .DS_Store
 .env
+.env.test
 /node_modules/
 tsconfig.tsbuildinfo
 
 # React Router
 /.react-router/
 /build/
+test-results/

@@ -5,6 +5,11 @@ import { db } from "./drizzle";
 import { schema } from "~/db/schema";
 
 export const auth = betterAuth({
+  rateLimit: {
+    enabled:
+      process.env.NODE_ENV === "production" &&
+      !process.env.DATABASE_URL?.includes("_test"),
+  },
   database: drizzleAdapter(db, {
     schema,
     provider: "pg",
