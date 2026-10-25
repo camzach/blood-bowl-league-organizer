@@ -1,4 +1,5 @@
 import "./wdyr";
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -24,6 +25,12 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout() {
+  // Signals that React has hydrated and event handlers are attached. The e2e
+  // tests wait on this so they don't click on server-rendered, inert HTML.
+  useEffect(() => {
+    document.documentElement.dataset.hydrated = "true";
+  }, []);
+
   return (
     <html lang="en">
       <head>
