@@ -11,6 +11,7 @@ import SignoutButton from "./components/signout-button";
 import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
 import { NotificationProvider } from "./components/notification-provider";
+import { useId } from "react";
 
 type BetterAuthSession = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -70,8 +71,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 }
 
 export default function RootLayout({ loaderData }: Route.ComponentProps) {
-  // TODO: investigate useId issue
-  const drawerId = "_drawer_";
+  const drawerId = useId();
 
   const { user, teams, activeLeague, userLeagues, activeSeason } = loaderData;
 
