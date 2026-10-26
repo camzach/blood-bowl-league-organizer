@@ -24,7 +24,6 @@ test("journeymen: selecting journeymen moves game to inducements", async ({
     state: "journeymen",
   });
 
-  await page.goto("/");
   await nav.goToGame(teamA.name, teamB.name);
 
   // Only the home team needs journeymen — scope to their group and pick the first position

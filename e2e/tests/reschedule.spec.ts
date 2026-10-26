@@ -15,6 +15,7 @@ test("reschedule: admin can set a scheduled time on a game", async ({
   await seed.game(teamA.teamId, teamB.teamId, {
     seasonId: season.seasonId,
   });
+  await page.reload();
 
   // The browser runs in UTC (timezoneId: "UTC" in playwright.config.ts).
   // datetime-local treats the fill value as local (UTC) time, stores as UTC,
@@ -25,7 +26,6 @@ test("reschedule: admin can set a scheduled time on a game", async ({
     timeZone: "UTC",
   });
 
-  await page.goto("/");
   await nav.goToScheduleManager();
 
   const gameRow = page

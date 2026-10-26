@@ -17,7 +17,6 @@ test("inducements: skipping inducements moves game to in_progress", async ({
     state: "inducements",
   });
 
-  await page.goto("/");
   await nav.goToGame(teamA.name, teamB.name);
 
   await page.getByRole("button", { name: "Done :)" }).click();

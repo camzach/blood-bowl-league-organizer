@@ -129,6 +129,7 @@ export const test = base.extend<AuthFixtures & { testLeague: TestLeague }>({
       return res;
     }) as typeof page.reload;
 
+    await page.goto("/");
     await use(page);
   },
 

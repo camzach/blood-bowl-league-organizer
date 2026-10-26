@@ -7,7 +7,6 @@ test("end-game: completing a game moves both teams to improving", async ({
   leagueId,
   userId,
 }) => {
-  await page.goto("/");
   await seed.makeAdmin(userId);
 
   const teamA = await seed.team(leagueId, userId, { state: "ready" });

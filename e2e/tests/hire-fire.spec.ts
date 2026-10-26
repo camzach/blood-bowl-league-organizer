@@ -11,8 +11,7 @@ test("hire-fire: hired player appears on roster then can be fired", async ({
     state: "hiring",
     playerCount: 11,
   });
-
-  await page.goto("/");
+  await page.reload();
   await nav.goToTeamEdit(team.name);
 
   // Hire a new player as #12
