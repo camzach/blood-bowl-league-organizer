@@ -52,6 +52,14 @@ const config = defineConfig([
   },
 
   {
+    files: ["e2e/**"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "no-empty-pattern": "off",
+    },
+  },
+
+  {
     files: ["**/*.cjs"],
 
     languageOptions: {

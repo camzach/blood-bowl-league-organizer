@@ -26,10 +26,10 @@ function ChoicesList(props: {
 }) {
   const { teamName, needed, onSelect, value, choices } = props;
   return (
-    <>
-      <h1>
+    <fieldset>
+      <legend>
         {teamName} - Need {needed} Journeymen
-      </h1>
+      </legend>
       {choices.map((choice) => (
         <label key={choice.id}>
           <input
@@ -45,7 +45,7 @@ function ChoicesList(props: {
           {choice.name}
         </label>
       ))}
-    </>
+    </fieldset>
   );
 }
 
@@ -58,6 +58,9 @@ export default function Journeymen({ home, away, gameId }: Props) {
   useFetcherErrorNotification(fetcher);
 
   const isLoading = fetcher.state !== "idle";
+  const canSubmit =
+    (home.needed === 0 || homeChoice !== undefined) &&
+    (away.needed === 0 || awayChoice !== undefined);
 
   const handleSubmit = () => {
     const formData = new FormData();
@@ -100,7 +103,11 @@ export default function Journeymen({ home, away, gameId }: Props) {
         />
       )}
       <br />
-      <button className="btn" onClick={handleSubmit} disabled={isLoading}>
+      <button
+        className="btn"
+        onClick={handleSubmit}
+        disabled={isLoading || !canSubmit}
+      >
         {isLoading ? "Submitting..." : "Submit!"}
       </button>
     </>

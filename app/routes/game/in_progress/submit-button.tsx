@@ -6,6 +6,7 @@ import { Modal } from "~/app/components/modal";
 import { Die } from "~/app/components/die";
 import { EndGameModal } from "./end-game-modal";
 import { gameEvent } from "../game-events";
+import type { EndGameActionData } from "../game.action";
 import z from "zod";
 
 type BasePlayer = {
@@ -43,35 +44,11 @@ export default function Button({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [mvpModalOpen, setMvpModalOpen] = useState(false);
-  const fetcher = useFetcher<{
-    success: boolean;
-    data?: {
-      homeWinnings: number;
-      awayWinnings: number;
-      homeFansUpdate: {
-        roll: number;
-        currentFans: number;
-        newFans: number;
-      };
-      awayFansUpdate: {
-        roll: number;
-        currentFans: number;
-        newFans: number;
-      };
-      homeMVP: {
-        name: string | null;
-        number: number;
-      };
-      awayMVP: {
-        name: string | null;
-        number: number;
-      };
-    };
-  }>();
+  const fetcher = useFetcher();
 
   const isLoading = fetcher.state !== "idle";
-  const hasError = fetcher.data && !fetcher.data.success;
-  const result = fetcher.data;
+  const result = fetcher.data as EndGameActionData | undefined;
+  const hasError = result && !result.success;
 
   // Open success modal when data arrives
   if (result?.success && result.data && !open) {
@@ -98,17 +75,17 @@ export default function Button({
       </button>
     );
   }
-  if (result?.success && result.data)
+
+  if (result?.success && result.data) {
+    console.log(result);
     return (
       <>
         <Modal
           isOpen={open}
+          title="Post-Game Sequence"
           className="w-fit max-w-(--breakpoint-sm)"
           onRequestClose={() => setOpen(false)}
         >
-          <span className="block w-full text-center text-lg">
-            Post-Game Sequence
-          </span>
           <table className="table-sm table">
             <thead>
               <tr>
@@ -159,12 +136,16 @@ export default function Button({
         </button>
       </>
     );
+  }
+
   return (
     <>
       {mvpModalOpen && (
         <EndGameModal
           isOpen={mvpModalOpen}
           onRequestClose={() => setMvpModalOpen(false)}
+          homeTeamName={homeTeam.name}
+          awayTeamName={awayTeam.name}
           homePlayers={homeTeam.players
             .concat(homeTeam.journeymen)
             .filter(
@@ -204,6 +185,7 @@ export default function Button({
                 action: `/game/${gameId}/action`,
                 method: "post",
                 encType: "application/json",
+                defaultShouldRevalidate: false,
               },
             );
           }}
@@ -211,6 +193,7 @@ export default function Button({
       )}
       <button
         className={classNames("btn", className)}
+        aria-label="Done — end game"
         onClick={() => setMvpModalOpen(true)}
       >
         Done

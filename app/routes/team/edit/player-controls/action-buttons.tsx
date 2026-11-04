@@ -78,7 +78,11 @@ export function PlayerActions({
           />
         )}
       {canAdvance && (
-        <Modal isOpen={isOpen} onRequestClose={() => setOpen(false)}>
+        <Modal
+          isOpen={isOpen}
+          onRequestClose={() => setOpen(false)}
+          title="Advance Player"
+        >
           <div className="whitespace-pre-wrap">
             <Popup
               player={player}

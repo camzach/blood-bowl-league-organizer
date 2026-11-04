@@ -18,7 +18,7 @@ export default function TeamState({
 }: Props) {
   return (
     <div className="my-2 inline-flex flex-col gap-2">
-      <ol className="steps">
+      <ol className="steps" aria-label="Team setup steps">
         {state === "draft" ? (
           <>
             <li className="step step-primary">Draft Team</li>

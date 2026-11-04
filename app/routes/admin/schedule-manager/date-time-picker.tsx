@@ -13,6 +13,7 @@ export default function dateTimePicker({ value, onChange, className }: Props) {
       <input
         className={classNames("input", className)}
         type="datetime-local"
+        aria-label="Scheduled time"
         value={value ? format(value, "yyyy-MM-dd'T'HH:mm") : ""}
         onChange={(e) => {
           const value = e.target.value;

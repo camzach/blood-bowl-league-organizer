@@ -26,7 +26,6 @@ export default function PlayerFirer({ id, teamId, disabled }: Props) {
           : undefined
       }
       onClick={() => {
-        console.log("Sus");
         fetcher.submit(
           {},
           {

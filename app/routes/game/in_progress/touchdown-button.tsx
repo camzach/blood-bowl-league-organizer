@@ -37,7 +37,11 @@ export default function TDButton({
 
   return (
     <>
-      <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        title="Record Touchdown"
+      >
         <label>
           Scored By:
           <select

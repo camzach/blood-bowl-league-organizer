@@ -221,7 +221,7 @@ async function handleStart(gameId: string) {
       awayDetailsUpdate,
     ]);
 
-    return { success: true, data: result };
+    return result;
   });
 }
 
@@ -344,11 +344,8 @@ async function handleSelectJourneymen(
     ]);
 
     return {
-      success: true,
-      data: {
-        pettyCashHome,
-        pettyCashAway,
-      },
+      pettyCashHome,
+      pettyCashAway,
     };
   });
 }
@@ -482,11 +479,8 @@ async function handlePurchaseInducements(
     ]);
 
     return {
-      success: true,
-      data: {
-        treasuryCostHome,
-        treasuryCostAway,
-      },
+      treasuryCostHome,
+      treasuryCostAway,
     };
   });
 }
@@ -823,29 +817,30 @@ async function handleEndGame(
     }
 
     return {
-      success: true,
-      data: {
-        homeWinnings,
-        awayWinnings,
-        homeFansUpdate: {
-          roll: homeFansUpdate.roll,
-          currentFans: homeFansUpdate.currentFans,
-          newFans: homeFansUpdate.newFans,
-        },
-        awayFansUpdate: {
-          roll: awayFansUpdate.roll,
-          currentFans: awayFansUpdate.currentFans,
-          newFans: awayFansUpdate.newFans,
-        },
-        homeMVP: {
-          name: mvpHome.name,
-          number: mvpHome.number,
-        },
-        awayMVP: {
-          name: mvpAway.name,
-          number: mvpAway.number,
-        },
+      homeWinnings,
+      awayWinnings,
+      homeFansUpdate: {
+        roll: homeFansUpdate.roll,
+        currentFans: homeFansUpdate.currentFans,
+        newFans: homeFansUpdate.newFans,
+      },
+      awayFansUpdate: {
+        roll: awayFansUpdate.roll,
+        currentFans: awayFansUpdate.currentFans,
+        newFans: awayFansUpdate.newFans,
+      },
+      homeMVP: {
+        name: mvpHome.name,
+        number: mvpHome.number,
+      },
+      awayMVP: {
+        name: mvpAway.name,
+        number: mvpAway.number,
       },
     };
   });
 }
+
+export type EndGameActionData =
+  | { success: true; data: Awaited<ReturnType<typeof handleEndGame>> }
+  | { success: false; error: string };

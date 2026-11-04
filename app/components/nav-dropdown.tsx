@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, type PropsWithChildren } from "react";
+import { useId, type PropsWithChildren } from "react";
 
 type Props = {
   title: string;
@@ -10,29 +10,28 @@ export default function NavDropdown({
   title,
   children,
 }: PropsWithChildren<Props>) {
-  const ref = useRef<HTMLDetailsElement>(null);
-  useEffect(() => {
-    const listener = (e: MouseEvent) => {
-      if (!ref.current) return;
-      if (
-        !ref.current.contains(e.target as Node) ||
-        (e.target as Node).nodeName === "A"
-      ) {
-        ref.current.open = false;
-      }
-    };
-    document.body.addEventListener("click", listener);
-    return () => {
-      document.body.removeEventListener("click", listener);
-    };
-  }, []);
+  const id = useId();
+  const anchorName = `--nav-anchor-${id.replace(/:/g, "")}`;
 
   return (
-    <details ref={ref}>
-      <summary>{title}</summary>
-      <ul className="bg-base-200 z-1 w-max max-w-xs p-2 shadow-xl">
+    <>
+      <button popoverTarget={id} style={{ anchorName } as React.CSSProperties}>
+        {title}
+      </button>
+      <ul
+        id={id}
+        popover="auto"
+        className="bg-base-200 z-1 w-max max-w-xs p-2 shadow-xl"
+        style={
+          {
+            positionAnchor: anchorName,
+            top: "anchor(bottom)",
+            left: "anchor(left)",
+          } as React.CSSProperties
+        }
+      >
         {children}
       </ul>
-    </details>
+    </>
   );
 }

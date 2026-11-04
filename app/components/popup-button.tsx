@@ -22,7 +22,11 @@ export default function PopupButton({
       >
         {buttonText}
       </button>
-      <Modal isOpen={show} onRequestClose={() => setShow(false)}>
+      <Modal
+        isOpen={show}
+        onRequestClose={() => setShow(false)}
+        title={buttonText}
+      >
         {children}
       </Modal>
     </>
