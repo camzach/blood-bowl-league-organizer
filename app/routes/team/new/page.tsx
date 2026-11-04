@@ -56,6 +56,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
               Redraft an existing team
             </Link>
             <select
+              aria-label="Team to redraft"
               className="join-item select select-accent"
               value={redraftTeamId}
               onChange={(e) => setRedraftTeamId(e.target.value)}
