@@ -1,0 +1,12 @@
+{
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "sortTailwindcss": {},
+  "ignorePatterns": [
+    "node_modules/",
+    "build/",
+    ".react-router/",
+    "drizzle/",
+    "pnpm-lock.yaml"
+  ]
+}

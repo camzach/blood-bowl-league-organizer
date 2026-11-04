@@ -4,7 +4,7 @@ import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 
 // In development/test, we cache the database instance on globalThis to prevent connection pool leaks
 let db: NodePgDatabase<typeof relations> | NeonDatabase<typeof relations> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).db;
 
 if (!db) {
@@ -32,7 +32,7 @@ if (!db) {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any).db = db;
   }
 }

@@ -25,24 +25,24 @@ export default function Calendar(props: Props) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  let month = new Date();
+  // oxlint-disable-next-line react/purity
+  let today = new Date();
   if (props.year !== undefined) {
-    month = setYear(month, props.year);
+    today = setYear(today, props.year);
   }
   if (props.month !== undefined) {
-    month = setMonth(month, props.month);
+    today = setMonth(today, props.month);
   }
-  month = startOfMonth(month);
 
-  const firstDay = startOfWeek(month);
-  const nDays = differenceInDays(endOfWeek(endOfMonth(month)), firstDay);
+  const firstDay = startOfWeek(startOfMonth(today));
+  const nDays = differenceInDays(endOfWeek(endOfMonth(today)), firstDay);
 
-  const nextMonth = addMonths(month, 1);
+  const nextMonth = addMonths(today, 1);
   const nextMonthSearch = new URLSearchParams(searchParams);
   nextMonthSearch.set("month", nextMonth.getMonth().toString());
   nextMonthSearch.set("year", nextMonth.getFullYear().toString());
 
-  const lastMonth = addMonths(month, -1);
+  const lastMonth = addMonths(today, -1);
   const lastMonthSearch = new URLSearchParams(searchParams);
   lastMonthSearch.set("month", lastMonth.getMonth().toString());
   lastMonthSearch.set("year", lastMonth.getFullYear().toString());
@@ -57,7 +57,7 @@ export default function Calendar(props: Props) {
           &lt;
         </button>
         <h1>
-          {month.toLocaleDateString("default", {
+          {today.toLocaleDateString("default", {
             month: "long",
             year: "numeric",
           })}
@@ -79,10 +79,8 @@ export default function Calendar(props: Props) {
               <div
                 className={classNames(
                   "bg-base-200 flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border shadow-xl lg:aspect-square",
-                  isSameDay(new Date(), date)
-                    ? "border-accent"
-                    : "border-neutral",
-                  !isSameMonth(date, month) && "opacity-50",
+                  isSameDay(today, date) ? "border-accent" : "border-neutral",
+                  !isSameMonth(date, today) && "opacity-50",
                 )}
                 key={date.toString()}
               >

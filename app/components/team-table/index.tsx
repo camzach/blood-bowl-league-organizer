@@ -28,7 +28,8 @@ export type TeamTableProps<T extends PlayerType> = {
   players: T[];
   cols?: Array<
     (
-      (typeof cols)[number]["id"] | ComponentProps<typeof Table<T>>["columns"]
+      | (typeof cols)[number]["id"]
+      | ComponentProps<typeof Table<T>>["columns"]
     )[number]
   >;
   compact?: boolean;
