@@ -9,11 +9,11 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
   const team = await fetchTeam(teamId, false);
 
-  const isEditable = true;
-
   if (!team || team.leagueId !== (session.activeOrganizationId as string)) {
     throw data({}, { status: 404 });
   }
+
+  const isEditable = team.coaches.some((c) => c.id === session.userId);
 
   return { team, isEditable };
 }
