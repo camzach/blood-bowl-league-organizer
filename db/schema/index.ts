@@ -20,26 +20,34 @@ export const relations = defineRelations(
       league: r.one.league({
         from: r.invitation.leagueId,
         to: r.league.id,
+        optional: false,
       }),
       inviter: r.one.user({
         from: r.invitation.inviterId,
         to: r.user.id,
+        optional: false,
       }),
     },
     member: {
       user: r.one.user({
         from: r.member.userId,
         to: r.user.id,
+        optional: false,
       }),
       league: r.one.league({
         from: r.member.leagueId,
         to: r.league.id,
+        optional: false,
       }),
     },
     user: {
-      memberships: r.many.member({
+      members: r.many.member({
         from: r.user.id,
         to: r.member.userId,
+      }),
+      invitations: r.many.invitation({
+        from: r.user.id,
+        to: r.invitation.inviterId,
       }),
       sessions: r.many.session({
         from: r.user.id,
@@ -218,6 +226,10 @@ export const relations = defineRelations(
       members: r.many.member({
         from: r.league.id,
         to: r.member.leagueId,
+      }),
+      invitations: r.many.invitation({
+        from: r.league.id,
+        to: r.invitation.leagueId,
       }),
       seasons: r.many.season({
         from: r.league.id,

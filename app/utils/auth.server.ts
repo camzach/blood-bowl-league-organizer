@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth/minimal";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { admin, organization } from "better-auth/plugins";
 import { db } from "./drizzle";
 import { schema } from "~/db/schema";
@@ -14,7 +14,7 @@ export const auth = betterAuth({
     schema,
     provider: "pg",
   }),
-  experimental: { joins: true },
+  advanced: { database: { joins: true } },
   databaseHooks: {
     session: {
       create: {
