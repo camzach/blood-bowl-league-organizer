@@ -211,7 +211,7 @@ async function loadInProgressData(gameId: string) {
     home: {
       name: game.homeDetails.team.name,
       id: game.homeDetails.team.id,
-      song: game.homeDetails.team.song?.data,
+      song: game.homeDetails.team.song?.id,
       rerolls:
         game.homeDetails.team.rerolls +
         (game.homeDetails.gameDetailsToInducement.find(
@@ -256,7 +256,7 @@ async function loadInProgressData(gameId: string) {
     away: {
       name: game.awayDetails.team.name,
       id: game.awayDetails.team.id,
-      song: game.awayDetails.team.song?.data,
+      song: game.awayDetails.team.song?.id,
       rerolls:
         game.awayDetails.team.rerolls +
         (game.awayDetails.gameDetailsToInducement.find(

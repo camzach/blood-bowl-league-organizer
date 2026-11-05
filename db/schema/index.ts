@@ -518,7 +518,7 @@ export const relations = defineRelations(
       }),
       song: r.one.song({
         from: r.team.touchdownSong,
-        to: r.song.name,
+        to: r.song.id,
       }),
       coachToTeam: r.many.coachToTeam({
         from: r.team.id,

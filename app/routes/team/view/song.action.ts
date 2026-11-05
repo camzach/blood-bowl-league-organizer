@@ -27,13 +27,18 @@ export const action = createValidatedAction(songSchema, async (data) => {
 
   // Permission check handled by team-permission-middleware layout
 
-  // Validate file is audio
-  const buffer = await file.arrayBuffer();
-
   // Basic MIME type check
   if (!file.type.startsWith("audio/")) {
     return { errors: { file: ["Audio files only"] } };
   }
+
+  // Limit file size to 10MB
+  if (file.size > 10 * 1024 * 1024) {
+    return { errors: { file: ["Audio file size must be less than 10MB"] } };
+  }
+
+  // Validate file is audio
+  const buffer = await file.arrayBuffer();
 
   const team = await db.query.team.findFirst({
     where: { id: teamId },
@@ -46,27 +51,12 @@ export const action = createValidatedAction(songSchema, async (data) => {
 
   const currentSong = team.song;
 
-  // Delete old song from S3 if exists
-  if (currentSong) {
-    try {
-      await s3.deleteObject({
-        Bucket: process.env.S3_BUCKET ?? "",
-        Key: currentSong.data,
-      });
-    } catch (error) {
-      console.error("Error removing old song from S3:", error);
-      throw new Error("There was an issue removing the old song", {
-        cause: error,
-      });
-    }
-  }
-
   // Upload new song to S3
-  const Key = randomUUID();
+  const songId = randomUUID();
   try {
     await s3.putObject({
       Bucket: process.env.S3_BUCKET ?? "",
-      Key,
+      Key: songId,
       Body: Buffer.from(buffer),
       ContentType: file.type,
     });
@@ -79,19 +69,35 @@ export const action = createValidatedAction(songSchema, async (data) => {
 
   // Update database
   await db.transaction(async (tx) => {
-    await tx
-      .insert(dbSong)
-      .values({ data: Key, name: songName })
-      .onConflictDoUpdate({
-        target: dbSong.name,
-        set: { data: Key },
-      });
+    // 1. Insert new entry in song table pointing to the new S3 object
+    await tx.insert(dbSong).values({ id: songId, name: songName });
 
+    // 2. Swap the team's pointer to point to the new song record
     await tx
       .update(dbTeam)
-      .set({ touchdownSong: songName })
+      .set({ touchdownSong: songId })
       .where(eq(dbTeam.id, teamId));
+
+    // 3. Delete the old song record from the database to clean up the database orphan
+    if (currentSong) {
+      await tx.delete(dbSong).where(eq(dbSong.id, currentSong.id));
+    }
   });
+
+  // 4. Clean up the old S3 file AFTER the database transaction succeeds!
+  if (currentSong) {
+    try {
+      await s3.deleteObject({
+        Bucket: process.env.S3_BUCKET ?? "",
+        Key: currentSong.id,
+      });
+    } catch (error) {
+      console.error(
+        "Warning: Failed to clean up old S3 file from bucket:",
+        error,
+      );
+    }
+  }
 
   return { success: true };
 });

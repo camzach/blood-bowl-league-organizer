@@ -30,7 +30,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   try {
     const object = await s3.getObject({
       Bucket: process.env.S3_BUCKET ?? "",
-      Key: team.song.data,
+      Key: team.song.id,
     });
 
     if (object.Body === undefined) {

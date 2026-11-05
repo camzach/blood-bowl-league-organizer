@@ -108,11 +108,12 @@ export const team = pgTable(
     apothecary: boolean("apothecary").notNull().default(false),
     dedicatedFans: integer("dedicated_fans").notNull().default(1),
     touchdownSong: varchar("touchdown_song", { length: 255 }).references(
-      () => song.name,
+      () => song.id,
     ),
   },
   (table) => ({
     uniqueTeamNamePerLeague: unique("name").on(table.name, table.leagueId),
+    uniqueTouchdownSong: unique("touchdown_song_uniq").on(table.touchdownSong),
   }),
 );
 
@@ -196,8 +197,8 @@ export const pendingRandomStat = pgTable("pending_random_stat", {
 });
 
 export const song = pgTable("song", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey(),
-  data: varchar("data", { length: 255 }).notNull(),
+  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
 });
 
 export const coachToTeam = pgTable(
