@@ -37,7 +37,7 @@ import { getPlayerStats } from "~/app/utils/get-computed-player-fields";
 const inducementChoices = z.object({
   stars: z.array(z.string()),
   inducements: z.array(
-    z.object({ name: z.string(), quantity: z.number().int() }),
+    z.object({ name: z.string(), quantity: z.number().int().min(1) }),
   ),
 });
 
@@ -616,52 +616,29 @@ async function handleEndGame(
     );
 
     const playerUpdateQueries = Object.entries(playerUpdates).map(
-      ([id, update]) =>
-        tx
-          .update(player)
-          .set({
-            touchdowns:
-              update.touchdowns &&
-              sql`${player.touchdowns} + ${update.touchdowns}`,
-            casualties:
-              update.casualties &&
-              sql`${player.casualties} + ${update.casualties}`,
-            mvps: update.mvps && sql`${player.mvps} + ${update.mvps}`,
-            interceptions:
-              update.interceptions &&
-              sql`${player.interceptions} + ${update.interceptions}`,
-            safeLandings:
-              update.safeLandings &&
-              sql`${player.safeLandings} + ${update.safeLandings}`,
-            otherSPP:
-              update.otherSPP && sql`${player.otherSPP} + ${update.otherSPP}`,
-            completions:
-              update.completions &&
-              sql`${player.completions} + ${update.completions}`,
-            missNextGame: update.missNextGame,
-            dead: update.dead,
-            maInjuries:
-              update.maInjuries &&
-              sql`${player.maInjuries} + ${update.maInjuries}`,
-            avInjuries:
-              update.avInjuries &&
-              sql`${player.avInjuries} + ${update.avInjuries}`,
-            stInjuries:
-              update.stInjuries &&
-              sql`${player.stInjuries} + ${update.stInjuries}`,
-            agInjuries:
-              update.agInjuries &&
-              sql`${player.agInjuries} + ${update.agInjuries}`,
-            paInjuries:
-              update.paInjuries &&
-              sql`${player.paInjuries} + ${update.paInjuries}`,
-            nigglingInjuries:
-              update.nigglingInjuries &&
-              sql`${player.nigglingInjuries} + ${update.nigglingInjuries}`,
-            teamId: update.teamId,
-            membershipType: update.membershipType,
-          })
-          .where(eq(player.id, id)),
+      ([id, update]) => {
+        const setPayload: Record<string, unknown> = {};
+
+        for (const [key, value] of Object.entries(update)) {
+          if (value === undefined) continue;
+
+          const isReplacementField = [
+            "missNextGame",
+            "dead",
+            "teamId",
+            "membershipType",
+          ].includes(key);
+
+          if (isReplacementField) {
+            setPayload[key] = value;
+          } else {
+            setPayload[key] =
+              sql`${player[key as keyof typeof player]} + ${value}`;
+          }
+        }
+
+        return tx.update(player).set(setPayload).where(eq(player.id, id));
+      },
     );
     const gameUpdate = tx
       .update(dbGame)
@@ -756,7 +733,7 @@ async function handleEndGame(
           ? gamesInRound - relatedBracketGame.seed + 1
           : relatedBracketGame.seed;
       const detailsId = nanoid();
-      const newDetails = tx.insert(gameDetails).values({
+      await tx.insert(gameDetails).values({
         teamId: (touchdowns[0] > touchdowns[1]
           ? game.homeDetails
           : game.awayDetails
@@ -782,7 +759,7 @@ async function handleEndGame(
         })
         .where(eq(dbGame.id, nextGame.gameId));
 
-      allUpdates.push(newDetails, updateNextGame);
+      allUpdates.push(updateNextGame);
     }
 
     await Promise.all(allUpdates);
