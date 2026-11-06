@@ -111,10 +111,11 @@ export const team = pgTable(
       () => song.id,
     ),
   },
-  (table) => ({
-    uniqueTeamNamePerLeague: unique("name").on(table.name, table.leagueId),
-    uniqueTouchdownSong: unique("touchdown_song_uniq").on(table.touchdownSong),
-  }),
+  (table) => [
+    index("team_league_id_idx").on(table.leagueId),
+    unique("name").on(table.name, table.leagueId),
+    unique("touchdown_song_uniq").on(table.touchdownSong),
+  ],
 );
 
 export const player = pgTable(
@@ -147,6 +148,7 @@ export const player = pgTable(
     membershipType: membershipType("membership_type"),
   },
   (table) => [
+    index("player_team_id_idx").on(table.teamId),
     uniqueIndex()
       .on(table.teamId)
       .where(sql`${table.isCaptain} = true`),
@@ -169,9 +171,7 @@ export const improvement = pgTable(
       () => skill.name,
     ),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.playerId, table.order] }),
-  }),
+  (table) => [primaryKey({ columns: [table.playerId, table.order] })],
 );
 
 export const pendingRandomSkill = pgTable("pending_random_skill", {
@@ -211,7 +211,10 @@ export const coachToTeam = pgTable(
       .notNull()
       .references(() => team.id),
   },
-  (table) => ({ pk: primaryKey({ columns: [table.coachId, table.teamId] }) }),
+  (table) => [
+    primaryKey({ columns: [table.coachId, table.teamId] }),
+    index("coach_to_team_team_id_idx").on(table.teamId),
+  ],
 );
 
 export const roster = pgTable("roster", {
@@ -236,9 +239,9 @@ export const specialRuleToRoster = pgTable(
       .notNull()
       .references(() => roster.name),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
+  ],
 );
 
 export const optionalSpecialRuleToRoster = pgTable(
@@ -251,9 +254,9 @@ export const optionalSpecialRuleToRoster = pgTable(
       .notNull()
       .references(() => roster.name),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.specialRuleName, table.rosterName] }),
+  ],
 );
 
 export const rosterSlot = pgTable(
@@ -265,9 +268,7 @@ export const rosterSlot = pgTable(
     id: varchar("id", { length: 25 }).notNull().primaryKey(),
     max: integer("max").notNull(),
   },
-  (table) => ({
-    rosterIndex: index("roster_slot_idx").on(table.rosterName),
-  }),
+  (table) => [index("roster_slot_idx").on(table.rosterName)],
 );
 
 export const position = pgTable("position", {
@@ -304,9 +305,7 @@ export const skillToPosition = pgTable(
       .notNull()
       .references(() => position.id),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.skillName, table.positionId] }),
-  }),
+  (table) => [primaryKey({ columns: [table.skillName, table.positionId] })],
 );
 
 export const skillRelationType = pgEnum("skill_relation_type", [
@@ -325,15 +324,15 @@ export const skillRelation = pgTable(
       .references(() => skill.name),
     type: skillRelationType("type").notNull(),
   },
-  (table) => ({
-    pk: primaryKey({
+  (table) => [
+    primaryKey({
       columns: [table.skillNameA, table.skillNameB, table.type],
     }),
-    orderCheck: check(
+    check(
       "skill_relation_conflicts_ordered",
       sql`${table.type} != 'conflicts' OR ${table.skillNameA} < ${table.skillNameB}`,
     ),
-  }),
+  ],
 );
 
 export const faq = pgTable("faq", {
@@ -352,9 +351,7 @@ export const faqToSkill = pgTable(
       .notNull()
       .references(() => faq.id),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.skillName, table.faqId] }),
-  }),
+  (table) => [primaryKey({ columns: [table.skillName, table.faqId] })],
 );
 
 export const game = pgTable("game", {
@@ -371,18 +368,22 @@ export const game = pgTable("game", {
   discordEventId: varchar("discord_event_id"),
 });
 
-export const gameDetails = pgTable("game_details", {
-  id: varchar("id", { length: 25 }).notNull().primaryKey(),
-  teamId: varchar("team_id", { length: 25 })
-    .notNull()
-    .references(() => team.id),
-  touchdowns: integer("touchdowns").notNull().default(0),
-  casualties: integer("casualties").notNull().default(0),
-  pettyCashAwarded: integer("petty_cash_awarded").notNull().default(0),
-  journeymenRequired: integer("journeymen_required"),
-  fanFactor: integer("fan_factor").notNull().default(0),
-  mvpId: varchar("mvp_id", { length: 25 }).references(() => player.id),
-});
+export const gameDetails = pgTable(
+  "game_details",
+  {
+    id: varchar("id", { length: 25 }).notNull().primaryKey(),
+    teamId: varchar("team_id", { length: 25 })
+      .notNull()
+      .references(() => team.id),
+    touchdowns: integer("touchdowns").notNull().default(0),
+    casualties: integer("casualties").notNull().default(0),
+    pettyCashAwarded: integer("petty_cash_awarded").notNull().default(0),
+    journeymenRequired: integer("journeymen_required"),
+    fanFactor: integer("fan_factor").notNull().default(0),
+    mvpId: varchar("mvp_id", { length: 25 }).references(() => player.id),
+  },
+  (table) => [index("game_details_team_id_idx").on(table.teamId)],
+);
 
 export const season = pgTable(
   "season",
@@ -394,23 +395,28 @@ export const season = pgTable(
       .references(() => league.id),
     isActive: boolean("is_active").notNull().default(false),
   },
-  (table) => ({
-    oneActiveSeason: uniqueIndex()
+  (table) => [
+    index("season_league_id_idx").on(table.leagueId),
+    uniqueIndex()
       .on(table.leagueId)
       .where(sql`${table.isActive} = true`),
-  }),
+  ],
 );
 
-export const roundRobinGame = pgTable("round_robin_game", {
-  gameId: varchar("game_id", { length: 25 })
-    .notNull()
-    .primaryKey()
-    .references(() => game.id),
-  seasonId: varchar("season_id", { length: 25 })
-    .notNull()
-    .references(() => season.id),
-  round: integer("round").notNull(),
-});
+export const roundRobinGame = pgTable(
+  "round_robin_game",
+  {
+    gameId: varchar("game_id", { length: 25 })
+      .notNull()
+      .primaryKey()
+      .references(() => game.id),
+    seasonId: varchar("season_id", { length: 25 })
+      .notNull()
+      .references(() => season.id),
+    round: integer("round").notNull(),
+  },
+  (table) => [index("round_robin_game_season_id_idx").on(table.seasonId)],
+);
 
 export const bracketGame = pgTable(
   "bracket_game",
@@ -425,13 +431,7 @@ export const bracketGame = pgTable(
       .primaryKey()
       .references(() => game.id),
   },
-  (table) => ({
-    uniqueSeedPerRound: uniqueIndex().on(
-      table.seasonId,
-      table.round,
-      table.seed,
-    ),
-  }),
+  (table) => [uniqueIndex().on(table.seasonId, table.round, table.seed)],
 );
 
 export const inducement = pgTable(
@@ -473,12 +473,12 @@ export const starPlayer = pgTable(
     partnerName: varchar("partner_name", { length: 255 }),
     specialAbility: text("special_ability").notNull(),
   },
-  (table) => ({
-    partner: foreignKey({
+  (table) => [
+    foreignKey({
       columns: [table.partnerName],
       foreignColumns: [table.name],
     }),
-  }),
+  ],
 );
 
 export const skillToStarPlayer = pgTable(
@@ -491,9 +491,7 @@ export const skillToStarPlayer = pgTable(
       .notNull()
       .references(() => starPlayer.name),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.skillName, table.starPlayerName] }),
-  }),
+  (table) => [primaryKey({ columns: [table.skillName, table.starPlayerName] })],
 );
 
 export const specialRuleToStarPlayer = pgTable(
@@ -506,9 +504,9 @@ export const specialRuleToStarPlayer = pgTable(
       .notNull()
       .references(() => specialRule.name),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.starPlayerName, table.specialRuleName] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.starPlayerName, table.specialRuleName] }),
+  ],
 );
 
 export const gameDetailsToStarPlayer = pgTable(
@@ -521,9 +519,9 @@ export const gameDetailsToStarPlayer = pgTable(
       .notNull()
       .references(() => starPlayer.name),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.gameDetailsId, table.starPlayerName] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.gameDetailsId, table.starPlayerName] }),
+  ],
 );
 
 export const gameDetailsToInducement = pgTable(
@@ -537,9 +535,9 @@ export const gameDetailsToInducement = pgTable(
       .references(() => inducement.name),
     count: integer("count").notNull().default(1),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.gameDetailsId, table.inducementName] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.gameDetailsId, table.inducementName] }),
+  ],
 );
 
 export const keyword = pgTable("keyword", {
