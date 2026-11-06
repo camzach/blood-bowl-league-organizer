@@ -134,6 +134,12 @@ async function makeCaptain(teamId: string, playerId: string) {
       throw new Error("A Big Guy cannot be a captain.");
     }
 
+    if (
+      !["hiring", "firing", "improving", "draft"].includes(player.team.state)
+    ) {
+      throw new Error("Team is not modifiable at this time");
+    }
+
     if (player.team.state === "draft") {
       await tx
         .update(dbPlayer)
