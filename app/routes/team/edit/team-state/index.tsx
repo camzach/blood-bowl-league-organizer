@@ -2,9 +2,10 @@ import classNames from "classnames";
 import DoneImproving from "./done-improving";
 import DoneHiring from "./done-hiring";
 import ReadyTeam from "./ready-team";
+import type { TeamState as TeamStateType } from "~/db/schema";
 
 type Props = {
-  state: "draft" | "improving" | "hiring" | "firing";
+  state: TeamStateType;
   id: string;
   treasury: number;
   blocked: boolean;

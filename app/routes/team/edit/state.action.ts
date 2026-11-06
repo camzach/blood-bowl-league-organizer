@@ -5,7 +5,12 @@ import { db } from "~/app/utils/drizzle";
 import { team as dbTeam, player as dbPlayer } from "~/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 
+import { redirect } from "react-router";
+
 const stateSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("redraft"),
+  }),
   z.object({
     action: z.literal("done-improving"),
   }),
@@ -25,7 +30,9 @@ export const action = createValidatedAction(
     // Permission check handled by team-permission-middleware layout
 
     // Route to appropriate handler
-    if (data.action === "done-improving") {
+    if (data.action === "redraft") {
+      return redraft(teamId);
+    } else if (data.action === "done-improving") {
       return doneImproving(teamId);
     } else if (data.action === "done-hiring") {
       return doneHiring(teamId);
@@ -34,6 +41,19 @@ export const action = createValidatedAction(
     }
   },
 );
+
+async function redraft(teamId: string) {
+  await db.transaction(async (tx) => {
+    const [team] = await tx
+      .update(dbTeam)
+      .set({ state: "draft" })
+      .where(and(eq(dbTeam.id, teamId), eq(dbTeam.state, "inactive")))
+      .returning({ id: dbTeam.id });
+    if (!team) throw new Error("Team not in Inactive state");
+  });
+
+  throw redirect(`/team/${teamId}/edit`);
+}
 
 async function doneImproving(teamId: string) {
   return db.transaction(async (tx) => {

@@ -24,7 +24,9 @@ export const teamStates = [
   "hiring",
   "firing",
   "improving",
+  "inactive",
 ] as const;
+export type TeamState = (typeof teamStates)[number];
 export const teamState = pgEnum("team_state", teamStates);
 
 export const gameStates = [

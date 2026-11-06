@@ -2,6 +2,7 @@ import FireButton from "./player-firer";
 import { Popup, advancementCosts } from "./advancement-modal";
 import { useState } from "react";
 import { Modal } from "~/app/components/modal";
+import type { TeamState } from "~/db/schema";
 import { skill, skillRelation } from "~/db/schema";
 import type fetchTeam from "../../fetch-team";
 import classNames from "classnames";
@@ -12,7 +13,7 @@ type Props = {
   player: NonNullable<Awaited<ReturnType<typeof fetchTeam>>>["players"][number];
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
-  state: "hiring" | "firing" | "improving" | "draft";
+  state: TeamState;
   hasCaptainRule: boolean;
   currentCaptainId: string | undefined;
   teamId: string;

@@ -10,10 +10,18 @@ import PlayerNumberSelector from "./player-controls/player-number-selector";
 import PlayerNameEditor from "./player-controls/player-name-editor";
 import { db } from "~/app/utils/drizzle";
 import TeamState from "./team-state";
+import type { TeamState as TeamStateType } from "~/db/schema/bblo";
 import { useCallback } from "react";
 
 import { Route } from "./+types/page";
 import { data, redirect } from "react-router";
+
+const EDITABLE_STATES: TeamStateType[] = [
+  "draft",
+  "hiring",
+  "firing",
+  "improving",
+];
 
 export async function loader({ params }: Route.LoaderArgs) {
   const team = await db.query.team.findFirst({
@@ -21,8 +29,9 @@ export async function loader({ params }: Route.LoaderArgs) {
     columns: { state: true },
   });
   if (!team) throw data({}, { status: 404 });
-  if (team.state === "ready" || team.state === "playing")
+  if (!EDITABLE_STATES.includes(team.state)) {
     throw redirect(`/team/${params.teamId}`);
+  }
 
   const skills = await db.query.skill.findMany({});
 

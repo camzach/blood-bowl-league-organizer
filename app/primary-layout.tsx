@@ -46,7 +46,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
   const teams = await db.query.team.findMany({
     where: {
-      NOT: { state: "draft" },
+      NOT: { state: "inactive" },
       leagueId: session.activeOrganizationId ?? "",
     },
     orderBy: { name: "asc" },

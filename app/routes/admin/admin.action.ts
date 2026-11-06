@@ -377,14 +377,32 @@ async function endSeason(leagueId: string) {
         isActive: true,
       },
       with: {
-        roundRobinGames: true,
+        roundRobinGames: {
+          with: {
+            game: {
+              with: {
+                homeDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
+                awayDetails: {
+                  with: { team: { columns: { name: true, id: true } } },
+                },
+              },
+            },
+          },
+        },
         bracketGames: true,
       },
     });
     if (!activeSeason) throw new Error("No active season");
 
+    const leagueTable = computeLeagueTable(activeSeason.roundRobinGames);
+
     const teams = await tx.query.team.findMany({
-      where: { leagueId },
+      where: {
+        leagueId,
+        NOT: { state: "inactive" },
+      },
       with: {
         players: true,
       },
@@ -430,28 +448,6 @@ async function endSeason(leagueId: string) {
           ),
         );
     }
-
-    const leagueTableSeason = await tx.query.season.findFirst({
-      where: { id: activeSeason.id, isActive: true },
-      with: {
-        roundRobinGames: {
-          with: {
-            game: {
-              with: {
-                homeDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-                awayDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-    if (!leagueTableSeason) throw new Error("No active season found");
-    const leagueTable = computeLeagueTable(leagueTableSeason.roundRobinGames);
     const teamUpdates: Record<string, number> = {};
 
     let winnerId: string | undefined;
@@ -519,7 +515,7 @@ async function endSeason(leagueId: string) {
             assistantCoaches: 0,
             cheerleaders: 0,
             apothecary: false,
-            state: "draft",
+            state: "inactive",
           })
           .where(eq(team.id, teamId)),
       ),

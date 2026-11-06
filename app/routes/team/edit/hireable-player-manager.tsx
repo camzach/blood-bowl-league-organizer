@@ -2,6 +2,7 @@ import type { TeamTableProps } from "~/app/components/team-table";
 import { TeamTable } from "~/app/components/team-table";
 import { useState, useCallback } from "react";
 import { PlayerActions } from "./player-controls/action-buttons";
+import type { TeamState } from "~/db/schema";
 import { skill, skillRelation } from "~/db/schema";
 import type fetchTeam from "../fetch-team";
 
@@ -12,7 +13,7 @@ type Props = {
   freeNumbers: number[];
   skills: Array<typeof skill.$inferSelect>;
   skillRelations: Array<typeof skillRelation.$inferSelect>;
-  state: "draft" | "hiring" | "firing" | "improving";
+  state: TeamState;
   teamId: string;
   canFire: (playerId: string) => boolean;
 };
