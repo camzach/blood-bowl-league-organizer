@@ -1,11 +1,11 @@
-import type { Route } from "./+types/page";
 import calculateTV from "~/app/utils/calculate-tv";
 import { TeamTable } from "~/app/components/team-table";
 import EditButton from "./edit-button";
 import SongControls from "./touchdown-song-controls";
+import { useTeamLoaderData } from "../loader";
 
-export default function Component({ matches }: Route.ComponentProps) {
-  const { team, isEditable } = matches[2].loaderData;
+export default function Component() {
+  const { team, isEditable } = useTeamLoaderData();
 
   return (
     <>

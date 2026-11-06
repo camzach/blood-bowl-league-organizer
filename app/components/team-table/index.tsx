@@ -43,7 +43,7 @@ export function TeamTable<T extends PlayerType>({
   return (
     <Table
       className={compact ? "table-sm" : undefined}
-      rows={players.sort((a, b) => a.number - b.number)}
+      rows={players.toSorted((a, b) => a.number - b.number)}
       columns={displayCols
         .map((col) =>
           typeof col === "string" ? cols.find((c) => c.id === col) : col,

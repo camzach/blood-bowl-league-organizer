@@ -3,7 +3,7 @@ import { data as routerData } from "react-router";
 
 export function createValidatedAction<
   Args extends { request: Request },
-  T extends z.ZodTypeAny,
+  T extends z.ZodType,
 >(
   schema: T,
   handler: (data: z.infer<T>, args: Args) => Promise<unknown> | unknown,
@@ -23,9 +23,11 @@ export function createValidatedAction<
           success: false,
           error:
             "Validation failed: " +
-            Object.entries(z.flattenError(result.error).fieldErrors)
-              // @ts-expect-error errors is being incorrectly inferred as `any` instead of `string[] | unknown`
-              .map(([field, errors]) => `${field}: ${errors?.join(", ")}`)
+            result.error.issues
+              .map(
+                (issue) =>
+                  `${issue.path.join(".") || "root"}: ${issue.message}`,
+              )
               .join("; "),
         },
         { status: 400 },
@@ -36,17 +38,20 @@ export function createValidatedAction<
       const data = await handler(result.data, args);
       return { success: true, data };
     } catch (error) {
-      console.error("Action error:", error);
-
-      // Re-throw redirects
+      // Re-throw responses (like redirect() or Response) before error logging
       if (
-        error &&
-        typeof error === "object" &&
-        "status" in error &&
-        (error.status === 301 || error.status === 302)
+        error instanceof Response ||
+        (error &&
+          typeof error === "object" &&
+          "status" in error &&
+          typeof (error as { status: unknown }).status === "number" &&
+          (error as { status: number }).status >= 300 &&
+          (error as { status: number }).status < 400)
       ) {
         throw error;
       }
+
+      console.error("Action error:", error);
 
       return routerData(
         {

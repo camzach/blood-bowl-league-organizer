@@ -12,6 +12,8 @@ import { db } from "~/app/utils/drizzle";
 import TeamState from "./team-state";
 import type { TeamState as TeamStateType } from "~/db/schema/bblo";
 import { useCallback } from "react";
+import { useTeamLoaderData } from "../loader";
+import type fetchTeam from "../fetch-team";
 
 import { Route } from "./+types/page";
 import { data, redirect } from "react-router";
@@ -40,14 +42,12 @@ export async function loader({ params }: Route.LoaderArgs) {
   return { skills, skillRelations, state: team.state };
 }
 
-type Player =
-  Route.ComponentProps["matches"][2]["loaderData"]["team"]["players"][number];
+type Player = NonNullable<
+  Awaited<ReturnType<typeof fetchTeam>>
+>["players"][number];
 
-export default function EditTeam({
-  matches,
-  loaderData,
-}: Route.ComponentProps) {
-  const { team } = matches[2].loaderData;
+export default function EditTeam({ loaderData }: Route.ComponentProps) {
+  const { team } = useTeamLoaderData();
   const { skills, skillRelations, state } = loaderData;
 
   const freeNumbers = Array.from(new Array(16), (_, idx) => idx + 1).filter(

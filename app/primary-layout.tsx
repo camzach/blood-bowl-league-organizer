@@ -1,9 +1,7 @@
 import { db } from "~/app/utils/drizzle";
 import NavLinks from "./components/nav-links";
-import { Link, redirect } from "react-router";
+import { Link, redirect, Outlet, createContext } from "react-router";
 import type { Route } from "./+types/primary-layout";
-
-import { Outlet, createContext } from "react-router";
 import "@react-router/node";
 import { auth } from "~/app/utils/auth.server";
 import LeagueSelector from "./components/league-selector";
