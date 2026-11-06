@@ -99,25 +99,31 @@ async function scheduleAction(leagueId: string) {
       })),
     }));
 
+    const detailsInserts: (typeof gameDetails.$inferInsert)[] = [];
+    const gameInserts: (typeof game.$inferInsert)[] = [];
+    const roundRobinGameInserts: (typeof roundRobinGame.$inferInsert)[] = [];
+
     for (const round of rounds) {
       for (const roundGame of round.pairs) {
-        await tx.insert(gameDetails).values([roundGame.home, roundGame.away]);
+        detailsInserts.push(roundGame.home, roundGame.away);
         const gameId = nanoid();
-        await tx.insert(game).values([
-          {
-            homeDetailsId: roundGame.home.id,
-            awayDetailsId: roundGame.away.id,
-            id: gameId,
-          },
-        ]);
-        await tx.insert(roundRobinGame).values([
-          {
-            gameId,
-            round: round.number,
-            seasonId: activeSeason.id,
-          },
-        ]);
+        gameInserts.push({
+          homeDetailsId: roundGame.home.id,
+          awayDetailsId: roundGame.away.id,
+          id: gameId,
+        });
+        roundRobinGameInserts.push({
+          gameId,
+          round: round.number,
+          seasonId: activeSeason.id,
+        });
       }
+    }
+
+    if (detailsInserts.length > 0) {
+      await tx.insert(gameDetails).values(detailsInserts);
+      await tx.insert(game).values(gameInserts);
+      await tx.insert(roundRobinGame).values(roundRobinGameInserts);
     }
   });
 
