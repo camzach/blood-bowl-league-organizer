@@ -46,30 +46,34 @@ const advanceSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   advanceSchema,
   async (data, { params }: Route.ActionArgs) => {
-    const { playerId } = params;
+    const { teamId, playerId } = params;
 
     // Team permission check handled by team-permission-middleware layout
 
     // Route to appropriate handler
     switch (data.action) {
       case "learn-skill":
-        return learnSkill(playerId, data);
+        return learnSkill(teamId, playerId, data);
       case "roll-random-skill":
-        return rollRandomSkill(playerId, data);
+        return rollRandomSkill(teamId, playerId, data);
       case "confirm-random-skill":
-        return confirmRandomSkill(playerId, data);
+        return confirmRandomSkill(teamId, playerId, data);
       case "roll-random-stat":
-        return rollRandomStat(playerId);
+        return rollRandomStat(teamId, playerId);
       case "confirm-random-stat":
-        return confirmRandomStat(playerId, data);
+        return confirmRandomStat(teamId, playerId, data);
     }
   },
 );
 
-async function learnSkill(playerId: string, input: { skill: string }) {
+async function learnSkill(
+  teamId: string,
+  playerId: string,
+  input: { skill: string },
+) {
   return db.transaction(async (tx) => {
     const fetchedPlayer = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       with: {
         team: { columns: { state: true, id: true } },
         improvements: { with: { skill: true } },
@@ -159,12 +163,13 @@ async function learnSkill(playerId: string, input: { skill: string }) {
 }
 
 async function rollRandomSkill(
+  teamId: string,
   playerId: string,
   input: { category: (typeof skillCategories)[number] },
 ) {
   return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       with: {
         team: { columns: { state: true, id: true } },
         improvements: { with: { skill: true } },
@@ -229,10 +234,14 @@ async function rollRandomSkill(
   });
 }
 
-async function confirmRandomSkill(playerId: string, input: { skill: string }) {
+async function confirmRandomSkill(
+  teamId: string,
+  playerId: string,
+  input: { skill: string },
+) {
   return db.transaction(async (tx) => {
     const fetchedPlayer = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       with: {
         team: { columns: { state: true, id: true } },
         improvements: { with: { skill: true } },
@@ -305,10 +314,10 @@ async function confirmRandomSkill(playerId: string, input: { skill: string }) {
   });
 }
 
-async function rollRandomStat(playerId: string) {
+async function rollRandomStat(teamId: string, playerId: string) {
   return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       with: {
         team: { columns: { state: true, id: true } },
         improvements: true,
@@ -345,6 +354,7 @@ async function rollRandomStat(playerId: string) {
 }
 
 async function confirmRandomStat(
+  teamId: string,
   playerId: string,
   input:
     | { choice: "ma" | "ag" | "pa" | "st" | "av" }
@@ -352,7 +362,7 @@ async function confirmRandomStat(
 ) {
   return db.transaction(async (tx) => {
     const fetchedPlayer = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       with: {
         team: { columns: { state: true, id: true } },
         ...playerWithAdvancement.with,

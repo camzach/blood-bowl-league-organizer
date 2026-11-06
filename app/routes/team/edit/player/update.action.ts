@@ -19,26 +19,27 @@ const updateSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   updateSchema,
   async (data, { params }: Route.ActionArgs) => {
-    const { playerId } = params;
+    const { teamId, playerId } = params;
 
     // Team permission check handled by team-permission-middleware layout
 
     // Route to appropriate handler
     if (data.action === "info") {
-      return updatePlayerInfo(playerId, data);
+      return updatePlayerInfo(teamId, playerId, data);
     } else {
-      return makeCaptain(playerId);
+      return makeCaptain(teamId, playerId);
     }
   },
 );
 
 async function updatePlayerInfo(
+  teamId: string,
   playerId: string,
   input: { number?: number; name?: string },
 ) {
   return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       columns: {
         membershipType: true,
         number: true,
@@ -96,10 +97,10 @@ async function updatePlayerInfo(
   });
 }
 
-async function makeCaptain(playerId: string) {
+async function makeCaptain(teamId: string, playerId: string) {
   return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       columns: {
         teamId: true,
         isCaptain: true,

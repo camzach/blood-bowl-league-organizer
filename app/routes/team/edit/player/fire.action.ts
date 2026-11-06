@@ -11,18 +11,18 @@ const fireSchema = z.object({});
 export const action = createValidatedAction(
   fireSchema,
   async (data, { params }: Route.ActionArgs) => {
-    const { playerId } = params;
+    const { teamId, playerId } = params;
 
     // Team permission check handled by team-permission-middleware layout
 
-    return firePlayer(playerId);
+    return firePlayer(teamId, playerId);
   },
 );
 
-async function firePlayer(playerId: string) {
+async function firePlayer(teamId: string, playerId: string) {
   return db.transaction(async (tx) => {
     const player = await tx.query.player.findFirst({
-      where: { id: playerId },
+      where: { id: playerId, teamId },
       columns: {
         membershipType: true,
         id: true,
