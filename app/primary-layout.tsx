@@ -4,12 +4,14 @@ import { Link, redirect, Outlet, createContext } from "react-router";
 import type { Route } from "./+types/primary-layout";
 import "@react-router/node";
 import { auth } from "~/app/utils/auth.server";
+import { isAPIError } from "better-auth/api";
 import LeagueSelector from "./components/league-selector";
 import SignoutButton from "./components/signout-button";
 import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
 import { NotificationProvider } from "./components/notification-provider";
 import { useId } from "react";
+import { isLeagueAdmin, type ActiveLeague } from "./utils/permissions";
 
 type BetterAuthSession = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -20,6 +22,10 @@ type BetterAuthSession = NonNullable<
 // Accessing this context outside of an authenticated route will notresult
 // result in type errors, but will result in runtime errors.
 export const authContext = createContext<BetterAuthSession>(null!);
+
+// The league the user currently has selected, along with their role in it.
+// null if no league is selected, or the user is no longer a member of it.
+export const activeLeagueContext = createContext<ActiveLeague | null>(null);
 
 export const middleware: Route.MiddlewareFunction[] = [
   async ({ request, context }) => {
@@ -32,40 +38,71 @@ export const middleware: Route.MiddlewareFunction[] = [
     }
 
     context.set(authContext, session);
+    context.set(activeLeagueContext, await getActiveLeague(request, session));
   },
 ];
 
+// getActiveMember throws a BAD_REQUEST when the user has no active league or
+// is no longer a member of it. Both are normal states here, so map them to null.
+async function getActiveLeague(
+  request: Request,
+  session: BetterAuthSession,
+): Promise<ActiveLeague | null> {
+  if (!session.session.activeOrganizationId) return null;
+  try {
+    const { organizationId, role } = await auth.api.getActiveMember({
+      headers: request.headers,
+    });
+    return { id: organizationId, role };
+  } catch (error) {
+    if (isAPIError(error) && error.status === "BAD_REQUEST") return null;
+    throw error;
+  }
+}
+
 export async function loader({ context, request }: Route.LoaderArgs) {
-  const { user, session } = context.get(authContext);
+  const { user } = context.get(authContext);
+  const activeLeagueMembership = context.get(activeLeagueContext);
 
   const userLeagues = await auth.api.listOrganizations({
     headers: request.headers,
   });
 
-  const teams = await db.query.team.findMany({
-    where: {
-      NOT: { state: "inactive" },
-      leagueId: session.activeOrganizationId ?? "",
-    },
-    orderBy: { name: "asc" },
-  });
+  const teams = activeLeagueMembership
+    ? await db.query.team.findMany({
+        where: {
+          NOT: { state: "inactive" },
+          leagueId: activeLeagueMembership.id,
+        },
+        orderBy: { name: "asc" },
+      })
+    : [];
 
-  const activeSeason = await db.query.season.findFirst({
-    where: {
-      leagueId: session.activeOrganizationId ?? "",
-      isActive: true,
-    },
-    extras: {
-      totalBracketGames: (table) =>
-        db.$count(bracketGame, eq(bracketGame.seasonId, table.id)),
-    },
-  });
+  const activeSeason = activeLeagueMembership
+    ? await db.query.season.findFirst({
+        where: {
+          leagueId: activeLeagueMembership.id,
+          isActive: true,
+        },
+        extras: {
+          totalBracketGames: (table) =>
+            db.$count(bracketGame, eq(bracketGame.seasonId, table.id)),
+        },
+      })
+    : null;
 
-  const activeLeague = await db.query.league.findFirst({
-    where: { id: session.activeOrganizationId ?? "" },
-  });
+  const activeLeague = userLeagues.find(
+    (league) => league.id === activeLeagueMembership?.id,
+  );
 
-  return { user, activeLeague, userLeagues, teams, activeSeason };
+  return {
+    activeLeague,
+    isLeagueAdmin: isLeagueAdmin(activeLeagueMembership),
+    userLeagues,
+    teams,
+    activeSeason,
+    user,
+  };
 }
 
 export default function RootLayout({ loaderData }: Route.ComponentProps) {
@@ -91,7 +128,7 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
               <NavLinks
                 teams={teams}
                 showPlayoffsLink={(activeSeason?.totalBracketGames ?? 0) > 0}
-                isAdmin={user.role === "admin"}
+                isAdmin={loaderData.isLeagueAdmin}
               />
             </nav>
             <span className="navbar-end">
@@ -102,7 +139,7 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
                   aria-label="User menu"
                   className="btn btn-circle m-1 text-xl font-bold"
                 >
-                  {user.name?.[0]?.toUpperCase() ?? "?"}
+                  {user.name[0].toUpperCase()}
                 </div>
                 <ul
                   tabIndex={0}
@@ -138,7 +175,7 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
             <NavLinks
               teams={teams}
               showPlayoffsLink={(activeSeason?.totalBracketGames ?? 0) > 0}
-              isAdmin={user.role === "admin"}
+              isAdmin={loaderData.isLeagueAdmin}
             />
           </nav>
         </div>

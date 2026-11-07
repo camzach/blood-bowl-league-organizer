@@ -1,12 +1,11 @@
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { redirect, useFetcher } from "react-router";
 import { auth } from "~/app/utils/auth.server";
 import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
-  const { session } = context.get(authContext);
-  const leagueId = session.activeOrganizationId;
+  const leagueId = context.get(activeLeagueContext)?.id;
 
   if (!leagueId) {
     return redirect("/");

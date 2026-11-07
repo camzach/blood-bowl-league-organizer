@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
 import { db } from "~/app/utils/drizzle";
 import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { Link } from "react-router";
 
@@ -90,7 +90,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 
   const activeSeason = await db.query.season.findFirst({
     where: {
-      leagueId: session.activeOrganizationId ?? "",
+      leagueId: context.get(activeLeagueContext)?.id ?? "",
       isActive: true,
     },
   });

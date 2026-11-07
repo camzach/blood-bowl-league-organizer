@@ -1,6 +1,6 @@
 import { Link, useRevalidator } from "react-router";
 import type { Route } from "./+types/home";
-import { authContext } from "../primary-layout";
+import { activeLeagueContext, authContext } from "../primary-layout";
 import { db } from "~/app/utils/drizzle";
 import { auth } from "~/app/utils/auth.server";
 import { authClient } from "~/app/utils/auth.client";
@@ -8,12 +8,12 @@ import { useContext } from "react";
 import { notificationContext } from "../components/notification-provider";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
-  const { user, session } = context.get(authContext);
+  const { user } = context.get(authContext);
 
   const myLeagues = await auth.api.listOrganizations({
     headers: request.headers,
   });
-  const activeLeague = session.activeOrganizationId ?? "";
+  const activeLeague = context.get(activeLeagueContext)?.id ?? "";
 
   const myTeams = await db.query.team.findMany({
     where: { coaches: { id: user.id }, leagueId: activeLeague },

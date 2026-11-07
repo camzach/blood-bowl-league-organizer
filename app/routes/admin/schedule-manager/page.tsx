@@ -1,21 +1,17 @@
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { redirect, useFetcher } from "react-router";
 import { db } from "~/app/utils/drizzle";
 import ScheduleEditor from "./index";
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const { session } = context.get(authContext);
+  const leagueId = context.get(activeLeagueContext)?.id;
 
-  const league = await db.query.league.findFirst({
-    where: { id: session.activeOrganizationId ?? "" },
-  });
-
-  if (!league) return redirect("/");
+  if (!leagueId) return redirect("/");
 
   const draftTeams = await db.query.team.findMany({
     where: {
-      leagueId: league.id,
+      leagueId,
       state: "draft",
     },
     columns: {
@@ -26,7 +22,7 @@ export async function loader({ context }: Route.LoaderArgs) {
   const games = await db.query.roundRobinGame.findMany({
     where: {
       season: {
-        leagueId: league.id,
+        leagueId,
         isActive: true,
       },
     },
@@ -40,7 +36,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     },
   });
 
-  return { league, draftTeams, games };
+  return { draftTeams, games };
 }
 
 export default function ScheduleManagerPage({

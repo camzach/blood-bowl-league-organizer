@@ -1,6 +1,6 @@
 import { data, useRouteLoaderData } from "react-router";
 import fetchTeam from "./fetch-team";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import { Route } from "./+types/loader";
 
 export async function loader({ params, context }: Route.LoaderArgs) {
@@ -9,7 +9,7 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
   const team = await fetchTeam(teamId, false);
 
-  if (!team || team.leagueId !== (session.activeOrganizationId as string)) {
+  if (!team || team.leagueId !== context.get(activeLeagueContext)?.id) {
     throw data({}, { status: 404 });
   }
 

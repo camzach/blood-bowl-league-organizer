@@ -1,5 +1,5 @@
 import { redirect } from "react-router";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { getLeagueTable } from "~/app/utils/get-league-table";
 
@@ -10,7 +10,9 @@ export async function loader({ context }: Route.LoaderArgs) {
     throw redirect("/login");
   }
 
-  const table = await getLeagueTable(session.activeOrganizationId ?? "");
+  const table = await getLeagueTable(
+    context.get(activeLeagueContext)?.id ?? "",
+  );
 
   return { table };
 }

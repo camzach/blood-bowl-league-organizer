@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
 import type { Route } from "./+types/action";
 import { auth } from "~/app/utils/auth.server";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 
 const inviteActionSchema = z.discriminatedUnion("action", [
   z.object({
@@ -18,11 +18,10 @@ const inviteActionSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   inviteActionSchema,
   async (data, { request, context }: Route.ActionArgs) => {
-    const { session } = context.get(authContext);
-    const leagueId = session.activeOrganizationId;
+    const leagueId = context.get(activeLeagueContext)?.id;
 
     if (!leagueId) {
-      throw new Error("No active organization");
+      throw new Error("No active league");
     }
 
     switch (data.action) {

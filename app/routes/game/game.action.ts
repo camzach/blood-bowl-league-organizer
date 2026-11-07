@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
 import type { Route } from "./+types/game.action";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import { db } from "~/app/utils/drizzle";
 import { eq, inArray, sql, and } from "drizzle-orm";
 import {
@@ -72,7 +72,8 @@ const actionSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   actionSchema,
   async (data, { context }: Route.ActionArgs) => {
-    const { session, user } = context.get(authContext);
+    const { user } = context.get(authContext);
+    const activeLeague = context.get(activeLeagueContext);
 
     const game = await db.query.game.findFirst({
       where: { id: data.gameId },
@@ -82,7 +83,7 @@ export const action = createValidatedAction(
     if (!game.homeDetails || !game.awayDetails)
       throw new Error("Game does not have two teams");
 
-    if (!canActOnGame(user, game))
+    if (!canActOnGame(user, activeLeague, game))
       throw new Error("You do not have permission to act on this game");
 
     switch (data.action) {
@@ -100,7 +101,7 @@ export const action = createValidatedAction(
           data.awayMvpNominees,
           data.homeStalled,
           data.awayStalled,
-          session,
+          activeLeague?.id,
         );
     }
   },
@@ -492,10 +493,10 @@ async function handleEndGame(
   awayMvpNominees: string[],
   homeStalled: boolean,
   awayStalled: boolean,
-  session: { activeOrganizationId?: string | null },
+  leagueId: string | undefined,
 ) {
   return db.transaction(async (tx) => {
-    if (!session.activeOrganizationId) {
+    if (!leagueId) {
       throw new Error("No league currently active 💀");
     }
     const game = await tx.query.game.findFirst({
@@ -716,7 +717,7 @@ async function handleEndGame(
         .innerJoin(season, eq(bracketGame.seasonId, season.id))
         .where(
           and(
-            eq(season.leagueId, session.activeOrganizationId),
+            eq(season.leagueId, leagueId),
             eq(season.isActive, true),
             eq(bracketGame.gameId, game.id),
           ),

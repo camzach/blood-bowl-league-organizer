@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth/minimal";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
-import { admin, organization } from "better-auth/plugins";
+import { organization } from "better-auth/plugins";
 import { db } from "./drizzle";
 import { schema } from "~/db/schema";
 
@@ -19,13 +19,13 @@ export const auth = betterAuth({
     session: {
       create: {
         async before(session) {
-          const league = await db.query.member.findFirst({
+          const membership = await db.query.member.findFirst({
             where: { userId: session.userId },
           });
           return {
             data: {
               ...session,
-              activeOrganizationId: league?.leagueId,
+              activeOrganizationId: membership?.leagueId,
             },
           };
         },
@@ -33,9 +33,13 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    admin(),
     organization({
       schema: {
+        session: {
+          fields: {
+            activeOrganizationId: "activeLeagueId",
+          },
+        },
         organization: {
           modelName: "league",
         },

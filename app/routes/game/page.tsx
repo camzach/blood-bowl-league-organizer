@@ -1,5 +1,5 @@
 import type { Route } from "./+types/page";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import { PlayButton } from "./scheduled/play-button";
 import JourneymenContent from "./journeymen/content";
 import InducementsContent from "./inducements/content";
@@ -7,8 +7,9 @@ import InProgressContent from "./in_progress/page";
 import { loadGameData } from "./loader";
 
 export async function loader({ params, context }: Route.LoaderArgs) {
-  const { session } = context.get(authContext);
-  return loadGameData(params.gameId, session.activeOrganizationId ?? undefined);
+  const activeLeague = context.get(activeLeagueContext);
+  if (!activeLeague) throw new Response("Not Found", { status: 404 });
+  return loadGameData(params.gameId, activeLeague.id);
 }
 
 export default function Game({ loaderData }: Route.ComponentProps) {

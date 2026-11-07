@@ -7,8 +7,6 @@ test("journeymen: selecting journeymen moves game to inducements", async ({
   leagueId,
   userId,
 }) => {
-  await seed.makeAdmin(userId);
-
   // Home team needs 2 journeymen; away is full
   const teamA = await seed.team(leagueId, userId, {
     state: "playing",

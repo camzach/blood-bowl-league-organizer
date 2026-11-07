@@ -1,5 +1,5 @@
 import { redirect } from "react-router";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import List from "./list";
 import Calendar from "./calendar";
@@ -13,6 +13,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   if (!session) {
     throw redirect("/login");
   }
+  const leagueId = context.get(activeLeagueContext)?.id ?? "";
 
   const url = new URL(request.url);
   const teamId = url.searchParams.getAll("teamId");
@@ -21,16 +22,13 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   const { teams, games } = await fetchGames({
     teamId: teamId.length > 0 ? teamId : undefined,
     state,
-    league: session.activeOrganizationId ?? "",
+    league: leagueId,
   });
 
   const requestUrl = new URL(request.url);
   const baseURL = requestUrl.origin;
 
-  const exportLink = new URL(
-    `/api/calendar/${session.activeOrganizationId}/calendar.ics`,
-    baseURL,
-  );
+  const exportLink = new URL(`/api/calendar/${leagueId}/calendar.ics`, baseURL);
   if (teamId.length > 0) {
     for (const id of teamId) {
       exportLink.searchParams.append("teamId", id);

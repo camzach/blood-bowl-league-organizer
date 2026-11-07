@@ -3,12 +3,11 @@ import { SearchFilter } from "../search-filter";
 import Table from "~/app/components/table";
 import Skill from "~/app/components/team-table/skill";
 import { Route } from "./+types/page";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import { db } from "~/app/utils/drizzle";
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const { session } = context.get(authContext);
-  const leagueId = session.activeOrganizationId;
+  const leagueId = context.get(activeLeagueContext)?.id;
 
   const starPlayers = await db.query.starPlayer.findMany({
     with: { skills: true, specialRules: true },

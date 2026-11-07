@@ -1,4 +1,16 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  pgEnum,
+  text,
+  timestamp,
+  boolean,
+  index,
+} from "drizzle-orm/pg-core";
+
+// A member holds exactly one role within a league. better-auth's organization
+// plugin would allow comma-separated multi-roles; the enum forbids them.
+export const leagueRoles = ["owner", "admin", "member"] as const;
+export const leagueRole = pgEnum("league_role", leagueRoles);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -11,10 +23,6 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: text("role"),
-  banned: boolean("banned").default(false),
-  banReason: text("ban_reason"),
-  banExpires: timestamp("ban_expires"),
 });
 
 export const session = pgTable(
@@ -32,8 +40,7 @@ export const session = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    impersonatedBy: text("impersonated_by"),
-    activeOrganizationId: text("active_league_id"),
+    activeLeagueId: text("active_league_id"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );
@@ -98,7 +105,7 @@ export const member = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    role: text("role").default("member").notNull(),
+    role: leagueRole("role").default("member").notNull(),
     createdAt: timestamp("created_at").notNull(),
   },
   (table) => [
@@ -115,7 +122,7 @@ export const invitation = pgTable(
       .notNull()
       .references(() => league.id, { onDelete: "cascade" }),
     email: text("email").notNull(),
-    role: text("role"),
+    role: leagueRole("role"),
     status: text("status").default("pending").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),

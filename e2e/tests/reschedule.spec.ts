@@ -7,8 +7,6 @@ test("reschedule: admin can set a scheduled time on a game", async ({
   leagueId,
   userId,
 }) => {
-  await seed.makeAdmin(userId);
-
   const teamA = await seed.team(leagueId, userId, { state: "ready" });
   const teamB = await seed.team(leagueId, userId, { state: "ready" });
   const season = await seed.season(leagueId, { isActive: true });

@@ -1,4 +1,4 @@
-import { adminClient, organizationClient } from "better-auth/client/plugins";
+import { organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 const baseURL = import.meta.env.DEV
@@ -7,5 +7,5 @@ const baseURL = import.meta.env.DEV
 
 export const authClient = createAuthClient({
   baseURL,
-  plugins: [adminClient(), organizationClient()],
+  plugins: [organizationClient()],
 });

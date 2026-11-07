@@ -1,5 +1,4 @@
 import { customAlphabet } from "nanoid";
-import { eq } from "drizzle-orm";
 import { testDb } from "./db";
 import {
   team,
@@ -9,7 +8,6 @@ import {
   coachToTeam,
   roundRobinGame,
   season,
-  user,
 } from "~/db/schema";
 import type { teamStates, gameStates } from "~/db/schema";
 
@@ -122,8 +120,4 @@ export async function seedSeason(
   });
 
   return { seasonId };
-}
-
-export async function makeAdmin(userId: string) {
-  await testDb.update(user).set({ role: "admin" }).where(eq(user.id, userId));
 }

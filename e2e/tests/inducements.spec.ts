@@ -7,8 +7,6 @@ test("inducements: skipping inducements moves game to in_progress", async ({
   leagueId,
   userId,
 }) => {
-  await seed.makeAdmin(userId);
-
   const teamA = await seed.team(leagueId, userId, { state: "playing" });
   const teamB = await seed.team(leagueId, userId, { state: "playing" });
   const season = await seed.season(leagueId, { isActive: true });

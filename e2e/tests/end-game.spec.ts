@@ -7,8 +7,6 @@ test("end-game: completing a game moves both teams to improving", async ({
   leagueId,
   userId,
 }) => {
-  await seed.makeAdmin(userId);
-
   const teamA = await seed.team(leagueId, userId, { state: "ready" });
   const teamB = await seed.team(leagueId, userId, { state: "ready" });
   const season = await seed.season(leagueId, { isActive: true });

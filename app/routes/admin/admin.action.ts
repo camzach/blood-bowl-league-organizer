@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
 import type { Route } from "./+types/admin.action";
 import { db } from "~/app/utils/drizzle";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import { generateSchedule } from "~/app/utils/schedule-generator";
 import { computeLeagueTable } from "~/app/utils/get-league-table";
 import {
@@ -42,9 +42,8 @@ const adminActionSchema = z.discriminatedUnion("action", [
 export const action = createValidatedAction(
   adminActionSchema,
   async (data, args: Route.ActionArgs) => {
-    // Admin permission check handled by admin-permission-middleware layout
-    const { session } = args.context.get(authContext);
-    const leagueId = session.activeOrganizationId;
+    // League admin permission check handled by admin-permission-middleware layout
+    const leagueId = args.context.get(activeLeagueContext)?.id;
     if (!leagueId) throw new Error("No league currently active");
 
     // Route to appropriate handler

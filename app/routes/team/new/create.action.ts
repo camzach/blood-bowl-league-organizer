@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
 import nanoid from "~/app/utils/nanoid";
 import { Route } from "./+types/create.action";
-import { authContext } from "~/app/primary-layout";
+import { activeLeagueContext, authContext } from "~/app/primary-layout";
 import { redirect } from "react-router";
 
 export const action = createValidatedAction(
@@ -17,7 +17,8 @@ export const action = createValidatedAction(
   }),
   async ({ name, roster, optionalRule }, { context }: Route.ActionArgs) => {
     const { session } = context.get(authContext);
-    if (!session.activeOrganizationId) {
+    const activeLeague = context.get(activeLeagueContext)?.id;
+    if (!activeLeague) {
       throw "No active league";
     }
 
@@ -30,7 +31,6 @@ export const action = createValidatedAction(
     if (ruleOptions.length > 0 && !option)
       throw new Error("Invalid optional rule selected");
 
-    const activeLeague = session.activeOrganizationId;
     const teamId = nanoid();
     await db.transaction(async (tx) => {
       await tx.insert(team).values({

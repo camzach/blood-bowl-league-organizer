@@ -1,5 +1,5 @@
 import { test as authTest, type AuthFixtures } from "./auth";
-import { seedTeam, seedGame, seedSeason, makeAdmin } from "./seed";
+import { seedTeam, seedGame, seedSeason } from "./seed";
 import { buildNav, type NavFixture } from "./nav";
 
 export type Fixtures = AuthFixtures & {
@@ -8,7 +8,6 @@ export type Fixtures = AuthFixtures & {
     team: typeof seedTeam;
     game: typeof seedGame;
     season: typeof seedSeason;
-    makeAdmin: typeof makeAdmin;
   };
 };
 
@@ -22,7 +21,6 @@ export const test = authTest.extend<Pick<Fixtures, "nav" | "seed">>({
       team: seedTeam,
       game: seedGame,
       season: seedSeason,
-      makeAdmin,
     });
   },
 });

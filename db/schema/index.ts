@@ -375,7 +375,7 @@ export const relations = defineRelations(
         to: r.user.id,
       }),
       league: r.one.league({
-        from: r.session.activeOrganizationId,
+        from: r.session.activeLeagueId,
         to: r.league.id,
       }),
     },
