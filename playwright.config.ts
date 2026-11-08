@@ -15,15 +15,15 @@ export default defineConfig({
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
   fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
   workers: 4,
   reporter: "list",
   use: {
     baseURL,
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
-  // expect: {
-  //   timeout: 15_000,
-  // },
   projects: [
     {
       name: "chromium",
