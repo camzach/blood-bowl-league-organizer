@@ -53,6 +53,7 @@
     "@welldone-software/why-did-you-render": "^10.0.1",
     "dotenv": "^18.0.9",
     "drizzle-kit": "1.0.0-rc.4",
+    "eslint-plugin-playwright": "^2.12.2",
     "oxfmt": "^0.76.0",
     "oxlint": "^1.91.0",
     "pg": "^8.23.1",
