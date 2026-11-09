@@ -1,6 +1,7 @@
-import { isRouteErrorResponse, Link } from "react-router";
+import { isRouteErrorResponse, Link, useRouteError } from "react-router";
 
-export function ErrorBoundary({ error }: { error?: unknown }) {
+export function ErrorBoundary() {
+  const error = useRouteError();
   const is404 = isRouteErrorResponse(error) && error.status === 404;
   const message = is404 ? "404 - Not Found" : "Something went wrong";
   const details = is404

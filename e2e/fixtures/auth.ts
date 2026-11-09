@@ -19,6 +19,7 @@ export type AuthFixtures = {
   cookie: string;
   adminUserId: string;
   memberUserId: string;
+  otherLeague: TestLeague;
 };
 
 type AuthOptions = {
@@ -221,6 +222,10 @@ export const test = base.extend<
 
   adminUserId: async ({ testLeague }, use) => {
     await use(testLeague.admin.userId);
+  },
+
+  otherLeague: async ({}, use) => {
+    await use(await createTestLeague());
   },
 
   memberUserId: async ({ getMember }, use) => {
