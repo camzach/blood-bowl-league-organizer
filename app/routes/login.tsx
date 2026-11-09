@@ -1,8 +1,8 @@
 import { authClient } from "~/app/utils/auth.client";
-import { useState } from "react";
-import cx from "classnames";
+import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { redirect } from "react-router";
+import { useNavigate } from "react-router";
+import { notificationContext } from "~/app/components/notification-provider";
 
 type Inputs = {
   email: string;
@@ -11,65 +11,72 @@ type Inputs = {
 };
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const sendNotification = useContext(notificationContext);
   const loginForm = useForm<Inputs>();
   const signupForm = useForm<Inputs>();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
   const [isLoginMode, setIsLoginMode] = useState(true);
 
-  const handleLogin: SubmitHandler<Inputs> = ({ email, password }) => {
+  const handleLogin: SubmitHandler<Inputs> = async ({ email, password }) => {
     setIsSigningIn(true);
-    setError(undefined);
-    authClient.signIn
-      .email({
+    try {
+      const response = await authClient.signIn.email({
         email,
         password,
         callbackURL: "/",
-      })
-      .then((response) => {
-        if (response.error) {
-          setIsSigningIn(false);
-          setError(response.error.message);
-          setTimeout(() => setError(undefined), 2000);
-        }
-      })
-      .catch((error) => {
-        setIsSigningIn(false);
-        setError(error instanceof Error ? error.message : "Login failed");
-        setTimeout(() => setError(undefined), 2000);
       });
+      if (response.error) {
+        setIsSigningIn(false);
+        sendNotification({
+          text: response.error.message ?? "Login failed",
+          time: 5000,
+        });
+      }
+    } catch (error) {
+      setIsSigningIn(false);
+      sendNotification({
+        text: error instanceof Error ? error.message : "Login failed",
+        time: 5000,
+      });
+    }
   };
 
-  const handleSignup: SubmitHandler<Inputs> = ({ email, password, name }) => {
+  const handleSignup: SubmitHandler<Inputs> = async ({
+    email,
+    password,
+    name,
+  }) => {
     if (!name) {
-      setError("Name is required");
-      setTimeout(() => setError(undefined), 2000);
+      sendNotification({ text: "Name is required", time: 5000 });
       return;
     }
     setIsSigningUp(true);
-    setError(undefined);
-    authClient.signUp
-      .email({
+    try {
+      const response = await authClient.signUp.email({
         email,
         password,
         name,
-        callbackURL: "/",
-      })
-      .then((response) => {
-        if (response.error) {
-          setIsSigningUp(false);
-          setError(response.error.message);
-          setTimeout(() => setError(undefined), 2000);
-        } else {
-          throw redirect("/");
-        }
-      })
-      .catch((error) => {
-        setIsSigningUp(false);
-        setError(error instanceof Error ? error.message : "Signup failed");
-        setTimeout(() => setError(undefined), 2000);
       });
+      if (response.error) {
+        setIsSigningUp(false);
+        sendNotification({
+          text: response.error.message ?? "Signup failed",
+          time: 5000,
+        });
+        return;
+      }
+      // better-auth's email sign-up endpoint does not automatically
+      // redirect on success, so we do it manually
+      await navigate("/");
+    } catch (error) {
+      setIsSigningUp(false);
+      sendNotification({
+        text: error instanceof Error ? error.message : "Signup failed",
+        time: 5000,
+      });
+    }
   };
 
   const handleDiscordSignin = () => {
@@ -106,7 +113,9 @@ export default function LoginPage() {
                 </svg>
                 <input
                   type="text"
+                  autoComplete="name"
                   className="grow"
+                  aria-label="Name"
                   placeholder="Name"
                   {...signupForm.register("name")}
                 />
@@ -123,8 +132,10 @@ export default function LoginPage() {
                 <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
               </svg>
               <input
-                type="text"
+                type="email"
+                autoComplete="email"
                 className="grow"
+                aria-label="Email"
                 placeholder="Email"
                 {...(isLoginMode
                   ? loginForm.register("email")
@@ -146,6 +157,8 @@ export default function LoginPage() {
               </svg>
               <input
                 type="password"
+                autoComplete={isLoginMode ? "current-password" : "new-password"}
+                aria-label="Password"
                 placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;"
                 className="grow"
                 {...(isLoginMode
@@ -153,18 +166,13 @@ export default function LoginPage() {
                   : signupForm.register("password"))}
               />
             </label>
-            <button
-              type="submit"
-              className={cx(
-                "btn btn-block",
-                (error && "btn-error") || "btn-primary",
-              )}
-            >
+            <button type="submit" className="btn btn-block btn-primary">
               {isSigningIn || isSigningUp ? (
                 <div className="loading loading-spinner" />
+              ) : isLoginMode ? (
+                "Log In with Email"
               ) : (
-                (error ??
-                (isLoginMode ? "Log In with Email" : "Sign Up with Email"))
+                "Sign Up with Email"
               )}
             </button>
             <div className="divider">OR</div>

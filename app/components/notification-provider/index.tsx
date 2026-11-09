@@ -50,7 +50,7 @@ type NotificationProps = {
 };
 function Notification({ notif }: NotificationProps) {
   return (
-    <div className={styles.notif}>
+    <div role="alert" className={styles.notif}>
       <span
         className={styles["notif-timer"]}
         style={{ "--duration": notif.time } as CSSProperties}

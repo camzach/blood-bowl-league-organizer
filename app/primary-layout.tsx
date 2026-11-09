@@ -9,7 +9,6 @@ import LeagueSelector from "./components/league-selector";
 import SignoutButton from "./components/signout-button";
 import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
-import { NotificationProvider } from "./components/notification-provider";
 import { useId } from "react";
 import { isLeagueAdmin, type ActiveLeague } from "./utils/permissions";
 
@@ -111,75 +110,71 @@ export default function RootLayout({ loaderData }: Route.ComponentProps) {
   const { user, teams, activeLeague, userLeagues, activeSeason } = loaderData;
 
   return (
-    <NotificationProvider>
-      <div className="drawer">
-        <input id={drawerId} type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
-          <header className="navbar px-4">
-            <div className="navbar-start md:hidden">
-              <label htmlFor={drawerId} className="text-5xl">
-                ≡
-              </label>
-            </div>
-            <span className="max-sm:navbar-center md:navbar-start text-3xl">
-              <Link to={"/"}>BBLO</Link>
-            </span>
-            <nav className="navbar-center hidden gap-3 md:flex">
-              <NavLinks
-                teams={teams}
-                showPlayoffsLink={(activeSeason?.totalBracketGames ?? 0) > 0}
-                isAdmin={loaderData.isLeagueAdmin}
-              />
-            </nav>
-            <span className="navbar-end">
-              <div className="dropdown dropdown-end dropdown-hover">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  aria-label="User menu"
-                  className="btn btn-circle m-1 text-xl font-bold"
-                >
-                  {user.name[0].toUpperCase()}
-                </div>
-                <ul
-                  tabIndex={0}
-                  className="menu dropdown-content rounded-box bg-base-100 z-1 w-52 p-2 shadow-sm"
-                >
-                  <li>
-                    <LeagueSelector
-                      leagues={userLeagues}
-                      activeLeagueName={
-                        activeLeague?.name ?? "No active league"
-                      }
-                      activeLeagueId={activeLeague?.id ?? ""}
-                    />
-                  </li>
-                  <li>
-                    <SignoutButton />
-                  </li>
-                </ul>
-              </div>
-            </span>
-          </header>
-          <main className="p-4">
-            <Outlet />
-          </main>
-        </div>
-        <div className="drawer-side">
-          <label
-            htmlFor={drawerId}
-            aria-label="close sidebar"
-            className="drawer-overlay"
-          ></label>
-          <nav className="menu bg-base-200 text-base-content min-h-full w-fit p-4">
+    <div className="drawer">
+      <input id={drawerId} type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content">
+        <header className="navbar px-4">
+          <div className="navbar-start md:hidden">
+            <label htmlFor={drawerId} className="text-5xl">
+              ≡
+            </label>
+          </div>
+          <span className="max-sm:navbar-center md:navbar-start text-3xl">
+            <Link to={"/"}>BBLO</Link>
+          </span>
+          <nav className="navbar-center hidden gap-3 md:flex">
             <NavLinks
               teams={teams}
               showPlayoffsLink={(activeSeason?.totalBracketGames ?? 0) > 0}
               isAdmin={loaderData.isLeagueAdmin}
             />
           </nav>
-        </div>
+          <span className="navbar-end">
+            <div className="dropdown dropdown-end dropdown-hover">
+              <div
+                tabIndex={0}
+                role="button"
+                aria-label="User menu"
+                className="btn btn-circle m-1 text-xl font-bold"
+              >
+                {user.name[0].toUpperCase()}
+              </div>
+              <ul
+                tabIndex={0}
+                className="menu dropdown-content rounded-box bg-base-100 z-1 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <LeagueSelector
+                    leagues={userLeagues}
+                    activeLeagueName={activeLeague?.name ?? "No active league"}
+                    activeLeagueId={activeLeague?.id ?? ""}
+                  />
+                </li>
+                <li>
+                  <SignoutButton />
+                </li>
+              </ul>
+            </div>
+          </span>
+        </header>
+        <main className="p-4">
+          <Outlet />
+        </main>
       </div>
-    </NotificationProvider>
+      <div className="drawer-side">
+        <label
+          htmlFor={drawerId}
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        ></label>
+        <nav className="menu bg-base-200 text-base-content min-h-full w-fit p-4">
+          <NavLinks
+            teams={teams}
+            showPlayoffsLink={(activeSeason?.totalBracketGames ?? 0) > 0}
+            isAdmin={loaderData.isLeagueAdmin}
+          />
+        </nav>
+      </div>
+    </div>
   );
 }

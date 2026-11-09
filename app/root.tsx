@@ -9,6 +9,7 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { NotificationProvider } from "./components/notification-provider";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -39,7 +40,9 @@ export function Layout() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <NotificationProvider>
+          <Outlet />
+        </NotificationProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
