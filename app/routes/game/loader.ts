@@ -346,33 +346,21 @@ async function loadCompleteData(gameId: string) {
 
 export async function loadGameData(
   gameId: string,
-  leagueId?: string,
+  leagueId: string,
 ): Promise<GameData> {
   const basicGame = await db.query.game.findFirst({
-    where: { id: decodeURIComponent(gameId) },
+    where: { id: decodeURIComponent(gameId), leagueId },
     columns: { id: true, state: true },
     with: {
-      homeDetails: {
-        columns: { id: true },
-        with: { team: { columns: { leagueId: true } } },
-      },
-      awayDetails: {
-        columns: { id: true },
-        with: { team: { columns: { leagueId: true } } },
-      },
+      homeDetails: { columns: { id: true } },
+      awayDetails: { columns: { id: true } },
     },
   });
 
-  if (!basicGame) throw new Response("Not Found", { status: 404 });
-  if (!basicGame.homeDetails || !basicGame.awayDetails) {
+  if (!basicGame) {
     throw new Response("Not Found", { status: 404 });
   }
-
-  if (
-    leagueId &&
-    (basicGame.homeDetails.team.leagueId !== leagueId ||
-      basicGame.awayDetails.team.leagueId !== leagueId)
-  ) {
+  if (!basicGame.homeDetails || !basicGame.awayDetails) {
     throw new Response("Not Found", { status: 404 });
   }
 

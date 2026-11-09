@@ -116,6 +116,7 @@ export const team = pgTable(
   (table) => [
     index("team_league_id_idx").on(table.leagueId),
     unique("name").on(table.name, table.leagueId),
+    unique("team_id_league_id_uniq").on(table.id, table.leagueId),
     unique("touchdown_song_uniq").on(table.touchdownSong),
   ],
 );
@@ -356,24 +357,46 @@ export const faqToSkill = pgTable(
   (table) => [primaryKey({ columns: [table.skillName, table.faqId] })],
 );
 
-export const game = pgTable("game", {
-  id: varchar("id", { length: 25 }).notNull().primaryKey(),
-  state: gameState("state").notNull().default("scheduled"),
-  awayDetailsId: varchar("away_details_id", { length: 25 })
-    .unique()
-    .references(() => gameDetails.id),
-  homeDetailsId: varchar("home_details_id", { length: 25 })
-    .unique()
-    .references(() => gameDetails.id),
-  weather: weather("weather"),
-  scheduledTime: timestamp("scheduled_time"),
-  discordEventId: varchar("discord_event_id"),
-});
+export const game = pgTable(
+  "game",
+  {
+    id: varchar("id", { length: 25 }).notNull().primaryKey(),
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id),
+    state: gameState("state").notNull().default("scheduled"),
+    awayDetailsId: varchar("away_details_id", { length: 25 })
+      .unique()
+      .references(() => gameDetails.id),
+    homeDetailsId: varchar("home_details_id", { length: 25 })
+      .unique()
+      .references(() => gameDetails.id),
+    weather: weather("weather"),
+    scheduledTime: timestamp("scheduled_time"),
+    discordEventId: varchar("discord_event_id"),
+  },
+  (table) => [
+    unique("game_id_league_id_uniq").on(table.id, table.leagueId),
+    foreignKey({
+      name: "game_home_details_league_fk",
+      columns: [table.homeDetailsId, table.leagueId],
+      foreignColumns: [gameDetails.id, gameDetails.leagueId],
+    }),
+    foreignKey({
+      name: "game_away_details_league_fk",
+      columns: [table.awayDetailsId, table.leagueId],
+      foreignColumns: [gameDetails.id, gameDetails.leagueId],
+    }),
+  ],
+);
 
 export const gameDetails = pgTable(
   "game_details",
   {
     id: varchar("id", { length: 25 }).notNull().primaryKey(),
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id),
     teamId: varchar("team_id", { length: 25 })
       .notNull()
       .references(() => team.id),
@@ -384,7 +407,15 @@ export const gameDetails = pgTable(
     fanFactor: integer("fan_factor").notNull().default(0),
     mvpId: varchar("mvp_id", { length: 25 }).references(() => player.id),
   },
-  (table) => [index("game_details_team_id_idx").on(table.teamId)],
+  (table) => [
+    index("game_details_team_id_idx").on(table.teamId),
+    unique("game_details_id_league_id_uniq").on(table.id, table.leagueId),
+    foreignKey({
+      name: "game_details_team_league_fk",
+      columns: [table.teamId, table.leagueId],
+      foreignColumns: [team.id, team.leagueId],
+    }),
+  ],
 );
 
 export const season = pgTable(
@@ -399,6 +430,7 @@ export const season = pgTable(
   },
   (table) => [
     index("season_league_id_idx").on(table.leagueId),
+    unique("season_id_league_id_uniq").on(table.id, table.leagueId),
     uniqueIndex()
       .on(table.leagueId)
       .where(sql`${table.isActive} = true`),
@@ -412,17 +444,35 @@ export const roundRobinGame = pgTable(
       .notNull()
       .primaryKey()
       .references(() => game.id),
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id),
     seasonId: varchar("season_id", { length: 25 })
       .notNull()
       .references(() => season.id),
     round: integer("round").notNull(),
   },
-  (table) => [index("round_robin_game_season_id_idx").on(table.seasonId)],
+  (table) => [
+    index("round_robin_game_season_id_idx").on(table.seasonId),
+    foreignKey({
+      name: "round_robin_game_game_league_fk",
+      columns: [table.gameId, table.leagueId],
+      foreignColumns: [game.id, game.leagueId],
+    }),
+    foreignKey({
+      name: "round_robin_game_season_league_fk",
+      columns: [table.seasonId, table.leagueId],
+      foreignColumns: [season.id, season.leagueId],
+    }),
+  ],
 );
 
 export const bracketGame = pgTable(
   "bracket_game",
   {
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id),
     seasonId: varchar("season_id", { length: 25 })
       .notNull()
       .references(() => season.id),
@@ -433,7 +483,19 @@ export const bracketGame = pgTable(
       .primaryKey()
       .references(() => game.id),
   },
-  (table) => [uniqueIndex().on(table.seasonId, table.round, table.seed)],
+  (table) => [
+    uniqueIndex().on(table.seasonId, table.round, table.seed),
+    foreignKey({
+      name: "bracket_game_game_league_fk",
+      columns: [table.gameId, table.leagueId],
+      foreignColumns: [game.id, game.leagueId],
+    }),
+    foreignKey({
+      name: "bracket_game_season_league_fk",
+      columns: [table.seasonId, table.leagueId],
+      foreignColumns: [season.id, season.leagueId],
+    }),
+  ],
 );
 
 export const inducement = pgTable(

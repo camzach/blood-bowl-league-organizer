@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { canActOnGame } from "~/app/routes/game/can-act-on-game";
 
-const team = (leagueId: string, coaches: string[]) => ({
-  leagueId,
+const team = (coaches: string[]) => ({
   coaches: coaches.map((id) => ({ id })),
 });
 
 const game = {
-  homeDetails: { team: team("league-1", ["home-coach"]) },
-  awayDetails: { team: team("league-1", ["away-coach", "assistant"]) },
+  leagueId: "league-1",
+  homeDetails: { team: team(["home-coach"]) },
+  awayDetails: { team: team(["away-coach", "assistant"]) },
 };
 
 const member = { id: "league-1", role: "member" } as const;
@@ -45,25 +45,28 @@ describe("canActOnGame", () => {
     );
   });
 
-  it("denies a league admin when the teams have no coaches and are in another league", () => {
+  it("denies a league admin when the game is in another league and the teams have no coaches", () => {
     const uncoached = {
-      homeDetails: { team: team("league-2", []) },
-      awayDetails: { team: team("league-2", []) },
+      leagueId: "league-2",
+      homeDetails: { team: team([]) },
+      awayDetails: { team: team([]) },
     };
     expect(canActOnGame({ id: "stranger" }, admin, uncoached)).toBe(false);
   });
 
   it("denies a non-admin when the teams have no coaches", () => {
     const uncoached = {
-      homeDetails: { team: team("league-1", []) },
-      awayDetails: { team: team("league-1", []) },
+      leagueId: "league-1",
+      homeDetails: { team: team([]) },
+      awayDetails: { team: team([]) },
     };
     expect(canActOnGame({ id: "stranger" }, member, uncoached)).toBe(false);
   });
 
-  it("denies everyone when a team slot is empty, unless they coach", () => {
+  it("denies a non-admin when a team slot is empty", () => {
     expect(
-      canActOnGame({ id: "stranger" }, admin, {
+      canActOnGame({ id: "stranger" }, member, {
+        leagueId: "league-1",
         homeDetails: null,
         awayDetails: null,
       }),

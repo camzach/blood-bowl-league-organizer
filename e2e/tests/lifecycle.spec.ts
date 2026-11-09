@@ -27,7 +27,9 @@ test("lifecycle: full post-game flow from game start to ready", async ({
     treasury: 0,
   });
   const season = await seed.season(leagueId, { isActive: true });
-  await seed.game(team1.teamId, team2.teamId, { seasonId: season.seasonId });
+  await seed.game(leagueId, team1.teamId, team2.teamId, {
+    seasonId: season.seasonId,
+  });
 
   const playerRow = (number: number) =>
     page.getByRole("row").filter({

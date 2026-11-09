@@ -93,8 +93,8 @@ async function scheduleAction(leagueId: string) {
     const rounds = generateSchedule(teams).map((round, i) => ({
       number: i + 1,
       pairs: round.map((pair: [string, string]) => ({
-        home: { teamId: pair[0], id: nanoid() },
-        away: { teamId: pair[1], id: nanoid() },
+        home: { teamId: pair[0], id: nanoid(), leagueId },
+        away: { teamId: pair[1], id: nanoid(), leagueId },
       })),
     }));
 
@@ -110,9 +110,11 @@ async function scheduleAction(leagueId: string) {
           homeDetailsId: roundGame.home.id,
           awayDetailsId: roundGame.away.id,
           id: gameId,
+          leagueId,
         });
         roundRobinGameInserts.push({
           gameId,
+          leagueId,
           round: round.number,
           seasonId: activeSeason.id,
         });
@@ -334,6 +336,7 @@ async function seedBracket(leagueId: string) {
         detailsInserts.push({
           id: homeDetailsId,
           teamId: teams[current.homeSeed - 1],
+          leagueId,
         });
       }
       if (current.awayGame) {
@@ -343,17 +346,20 @@ async function seedBracket(leagueId: string) {
         detailsInserts.push({
           id: awayDetailsId,
           teamId: teams[current.awaySeed - 1],
+          leagueId,
         });
       }
 
       const gameId = nanoid();
       gameInserts.push({
         id: gameId,
+        leagueId,
         homeDetailsId,
         awayDetailsId,
       });
       bracketGameInserts.push({
         gameId,
+        leagueId,
         seasonId: activeSeason.id,
         round: current.round,
         seed: current.homeSeed,

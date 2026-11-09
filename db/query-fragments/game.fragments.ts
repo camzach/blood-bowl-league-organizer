@@ -191,7 +191,7 @@ export const gameWithTeamCoaches = {
     homeDetails: {
       with: {
         team: {
-          columns: { id: true, leagueId: true },
+          columns: { id: true },
           with: { coaches: { columns: { id: true } } },
         },
       },
@@ -199,7 +199,7 @@ export const gameWithTeamCoaches = {
     awayDetails: {
       with: {
         team: {
-          columns: { id: true, leagueId: true },
+          columns: { id: true },
           with: { coaches: { columns: { id: true } } },
         },
       },

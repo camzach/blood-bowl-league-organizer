@@ -740,6 +740,7 @@ async function handleEndGame(
           : game.awayDetails
         ).teamId,
         id: detailsId,
+        leagueId,
       });
       const nextGame = await tx.query.bracketGame.findFirst({
         where: {

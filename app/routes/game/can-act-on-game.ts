@@ -1,22 +1,24 @@
 import { isLeagueAdmin, type ActiveLeague } from "~/app/utils/permissions";
 
-type Team = { leagueId: string; coaches: Array<{ id: string }> };
+type Team = { coaches: Array<{ id: string }> };
 
 export function canActOnGame(
   user: { id: string },
   activeLeague: ActiveLeague | null,
   game: {
+    leagueId: string;
     homeDetails: { team: Team } | null;
     awayDetails: { team: Team } | null;
   },
 ): boolean {
-  const details = [game.homeDetails, game.awayDetails];
   if (
     activeLeague &&
     isLeagueAdmin(activeLeague) &&
-    details.every((d) => d?.team.leagueId === activeLeague.id)
+    game.leagueId === activeLeague.id
   ) {
     return true;
   }
-  return details.some((d) => d?.team.coaches.some((c) => c.id === user.id));
+  return [game.homeDetails, game.awayDetails].some((d) =>
+    d?.team.coaches.some((c) => c.id === user.id),
+  );
 }

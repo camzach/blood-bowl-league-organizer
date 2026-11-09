@@ -72,6 +72,7 @@ export async function seedTeam(
 }
 
 export async function seedGame(
+  leagueId: string,
   homeTeamId: string,
   awayTeamId: string,
   opts: {
@@ -87,19 +88,22 @@ export async function seedGame(
   const gameId = nanoid();
 
   await testDb.insert(gameDetails).values([
-    { id: homeDetailsId, teamId: homeTeamId },
-    { id: awayDetailsId, teamId: awayTeamId },
+    { id: homeDetailsId, leagueId, teamId: homeTeamId },
+    { id: awayDetailsId, leagueId, teamId: awayTeamId },
   ]);
 
   await testDb.insert(game).values({
     id: gameId,
+    leagueId,
     state,
     homeDetailsId,
     awayDetailsId,
   });
 
   if (seasonId) {
-    await testDb.insert(roundRobinGame).values({ gameId, seasonId, round });
+    await testDb
+      .insert(roundRobinGame)
+      .values({ gameId, leagueId, seasonId, round });
   }
 
   return { gameId, homeDetailsId, awayDetailsId };
