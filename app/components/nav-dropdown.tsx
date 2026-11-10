@@ -21,6 +21,12 @@ export default function NavDropdown({
       <ul
         id={id}
         popover="auto"
+        onClick={(e) => {
+          // Dismiss the nav when clicking a link inside it
+          if ((e.target as HTMLElement).closest("a")) {
+            e.currentTarget.hidePopover();
+          }
+        }}
         className="bg-base-200 z-1 w-max max-w-xs p-2 shadow-xl"
         style={
           {

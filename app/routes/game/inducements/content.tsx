@@ -77,15 +77,15 @@ export default function Content(props: Props) {
         gameId: props.gameId,
         home: {
           stars: homeChoices.stars,
-          inducements: Object.entries(homeChoices.inducements).map(
-            ([name, quantity]) => ({ name, quantity }),
-          ),
+          inducements: Object.entries(homeChoices.inducements)
+            .filter(([, quantity]) => quantity > 0)
+            .map(([name, quantity]) => ({ name, quantity })),
         },
         away: {
           stars: awayChoices.stars,
-          inducements: Object.entries(awayChoices.inducements).map(
-            ([name, quantity]) => ({ name, quantity }),
-          ),
+          inducements: Object.entries(awayChoices.inducements)
+            .filter(([, quantity]) => quantity > 0)
+            .map(([name, quantity]) => ({ name, quantity })),
         },
       },
       {
