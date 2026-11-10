@@ -30,8 +30,9 @@ export async function seedTeam(
     name?: string;
     playerCount?: number;
     treasury?: number;
-    /** Give the first player this many otherSPP (useful for testing the improving phase). */
     firstPlayerSPP?: number;
+    rosterName?: string;
+    positionIds?: string[];
   } = {},
 ) {
   const {
@@ -40,6 +41,11 @@ export async function seedTeam(
     playerCount = 11,
     treasury = 1_000_000,
     firstPlayerSPP,
+    rosterName = DEFAULT_ROSTER,
+    positionIds = Array.from(
+      { length: playerCount },
+      () => DEFAULT_POSITION_ID,
+    ),
   } = opts;
 
   const teamId = nanoid();
@@ -48,19 +54,19 @@ export async function seedTeam(
     id: teamId,
     name,
     leagueId,
-    rosterName: DEFAULT_ROSTER,
+    rosterName,
     state,
     treasury,
   });
 
   await testDb.insert(coachToTeam).values({ coachId, teamId });
 
-  if (playerCount > 0) {
+  if (positionIds.length > 0) {
     await testDb.insert(player).values(
-      Array.from({ length: playerCount }, (_, i) => ({
+      positionIds.map((positionId, i) => ({
         id: nanoid(),
         number: i + 1,
-        positionId: DEFAULT_POSITION_ID,
+        positionId,
         teamId,
         membershipType: "player" as const,
         otherSPP: i === 0 && firstPlayerSPP ? firstPlayerSPP : 0,
