@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { Link, useRevalidator } from "react-router";
+import { ChangeEvent, useContext } from "react";
+import { useRevalidator } from "react-router";
 import { authClient } from "~/app/utils/auth.client";
 import { notificationContext } from "./notification-provider";
 
@@ -11,17 +11,17 @@ interface LeagueSelectorProps {
 
 export default function LeagueSelector({
   leagues,
-  activeLeagueName,
   activeLeagueId,
 }: LeagueSelectorProps) {
   const revalidator = useRevalidator();
   const sendNotification = useContext(notificationContext);
 
-  const handleLeagueChange = async (leagueId: string) => {
-    if (leagueId === activeLeagueId) return;
+  const handleLeagueChange = async (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    if (selectedId === activeLeagueId) return;
 
     const { error } = await authClient.organization.setActive({
-      organizationId: leagueId,
+      organizationId: selectedId,
     });
     if (error) {
       sendNotification({
@@ -34,31 +34,16 @@ export default function LeagueSelector({
   };
 
   return (
-    <div className="dropdown dropdown-hover">
-      <div tabIndex={0} className="">
-        {activeLeagueName}
-      </div>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow"
-      >
-        {leagues.map((league) => (
-          <li key={league.id}>
-            <button
-              className="w-full text-left"
-              onClick={() => {
-                handleLeagueChange(league.id);
-              }}
-              disabled={league.id === activeLeagueId}
-            >
-              {league.name} {league.id === activeLeagueId && "(Active)"}
-            </button>
-          </li>
-        ))}
-        <li>
-          <Link to="/create-league">Create New League</Link>
-        </li>
-      </ul>
-    </div>
+    <select
+      aria-label="Active league"
+      value={activeLeagueId}
+      onChange={handleLeagueChange}
+    >
+      {leagues.map((league) => (
+        <option key={league.id} value={league.id}>
+          {league.name}
+        </option>
+      ))}
+    </select>
   );
 }
