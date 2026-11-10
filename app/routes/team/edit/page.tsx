@@ -168,7 +168,7 @@ export default function EditTeam({ loaderData }: Route.ComponentProps) {
       )}
       <SongControls
         teamId={team.id}
-        currentSong={team.touchdownSong ?? undefined}
+        currentSong={team.song?.name}
         isEditable={true}
       />
       <TeamTable

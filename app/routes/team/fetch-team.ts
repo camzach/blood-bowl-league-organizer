@@ -24,6 +24,7 @@ export default async function fetchTeam(
         where: includeNonPlayers ? undefined : { membershipType: "player" },
         ...playerWithAdvancement,
       },
+      song: true,
     },
   });
 
