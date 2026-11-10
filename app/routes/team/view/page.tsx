@@ -30,11 +30,13 @@ export default function Component() {
       Treasury -- {team.treasury}
       <br />
       Dedicated Fans -- {team.dedicatedFans}
-      <SongControls
-        teamId={team.id}
-        currentSong={team.touchdownSong ?? undefined}
-        isEditable={false}
-      />
+      {team.song && (
+        <SongControls
+          teamId={team.id}
+          currentSong={team.song.name}
+          isEditable={false}
+        />
+      )}
       <TeamTable players={team.players} />
       <table>
         <thead>
