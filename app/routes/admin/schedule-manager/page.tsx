@@ -3,6 +3,7 @@ import type { Route } from "./+types/page";
 import { redirect, useFetcher } from "react-router";
 import { db } from "~/app/utils/drizzle";
 import ScheduleEditor from "./index";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export async function loader({ context }: Route.LoaderArgs) {
   const leagueId = context.get(activeLeagueContext)?.id;
@@ -47,6 +48,11 @@ export default function ScheduleManagerPage({
   const clearFetcher = useFetcher();
   const seedBracketFetcher = useFetcher();
   const endSeasonFetcher = useFetcher();
+
+  useFetcherErrorNotification(scheduleFetcher);
+  useFetcherErrorNotification(clearFetcher);
+  useFetcherErrorNotification(seedBracketFetcher);
+  useFetcherErrorNotification(endSeasonFetcher);
 
   const isScheduling = scheduleFetcher.state !== "idle";
   const isClearing = clearFetcher.state !== "idle";
@@ -131,6 +137,7 @@ export default function ScheduleManagerPage({
       </div>
 
       <ScheduleEditor
+        key={games.map((g) => g.game.id).join()}
         games={games.map((g) => ({
           id: g.game.id,
           round: g.round,
