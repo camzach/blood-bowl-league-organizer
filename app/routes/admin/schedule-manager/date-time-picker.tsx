@@ -18,6 +18,9 @@ export default function dateTimePicker({ value, onChange, className }: Props) {
         onChange={(e) => {
           const value = e.target.value;
           const newDate = parse(value, "yyyy-MM-dd'T'HH:mm", new Date());
+          if (isNaN(newDate.getTime())) {
+            return;
+          }
           onChange?.(newDate);
         }}
       />
