@@ -19,12 +19,14 @@ type Props = {
   players: PlayerType[];
   journeymen: PlayerType[];
   className?: string;
+  ariaLabel?: string;
 };
 
 export default function SPPButton({
   players,
   journeymen,
   className,
+  ariaLabel,
   children,
   onSubmit,
 }: PropsWithChildren<Props>) {
@@ -89,6 +91,7 @@ export default function SPPButton({
       </Modal>
       <button
         className={classNames("btn", className)}
+        aria-label={ariaLabel}
         onClick={() => setIsOpen(true)}
       >
         {children}

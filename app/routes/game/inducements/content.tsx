@@ -194,7 +194,7 @@ export default function Content(props: Props) {
           <br />
           Total Cost: {calculateTotalCost("away")}
         </div>
-        <div>
+        <section aria-label={`${homeTeam} inducements`}>
           <InducementSelector
             inducements={homeInducements}
             stars={homeStars}
@@ -203,11 +203,11 @@ export default function Content(props: Props) {
               handleChooseInducement({ team: "home", choice });
             }}
           />
-        </div>
+        </section>
         <button className="btn" onClick={submit} disabled={isLoading}>
           {isLoading ? "Submitting..." : "Done :)"}
         </button>
-        <div>
+        <section aria-label={`${awayTeam} inducements`}>
           <InducementSelector
             inducements={awayInducements}
             stars={awayStars}
@@ -216,7 +216,7 @@ export default function Content(props: Props) {
               handleChooseInducement({ team: "away", choice });
             }}
           />
-        </div>
+        </section>
       </div>
     </>
   );

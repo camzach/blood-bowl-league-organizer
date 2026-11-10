@@ -29,6 +29,7 @@ type Props = {
     stars: StarPlayerType[];
   };
   className?: string;
+  ariaLabel?: string;
 };
 
 type FormValues = {
@@ -42,6 +43,7 @@ export default function InjuryButton({
   targets,
   actors,
   className,
+  ariaLabel,
   children,
   onSubmit,
 }: PropsWithChildren<Props>) {
@@ -252,6 +254,7 @@ export default function InjuryButton({
       </Modal>
       <button
         className={classNames("btn", className)}
+        aria-label={ariaLabel}
         onClick={() => setIsOpen(true)}
       >
         {children}

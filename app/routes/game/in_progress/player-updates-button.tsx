@@ -1,4 +1,3 @@
-import React from "react";
 import PopupButton from "~/app/components/popup-button";
 import { GameState } from "./score-widget";
 
@@ -55,12 +54,13 @@ export default function PlayerUpdatesButton({
       <ul className="[&_li:nth-of-type(2n)]:bg-base-300 leading-8">
         {events.map((e) => (
           <li key={e.eventId} className="p-2">
-            <label
+            <button
               className="btn btn-circle btn-sm mr-2"
+              aria-label="Remove event"
               onClick={() => removeEvent(e.eventId)}
             >
               ✕
-            </label>
+            </button>
             <span>{prettyEvent(e)}</span>
           </li>
         ))}

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 type Props = {
   onSubmit: (player: string, type: "player" | "star") => void;
   className?: string;
+  ariaLabel?: string;
   stars: string[];
 } & Record<
   "players" | "journeymen",
@@ -22,6 +23,7 @@ export default function TDButton({
   stars,
   onSubmit,
   className,
+  ariaLabel,
   children,
 }: PropsWithChildren<Props>) {
   const { register, handleSubmit } = useForm<FormValues>({
@@ -88,6 +90,7 @@ export default function TDButton({
       </Modal>
       <button
         className={classNames("btn", className)}
+        aria-label={ariaLabel}
         onClick={() => setIsOpen(true)}
       >
         {children}

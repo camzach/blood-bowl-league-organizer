@@ -208,6 +208,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         <span className="text-xl">
           <TDButton
             className="btn-outline btn-accent btn-sm mx-2"
+            ariaLabel={`Record touchdown for ${home.name}`}
             onSubmit={(player, type) => onTD("home", player, type)}
             players={home.players}
             journeymen={home.journeymen}
@@ -220,6 +221,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
         <span className="text-xl">
           <InjuryButton
             className="btn-outline btn-accent btn-sm mx-2"
+            ariaLabel={`Record casualty caused by ${home.name}`}
             onSubmit={dispatchEvent}
             actors={{
               players: home.players,
@@ -241,6 +243,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           players={home.players}
           journeymen={home.journeymen}
           className="btn-outline btn-accent btn-sm"
+          ariaLabel={`Record SPP for ${home.name}`}
         >
           SPP
         </SPPButton>
@@ -258,6 +261,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           {touchdowns[1]} Touchdowns
           <TDButton
             className="btn-outline btn-accent btn-sm mx-2"
+            ariaLabel={`Record touchdown for ${away.name}`}
             onSubmit={(player, type) => onTD("away", player, type)}
             players={away.players}
             journeymen={away.journeymen}
@@ -270,6 +274,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           {casualties[1]} Casualties
           <InjuryButton
             className="btn-outline btn-accent btn-sm mx-2"
+            ariaLabel={`Record casualty caused by ${away.name}`}
             onSubmit={dispatchEvent}
             actors={{
               players: away.players,
@@ -290,6 +295,7 @@ export default function ScoreWidget({ home, away, gameId }: Props) {
           players={away.players}
           journeymen={away.journeymen}
           className="btn-outline btn-accent btn-sm"
+          ariaLabel={`Record SPP for ${away.name}`}
         >
           SPP
         </SPPButton>
