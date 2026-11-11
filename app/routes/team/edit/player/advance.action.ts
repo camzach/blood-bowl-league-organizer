@@ -15,6 +15,8 @@ import {
   getPlayerStats,
 } from "~/app/utils/get-computed-player-fields";
 import { getBlockedSkills } from "~/app/utils/get-blocked-skills";
+import { characteristicsByRoll } from "~/app/utils/advancement";
+import { d8 } from "~/app/utils/d8";
 import {
   playerWithAdvancement,
   playerForTvCalculation,
@@ -342,7 +344,7 @@ async function rollRandomStat(teamId: string, playerId: string) {
       throw new Error("Player may not be improved further");
     }
 
-    const roll = Math.floor(Math.random() * 8);
+    const roll = d8();
 
     await tx.insert(pendingRandomStat).values({
       playerId: player.id,
@@ -432,19 +434,9 @@ async function confirmRandomStat(
 
       skillName = skill.name;
     } else {
-      const characteristicsByRoll = [
-        ["av"],
-        ["av", "pa"],
-        ["av", "ma", "pa"],
-        ["av", "ma", "pa"],
-        ["ma", "pa"],
-        ["ag", "ma"],
-        ["ag", "st"],
-        ["av", "pa", "ma", "ag", "st"],
-      ];
       const characteristicChoices =
-        characteristicsByRoll[player.pendingRandomStat.roll];
-      if (!characteristicChoices.includes(input.choice)) {
+        characteristicsByRoll[player.pendingRandomStat.roll - 1];
+      if (!characteristicChoices.some((c) => c === input.choice)) {
         throw new Error("Chosen characteristic not valid");
       }
     }

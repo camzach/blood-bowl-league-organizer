@@ -8,8 +8,10 @@ import {
   coachToTeam,
   roundRobinGame,
   season,
+  pendingRandomSkill,
+  pendingRandomStat,
 } from "~/db/schema";
-import type { teamStates, gameStates } from "~/db/schema";
+import type { teamStates, gameStates, SkillCategory } from "~/db/schema";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -61,10 +63,12 @@ export async function seedTeam(
 
   await testDb.insert(coachToTeam).values({ coachId, teamId });
 
+  const playerIds = positionIds.map(() => nanoid());
+
   if (positionIds.length > 0) {
     await testDb.insert(player).values(
       positionIds.map((positionId, i) => ({
-        id: nanoid(),
+        id: playerIds[i],
         number: i + 1,
         positionId,
         teamId,
@@ -74,7 +78,22 @@ export async function seedTeam(
     );
   }
 
-  return { teamId, name };
+  return { teamId, name, playerIds };
+}
+
+export async function seedPendingRandomStat(playerId: string, roll: number) {
+  await testDb.insert(pendingRandomStat).values({ playerId, roll });
+}
+
+export async function seedPendingRandomSkill(
+  playerId: string,
+  category: SkillCategory,
+  skillName1: string,
+  skillName2: string,
+) {
+  await testDb
+    .insert(pendingRandomSkill)
+    .values({ playerId, category, skillName1, skillName2 });
 }
 
 export async function seedGame(

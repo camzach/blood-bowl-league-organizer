@@ -10,24 +10,7 @@ import type {
 import { useFetcher } from "react-router";
 import { getBlockedSkills } from "~/app/utils/get-blocked-skills";
 import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
-
-export const advancementCosts = {
-  "Random Primary": [3, 4, 6, 8, 10, 15],
-  "Chosen Primary": [6, 8, 12, 16, 20, 30],
-  "Chosen Secondary": [12, 14, 18, 22, 26, 40],
-  "Characteristic Improvement": [18, 20, 24, 28, 32, 50],
-} as const;
-
-const characteristicsByRoll = [
-  ["av"],
-  ["av", "pa"],
-  ["av", "ma", "pa"],
-  ["av", "ma", "pa"],
-  ["ma", "pa"],
-  ["ag", "ma"],
-  ["ag", "st"],
-  ["av", "pa", "ma", "ag", "st"],
-] as const;
+import { characteristicsByRoll, sppCostTable } from "~/app/utils/advancement";
 
 function upperFirst(str: string) {
   return (str.charAt(0)?.toUpperCase() ?? "") + str.slice(1);
@@ -172,16 +155,16 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
 
   const canTakeRandom =
     player.starPlayerPoints >=
-    advancementCosts["Random Primary"][player.totalImprovements];
+    sppCostTable.random_primary[player.totalImprovements];
   const canTakePrimary =
     player.starPlayerPoints >=
-    advancementCosts["Chosen Primary"][player.totalImprovements];
+    sppCostTable.chosen_primary[player.totalImprovements];
   const canTakeSecondary =
     player.starPlayerPoints >=
-    advancementCosts["Chosen Secondary"][player.totalImprovements];
+    sppCostTable.chosen_secondary[player.totalImprovements];
   const canTakeCharacteristic =
     player.starPlayerPoints >=
-    advancementCosts["Characteristic Improvement"][player.totalImprovements];
+    sppCostTable.characteristic[player.totalImprovements];
 
   return (
     <>
@@ -221,22 +204,22 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
             Choose one of the following:
           </p>
           <div className="flex flex-wrap gap-2">
-            {characteristicsByRoll[
-              Math.min(player.pendingRandomStat.roll - 1, 6)
-            ]?.map((stat) => (
-              <button
-                key={stat}
-                className="btn btn-primary"
-                onClick={() =>
-                  executeConfirmRandomStat({
-                    player: player.id,
-                    choice: stat,
-                  })
-                }
-              >
-                {stat.toUpperCase()}
-              </button>
-            ))}
+            {characteristicsByRoll[player.pendingRandomStat.roll - 1].map(
+              (stat) => (
+                <button
+                  key={stat}
+                  className="btn btn-primary"
+                  onClick={() =>
+                    executeConfirmRandomStat({
+                      player: player.id,
+                      choice: stat,
+                    })
+                  }
+                >
+                  {stat.toUpperCase()}
+                </button>
+              ),
+            )}
           </div>
           <div className="divider">OR</div>
           <p>Choose a new skill</p>
@@ -297,6 +280,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
               <a
                 role="tab"
                 key={category}
+                aria-disabled={!canTakeRandom}
                 className={classNames(
                   "tab px-1",
                   tab === category && "tab-active",
@@ -314,6 +298,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
               <a
                 role="tab"
                 key={category}
+                aria-disabled={!canTakeSecondary}
                 className={classNames(
                   "tab px-1",
                   tab === category && "tab-active",
@@ -329,6 +314,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
             )}
             <a
               role="tab"
+              aria-disabled={!canTakeCharacteristic}
               className={classNames(
                 "tab px-1",
                 tab === "stat" && "tab-active",
@@ -372,7 +358,7 @@ export function Popup({ player, skills, skillRelations, teamId }: Props) {
                   disabled={hasPending || !canTakeRandom}
                 >
                   {`Random - ${
-                    advancementCosts["Random Primary"][player.totalImprovements]
+                    sppCostTable.random_primary[player.totalImprovements]
                   } SPP`}
                 </button>
               )}

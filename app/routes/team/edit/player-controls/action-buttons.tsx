@@ -1,5 +1,6 @@
 import FireButton from "./player-firer";
-import { Popup, advancementCosts } from "./advancement-modal";
+import { Popup } from "./advancement-modal";
+import { sppCostTable } from "~/app/utils/advancement";
 import { useState } from "react";
 import { Modal } from "~/app/components/modal";
 import type { TeamState } from "~/db/schema";
@@ -32,7 +33,7 @@ export function PlayerActions({
 }: Props) {
   const [isOpen, setOpen] = useState(false);
   const canAdvance =
-    Object.values(advancementCosts).some(
+    Object.values(sppCostTable).some(
       (list) => list[player.totalImprovements] <= player.starPlayerPoints,
     ) && player.totalImprovements < 6;
 
