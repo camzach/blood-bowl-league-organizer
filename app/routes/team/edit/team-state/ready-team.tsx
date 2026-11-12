@@ -5,33 +5,33 @@ import cx from "classnames";
 import useTooltip from "~/app/components/tooltip";
 import { useFetcher, useNavigate } from "react-router";
 import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
+import {
+  expensiveMistakesTier,
+  getExpensiveMistake,
+} from "~/app/utils/expensive-mistakes";
 
 type Props = {
   teamId: string;
   treasury: number;
 };
 
-const tableRows = Array.from(Array(2), (i) => <Catastrophe key={i} />)
-  .concat(Array.from(Array(2), (i) => <MajorIncident key={i + 2} />))
-  .concat(Array.from(Array(2), (i) => <MinorIncident key={i + 4} />))
-  .concat(Array.from(Array(5), (i) => <CrisisAverted key={i + 6} />));
+const mistakeBadges = {
+  "Crisis Averted": <CrisisAverted />,
+  "Minor Incident": <MinorIncident />,
+  "Major Incident": <MajorIncident />,
+  Catastrophe: <Catastrophe />,
+};
 
 export default function ReadyButton({ teamId, treasury }: Props) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const [warningOpen, setWarningOpen] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const tableOffset = Math.min(Math.floor(treasury / 100000), 6);
+  const tableOffset = expensiveMistakesTier(treasury);
 
   useFetcherErrorNotification(fetcher);
 
-  const result = fetcher.data as
-    | {
-        expensiveMistake: string;
-        expensiveMistakesCost: number;
-        expensiveMistakeRoll: number;
-      }
-    | undefined;
+  const result = fetcher.data?.data;
   const isSubmitting =
     fetcher.state === "submitting" || fetcher.state === "loading";
 
@@ -92,7 +92,7 @@ export default function ReadyButton({ teamId, treasury }: Props) {
                   <td>
                     <Die result={i + 1} />
                   </td>
-                  <td>{tableRows[i + 6 - tableOffset]}</td>
+                  <td>{mistakeBadges[getExpensiveMistake(treasury, i + 1)]}</td>
                 </tr>
               );
             })}
@@ -130,10 +130,10 @@ export default function ReadyButton({ teamId, treasury }: Props) {
         <button
           className={cx(
             "btn",
-            treasury > 100000 ? "btn-warning" : "btn-primary",
+            treasury >= 100000 ? "btn-warning" : "btn-primary",
           )}
           onClick={() => {
-            if (treasury > 100000) {
+            if (treasury >= 100000) {
               setWarningOpen(true);
             } else {
               fetcher.submit(

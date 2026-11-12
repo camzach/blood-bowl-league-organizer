@@ -4,6 +4,11 @@ import { Route } from "./+types/state.action";
 import { db } from "~/app/utils/drizzle";
 import { team as dbTeam, player as dbPlayer } from "~/db/schema";
 import { and, eq, sql } from "drizzle-orm";
+import { d6 } from "~/app/utils/d6";
+import {
+  getExpensiveMistake,
+  getExpensiveMistakeCost,
+} from "~/app/utils/expensive-mistakes";
 
 import { redirect } from "react-router";
 
@@ -145,83 +150,14 @@ async function ready(teamId: string) {
       }
     }
 
-    const expensiveMistakesFunctions: Record<string, (g: number) => number> = {
-      "Crisis Averted": () => 0,
-      "Minor Incident": () => Math.ceil(Math.random() * 3) * 10_000,
-      "Major Incident": (g) => Math.floor(g / 5_000 / 2) * 5_000,
-      Catastrophe: (g) =>
-        g -
-        (Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6)) *
-          10_000,
-    };
-    const expensiveMistakesTable = [
-      [
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Major Incident",
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-        "Crisis Averted",
-      ],
-      [
-        "Catastrophe",
-        "Major Incident",
-        "Major Incident",
-        "Minor Incident",
-        "Minor Incident",
-        "Crisis Averted",
-      ],
-      [
-        "Catastrophe",
-        "Catastrophe",
-        "Major Incident",
-        "Major Incident",
-        "Major Incident",
-        "Major Incident",
-      ],
-    ] as const;
-    const expensiveMistakeRoll = Math.floor(Math.random() * 6);
+    const expensiveMistakeRoll = d6();
     const expensiveMistake =
       team.state === "draft"
         ? null
-        : expensiveMistakesTable[
-            Math.min(Math.floor(team.treasury / 100_000), 6)
-          ][expensiveMistakeRoll];
+        : getExpensiveMistake(team.treasury, expensiveMistakeRoll);
     const expensiveMistakesCost =
       expensiveMistake !== null
-        ? expensiveMistakesFunctions[expensiveMistake](team.treasury)
+        ? getExpensiveMistakeCost(expensiveMistake, team.treasury)
         : 0;
 
     await Promise.all([
@@ -246,8 +182,7 @@ async function ready(teamId: string) {
     return {
       expensiveMistake,
       expensiveMistakesCost,
-      // Roll should appear to the user as 1-6 instead of 0-5
-      expensiveMistakeRoll: expensiveMistakeRoll + 1,
+      expensiveMistakeRoll,
     };
   });
 }
