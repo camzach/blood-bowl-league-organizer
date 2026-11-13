@@ -5,7 +5,8 @@ import { db } from "~/app/utils/drizzle";
 import RosterSelector from "./roster-selector";
 import { Route } from "./+types/page";
 import { authContext } from "~/app/primary-layout";
-import { Form } from "react-router";
+import { useFetcher } from "react-router";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 
 export async function loader({ context }: Route.LoaderArgs) {
   const { user } = context.get(authContext)!;
@@ -27,39 +28,55 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export default function Component({ loaderData }: Route.ComponentProps) {
   const { inactiveTeams, rosters } = loaderData;
+  const createFetcher = useFetcher();
+  const redraftFetcher = useFetcher();
   const [redraftTeamId, setRedraftTeamId] = useState(
     inactiveTeams[0]?.id ?? "",
   );
+
+  useFetcherErrorNotification(createFetcher);
+  useFetcherErrorNotification(redraftFetcher);
+
   return (
     <>
       <p>You do not have a team yet!</p>
       <br />
-      <Form method="POST" action="/team/new/create" className="join flex">
+      <createFetcher.Form
+        method="POST"
+        action="/team/new/create"
+        className="join flex"
+      >
         <button
           className="btn btn-primary join-item"
           style={{ height: "auto" }}
+          disabled={createFetcher.state !== "idle"}
         >
           Create a new team
         </button>
         <div className="join join-item join-vertical">
           <input
+            aria-label="Team name"
             className="input join-item"
             placeholder="Team Name"
             name="name"
           />
           <RosterSelector rosters={rosters} />
         </div>
-      </Form>
+      </createFetcher.Form>
       {inactiveTeams.length > 0 && (
         <>
           <div className="divider">OR</div>
-          <Form
+          <redraftFetcher.Form
             method="POST"
             action={`/team/${redraftTeamId}/edit/state`}
             className="join"
           >
             <input type="hidden" name="action" value="redraft" />
-            <button type="submit" className="btn join-item">
+            <button
+              type="submit"
+              className="btn join-item"
+              disabled={redraftFetcher.state !== "idle"}
+            >
               Redraft an existing team
             </button>
             <select
@@ -74,7 +91,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                 </option>
               ))}
             </select>
-          </Form>
+          </redraftFetcher.Form>
         </>
       )}
     </>

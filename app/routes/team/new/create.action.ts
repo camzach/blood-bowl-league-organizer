@@ -1,7 +1,6 @@
+import { DrizzleQueryError } from "drizzle-orm";
 import { coachToTeam, team } from "~/db/schema";
 import { db } from "~/app/utils/drizzle";
-// import nanoid from "~/utils/nanoid";
-// import { action } from "~/utils/safe-action";
 import { z } from "zod";
 import { createValidatedAction } from "~/app/utils/action";
 import nanoid from "~/app/utils/nanoid";
@@ -11,7 +10,7 @@ import { redirect } from "react-router";
 
 export const action = createValidatedAction(
   z.object({
-    name: z.string().min(1),
+    name: z.string().trim().min(1).max(255),
     roster: z.string(),
     optionalRule: z.string().optional(),
   }),
@@ -19,7 +18,7 @@ export const action = createValidatedAction(
     const { session } = context.get(authContext);
     const activeLeague = context.get(activeLeagueContext)?.id;
     if (!activeLeague) {
-      throw "No active league";
+      throw new Error("No active league");
     }
 
     const ruleOptions = await db.query.optionalSpecialRuleToRoster.findMany({
@@ -32,19 +31,35 @@ export const action = createValidatedAction(
       throw new Error("Invalid optional rule selected");
 
     const teamId = nanoid();
-    await db.transaction(async (tx) => {
-      await tx.insert(team).values({
-        name,
-        id: teamId,
-        rosterName: roster,
-        chosenSpecialRuleName: option?.specialRuleName,
-        leagueId: activeLeague,
+    try {
+      await db.transaction(async (tx) => {
+        await tx.insert(team).values({
+          name,
+          id: teamId,
+          rosterName: roster,
+          chosenSpecialRuleName: option?.specialRuleName,
+          leagueId: activeLeague,
+        });
+        await tx.insert(coachToTeam).values({
+          coachId: session.userId,
+          teamId,
+        });
       });
-      await tx.insert(coachToTeam).values({
-        coachId: session.userId,
-        teamId,
-      });
-    });
+    } catch (error) {
+      const cause = error instanceof DrizzleQueryError ? error.cause : null;
+      if (
+        cause &&
+        "code" in cause &&
+        cause.code === "23505" &&
+        "constraint" in cause &&
+        cause.constraint === "name"
+      ) {
+        throw new Error("A team with that name already exists in this league", {
+          cause: error,
+        });
+      }
+      throw error;
+    }
 
     throw redirect("/team/" + teamId);
   },

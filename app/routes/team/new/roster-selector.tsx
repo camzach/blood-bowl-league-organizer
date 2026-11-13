@@ -14,6 +14,7 @@ export default function RosterSelector({ rosters }: Props) {
   return (
     <>
       <select
+        aria-label="Roster"
         className="join-item select select-bordered"
         name="roster"
         value={roster.name}
@@ -31,6 +32,7 @@ export default function RosterSelector({ rosters }: Props) {
       </select>
       {roster.optionalSpecialRules.length > 0 && (
         <select
+          aria-label="Special rule"
           className="join-item select select-bordered"
           name="optionalRule"
         >
