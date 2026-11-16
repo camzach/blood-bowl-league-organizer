@@ -1,11 +1,8 @@
-import { Link, useRevalidator } from "react-router";
+import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { activeLeagueContext, authContext } from "../primary-layout";
 import { db } from "~/app/utils/drizzle";
 import { auth } from "~/app/utils/auth.server";
-import { authClient } from "~/app/utils/auth.client";
-import { useContext } from "react";
-import { notificationContext } from "../components/notification-provider";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const { user } = context.get(authContext);
@@ -45,9 +42,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const revalidator = useRevalidator();
-  const sendNotification = useContext(notificationContext);
-
   const { activeLeague, myTeams, myLeagues, upcomingGames } = loaderData;
   if (!activeLeague && myLeagues.length === 0) {
     return (
@@ -58,43 +52,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <strong className="font-bold">Warning!</strong>
         <span className="block sm:inline">
           You are not currently part of any leagues. Ask an admin to be added,
-          or create your own.
+          or <Link to="/create-league">create your own</Link>.
         </span>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const data = new FormData(e.target);
-            const leagueName = data.get("leagueName")?.toString();
-            if (!leagueName) {
-              return;
-            }
-            try {
-              await authClient.organization.create({
-                name: leagueName,
-                slug: leagueName.toLowerCase().replace(/\s/g, "-"),
-              });
-              await revalidator.revalidate();
-            } catch (error) {
-              sendNotification({
-                text:
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to create league",
-                time: 5000,
-              });
-            }
-          }}
-        >
-          <input
-            type="text"
-            name="leagueName"
-            placeholder="League Name"
-            className="input input-bordered w-full max-w-xs"
-          />
-          <button type="submit" className="btn btn-primary">
-            Create League
-          </button>
-        </form>
       </div>
     );
   }

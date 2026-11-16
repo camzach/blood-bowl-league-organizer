@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { authClient } from "~/app/utils/auth.client";
 import { useNavigate } from "react-router";
 import { notificationContext } from "~/app/components/notification-provider";
@@ -6,6 +6,7 @@ import { notificationContext } from "~/app/components/notification-provider";
 export default function CreateLeaguePage() {
   const navigate = useNavigate();
   const sendNotification = useContext(notificationContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <div className="container mx-auto p-4">
@@ -15,15 +16,24 @@ export default function CreateLeaguePage() {
         onSubmit={async (e) => {
           e.preventDefault();
           const data = new FormData(e.currentTarget);
-          const leagueName = data.get("leagueName")?.toString();
+          const leagueName = data.get("leagueName")?.toString().trim();
           if (!leagueName) {
+            sendNotification({ text: "League name is required", time: 5000 });
             return;
           }
           try {
-            await authClient.organization.create({
+            setIsSubmitting(true);
+            const { error } = await authClient.organization.create({
               name: leagueName,
-              slug: leagueName.toLowerCase().replace(/\s/g, "-"),
+              slug: leagueName.toLowerCase().replace(/\s+/g, "-"),
             });
+            if (error) {
+              sendNotification({
+                text: error.message ?? "Failed to create league",
+                time: 5000,
+              });
+              return;
+            }
             await navigate("/");
           } catch (error) {
             sendNotification({
@@ -33,6 +43,8 @@ export default function CreateLeaguePage() {
                   : "Failed to create league",
               time: 5000,
             });
+          } finally {
+            setIsSubmitting(false);
           }
         }}
       >
@@ -47,7 +59,11 @@ export default function CreateLeaguePage() {
           className="input input-bordered w-full max-w-xs"
           required
         />
-        <button type="submit" className="btn btn-primary mt-4">
+        <button
+          type="submit"
+          className="btn btn-primary mt-4"
+          disabled={isSubmitting}
+        >
           Create League
         </button>
       </form>
