@@ -30,7 +30,7 @@ test.describe("create league", () => {
     await page.getByRole("button", { name: "Create League" }).click();
 
     await expect(
-      page.getByLabel("League Name").and(page.locator(":invalid")),
+      page.getByRole("alert").filter({ hasText: "League name is required" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Create New League" }),
@@ -45,7 +45,9 @@ test.describe("create league", () => {
     await page.getByLabel("League Name").fill("   ");
     await page.getByRole("button", { name: "Create League" }).click();
 
-    await expect(page.getByRole("alert")).toContainText(/name/i);
+    await expect(
+      page.getByRole("alert").filter({ hasText: "League name is required" }),
+    ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Create New League" }),
     ).toBeVisible();

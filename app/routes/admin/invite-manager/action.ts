@@ -7,7 +7,7 @@ import { activeLeagueContext } from "~/app/primary-layout";
 const inviteActionSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("generate"),
-    email: z.string().email(),
+    email: z.email(),
   }),
   z.object({
     action: z.literal("revoke"),

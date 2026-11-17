@@ -1,8 +1,12 @@
+import { useContext } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { activeLeagueContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { redirect, useFetcher } from "react-router";
 import { auth } from "~/app/utils/auth.server";
 import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
+import { notificationContext } from "~/app/components/notification-provider";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const leagueId = context.get(activeLeagueContext)?.id;
@@ -19,12 +23,16 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   return { invites, leagueId };
 }
 
+type Inputs = { email: string };
+
 export default function InviteManagerPage({
   loaderData,
 }: Route.ComponentProps) {
   const { invites } = loaderData;
   const generateFetcher = useFetcher();
   const revokeFetcher = useFetcher();
+  const sendNotification = useContext(notificationContext);
+  const { register, handleSubmit } = useForm<Inputs>();
 
   useFetcherErrorNotification(generateFetcher);
   useFetcherErrorNotification(revokeFetcher);
@@ -33,27 +41,38 @@ export default function InviteManagerPage({
     <div className="flex flex-col">
       <h1 className="mb-4 text-2xl font-bold">Manage Invites</h1>
 
-      <generateFetcher.Form
-        method="post"
-        action="/admin/invite-manager/action"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          generateFetcher.submit(formData, {
-            method: "post",
-            action: "/admin/invite-manager/action",
-          });
-        }}
+      <form
+        noValidate
+        onSubmit={handleSubmit(
+          ({ email }) => {
+            generateFetcher.submit(
+              { action: "generate", email },
+              {
+                method: "post",
+                action: "/admin/invite-manager/action",
+              },
+            );
+          },
+          ({ email }) => {
+            sendNotification({
+              text: email?.message ?? "Enter a valid email address",
+              time: 5000,
+            });
+          },
+        )}
       >
         <div className="join join-horizontal mb-4">
           <input
-            name="email"
+            aria-label="User email"
             placeholder="User email"
             type="email"
             className="input join-item"
-            required
+            {...register("email", {
+              validate: (value) =>
+                z.email().safeParse(value).success ||
+                "Enter a valid email address",
+            })}
           />
-          <input type="hidden" name="action" value="generate" />
           <button
             type="submit"
             className="btn btn-primary join-item"
@@ -62,7 +81,7 @@ export default function InviteManagerPage({
             {generateFetcher.state !== "idle" ? "Sending..." : "Send invite"}
           </button>
         </div>
-      </generateFetcher.Form>
+      </form>
 
       {invites.length === 0 ? (
         <p>No active invite codes.</p>

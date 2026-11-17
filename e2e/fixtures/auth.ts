@@ -19,6 +19,7 @@ export type AuthFixtures = {
   cookie: string;
   adminUserId: string;
   memberUserId: string;
+  memberEmail: string;
   otherLeague: TestLeague;
 };
 
@@ -98,6 +99,19 @@ async function setActiveLeague(
   return { ...user, cookie: extractSessionCookie(await response, user.cookie) };
 }
 
+export async function acceptInvitation(
+  user: TestUser,
+  invitationId: string,
+): Promise<void> {
+  const accepted = await authClient.organization.acceptInvitation(
+    { invitationId },
+    { headers: { Cookie: user.cookie } },
+  );
+  if (accepted.error) {
+    throw new Error(`Failed to accept invitation: ${accepted.error.message}`);
+  }
+}
+
 async function joinLeagueAsMember(
   user: TestUser,
   league: TestLeague,
@@ -114,13 +128,7 @@ async function joinLeagueAsMember(
     throw new Error(`Failed to invite member: ${invitation.error.message}`);
   }
 
-  const accepted = await authClient.organization.acceptInvitation(
-    { invitationId: invitation.data.id },
-    { headers: { Cookie: user.cookie } },
-  );
-  if (accepted.error) {
-    throw new Error(`Failed to accept invitation: ${accepted.error.message}`);
-  }
+  await acceptInvitation(user, invitation.data.id);
   return user;
 }
 
@@ -230,6 +238,10 @@ export const test = base.extend<
 
   memberUserId: async ({ getMember }, use) => {
     await use((await getMember()).userId);
+  },
+
+  memberEmail: async ({ getMember }, use) => {
+    await use((await getMember()).email);
   },
 
   leagueId: async ({ testLeague }, use) => {
