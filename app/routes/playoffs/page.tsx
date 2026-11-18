@@ -1,7 +1,6 @@
-import { redirect } from "react-router";
 import { db } from "~/app/utils/drizzle";
 import { gameWithTeamNames } from "~/db/query-fragments/game.fragments";
-import { activeLeagueContext, authContext } from "~/app/primary-layout";
+import { activeLeagueContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
 import { Link } from "react-router";
 
@@ -82,12 +81,6 @@ function buildGrid(numRounds: number) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const { session } = context.get(authContext);
-
-  if (!session) {
-    throw redirect("/login");
-  }
-
   const activeSeason = await db.query.season.findFirst({
     where: {
       leagueId: context.get(activeLeagueContext)?.id ?? "",

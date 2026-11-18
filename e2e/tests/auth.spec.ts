@@ -38,7 +38,7 @@ test.describe("signed out", () => {
     page,
   }) => {
     await page.goto("/schedule");
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL("/login?redirectTo=%2Fschedule");
     await expect(
       page.getByRole("heading", { name: "Sign In to BBLO" }),
     ).toBeVisible();
@@ -46,7 +46,7 @@ test.describe("signed out", () => {
 
   test("a protected game URL does not leak any content", async ({ page }) => {
     await page.goto("/team/some-team-id");
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL("/login?redirectTo=%2Fteam%2Fsome-team-id");
     await expect(page.getByRole("navigation")).toHaveCount(0);
   });
 
@@ -144,13 +144,13 @@ test.describe("sign up and sign in", () => {
 
     // The session is really gone, not just hidden.
     await page.goto("/schedule");
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL("/login?redirectTo=%2Fschedule");
 
     await page.getByRole("textbox", { name: "Email" }).fill(creds.email);
     await page.getByLabel("Password").fill(creds.password);
     await page.getByRole("button", { name: "Log In with Email" }).click();
 
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL("/schedule");
     await expect(page.getByRole("button", { name: "User menu" })).toBeVisible();
   });
 

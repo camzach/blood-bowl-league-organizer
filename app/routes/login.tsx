@@ -1,8 +1,9 @@
 import { authClient } from "~/app/utils/auth.client";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { notificationContext } from "~/app/components/notification-provider";
+import { safeRedirectPath } from "~/app/utils/safe-redirect";
 
 type Inputs = {
   email: string;
@@ -12,6 +13,8 @@ type Inputs = {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = safeRedirectPath(searchParams.get("redirectTo"));
   const sendNotification = useContext(notificationContext);
   const loginForm = useForm<Inputs>();
   const signupForm = useForm<Inputs>();
@@ -25,7 +28,7 @@ export default function LoginPage() {
       const response = await authClient.signIn.email({
         email,
         password,
-        callbackURL: "/",
+        callbackURL: redirectTo,
       });
       if (response.error) {
         setIsSigningIn(false);
@@ -69,7 +72,7 @@ export default function LoginPage() {
       }
       // better-auth's email sign-up endpoint does not automatically
       // redirect on success, so we do it manually
-      await navigate("/");
+      await navigate(redirectTo);
     } catch (error) {
       setIsSigningUp(false);
       sendNotification({
@@ -82,7 +85,7 @@ export default function LoginPage() {
   const handleDiscordSignin = () => {
     authClient.signIn.social({
       provider: "discord",
-      callbackURL: "/",
+      callbackURL: redirectTo,
     });
   };
 

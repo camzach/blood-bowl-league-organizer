@@ -11,6 +11,7 @@ import { eq } from "drizzle-orm";
 import { bracketGame } from "~/db/schema";
 import { useId } from "react";
 import { isLeagueAdmin, type ActiveLeague } from "./utils/permissions";
+import { loginRedirectUrl } from "./utils/login-redirect";
 
 type BetterAuthSession = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -33,7 +34,7 @@ export const middleware: Route.MiddlewareFunction[] = [
     });
 
     if (!session) {
-      throw redirect("/login");
+      throw redirect(loginRedirectUrl(request));
     }
 
     context.set(authContext, session);
