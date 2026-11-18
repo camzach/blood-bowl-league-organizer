@@ -1,5 +1,8 @@
 import { test, expect } from "../fixtures/index";
-import { acceptInvitation } from "../fixtures/auth";
+import { inviteMember } from "../fixtures/auth";
+import { testDb } from "../fixtures/db";
+import { eq } from "drizzle-orm";
+import { invitation } from "~/db/schema";
 import nanoid from "~/app/utils/nanoid";
 
 const newAddress = () => `invitee-${nanoid().toLowerCase()}@test.local`;
@@ -148,33 +151,47 @@ test.describe("invite manager", () => {
     await expect(page.getByText("No active invite codes.")).toBeVisible();
   });
 
-  test("an invite shows as accepted once the invitee accepts it", async ({
+  test("only a pending invite can have its link copied", async ({
     page,
-    otherLeague,
+    memberEmail,
   }) => {
+    const address = newAddress();
     await page.goto("/admin/invite-manager");
-    await page
-      .getByRole("textbox", { name: "User email" })
-      .fill(otherLeague.admin.email);
+    await page.getByRole("textbox", { name: "User email" }).fill(address);
     await page.getByRole("button", { name: "Send invite" }).click();
-    const row = page
-      .getByRole("row")
-      .filter({ hasText: otherLeague.admin.email });
+
+    await expect(
+      page
+        .getByRole("row")
+        .filter({ hasText: address })
+        .getByRole("button", { name: "Copy link" }),
+    ).toBeEnabled();
+    await expect(
+      page
+        .getByRole("row")
+        .filter({ hasText: memberEmail })
+        .getByRole("button", { name: "Copy link" }),
+    ).toBeDisabled();
+  });
+
+  test("an expired invite can no longer have its link copied", async ({
+    page,
+    testLeague,
+  }) => {
+    const address = newAddress();
+    const inviteId = await inviteMember(testLeague, address);
+    await testDb
+      .update(invitation)
+      .set({ expiresAt: new Date(0) })
+      .where(eq(invitation.id, inviteId));
+
+    await page.goto("/admin/invite-manager");
+
+    const row = page.getByRole("row").filter({ hasText: address });
     await expect(
       row.getByRole("cell", { name: "pending", exact: true }),
     ).toBeVisible();
-    const headers = await page.getByRole("columnheader").allInnerTexts();
-    expect(headers).toContain("ID");
-    const inviteId = await row
-      .getByRole("cell")
-      .nth(headers.indexOf("ID"))
-      .innerText();
-
-    await acceptInvitation(otherLeague.admin, inviteId);
-    await page.reload();
-
-    await expect(
-      row.getByRole("cell", { name: "accepted", exact: true }),
-    ).toBeVisible();
+    await expect(row.getByRole("button", { name: "Revoke" })).toBeVisible();
+    await expect(row.getByRole("button", { name: "Copy link" })).toBeDisabled();
   });
 });

@@ -7,6 +7,7 @@ import { redirect, useFetcher } from "react-router";
 import { auth } from "~/app/utils/auth.server";
 import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 import { notificationContext } from "~/app/components/notification-provider";
+import { baseURL } from "~/app/utils/auth.client";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const leagueId = context.get(activeLeagueContext)?.id;
@@ -15,15 +16,32 @@ export async function loader({ context, request }: Route.LoaderArgs) {
     return redirect("/");
   }
 
-  const invites = await auth.api.listInvitations({
+  const listedInvites = await auth.api.listInvitations({
     headers: request.headers,
     query: { organizationId: leagueId },
   });
+  const invites = listedInvites.map((invite) => ({
+    ...invite,
+    isExpired: new Date(invite.expiresAt).getTime() < Date.now(),
+  }));
 
   return { invites, leagueId };
 }
 
 type Inputs = { email: string };
+
+async function copyInviteLink(
+  inviteId: string,
+  sendNotification: (notification: { text: string; time: number }) => void,
+) {
+  const link = new URL(`/accept-invite?id=${inviteId}`, baseURL).toString();
+  try {
+    await navigator.clipboard.writeText(link);
+    sendNotification({ text: "Invite link copied", time: 5000 });
+  } catch {
+    sendNotification({ text: "Could not copy the invite link", time: 5000 });
+  }
+}
 
 export default function InviteManagerPage({
   loaderData,
@@ -92,7 +110,7 @@ export default function InviteManagerPage({
             <thead>
               <tr>
                 <th>Email</th>
-                <th>ID</th>
+                <th>Link</th>
                 <th>Status</th>
                 <th>Revoke</th>
               </tr>
@@ -101,7 +119,16 @@ export default function InviteManagerPage({
               {invites.map((code) => (
                 <tr key={code.id}>
                   <td>{code.email}</td>
-                  <td>{code.id}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => copyInviteLink(code.id, sendNotification)}
+                      disabled={code.status !== "pending" || code.isExpired}
+                    >
+                      Copy link
+                    </button>
+                  </td>
                   <td>{code.status}</td>
                   <td>
                     <revokeFetcher.Form

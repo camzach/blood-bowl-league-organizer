@@ -10,6 +10,7 @@ export default [
       route("/", "./routes/home.tsx"),
 
       route("/create-league", "./routes/create-league/page.tsx"),
+      route("/accept-invite", "./routes/accept-invite.tsx"),
 
       layout("./routes/admin/admin-permission-middleware.ts", [
         route("/admin/action", "./routes/admin/admin.action.ts"),

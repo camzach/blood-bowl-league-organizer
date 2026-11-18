@@ -6,6 +6,8 @@ import config from "../../playwright.config";
 
 const BASE_URL = config.use!.baseURL!;
 
+export const TEST_PASSWORD = "testpassword1!";
+
 const authClient = createAuthClient({
   baseURL: BASE_URL,
   fetchOptions: { headers: { Origin: BASE_URL } },
@@ -29,6 +31,7 @@ type AuthOptions = {
 
 type TestUser = {
   userId: string;
+  name: string;
   email: string;
   cookie: string;
 };
@@ -63,12 +66,11 @@ function extractSessionCookie(res: Response, fallback?: string): string {
 async function createTestUser(): Promise<TestUser> {
   const id = nanoid().toLowerCase();
   const email = `test-${id}@test.local`;
-  const password = "testpassword1!";
   const name = `User ${id}`;
 
   const { resolve, promise: response } = Promise.withResolvers<Response>();
   const signUp = await authClient.signUp.email(
-    { email, password, name },
+    { email, password: TEST_PASSWORD, name },
     { onResponse: (ctx) => resolve(ctx.response) },
   );
   if (signUp.error) {
@@ -76,6 +78,7 @@ async function createTestUser(): Promise<TestUser> {
   }
   return {
     userId: signUp.data.user.id,
+    name,
     email,
     cookie: extractSessionCookie(await response),
   };
@@ -99,7 +102,7 @@ async function setActiveLeague(
   return { ...user, cookie: extractSessionCookie(await response, user.cookie) };
 }
 
-export async function acceptInvitation(
+async function acceptInvitation(
   user: TestUser,
   invitationId: string,
 ): Promise<void> {
@@ -112,13 +115,13 @@ export async function acceptInvitation(
   }
 }
 
-async function joinLeagueAsMember(
-  user: TestUser,
+export async function inviteMember(
   league: TestLeague,
-): Promise<TestUser> {
+  email: string,
+): Promise<string> {
   const invitation = await authClient.organization.inviteMember(
     {
-      email: user.email,
+      email,
       role: "member",
       organizationId: league.leagueId,
     },
@@ -127,8 +130,14 @@ async function joinLeagueAsMember(
   if (invitation.error) {
     throw new Error(`Failed to invite member: ${invitation.error.message}`);
   }
+  return invitation.data.id;
+}
 
-  await acceptInvitation(user, invitation.data.id);
+async function joinLeagueAsMember(
+  user: TestUser,
+  league: TestLeague,
+): Promise<TestUser> {
+  await acceptInvitation(user, await inviteMember(league, user.email));
   return user;
 }
 
