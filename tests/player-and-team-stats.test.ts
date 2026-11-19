@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import calculateTV from "~/app/utils/calculate-tv";
-import { getPlayerSppAndTv } from "~/app/utils/get-computed-player-fields";
+import {
+  getPlayerSkills,
+  getPlayerSppAndTv,
+  getPlayerStats,
+} from "~/app/utils/get-computed-player-fields";
 
 type Player = Parameters<typeof getPlayerSppAndTv>[0];
 type Team = Parameters<typeof calculateTV>[0];
@@ -221,6 +225,176 @@ describe("getPlayerSppAndTv", () => {
     );
     expect(teamValue).toBe(50000 + 20000 + 20000);
     expect(starPlayerPoints).toBe(-6 - 16);
+  });
+});
+
+describe("getPlayerStats", () => {
+  const basePosition = { ma: 6, st: 3, ag: 3, pa: 4, av: 8 };
+
+  function mockStatPlayer(opts: {
+    position?:
+      | typeof basePosition
+      | (Omit<typeof basePosition, "pa"> & { pa: number | null });
+    maInjuries?: number;
+    stInjuries?: number;
+    agInjuries?: number;
+    avInjuries?: number;
+    improvements?: Array<{ type: string }>;
+  }) {
+    return {
+      position: opts.position ?? basePosition,
+      maInjuries: opts.maInjuries ?? 0,
+      stInjuries: opts.stInjuries ?? 0,
+      agInjuries: opts.agInjuries ?? 0,
+      avInjuries: opts.avInjuries ?? 0,
+      improvements: opts.improvements ?? [],
+    } as Parameters<typeof getPlayerStats>[0];
+  }
+
+  it("returns base position stats when player has no injuries or improvements", () => {
+    const stats = getPlayerStats(mockStatPlayer({}));
+    expect(stats).toEqual({ ma: 6, st: 3, ag: 3, pa: 4, av: 8 });
+  });
+
+  it("applies stat injuries correctly", () => {
+    const stats = getPlayerStats(
+      mockStatPlayer({
+        maInjuries: 1,
+        stInjuries: 1,
+        avInjuries: 1,
+        agInjuries: 1,
+      }),
+    );
+    expect(stats).toEqual({
+      ma: 5,
+      st: 2,
+      ag: 4, // target roll worsens (increases)
+      pa: 4,
+      av: 7,
+    });
+  });
+
+  it("applies characteristic improvements correctly", () => {
+    const stats = getPlayerStats(
+      mockStatPlayer({
+        improvements: [
+          { type: "ma" },
+          { type: "st" },
+          { type: "av" },
+          { type: "ag" },
+          { type: "pa" },
+        ],
+      }),
+    );
+    expect(stats).toEqual({
+      ma: 7,
+      st: 4,
+      ag: 2, // target roll improves (decreases)
+      pa: 3, // target roll improves (decreases)
+      av: 9,
+    });
+  });
+
+  it("initializes null PA to 6 on first PA improvement", () => {
+    const stats = getPlayerStats(
+      mockStatPlayer({
+        position: { ma: 6, st: 3, ag: 3, pa: null, av: 8 },
+        improvements: [{ type: "pa" }],
+      }),
+    );
+    expect(stats.pa).toBe(6);
+  });
+
+  it("decrements PA on subsequent PA improvements after initializing null PA", () => {
+    const stats = getPlayerStats(
+      mockStatPlayer({
+        position: { ma: 6, st: 3, ag: 3, pa: null, av: 8 },
+        improvements: [{ type: "pa" }, { type: "pa" }],
+      }),
+    );
+    expect(stats.pa).toBe(5);
+  });
+
+  it("combines injuries and improvements accurately", () => {
+    const stats = getPlayerStats(
+      mockStatPlayer({
+        maInjuries: 1,
+        agInjuries: 1,
+        improvements: [{ type: "ma" }, { type: "ag" }, { type: "st" }],
+      }),
+    );
+    expect(stats).toEqual({
+      ma: 6, // 6 - 1 + 1
+      st: 4, // 3 + 1
+      ag: 3, // 3 + 1 - 1
+      pa: 4,
+      av: 8,
+    });
+  });
+});
+
+describe("getPlayerSkills", () => {
+  type Skill = NonNullable<Parameters<typeof getPlayerSkills>[1]>;
+
+  const dodgeSkill = {
+    name: "Dodge",
+    category: "A",
+    elite: false,
+  } as unknown as Skill;
+  const blockSkill = {
+    name: "Block",
+    category: "G",
+    elite: false,
+  } as unknown as Skill;
+  const proSkill = {
+    name: "Pro",
+    category: "G",
+    elite: false,
+  } as unknown as Skill;
+
+  it("returns base position skills when there are no improvements and not captain", () => {
+    const skills = getPlayerSkills({
+      position: { skills: [dodgeSkill] },
+      improvements: [],
+      isCaptain: false,
+    });
+    expect(skills).toEqual([dodgeSkill]);
+  });
+
+  it("combines position skills with skills from improvements, filtering out nulls", () => {
+    const skills = getPlayerSkills({
+      position: { skills: [dodgeSkill] },
+      improvements: [
+        { skill: blockSkill },
+        { skill: null }, // e.g. stat improvement
+      ],
+      isCaptain: false,
+    });
+    expect(skills).toEqual([dodgeSkill, blockSkill]);
+  });
+
+  it("appends Pro skill when player is captain and proSkill is provided", () => {
+    const skills = getPlayerSkills(
+      {
+        position: { skills: [dodgeSkill] },
+        improvements: [{ skill: blockSkill }],
+        isCaptain: true,
+      },
+      proSkill,
+    );
+    expect(skills).toEqual([dodgeSkill, blockSkill, proSkill]);
+  });
+
+  it("does not append Pro skill when player is not captain even if proSkill is provided", () => {
+    const skills = getPlayerSkills(
+      {
+        position: { skills: [dodgeSkill] },
+        improvements: [],
+        isCaptain: false,
+      },
+      proSkill,
+    );
+    expect(skills).toEqual([dodgeSkill]);
   });
 });
 

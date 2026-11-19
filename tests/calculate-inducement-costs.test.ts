@@ -160,7 +160,7 @@ describe("calculate inducement costs", () => {
     ).toThrow();
   });
 
-  it("should allow puchase of null price with matching special rule", () => {
+  it("should allow purchase of null price with matching special rule", () => {
     const inducements = [{ name: "inducement-3", quantity: 1 }];
     const result = calculateInducementCostsFromData(
       inducements,
@@ -267,7 +267,7 @@ describe("calculate inducement costs", () => {
   it("should use special max for bribes", () => {
     const inducements = [{ name: "Bribe", quantity: 6 }];
     const specialRules = ["Bribery and Corruption"];
-    calculateInducementCostsFromData(
+    const result = calculateInducementCostsFromData(
       inducements,
       [],
       specialRules,
@@ -276,6 +276,7 @@ describe("calculate inducement costs", () => {
       mockStarPlayersData,
       mockInducementsData,
     );
+    expect(result).toBe(6 * 50000);
     expect(() =>
       calculateInducementCostsFromData(
         inducements,
