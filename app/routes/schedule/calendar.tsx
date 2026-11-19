@@ -1,6 +1,4 @@
 import {
-  setMonth,
-  setYear,
   startOfMonth,
   startOfWeek,
   addDays,
@@ -13,6 +11,7 @@ import {
 } from "date-fns";
 import classNames from "classnames";
 import { Link, useNavigate, useSearchParams } from "react-router";
+import { shownMonth } from "~/app/utils/shown-month";
 import type fetchGames from "./fetch-games";
 
 type Props = {
@@ -26,23 +25,18 @@ export default function Calendar(props: Props) {
   const navigate = useNavigate();
 
   // oxlint-disable-next-line react/purity
-  let today = new Date();
-  if (props.year !== undefined) {
-    today = setYear(today, props.year);
-  }
-  if (props.month !== undefined) {
-    today = setMonth(today, props.month);
-  }
+  const today = new Date();
+  const shown = shownMonth(today, props.year, props.month);
 
-  const firstDay = startOfWeek(startOfMonth(today));
-  const nDays = differenceInDays(endOfWeek(endOfMonth(today)), firstDay);
+  const firstDay = startOfWeek(startOfMonth(shown));
+  const nDays = differenceInDays(endOfWeek(endOfMonth(shown)), firstDay);
 
-  const nextMonth = addMonths(today, 1);
+  const nextMonth = addMonths(shown, 1);
   const nextMonthSearch = new URLSearchParams(searchParams);
   nextMonthSearch.set("month", nextMonth.getMonth().toString());
   nextMonthSearch.set("year", nextMonth.getFullYear().toString());
 
-  const lastMonth = addMonths(today, -1);
+  const lastMonth = addMonths(shown, -1);
   const lastMonthSearch = new URLSearchParams(searchParams);
   lastMonthSearch.set("month", lastMonth.getMonth().toString());
   lastMonthSearch.set("year", lastMonth.getFullYear().toString());
@@ -57,7 +51,7 @@ export default function Calendar(props: Props) {
           &lt;
         </button>
         <h1>
-          {today.toLocaleDateString("default", {
+          {shown.toLocaleDateString("default", {
             month: "long",
             year: "numeric",
           })}
@@ -80,7 +74,7 @@ export default function Calendar(props: Props) {
                 className={classNames(
                   "bg-base-200 flex aspect-1/2 min-w-20 flex-col overflow-clip rounded-xl border shadow-xl lg:aspect-square",
                   isSameDay(today, date) ? "border-accent" : "border-neutral",
-                  !isSameMonth(date, today) && "opacity-50",
+                  !isSameMonth(date, shown) && "opacity-50",
                 )}
                 key={date.toString()}
               >

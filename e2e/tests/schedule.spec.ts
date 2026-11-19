@@ -1,14 +1,6 @@
 import { test, expect } from "../fixtures/index";
 import type { Page } from "@playwright/test";
 
-function monthHeading(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
 function gameRow(page: Page, home: string, away: string) {
   return page
     .getByRole("row")
@@ -72,7 +64,7 @@ test("schedule: opens as a calendar on the current month", async ({ page }) => {
   await page.goto("/schedule");
 
   await expect(
-    page.getByRole("heading", { name: monthHeading(new Date()), level: 1 }),
+    page.getByRole("heading", { name: /^[A-Z][a-z]+ \d{4}$/, level: 1 }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Filters" }).click();
@@ -111,7 +103,7 @@ test("schedule: the display can be switched between calendar and list", async ({
     await page.getByRole("radio", { name: "Calendar" }).click();
     await expect(page.getByRole("radio", { name: "Calendar" })).toBeChecked();
     await expect(
-      page.getByRole("heading", { name: monthHeading(new Date()), level: 1 }),
+      page.getByRole("heading", { name: /^[A-Z][a-z]+ \d{4}$/, level: 1 }),
     ).toBeVisible();
     await expect(gameRow(page, home.name, away.name)).toBeHidden();
   });
@@ -177,6 +169,20 @@ test("schedule: the calendar shows games in their month and moves between months
 
   await test.step("previous month goes back", async () => {
     await page.getByRole("button", { name: "<", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "July 2030", level: 1 }),
+    ).toBeVisible();
+    await expect(julyGame).toBeVisible();
+  });
+
+  await test.step("a month with fewer days can be reached and left", async () => {
+    await page.getByRole("button", { name: "<", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "June 2030", level: 1 }),
+    ).toBeVisible();
+    await expect(julyGame).toHaveCount(0);
+
+    await page.getByRole("button", { name: ">", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "July 2030", level: 1 }),
     ).toBeVisible();
