@@ -1,7 +1,6 @@
-import { gameDetails, team, game, roundRobinGame, season } from "~/db/schema";
-import { or, eq, and } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/app/utils/drizzle";
+
+const teamName = { with: { team: { columns: { name: true } } } } as const;
 
 export default async function fetchGames({
   league,
@@ -12,68 +11,62 @@ export default async function fetchGames({
   teamId?: string | string[];
   state?: string;
 }) {
-  const homeDetails = alias(gameDetails, "home_details");
-  const awayDetails = alias(gameDetails, "away_details");
-  const homeTeam = alias(team, "home_team");
-  const awayTeam = alias(team, "away_team");
+  const teamIds = teamId === undefined ? [] : [teamId].flat();
+  const gameState =
+    state === "completed"
+      ? "complete"
+      : state === "scheduled"
+        ? "scheduled"
+        : undefined;
 
-  const gameTeamFilter = Array.isArray(teamId)
-    ? or(
-        ...teamId.flatMap((id) => [
-          eq(homeDetails.teamId, id),
-          eq(awayDetails.teamId, id),
-        ]),
-      )
-    : typeof teamId === "string"
-      ? or(eq(homeDetails.teamId, teamId), eq(awayDetails.teamId, teamId))
-      : undefined;
-  const gameStateFilter = {
-    completed: eq(game.state, "complete"),
-    scheduled: eq(game.state, "scheduled"),
-  }[state ?? "any"];
+  const seasonGames = await db.query.roundRobinGame.findMany({
+    where: { leagueId: league, season: { isActive: true } },
+    with: {
+      game: {
+        with: { homeDetails: teamName, awayDetails: teamName },
+      },
+    },
+  });
 
-  const games = await db
-    .select({
-      round: roundRobinGame.round,
+  const teamMap = new Map<string, string>();
+  const games = seasonGames.flatMap(({ round, game }) => {
+    const { homeDetails, awayDetails } = game;
+    if (!homeDetails || !awayDetails) {
+      return [];
+    }
+    teamMap.set(homeDetails.teamId, homeDetails.team.name);
+    teamMap.set(awayDetails.teamId, awayDetails.team.name);
+
+    if (gameState && game.state !== gameState) {
+      return [];
+    }
+    if (
+      teamIds.length > 0 &&
+      !teamIds.includes(homeDetails.teamId) &&
+      !teamIds.includes(awayDetails.teamId)
+    ) {
+      return [];
+    }
+    return {
+      round,
       state: game.state,
       time: game.scheduledTime,
+      id: game.id,
       homeDetails: {
-        teamName: homeTeam.name,
-        teamId: homeTeam.id,
+        teamName: homeDetails.team.name,
+        teamId: homeDetails.teamId,
         touchdowns: homeDetails.touchdowns,
         casualties: homeDetails.casualties,
       },
       awayDetails: {
-        teamName: awayTeam.name,
-        teamId: awayTeam.id,
+        teamName: awayDetails.team.name,
+        teamId: awayDetails.teamId,
         touchdowns: awayDetails.touchdowns,
         casualties: awayDetails.casualties,
       },
-      id: game.id,
-    })
-    .from(season)
-    .innerJoin(roundRobinGame, eq(season.id, roundRobinGame.seasonId))
-    .innerJoin(game, eq(game.id, roundRobinGame.gameId))
-    .innerJoin(homeDetails, eq(homeDetails.id, game.homeDetailsId))
-    .innerJoin(homeTeam, eq(homeTeam.id, homeDetails.teamId))
-    .innerJoin(awayDetails, eq(awayDetails.id, game.awayDetailsId))
-    .innerJoin(awayTeam, eq(awayTeam.id, awayDetails.teamId))
-    .where(
-      and(
-        gameTeamFilter,
-        gameStateFilter,
-        eq(season.leagueId, league),
-        eq(season.isActive, true),
-      ),
-    );
+    };
+  });
 
-  const teamMap = new Map();
-  for (const game of games) {
-    teamMap.set(game.homeDetails.teamId, game.homeDetails.teamName);
-    teamMap.set(game.awayDetails.teamId, game.awayDetails.teamName);
-  }
-  const teams = Array.from(
-    teamMap.entries().map(([id, name]) => ({ name, id })),
-  );
+  const teams = Array.from(teamMap, ([id, name]) => ({ id, name }));
   return { teams, games };
 }

@@ -249,6 +249,77 @@ test("schedule: the state filter narrows the list to completed or scheduled game
   });
 });
 
+test("schedule: the team filter keeps every team available to choose", async ({
+  page,
+  nav,
+  seed,
+  leagueId,
+  userId,
+}) => {
+  const teamA = await seed.team(leagueId, userId, { state: "ready" });
+  const teamB = await seed.team(leagueId, userId, { state: "ready" });
+  const teamC = await seed.team(leagueId, userId, { state: "ready" });
+  const teamD = await seed.team(leagueId, userId, { state: "ready" });
+  const season = await seed.season(leagueId, { isActive: true });
+  await seed.game(leagueId, teamA.teamId, teamB.teamId, {
+    seasonId: season.seasonId,
+    round: 1,
+  });
+  await seed.game(leagueId, teamC.teamId, teamD.teamId, {
+    seasonId: season.seasonId,
+    round: 2,
+  });
+
+  const aVsB = gameRow(page, teamA.name, teamB.name);
+  const cVsD = gameRow(page, teamC.name, teamD.name);
+  const checkboxA = page.getByRole("checkbox", {
+    name: teamA.name,
+    exact: true,
+  });
+  const checkboxC = page.getByRole("checkbox", {
+    name: teamC.name,
+    exact: true,
+  });
+  const checkboxD = page.getByRole("checkbox", {
+    name: teamD.name,
+    exact: true,
+  });
+
+  await nav.goToScheduleList();
+  await page.getByRole("button", { name: "Filters" }).click();
+
+  await test.step("choosing a team shows only its games", async () => {
+    await checkboxA.click();
+    await expect(checkboxA).toBeChecked();
+    await expect(aVsB).toBeVisible();
+    await expect(cVsD).toHaveCount(0);
+  });
+
+  await test.step("teams that never meet the chosen team can still be chosen", async () => {
+    await expect(checkboxC).toBeVisible();
+    await expect(checkboxD).toBeVisible();
+    await checkboxC.click();
+    await expect(checkboxC).toBeChecked();
+    await expect(aVsB).toBeVisible();
+    await expect(cVsD).toBeVisible();
+  });
+
+  await test.step("clearing a team drops the games only it had", async () => {
+    await checkboxA.click();
+    await expect(checkboxA).not.toBeChecked();
+    await expect(aVsB).toHaveCount(0);
+    await expect(cVsD).toBeVisible();
+  });
+
+  await test.step("a state filter with no matching games keeps every team listed", async () => {
+    await page.getByRole("radio", { name: "Completed" }).click();
+    await expect(page.getByRole("radio", { name: "Completed" })).toBeChecked();
+    await expect(cVsD).toHaveCount(0);
+    await expect(checkboxA).toBeVisible();
+    await expect(checkboxD).toBeVisible();
+  });
+});
+
 test("schedule: the list says so when there are no games", async ({
   page,
   nav,
