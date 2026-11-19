@@ -4,6 +4,7 @@ export type NavFixture = {
   goToTeam(teamName: string): Promise<void>;
   goToTeamEdit(teamName: string): Promise<void>;
   goToSchedule(): Promise<void>;
+  goToScheduleList(): Promise<void>;
   goToScheduleManager(): Promise<void>;
   /** Navigate to a game row by home team name. Pass the button name you expect
    *  to be visible on arrival — this confirms both navigation and game state. */
@@ -20,6 +21,17 @@ export async function buildNav(
   use: (nav: NavFixture) => Promise<void>,
 ) {
   const navBar = page.getByRole("navigation");
+
+  async function openScheduleList() {
+    await navBar.getByRole("link", { name: "Schedule" }).click();
+    await expect(
+      page.getByRole("link", { name: "Export Calendar" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Filters" }).click();
+    await page.getByRole("radio", { name: "List" }).click();
+    await expect(page.getByRole("radio", { name: "List" })).toBeChecked();
+    await page.keyboard.press("Escape");
+  }
 
   await use({
     async goToTeam(teamName) {
@@ -50,6 +62,8 @@ export async function buildNav(
       ).toBeVisible();
     },
 
+    goToScheduleList: openScheduleList,
+
     async goToScheduleManager() {
       await navBar.getByRole("button", { name: "Admin" }).click();
       await page.getByRole("link", { name: "Schedule Manager" }).click();
@@ -59,14 +73,7 @@ export async function buildNav(
     },
 
     async goToGame(homeTeamName, awayTeamName, expectedButton) {
-      await navBar.getByRole("link", { name: "Schedule" }).click();
-      await expect(
-        page.getByRole("link", { name: "Export Calendar" }),
-      ).toBeVisible();
-      await page.getByRole("button", { name: "Filters" }).click();
-      await page.getByRole("radio", { name: "List" }).click();
-      await expect(page.getByRole("radio", { name: "List" })).toBeChecked();
-      await page.keyboard.press("Escape");
+      await openScheduleList();
 
       const scheduleRow = page
         .getByRole("row")

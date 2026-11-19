@@ -104,17 +104,43 @@ export async function seedGame(
     state?: GameState;
     seasonId?: string;
     round?: number;
+    scheduledTime?: Date;
+    homeTouchdowns?: number;
+    awayTouchdowns?: number;
+    homeCasualties?: number;
+    awayCasualties?: number;
   } = {},
 ) {
-  const { state = "scheduled", seasonId, round = 1 } = opts;
+  const {
+    state = "scheduled",
+    seasonId,
+    round = 1,
+    scheduledTime,
+    homeTouchdowns = 0,
+    awayTouchdowns = 0,
+    homeCasualties = 0,
+    awayCasualties = 0,
+  } = opts;
 
   const homeDetailsId = nanoid();
   const awayDetailsId = nanoid();
   const gameId = nanoid();
 
   await testDb.insert(gameDetails).values([
-    { id: homeDetailsId, leagueId, teamId: homeTeamId },
-    { id: awayDetailsId, leagueId, teamId: awayTeamId },
+    {
+      id: homeDetailsId,
+      leagueId,
+      teamId: homeTeamId,
+      touchdowns: homeTouchdowns,
+      casualties: homeCasualties,
+    },
+    {
+      id: awayDetailsId,
+      leagueId,
+      teamId: awayTeamId,
+      touchdowns: awayTouchdowns,
+      casualties: awayCasualties,
+    },
   ]);
 
   await testDb.insert(game).values({
@@ -123,6 +149,7 @@ export async function seedGame(
     state,
     homeDetailsId,
     awayDetailsId,
+    scheduledTime,
   });
 
   if (seasonId) {

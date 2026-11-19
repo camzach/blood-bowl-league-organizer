@@ -4,6 +4,7 @@ import List from "./list";
 import Calendar from "./calendar";
 import Controls from "./controls";
 import { Link, useSearchParams } from "react-router";
+import { z } from "zod";
 import fetchGames from "./fetch-games";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
@@ -36,16 +37,25 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   };
 }
 
+const monthParam = z
+  .string()
+  .min(1)
+  .transform(Number)
+  .pipe(z.number().int().min(0).max(11));
+const yearParam = z
+  .string()
+  .min(1)
+  .transform(Number)
+  .pipe(z.number().int().min(1).max(9999));
+
 export default function Schedule({ loaderData }: Route.ComponentProps) {
   const { teams, games, exportLink } = loaderData;
   const [searchParams] = useSearchParams();
 
   const mode = searchParams.get("mode") ?? "calendar";
 
-  const month = searchParams.get("month");
-  const year = searchParams.get("year");
-  const parsedMonth = month !== null ? parseInt(month) : undefined;
-  const parsedYear = year !== null ? parseInt(year) : undefined;
+  const parsedMonth = monthParam.safeParse(searchParams.get("month")).data;
+  const parsedYear = yearParam.safeParse(searchParams.get("year")).data;
 
   return (
     <div className="mx-auto flex flex-col gap-4 p-3 lg:flex-row">
