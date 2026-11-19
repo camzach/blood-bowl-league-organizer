@@ -4,7 +4,8 @@ import type { Route } from "./+types/admin.action";
 import { db } from "~/app/utils/drizzle";
 import { activeLeagueContext } from "~/app/primary-layout";
 import { generateSchedule } from "~/app/utils/schedule-generator";
-import { computeLeagueTable } from "~/app/utils/get-league-table";
+import { computeLeagueTable, sortLeagueTable } from "~/app/utils/league-table";
+import { roundRobinGamesWithTeams } from "~/db/query-fragments/game.fragments";
 import {
   bracketGame,
   game,
@@ -252,35 +253,13 @@ async function seedBracket(leagueId: string) {
     const leagueTableSeason = await tx.query.season.findFirst({
       where: { id: activeSeason.id, isActive: true },
       with: {
-        roundRobinGames: {
-          with: {
-            game: {
-              with: {
-                homeDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-                awayDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-              },
-            },
-          },
-        },
+        roundRobinGames: roundRobinGamesWithTeams,
       },
     });
     if (!leagueTableSeason) throw new Error("No active season found");
     const leagueTable = computeLeagueTable(leagueTableSeason.roundRobinGames);
     const TOP_CUT = 10;
-    const teams = Object.entries(leagueTable)
-      .sort(([, a], [, b]) => {
-        if (a.points !== b.points) return b.points - a.points;
-        // Tiebreakers
-        if (a.tdDiff !== b.tdDiff) return b.tdDiff - a.tdDiff;
-        if (a.casDiff !== b.casDiff) return b.casDiff - a.casDiff;
-        if (a.tdDiff + a.casDiff !== b.tdDiff + b.casDiff)
-          return b.tdDiff + b.casDiff - (a.tdDiff + b.casDiff);
-        return 0;
-      })
+    const teams = sortLeagueTable(leagueTable)
       .map(([k]) => k)
       .slice(0, TOP_CUT);
 
@@ -382,20 +361,7 @@ async function endSeason(leagueId: string) {
         isActive: true,
       },
       with: {
-        roundRobinGames: {
-          with: {
-            game: {
-              with: {
-                homeDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-                awayDetails: {
-                  with: { team: { columns: { name: true, id: true } } },
-                },
-              },
-            },
-          },
-        },
+        roundRobinGames: roundRobinGamesWithTeams,
         bracketGames: true,
       },
     });

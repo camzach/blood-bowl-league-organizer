@@ -1,9 +1,10 @@
 import { activeLeagueContext } from "~/app/primary-layout";
 import type { Route } from "./+types/page";
-import { getLeagueTable } from "~/app/utils/get-league-table";
+import fetchLeagueTable from "./fetch-league-table";
+import { sortLeagueTable } from "~/app/utils/league-table";
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const table = await getLeagueTable(
+  const table = await fetchLeagueTable(
     context.get(activeLeagueContext)?.id ?? "",
   );
 
@@ -29,29 +30,19 @@ export default function Page({ loaderData }: Route.ComponentProps) {
         </tr>
       </thead>
       <tbody>
-        {Object.entries(table)
-          .sort(([, a], [, b]) => {
-            if (a.points !== b.points) return b.points - a.points;
-            // Tiebreakers
-            if (a.tdDiff !== b.tdDiff) return b.tdDiff - a.tdDiff;
-            if (a.casDiff !== b.casDiff) return b.casDiff - a.casDiff;
-            if (a.tdDiff + a.casDiff !== b.tdDiff + b.casDiff)
-              return b.tdDiff + b.casDiff - (a.tdDiff + b.casDiff);
-            return 0;
-          })
-          .map(([teamId, stats]) => (
-            <tr key={teamId}>
-              <td>{stats.name}</td>
-              <td>{stats.points}</td>
-              <td>{stats.wins}</td>
-              <td>{stats.losses}</td>
-              <td>{stats.draws}</td>
-              <td>{stats.td}</td>
-              <td>{stats.tdDiff}</td>
-              <td>{stats.cas}</td>
-              <td>{stats.casDiff}</td>
-            </tr>
-          ))}
+        {sortLeagueTable(table).map(([teamId, stats]) => (
+          <tr key={teamId}>
+            <td>{stats.name}</td>
+            <td>{stats.points}</td>
+            <td>{stats.wins}</td>
+            <td>{stats.losses}</td>
+            <td>{stats.draws}</td>
+            <td>{stats.td}</td>
+            <td>{stats.tdDiff}</td>
+            <td>{stats.cas}</td>
+            <td>{stats.casDiff}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );

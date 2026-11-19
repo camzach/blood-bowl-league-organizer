@@ -206,3 +206,18 @@ export const gameWithTeamCoaches = {
     },
   },
 } as const;
+
+const gameDetailsWithTeamIdAndName = {
+  with: { team: { columns: { name: true, id: true } } },
+} as const;
+
+export const roundRobinGamesWithTeams = {
+  with: {
+    game: {
+      with: {
+        homeDetails: gameDetailsWithTeamIdAndName,
+        awayDetails: gameDetailsWithTeamIdAndName,
+      },
+    },
+  },
+} as const;

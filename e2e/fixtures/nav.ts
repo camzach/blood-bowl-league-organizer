@@ -6,6 +6,7 @@ export type NavFixture = {
   goToSchedule(): Promise<void>;
   goToScheduleList(): Promise<void>;
   goToScheduleManager(): Promise<void>;
+  goToLeagueTable(): Promise<void>;
   /** Navigate to a game row by home team name. Pass the button name you expect
    *  to be visible on arrival — this confirms both navigation and game state. */
   goToGame(
@@ -69,6 +70,13 @@ export async function buildNav(
       await page.getByRole("link", { name: "Schedule Manager" }).click();
       await expect(
         page.getByRole("heading", { name: "Season Management", level: 1 }),
+      ).toBeVisible();
+    },
+
+    async goToLeagueTable() {
+      await navBar.getByRole("link", { name: "League Table" }).click();
+      await expect(
+        page.getByRole("columnheader", { name: "League Points" }),
       ).toBeVisible();
     },
 

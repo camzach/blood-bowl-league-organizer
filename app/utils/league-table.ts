@@ -1,5 +1,3 @@
-import { db } from "~/app/utils/drizzle";
-
 export type TeamStats = {
   name: string;
   points: number;
@@ -113,35 +111,10 @@ export function computeLeagueTable(
   );
 }
 
-export async function getLeagueTable(
-  leagueId: string,
-): Promise<Record<string, TeamStats>> {
-  const activeSeason = await db.query.season.findFirst({
-    where: {
-      leagueId,
-      isActive: true,
-    },
-    with: {
-      roundRobinGames: {
-        with: {
-          game: {
-            with: {
-              homeDetails: {
-                with: { team: { columns: { name: true, id: true } } },
-              },
-              awayDetails: {
-                with: { team: { columns: { name: true, id: true } } },
-              },
-            },
-          },
-        },
-      },
-    },
+export function sortLeagueTable(table: Record<string, TeamStats>) {
+  return Object.entries(table).sort(([, a], [, b]) => {
+    if (a.points !== b.points) return b.points - a.points;
+    if (a.tdDiff !== b.tdDiff) return b.tdDiff - a.tdDiff;
+    return b.casDiff - a.casDiff;
   });
-
-  if (!activeSeason) {
-    throw new Error("No active season found");
-  }
-
-  return computeLeagueTable(activeSeason.roundRobinGames);
 }
