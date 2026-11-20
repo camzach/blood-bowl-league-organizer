@@ -85,6 +85,11 @@ test.describe("as a plain member", () => {
     await mvpDialog.getByRole("button", { name: "Submit Nominations" }).click();
 
     await expect(
+      page
+        .getByRole("alert")
+        .filter({ hasText: "You do not have permission to act on this game" }),
+    ).toBeVisible();
+    await expect(
       page.getByRole("button", {
         name: /There was an error with your submission/,
       }),

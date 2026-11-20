@@ -724,10 +724,10 @@ async function handleEndGame(
         )
         .limit(1)
     ).at(0);
+    if (relatedBracketGame && touchdowns[0] === touchdowns[1]) {
+      throw new Error("Ties are not allowed in the playoffs");
+    }
     if (relatedBracketGame && relatedBracketGame.round > 1) {
-      if (touchdowns[0] === touchdowns[1]) {
-        throw new Error("Ties are not allowed in the playoffs");
-      }
       const gamesInRound = Math.pow(2, relatedBracketGame.round - 1);
       const nextSeed =
         relatedBracketGame.seed > gamesInRound / 2

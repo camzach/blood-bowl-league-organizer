@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useFetcher } from "react-router";
 import classNames from "classnames";
 import { Modal } from "~/app/components/modal";
+import { useFetcherErrorNotification } from "~/app/hooks/use-fetcher-error-notification";
 import { Die } from "~/app/components/die";
 import { EndGameModal } from "./end-game-modal";
 import { gameEvent } from "../game-events";
@@ -42,19 +43,14 @@ export default function Button({
   homeTeam,
   awayTeam,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [resultDismissed, setResultDismissed] = useState(false);
   const [mvpModalOpen, setMvpModalOpen] = useState(false);
   const fetcher = useFetcher();
+  useFetcherErrorNotification(fetcher);
 
   const isLoading = fetcher.state !== "idle";
   const result = fetcher.data as EndGameActionData | undefined;
   const hasError = result && !result.success;
-
-  // Open success modal when data arrives
-  if (result?.success && result.data && !open) {
-    setOpen(true);
-    setMvpModalOpen(false);
-  }
 
   if (isLoading)
     return (
@@ -77,14 +73,13 @@ export default function Button({
   }
 
   if (result?.success && result.data) {
-    console.log(result);
     return (
       <>
         <Modal
-          isOpen={open}
+          isOpen={!resultDismissed}
           title="Post-Game Sequence"
           className="w-fit max-w-(--breakpoint-sm)"
-          onRequestClose={() => setOpen(false)}
+          onRequestClose={() => setResultDismissed(true)}
         >
           <table className="table-sm table">
             <thead>

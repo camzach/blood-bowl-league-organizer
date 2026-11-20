@@ -5,6 +5,7 @@ import {
   seedSeason,
   seedPendingRandomStat,
   seedPendingRandomSkill,
+  startScheduledGames,
 } from "./seed";
 import { buildNav, type NavFixture } from "./nav";
 
@@ -16,6 +17,7 @@ export type Fixtures = AuthFixtures & {
     season: typeof seedSeason;
     pendingRandomStat: typeof seedPendingRandomStat;
     pendingRandomSkill: typeof seedPendingRandomSkill;
+    startScheduledGames: typeof startScheduledGames;
   };
 };
 
@@ -31,6 +33,7 @@ export const test = authTest.extend<Pick<Fixtures, "nav" | "seed">>({
       season: seedSeason,
       pendingRandomStat: seedPendingRandomStat,
       pendingRandomSkill: seedPendingRandomSkill,
+      startScheduledGames,
     });
   },
 });

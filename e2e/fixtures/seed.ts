@@ -1,4 +1,5 @@
 import { customAlphabet } from "nanoid";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { testDb } from "./db";
 import {
   team,
@@ -176,4 +177,18 @@ export async function seedSeason(
   });
 
   return { seasonId };
+}
+
+export async function startScheduledGames(leagueId: string) {
+  await testDb
+    .update(game)
+    .set({ state: "in_progress" })
+    .where(
+      and(
+        eq(game.leagueId, leagueId),
+        eq(game.state, "scheduled"),
+        isNotNull(game.homeDetailsId),
+        isNotNull(game.awayDetailsId),
+      ),
+    );
 }
