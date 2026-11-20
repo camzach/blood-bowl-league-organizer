@@ -1,10 +1,5 @@
-import type { Page } from "@playwright/test";
 import { test, expect } from "../fixtures/index";
-
-const playerRow = (page: Page, number: number) =>
-  page.getByRole("row").filter({
-    has: page.getByRole("cell", { name: String(number), exact: true }),
-  });
+import { playerRow } from "../fixtures/locators";
 
 test.describe("improving players", () => {
   test("a player with too little SPP cannot spend any", async ({

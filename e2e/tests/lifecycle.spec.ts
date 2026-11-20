@@ -1,4 +1,5 @@
 import { test, expect } from "../fixtures/index";
+import { playerRow } from "../fixtures/locators";
 
 /**
  * Full lifecycle: plays a game for two ready teams, then walks the home team
@@ -30,11 +31,6 @@ test("lifecycle: full post-game flow from game start to ready", async ({
   await seed.game(leagueId, team1.teamId, team2.teamId, {
     seasonId: season.seasonId,
   });
-
-  const playerRow = (number: number) =>
-    page.getByRole("row").filter({
-      has: page.getByRole("cell", { name: String(number), exact: true }),
-    });
 
   await test.step("play the game", async () => {
     await nav.goToGame(team1.name, team2.name);
@@ -69,7 +65,7 @@ test("lifecycle: full post-game flow from game start to ready", async ({
   await test.step("improve players", async () => {
     await nav.goToTeamEdit(team1.name);
     await expect(
-      playerRow(1).getByRole("button", { name: "Spend SPP" }),
+      playerRow(page, 1).getByRole("button", { name: "Spend SPP" }),
     ).toBeEnabled();
     await page.getByRole("button", { name: "Done improving players" }).click();
     await expect(
@@ -85,10 +81,10 @@ test("lifecycle: full post-game flow from game start to ready", async ({
   });
 
   await test.step("fire a player, leaving the 11 required", async () => {
-    await playerRow(12).getByRole("button", { name: "Fire!" }).click();
-    await expect(playerRow(12)).not.toBeAttached();
+    await playerRow(page, 12).getByRole("button", { name: "Fire!" }).click();
+    await expect(playerRow(page, 12)).not.toBeAttached();
     await expect(
-      playerRow(11).getByRole("button", { name: "Fire!" }),
+      playerRow(page, 11).getByRole("button", { name: "Fire!" }),
     ).toBeDisabled();
   });
 

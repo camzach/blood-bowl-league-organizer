@@ -1,16 +1,12 @@
 import type { Page } from "@playwright/test";
 import { test, expect } from "../fixtures/index";
+import { playerRow } from "../fixtures/locators";
 
 const SNOTLING_ROSTER = "Snotling";
 const SNOTLING_LINEMAN = "YInpwz9cBpLjESS";
 const FUN_HOPPA = "KfgmOKbQvX5AmiE";
 const STILTY_RUNNA = "IB9S47SgIjTYzSo";
 const FUNGUS_FLINGA = "8G6ifoC6QIG4hoE";
-
-const playerRow = (page: Page, number: number) =>
-  page.getByRole("row").filter({
-    has: page.getByRole("cell", { name: String(number), exact: true }),
-  });
 
 const staffRow = (page: Page, name: string) =>
   page.getByRole("row").filter({
