@@ -8,6 +8,7 @@ import {
   game,
   coachToTeam,
   roundRobinGame,
+  bracketGame,
   season,
   pendingRandomSkill,
   pendingRandomStat,
@@ -106,6 +107,7 @@ export async function seedGame(
     seasonId?: string;
     round?: number;
     scheduledTime?: Date;
+    bracket?: { round: number; seed: number };
     homeTouchdowns?: number;
     awayTouchdowns?: number;
     homeCasualties?: number;
@@ -117,6 +119,7 @@ export async function seedGame(
     seasonId,
     round = 1,
     scheduledTime,
+    bracket,
     homeTouchdowns = 0,
     awayTouchdowns = 0,
     homeCasualties = 0,
@@ -153,7 +156,11 @@ export async function seedGame(
     scheduledTime,
   });
 
-  if (seasonId) {
+  if (seasonId && bracket) {
+    await testDb
+      .insert(bracketGame)
+      .values({ gameId, leagueId, seasonId, ...bracket });
+  } else if (seasonId) {
     await testDb
       .insert(roundRobinGame)
       .values({ gameId, leagueId, seasonId, round });

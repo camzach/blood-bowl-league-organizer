@@ -2,6 +2,7 @@ import { layout, route, type RouteConfig } from "@react-router/dev/routes";
 
 export default [
   route("/api/auth/*", "./routes/auth.ts"),
+  route("/api/calendar/:token/calendar.ics", "./routes/calendar-export.ts"),
   route("/login", "./routes/login.tsx"),
   route("/songs/:teamId", "./routes/songs.ts"),
 

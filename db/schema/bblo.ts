@@ -220,6 +220,23 @@ export const coachToTeam = pgTable(
   ],
 );
 
+export const calendarFeed = pgTable(
+  "calendar_feed",
+  {
+    token: text("token").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    leagueId: text("league_id")
+      .notNull()
+      .references(() => league.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    unique("calendar_feed_user_league_uniq").on(table.userId, table.leagueId),
+  ],
+);
+
 export const roster = pgTable("roster", {
   name: varchar("name", { length: 255 }).notNull().primaryKey(),
   rerollCost: integer("reroll_cost").notNull(),
